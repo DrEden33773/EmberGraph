@@ -3,23 +3,26 @@ pub mod base;
 pub mod instruction;
 
 use ahash::AHashMap;
-use std::{hash::Hash, ops::Deref};
+use std::hash::Hash;
 
 pub use {attr::*, base::*, instruction::*};
 
-pub trait VertexLike<T = Self>: Clone + AsRef<T> {
+pub trait VertexLike<T = Self>: Clone + AsRef<T> + Hash + PartialEq + Eq {
   fn vid(&self) -> &Vid;
   fn label(&self) -> &Label;
 }
 
-pub trait EdgeLike<T = Self>: Clone + AsRef<T> {
+pub trait EdgeLike<T = Self>: Clone + AsRef<T> + Hash + PartialEq + Eq {
   fn eid(&self) -> &Vid;
   fn src_vid(&self) -> &Vid;
   fn dst_vid(&self) -> &Vid;
   fn label(&self) -> &Label;
+  fn contains(&self, vid: &Vid) -> bool {
+    self.src_vid() == vid || self.dst_vid() == vid
+  }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PatternVertex {
   pub(crate) vid: Vid,
   pub(crate) label: Label,
@@ -47,7 +50,7 @@ impl Hash for PatternVertex {
   }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DataVertex {
   pub(crate) vid: Vid,
   pub(crate) label: Label,
@@ -75,7 +78,7 @@ impl VertexLike for DataVertex {
   }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PatternEdge {
   pub(crate) eid: Vid,
   pub(crate) src_vid: Vid,
@@ -111,7 +114,7 @@ impl EdgeLike for PatternEdge {
   }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DataEdge {
   pub(crate) eid: Vid,
   pub(crate) src_vid: Vid,

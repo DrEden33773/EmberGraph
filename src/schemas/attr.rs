@@ -3,7 +3,7 @@ use ahash::AHashMap;
 use std::{fmt::Display, hash::Hash};
 use strum_macros::EnumString;
 
-#[derive(Debug, Clone, Copy, strum_macros::Display, EnumString)]
+#[derive(Debug, Clone, Copy, strum_macros::Display, EnumString, PartialEq, Eq)]
 pub enum AttrType {
   #[strum(serialize = "int")]
   Int,
@@ -80,7 +80,9 @@ impl PartialEq for AttrValue {
   }
 }
 
-#[derive(Debug, Clone)]
+impl Eq for AttrValue {}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PatternAttr {
   pub(crate) key: String,
   pub(crate) op: Op,

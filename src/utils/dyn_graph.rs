@@ -34,6 +34,12 @@ pub struct DynGraph<VType: VertexLike = DataVertex, EType: EdgeLike = DataEdge> 
   pub(crate) adj_table: AHashMap<Vid, VNode>,
 }
 
+impl<VType: VertexLike, EType: EdgeLike> AsRef<Self> for DynGraph<VType, EType> {
+  fn as_ref(&self) -> &Self {
+    self
+  }
+}
+
 impl<VType: VertexLike, EType: EdgeLike> Default for DynGraph<VType, EType> {
   fn default() -> Self {
     Self {
@@ -108,21 +114,21 @@ impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
 }
 
 impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
-  pub fn update_v(&mut self, vertex: VType) -> &Self {
+  pub fn update_v(&mut self, vertex: VType) -> &mut Self {
     let vid = vertex.vid().clone();
     self.v_entities.insert(vid.clone(), vertex);
     self.adj_table.insert(vid, VNode::default());
     self
   }
 
-  pub fn update_v_batch(&mut self, vertices: Vec<VType>) -> &Self {
+  pub fn update_v_batch(&mut self, vertices: impl IntoIterator<Item = VType>) -> &mut Self {
     for vertex in vertices {
       self.update_v(vertex);
     }
     self
   }
 
-  pub fn update_e(&mut self, edge: EType) -> &Self {
+  pub fn update_e(&mut self, edge: EType) -> &mut Self {
     let eid = edge.eid().clone();
     let src_vid = edge.src_vid().clone();
     let dst_vid = edge.dst_vid().clone();
@@ -158,14 +164,14 @@ impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
     }
   }
 
-  pub fn update_e_batch(&mut self, edges: Vec<EType>) -> &Self {
+  pub fn update_e_batch(&mut self, edges: impl IntoIterator<Item = EType>) -> &mut Self {
     for edge in edges {
       self.update_e(edge);
     }
     self
   }
 
-  pub fn remove_e(&mut self, eid: EidRef) -> &Self {
+  pub fn remove_e(&mut self, eid: EidRef) -> &mut Self {
     if !self.has_eid(eid) {
       return self;
     }
@@ -178,7 +184,7 @@ impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
     self
   }
 
-  pub fn remove_e_batch(&mut self, eids: &[EidRef]) -> &Self {
+  pub fn remove_e_batch(&mut self, eids: &[EidRef]) -> &mut Self {
     for eid in eids {
       self.remove_e(eid);
     }
@@ -212,6 +218,12 @@ impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
   pub fn get_eid_set(&self) -> AHashSet<Eid> {
     self.e_entities.keys().cloned().collect()
   }
+  pub fn get_v_entities(&self) -> Vec<VType> {
+    self.v_entities.values().cloned().collect()
+  }
+  pub fn get_e_entities(&self) -> Vec<EType> {
+    self.e_entities.values().cloned().collect()
+  }
   pub fn get_v_count(&self) -> usize {
     self.v_entities.len()
   }
@@ -239,5 +251,14 @@ impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
   }
   pub fn has_any_eids(&self, eids: &[EidRef]) -> bool {
     eids.iter().any(|eid| self.has_eid(eid))
+  }
+}
+
+impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
+  pub fn is_e_connective(&self, edge: &EType) -> bool {
+    self.has_any_vids(&[edge.src_vid(), edge.dst_vid()])
+  }
+  pub fn is_e_full_connective(&self, edge: &EType) -> bool {
+    self.has_all_vids(&[edge.src_vid(), edge.dst_vid()])
   }
 }

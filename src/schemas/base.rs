@@ -10,7 +10,7 @@ pub type EidRef<'a> = &'a str;
 pub type Label = String;
 pub type LabelRef<'a> = &'a str;
 
-#[derive(Debug, Clone, Copy, Display, EnumString)]
+#[derive(Debug, Clone, Copy, Display, EnumString, PartialEq, Eq)]
 pub enum Op {
   #[strum(serialize = "=")]
   Eq,

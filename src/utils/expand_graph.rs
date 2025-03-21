@@ -4,11 +4,63 @@ use crate::schemas::{DataEdge, DataVertex, EdgeLike, Eid, VertexLike, Vid};
 
 use super::dyn_graph::{DynGraph, VNode};
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ExpandGraph<VType: VertexLike = DataVertex, EType: EdgeLike = DataEdge> {
   pub(crate) dyn_graph: DynGraph<VType, EType>,
   pub(crate) target_v_adj_table: AHashMap<Vid, VNode>,
   pub(crate) dangling_e_entities: AHashMap<Eid, EType>,
   pub(crate) target_v_entities: AHashMap<Vid, VType>,
+}
+
+impl<VType: VertexLike, EType: EdgeLike> Default for ExpandGraph<VType, EType> {
+  fn default() -> Self {
+    Self {
+      dyn_graph: Default::default(),
+      target_v_adj_table: Default::default(),
+      dangling_e_entities: Default::default(),
+      target_v_entities: Default::default(),
+    }
+  }
+}
+
+impl<VType: VertexLike, EType: EdgeLike> From<&DynGraph<VType, EType>>
+  for ExpandGraph<VType, EType>
+{
+  fn from(value: &DynGraph<VType, EType>) -> Self {
+    Self {
+      dyn_graph: value.clone(),
+      ..Default::default()
+    }
+  }
+}
+
+impl<VType: VertexLike, EType: EdgeLike> From<&ExpandGraph<VType, EType>>
+  for DynGraph<VType, EType>
+{
+  fn from(val: &ExpandGraph<VType, EType>) -> Self {
+    let mut dyn_graph = val.dyn_graph.clone();
+
+    dyn_graph.update_v_batch(val.target_v_entities.values().cloned());
+
+    for target_v in val.target_v_adj_table.keys() {
+      let mut dangling_eids = val
+        .target_v_adj_table
+        .get(target_v)
+        .unwrap()
+        .e_out
+        .to_owned();
+      dangling_eids.extend(val.target_v_adj_table.get(target_v).unwrap().e_in.clone());
+
+      let dangling_es = dangling_eids
+        .iter()
+        .filter_map(|eid| val.dangling_e_entities.get(eid))
+        .cloned()
+        .collect::<Vec<EType>>();
+      dyn_graph.update_e_batch(dangling_es);
+    }
+
+    dyn_graph
+  }
 }
 
 impl<VType: VertexLike, EType: EdgeLike> ExpandGraph<VType, EType> {
@@ -46,4 +98,148 @@ impl<VType: VertexLike, EType: EdgeLike> ExpandGraph<VType, EType> {
 
     dangling_e_grouped
   }
+
+  fn is_valid_edge(&self, e: &EType) -> bool {
+    self.dyn_graph.is_e_connective(e) && !self.dyn_graph.is_e_full_connective(e)
+  }
+
+  pub fn update_valid_dangling_edges(&mut self, dangling_edges: Vec<EType>) {
+    let mut legal_edges = AHashSet::new();
+    let mut illegal_edges = AHashSet::new();
+    for edge in dangling_edges {
+      if self.is_valid_edge(&edge) {
+        legal_edges.insert(edge.clone());
+      } else {
+        illegal_edges.insert(edge.clone());
+      }
+    }
+
+    self
+      .dangling_e_entities
+      .extend(legal_edges.into_iter().map(|e| (e.eid().clone(), e)));
+  }
+
+  fn is_valid_target(&self, v: &VType) -> bool {
+    for edge in self.dangling_e_entities.values() {
+      if edge.contains(v.vid()) {
+        return true;
+      }
+    }
+    false
+  }
+
+  pub fn update_valid_target_vertices(&mut self, target_vertices: Vec<VType>) {
+    let mut legal_vertices = AHashSet::new();
+    let mut illegal_vertices = AHashSet::new();
+    for vertex in target_vertices {
+      if self.is_valid_target(&vertex) {
+        legal_vertices.insert(vertex.clone());
+      } else {
+        illegal_vertices.insert(vertex.clone());
+      }
+    }
+
+    self
+      .target_v_entities
+      .extend(legal_vertices.into_iter().map(|v| (v.vid().clone(), v)));
+
+    for dangling_e in self.dangling_e_entities.keys() {
+      let e = self.dangling_e_entities.get(dangling_e).unwrap();
+      if self.target_v_entities.contains_key(e.src_vid()) {
+        self
+          .target_v_adj_table
+          .entry(e.src_vid().clone())
+          .or_default()
+          .e_out
+          .insert(e.eid().clone());
+      }
+      if self.target_v_entities.contains_key(e.dst_vid()) {
+        self
+          .target_v_adj_table
+          .entry(e.dst_vid().clone())
+          .or_default()
+          .e_in
+          .insert(e.eid().clone());
+      }
+    }
+  }
+}
+
+pub fn intersect_then_union_on_same_v<VType: VertexLike, EType: EdgeLike>(
+  potential_unused: &ExpandGraph<VType, EType>,
+  potential_incomplete: &ExpandGraph<VType, EType>,
+) -> Vec<ExpandGraph<VType, EType>> {
+  let mut result = Vec::new();
+
+  let mut unused = potential_unused;
+  let mut incomplete = potential_incomplete;
+  let unused_set = unused.get_vid_set();
+  let incomplete_set = incomplete.get_vid_set();
+
+  if !unused_set.is_subset(&incomplete_set) {
+    if !incomplete_set.is_subset(&unused_set) {
+      return union_then_intersect_on_connective_v(unused, incomplete);
+    }
+    (unused, incomplete) = (incomplete, unused);
+  }
+
+  let grouped_incomplete_dangling_es = incomplete.group_dangling_e_by_pending_v();
+  let grouped_unused_dangling_es = unused.group_dangling_e_by_pending_v();
+
+  for (pending_vid, dangling_es) in &grouped_unused_dangling_es {
+    for expected_vid in grouped_incomplete_dangling_es.keys() {
+      if pending_vid != expected_vid {
+        continue;
+      }
+
+      let mut expanding_dg = incomplete.clone();
+      expanding_dg.update_valid_dangling_edges(dangling_es.clone());
+      result.push(expanding_dg);
+    }
+  }
+
+  result
+}
+
+pub fn union_then_intersect_on_connective_v<VType: VertexLike, EType: EdgeLike>(
+  left_expand_graph: &ExpandGraph<VType, EType>,
+  right_expand_graph: &ExpandGraph<VType, EType>,
+) -> Vec<ExpandGraph<VType, EType>> {
+  let left_dyn_graph = &left_expand_graph.dyn_graph;
+  let right_dyn_graph = &right_expand_graph.dyn_graph;
+
+  if !left_dyn_graph
+    .get_vid_set()
+    .is_disjoint(&right_dyn_graph.get_vid_set())
+  {
+    return intersect_then_union_on_same_v(left_expand_graph, right_expand_graph);
+  }
+
+  let left_vs = left_dyn_graph.get_v_entities();
+  let right_vs = right_dyn_graph.get_v_entities();
+  let left_es = left_dyn_graph.get_e_entities();
+  let right_es = right_dyn_graph.get_e_entities();
+
+  let mut new_dyn_graph = DynGraph::<VType, EType>::default();
+  new_dyn_graph.update_v_batch(left_vs.into_iter().chain(right_vs));
+  new_dyn_graph.update_e_batch(right_es.into_iter().chain(left_es));
+
+  let grouped_l_dangling_es = left_expand_graph.group_dangling_e_by_pending_v();
+  let grouped_r_dangling_es = right_expand_graph.group_dangling_e_by_pending_v();
+  let mut result = vec![];
+
+  for (l_pending_vid, l_dangling_es) in &grouped_l_dangling_es {
+    for (r_pending_vid, r_dangling_es) in &grouped_r_dangling_es {
+      if l_pending_vid != r_pending_vid {
+        continue;
+      }
+
+      let mut expanding_dg: ExpandGraph<VType, EType> = new_dyn_graph.as_ref().into();
+      expanding_dg.update_valid_dangling_edges(l_dangling_es.clone());
+      expanding_dg.update_valid_dangling_edges(r_dangling_es.clone());
+      result.push(expanding_dg);
+    }
+  }
+
+  result
 }
