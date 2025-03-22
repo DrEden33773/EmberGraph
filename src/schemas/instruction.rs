@@ -18,6 +18,7 @@ pub enum InstructionType {
   Report,
 }
 
+#[derive(Debug, Clone)]
 pub struct Instruction {
   pub(crate) vid: Vid,
   pub(crate) type_: InstructionType,

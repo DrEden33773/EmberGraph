@@ -115,8 +115,8 @@ impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
 
 impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
   pub fn update_v(&mut self, vertex: VType) -> &mut Self {
-    let vid = vertex.vid().clone();
-    self.v_entities.insert(vid.clone(), vertex);
+    let vid = vertex.vid().to_owned();
+    self.v_entities.insert(vid.to_owned(), vertex);
     self.adj_table.insert(vid, VNode::default());
     self
   }
@@ -129,25 +129,20 @@ impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
   }
 
   pub fn update_e(&mut self, edge: EType) -> &mut Self {
-    let eid = edge.eid().clone();
-    let src_vid = edge.src_vid().clone();
-    let dst_vid = edge.dst_vid().clone();
+    let eid = edge.eid().to_owned();
+    let src_vid = edge.src_vid().to_owned();
+    let dst_vid = edge.dst_vid().to_owned();
 
-    self.e_entities.insert(eid.clone(), edge);
+    self.e_entities.insert(eid.to_owned(), edge);
 
     if self.has_all_vids(&[&src_vid, &dst_vid]) {
       self
         .adj_table
-        .entry(src_vid.clone())
+        .entry(src_vid)
         .or_default()
         .e_out
-        .insert(eid.clone());
-      self
-        .adj_table
-        .entry(dst_vid.clone())
-        .or_default()
-        .e_in
-        .insert(eid.clone());
+        .insert(eid.to_owned());
+      self.adj_table.entry(dst_vid).or_default().e_in.insert(eid);
       self
     } else if self.has_vid(&src_vid) {
       panic!(
@@ -193,9 +188,11 @@ impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
 }
 
 impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
+  #[inline]
   pub fn get_v_from_vid(&self, vid: VidRef) -> Option<&VType> {
     self.v_entities.get(vid)
   }
+  #[inline]
   pub fn get_e_from_eid(&self, eid: EidRef) -> Option<&EType> {
     self.e_entities.get(eid)
   }
@@ -204,60 +201,74 @@ impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
     let src_vid = edge.src_vid();
     let dst_vid = edge.dst_vid();
     if self.has_vid(src_vid) {
-      Some(src_vid.clone())
+      Some(src_vid.to_owned())
     } else if self.has_vid(dst_vid) {
-      Some(dst_vid.clone())
+      Some(dst_vid.to_owned())
     } else {
       None
     }
   }
 
+  #[inline]
   pub fn get_vid_set(&self) -> AHashSet<Vid> {
     self.v_entities.keys().cloned().collect()
   }
+  #[inline]
   pub fn get_eid_set(&self) -> AHashSet<Eid> {
     self.e_entities.keys().cloned().collect()
   }
+  #[inline]
   pub fn get_v_entities(&self) -> Vec<VType> {
     self.v_entities.values().cloned().collect()
   }
+  #[inline]
   pub fn get_e_entities(&self) -> Vec<EType> {
     self.e_entities.values().cloned().collect()
   }
+  #[inline]
   pub fn get_v_count(&self) -> usize {
     self.v_entities.len()
   }
+  #[inline]
   pub fn get_e_count(&self) -> usize {
     self.e_entities.len()
   }
 }
 
 impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
+  #[inline]
   pub fn has_vid(&self, vid: VidRef) -> bool {
     self.v_entities.contains_key(vid)
   }
+  #[inline]
   pub fn has_all_vids(&self, vids: &[VidRef]) -> bool {
     vids.iter().all(|vid| self.has_vid(vid))
   }
+  #[inline]
   pub fn has_any_vids(&self, vids: &[VidRef]) -> bool {
     vids.iter().any(|vid| self.has_vid(vid))
   }
 
+  #[inline]
   pub fn has_eid(&self, eid: EidRef) -> bool {
     self.e_entities.contains_key(eid)
   }
+  #[inline]
   pub fn has_all_eids(&self, eids: &[EidRef]) -> bool {
     eids.iter().all(|eid| self.has_eid(eid))
   }
+  #[inline]
   pub fn has_any_eids(&self, eids: &[EidRef]) -> bool {
     eids.iter().any(|eid| self.has_eid(eid))
   }
 }
 
 impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
+  #[inline]
   pub fn is_e_connective(&self, edge: &EType) -> bool {
     self.has_any_vids(&[edge.src_vid(), edge.dst_vid()])
   }
+  #[inline]
   pub fn is_e_full_connective(&self, edge: &EType) -> bool {
     self.has_all_vids(&[edge.src_vid(), edge.dst_vid()])
   }
