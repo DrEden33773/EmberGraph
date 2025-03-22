@@ -1,4 +1,4 @@
-use super::{AttrValue, Label, LabelRef, PatternAttr, Vid, VidRef};
+use super::{AttrValue, Label, LabelRef, Vid, VidRef, PatternAttr};
 use ahash::AHashMap;
 use std::hash::Hash;
 

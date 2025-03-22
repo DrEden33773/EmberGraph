@@ -1,7 +1,7 @@
 use ahash::{AHashMap, AHashSet};
 use buckets::{ABucket, CBucket, FBucket, TBucket};
 
-use crate::schemas::{PatternEdge, PatternVertex, PlanData, STR_TUPLE_SPLITTER, Vid};
+use crate::schemas::{PlanData, STR_TUPLE_SPLITTER, Vid};
 
 pub mod buckets;
 

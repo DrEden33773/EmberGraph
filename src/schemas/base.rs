@@ -5,8 +5,10 @@ pub const STR_TUPLE_SPLITTER: &str = "^";
 
 pub type Vid = String;
 pub type VidRef<'a> = &'a str;
+
 pub type Eid = String;
 pub type EidRef<'a> = &'a str;
+
 pub type Label = String;
 pub type LabelRef<'a> = &'a str;
 
