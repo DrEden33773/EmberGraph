@@ -1,12 +1,12 @@
-use super::{AttrValue, Label, LabelRef, Vid, VidRef, PatternAttr};
+use super::{AttrValue, Label, LabelRef, PatternAttr, Vid, VidRef};
 use ahash::AHashMap;
 use std::hash::Hash;
 
-pub trait VertexLike<T = Self>: Clone + AsRef<T> + Hash + PartialEq + Eq {
+pub trait VBase<T = Self>: Clone + AsRef<T> + Hash + PartialEq + Eq {
   fn vid(&self) -> VidRef;
   fn label(&self) -> LabelRef;
 }
-pub trait EdgeLike<T = Self>: Clone + AsRef<T> + Hash + PartialEq + Eq {
+pub trait EBase<T = Self>: Clone + AsRef<T> + Hash + PartialEq + Eq {
   fn eid(&self) -> VidRef;
   fn src_vid(&self) -> VidRef;
   fn dst_vid(&self) -> VidRef;
@@ -50,7 +50,7 @@ impl AsRef<Self> for PatternVertex {
     self
   }
 }
-impl VertexLike for PatternVertex {
+impl VBase for PatternVertex {
   fn vid(&self) -> VidRef {
     &self.vid
   }
@@ -74,7 +74,7 @@ impl AsRef<Self> for DataVertex {
     self
   }
 }
-impl VertexLike for DataVertex {
+impl VBase for DataVertex {
   fn vid(&self) -> VidRef {
     &self.vid
   }
@@ -93,7 +93,7 @@ impl AsRef<Self> for PatternEdge {
     self
   }
 }
-impl EdgeLike for PatternEdge {
+impl EBase for PatternEdge {
   fn eid(&self) -> VidRef {
     &self.eid
   }
@@ -118,7 +118,7 @@ impl AsRef<Self> for DataEdge {
     self
   }
 }
-impl EdgeLike for DataEdge {
+impl EBase for DataEdge {
   fn eid(&self) -> VidRef {
     &self.eid
   }

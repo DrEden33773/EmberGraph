@@ -1,11 +1,21 @@
-use crate::schemas::{DataEdge, DataVertex, EdgeLike, Eid, EidRef, VertexLike, Vid, VidRef};
+use crate::schemas::{DataEdge, DataVertex, EBase, Eid, EidRef, VBase, Vid, VidRef};
 use ahash::{AHashMap, AHashSet};
-use std::ops::{BitOr, BitOrAssign};
+use std::{
+  hash::Hash,
+  ops::{BitOr, BitOrAssign},
+};
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct VNode {
   pub(crate) e_in: AHashSet<Eid>,
   pub(crate) e_out: AHashSet<Eid>,
+}
+
+impl Hash for VNode {
+  fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+    self.e_in.iter().for_each(|eid| eid.hash(state));
+    self.e_out.iter().for_each(|eid| eid.hash(state));
+  }
 }
 
 impl BitOrAssign for VNode {
@@ -28,29 +38,42 @@ impl BitOr for VNode {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct DynGraph<VType: VertexLike = DataVertex, EType: EdgeLike = DataEdge> {
+pub struct DynGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
   pub(crate) v_entities: AHashMap<Vid, VType>,
   pub(crate) e_entities: AHashMap<Eid, EType>,
   pub(crate) adj_table: AHashMap<Vid, VNode>,
+  pub(crate) v_patterns: AHashMap<Vid, String>,
+  pub(crate) e_patterns: AHashMap<Eid, String>,
 }
 
-impl<VType: VertexLike, EType: EdgeLike> AsRef<Self> for DynGraph<VType, EType> {
+impl<VType: VBase, EType: EBase> Hash for DynGraph<VType, EType> {
+  fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+    for (vid, v_node) in &self.adj_table {
+      vid.hash(state);
+      v_node.hash(state);
+    }
+  }
+}
+
+impl<VType: VBase, EType: EBase> AsRef<Self> for DynGraph<VType, EType> {
   fn as_ref(&self) -> &Self {
     self
   }
 }
 
-impl<VType: VertexLike, EType: EdgeLike> Default for DynGraph<VType, EType> {
+impl<VType: VBase, EType: EBase> Default for DynGraph<VType, EType> {
   fn default() -> Self {
     Self {
       v_entities: Default::default(),
       e_entities: Default::default(),
       adj_table: Default::default(),
+      v_patterns: Default::default(),
+      e_patterns: Default::default(),
     }
   }
 }
 
-impl<VType: VertexLike, EType: EdgeLike> BitOrAssign for DynGraph<VType, EType> {
+impl<VType: VBase, EType: EBase> BitOrAssign for DynGraph<VType, EType> {
   fn bitor_assign(&mut self, rhs: Self) {
     self.v_entities.extend(rhs.v_entities);
     self.e_entities.extend(rhs.e_entities);
@@ -60,7 +83,7 @@ impl<VType: VertexLike, EType: EdgeLike> BitOrAssign for DynGraph<VType, EType> 
   }
 }
 
-impl<VType: VertexLike, EType: EdgeLike> BitOr for DynGraph<VType, EType> {
+impl<VType: VBase, EType: EBase> BitOr for DynGraph<VType, EType> {
   type Output = Self;
 
   fn bitor(self, rhs: Self) -> Self::Output {
@@ -89,19 +112,38 @@ impl<VType: VertexLike, EType: EdgeLike> BitOr for DynGraph<VType, EType> {
   }
 }
 
-impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
+impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   pub fn is_subset_of(&self, other: &Self) -> bool {
+    // adj_table
     for (vid, v_node) in self.adj_table.iter() {
       // vertex
       if !other.adj_table.contains_key(vid) {
         return false;
       }
-      // in-edge
+      // in_edge
       if !v_node.e_in.is_subset(&other.adj_table[vid].e_in) {
         return false;
       }
-      // out-edge
+      // out_edge
       if !v_node.e_out.is_subset(&other.adj_table[vid].e_out) {
+        return false;
+      }
+    }
+    // v_patterns
+    for (vid, v_pattern) in self.v_patterns.iter() {
+      if !other.v_patterns.contains_key(vid) {
+        return false;
+      }
+      if other.v_patterns[vid] != *v_pattern {
+        return false;
+      }
+    }
+    // e_patterns
+    for (eid, e_pattern) in self.e_patterns.iter() {
+      if !other.e_patterns.contains_key(eid) {
+        return false;
+      }
+      if other.e_patterns[eid] != *e_pattern {
         return false;
       }
     }
@@ -113,22 +155,26 @@ impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
   }
 }
 
-impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
-  pub fn update_v(&mut self, vertex: VType) -> &mut Self {
+impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
+  pub fn update_v(&mut self, vertex: VType, pattern: String) -> &mut Self {
     let vid = vertex.vid().to_owned();
     self.v_entities.insert(vid.to_owned(), vertex);
-    self.adj_table.insert(vid, VNode::default());
+    self.adj_table.insert(vid.to_owned(), VNode::default());
+    self.v_patterns.insert(vid, pattern.to_owned());
     self
   }
 
-  pub fn update_v_batch(&mut self, vertices: impl IntoIterator<Item = VType>) -> &mut Self {
-    for vertex in vertices {
-      self.update_v(vertex);
+  pub fn update_v_batch(
+    &mut self,
+    v_pattern_pairs: impl IntoIterator<Item = (VType, String)>,
+  ) -> &mut Self {
+    for (vertex, pattern) in v_pattern_pairs {
+      self.update_v(vertex, pattern);
     }
     self
   }
 
-  pub fn update_e(&mut self, edge: EType) -> &mut Self {
+  pub fn update_e(&mut self, edge: EType, pattern: String) -> &mut Self {
     let eid = edge.eid().to_owned();
     let src_vid = edge.src_vid().to_owned();
     let dst_vid = edge.dst_vid().to_owned();
@@ -142,7 +188,13 @@ impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
         .or_default()
         .e_out
         .insert(eid.to_owned());
-      self.adj_table.entry(dst_vid).or_default().e_in.insert(eid);
+      self
+        .adj_table
+        .entry(dst_vid)
+        .or_default()
+        .e_in
+        .insert(eid.to_owned());
+      self.e_patterns.insert(eid, pattern.to_owned());
       self
     } else if self.has_vid(&src_vid) {
       panic!(
@@ -159,9 +211,12 @@ impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
     }
   }
 
-  pub fn update_e_batch(&mut self, edges: impl IntoIterator<Item = EType>) -> &mut Self {
-    for edge in edges {
-      self.update_e(edge);
+  pub fn update_e_batch(
+    &mut self,
+    e_pattern_pairs: impl IntoIterator<Item = (EType, String)>,
+  ) -> &mut Self {
+    for (edge, pattern) in e_pattern_pairs {
+      self.update_e(edge, pattern);
     }
     self
   }
@@ -187,7 +242,7 @@ impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
   }
 }
 
-impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
+impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   #[inline]
   pub fn get_v_from_vid(&self, vid: VidRef) -> Option<&VType> {
     self.v_entities.get(vid)
@@ -226,6 +281,28 @@ impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
     self.e_entities.values().cloned().collect()
   }
   #[inline]
+  pub fn get_v_pattern_pairs(&self) -> Vec<(VType, String)> {
+    self
+      .v_entities
+      .iter()
+      .filter_map(|(vid, v_entity)| {
+        let pattern = self.v_patterns.get(vid).cloned();
+        pattern.map(|p| (v_entity.clone(), p))
+      })
+      .collect()
+  }
+  #[inline]
+  pub fn get_e_pattern_pairs(&self) -> Vec<(EType, String)> {
+    self
+      .e_entities
+      .iter()
+      .filter_map(|(eid, e_entity)| {
+        let pattern = self.e_patterns.get(eid).cloned();
+        pattern.map(|p| (e_entity.clone(), p))
+      })
+      .collect()
+  }
+  #[inline]
   pub fn get_v_count(&self) -> usize {
     self.v_entities.len()
   }
@@ -235,7 +312,7 @@ impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
   }
 }
 
-impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
+impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   #[inline]
   pub fn has_vid(&self, vid: VidRef) -> bool {
     self.v_entities.contains_key(vid)
@@ -263,7 +340,7 @@ impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
   }
 }
 
-impl<VType: VertexLike, EType: EdgeLike> DynGraph<VType, EType> {
+impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   #[inline]
   pub fn is_e_connective(&self, edge: &EType) -> bool {
     self.has_any_vids(&[edge.src_vid(), edge.dst_vid()])
