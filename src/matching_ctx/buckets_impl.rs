@@ -32,10 +32,10 @@ async fn does_data_v_satisfy_pattern(
     false
   } else {
     let pat_attr = pat_v.attr.as_ref().unwrap();
-    if !data_v.attrs.contains_key(pat_attr.key.as_str()) {
+    if !data_v.attrs.contains_key(&pat_attr.key) {
       return false;
     }
-    let data_value = data_v.attrs.get(pat_attr.key.as_str()).unwrap();
+    let data_value = data_v.attrs.get(&pat_attr.key).unwrap();
     pat_attr.op.operate_on(data_value, &pat_attr.value)
   }
 }
@@ -123,11 +123,11 @@ impl ABucket {
             for e in matched_data_es {
               next_vid_grouped_conn_pat_strs
                 .entry(e.dst_vid().to_owned())
-                .or_insert(vec![])
+                .or_insert_with(Vec::new)
                 .push(pat_e.eid().to_owned());
               next_vid_grouped_conn_es
                 .entry(e.dst_vid().to_owned())
-                .or_insert(vec![])
+                .or_insert_with(Vec::new)
                 .push(e);
             }
             is_matched_data_es_empty
@@ -152,11 +152,11 @@ impl ABucket {
             for e in matched_data_es {
               next_vid_grouped_conn_pat_strs
                 .entry(e.src_vid().to_owned())
-                .or_insert(vec![])
+                .or_insert_with(Vec::new)
                 .push(pat_e.eid().to_owned());
               next_vid_grouped_conn_es
                 .entry(e.src_vid().to_owned())
-                .or_insert(vec![])
+                .or_insert_with(Vec::new)
                 .push(e);
             }
             is_matched_data_es_empty

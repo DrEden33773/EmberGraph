@@ -7,6 +7,7 @@ async fn futures_with_tokio() {
   let outer = Vec::from_iter(1..=4);
   let inner = Vec::from_iter(1..=4);
   let mut futures = vec![];
+  let mut handles = vec![];
 
   for i in outer.iter() {
     for j in inner.iter() {
@@ -15,6 +16,20 @@ async fn futures_with_tokio() {
     }
   }
 
-  let results = futures::future::join_all(futures).await;
-  println!("Results: {:?}", results);
+  for i in outer.iter() {
+    for j in inner.iter() {
+      let i = *i;
+      let j = *j;
+      let handle = tokio::spawn(async move { operate(&i, &j).await });
+      handles.push(handle);
+    }
+  }
+
+  let results_via_futures = futures::future::join_all(futures).await;
+  let mut results_via_handles = vec![];
+  for handle in handles {
+    let result = handle.await.unwrap();
+    results_via_handles.push(result);
+  }
+  assert_eq!(results_via_futures, results_via_handles);
 }
