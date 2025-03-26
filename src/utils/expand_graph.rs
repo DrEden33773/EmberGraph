@@ -48,13 +48,8 @@ impl<VType: VBase, EType: EBase> From<ExpandGraph<VType, EType>> for DynGraph<VT
     }));
 
     for target_v in val.target_v_adj_table.keys() {
-      let mut dangling_eids = val
-        .target_v_adj_table
-        .get(target_v)
-        .unwrap()
-        .e_out
-        .to_owned();
-      dangling_eids.extend(val.target_v_adj_table.get(target_v).unwrap().e_in.clone());
+      let mut dangling_eids = val.target_v_adj_table[target_v].e_out.to_owned();
+      dangling_eids.extend(val.target_v_adj_table[target_v].e_in.clone());
 
       let dangling_e_pattern_pairs = dangling_eids
         .into_iter()
@@ -146,19 +141,19 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
   pub fn update_valid_target_vertices(
     &mut self,
     target_vertices: impl IntoIterator<Item = (VType, String)>,
-  ) {
+  ) -> AHashSet<String> {
     let mut legal_vids = AHashSet::new();
     for (v, pattern) in target_vertices {
       if !self.is_valid_target(&v) {
         continue;
       }
-      legal_vids.insert(v.clone());
+      legal_vids.insert(v.vid().to_owned());
       self.target_v_patterns.insert(v.vid().to_owned(), pattern);
       self.target_v_entities.insert(v.vid().to_owned(), v);
     }
 
     for dangling_e in self.dangling_e_entities.keys() {
-      let e = self.dangling_e_entities.get(dangling_e).unwrap();
+      let e = &self.dangling_e_entities[dangling_e];
       if self.target_v_entities.contains_key(e.src_vid()) {
         self
           .target_v_adj_table
@@ -176,6 +171,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
           .insert(e.eid().to_owned());
       }
     }
+    legal_vids
   }
 }
 
@@ -210,21 +206,13 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
       expanding_dg.update_valid_dangling_edges(l_dangling_es.clone().into_iter().map(|e| {
         (
           e.to_owned(),
-          left_expand_graph
-            .dangling_e_patterns
-            .get(e.eid())
-            .unwrap()
-            .to_owned(),
+          left_expand_graph.dangling_e_patterns[e.eid()].to_owned(),
         )
       }));
       expanding_dg.update_valid_dangling_edges(r_dangling_es.clone().into_iter().map(|e| {
         (
           e.to_owned(),
-          right_expand_graph
-            .dangling_e_patterns
-            .get(e.eid())
-            .unwrap()
-            .to_owned(),
+          right_expand_graph.dangling_e_patterns[e.eid()].to_owned(),
         )
       }));
       result.push(expanding_dg);

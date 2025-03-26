@@ -1,23 +1,25 @@
 use crate::{
-  schemas::{DataEdge, Vid},
+  schemas::Vid,
   utils::{dyn_graph::DynGraph, expand_graph::ExpandGraph},
 };
-use ahash::{AHashMap, AHashSet};
+use ahash::AHashMap;
 
 #[derive(Debug, Clone, Default)]
 pub struct FBucket {
   pub(crate) all_matched: Vec<DynGraph>,
+  pub(crate) matched_with_pivots: AHashMap<usize, Vec<Vid>>,
 }
 #[derive(Debug, Clone)]
 pub struct ABucket {
   pub(crate) curr_pat_vid: Vid,
   pub(crate) all_matched: Vec<DynGraph>,
-  pub(crate) next_pat_grouped_es: AHashMap<Vid, AHashSet<DataEdge>>,
-  pub(crate) next_pat_grouped_expansions: AHashMap<Vid, AHashSet<DataEdge>>,
+  pub(crate) matched_with_pivots: AHashMap<usize, Vec<Vid>>,
+  pub(crate) next_pat_grouped_expanding: AHashMap<Vid, Vec<ExpandGraph>>,
 }
 #[derive(Debug, Clone, Default)]
 pub struct CBucket {
   pub(crate) all_expanded: Vec<ExpandGraph>,
+  pub(crate) expanded_with_pivots: AHashMap<usize, Vec<Vid>>,
 }
 #[derive(Debug, Clone)]
 pub struct TBucket {

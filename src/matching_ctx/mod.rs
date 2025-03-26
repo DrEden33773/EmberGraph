@@ -17,8 +17,8 @@ pub struct MatchingCtx {
   pub(crate) empty_matched_set_appeared: bool,
   pub(crate) expanded_data_vids: AHashSet<Vid>,
 
-  pub(crate) f_pool: AHashMap<Vid, FBucket>,
-  pub(crate) a_pool: AHashMap<Vid, ABucket>,
-  pub(crate) c_pool: AHashMap<Vid, CBucket>,
-  pub(crate) t_pool: AHashMap<Vid, TBucket>,
+  pub(crate) f_block: AHashMap<Vid, FBucket>,
+  pub(crate) a_block: AHashMap<Vid, ABucket>,
+  pub(crate) c_block: AHashMap<Vid, CBucket>,
+  pub(crate) t_block: AHashMap<Vid, TBucket>,
 }
