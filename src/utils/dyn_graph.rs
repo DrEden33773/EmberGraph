@@ -39,10 +39,18 @@ impl BitOr for VNode {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
+  /// vid -> v_entity
   pub(crate) v_entities: AHashMap<Vid, VType>,
+
+  /// eid -> e_entity
   pub(crate) e_entities: AHashMap<Eid, EType>,
+
   pub(crate) adj_table: AHashMap<Vid, VNode>,
+
+  /// vid -> v_pattern_str
   pub(crate) v_patterns: AHashMap<Vid, String>,
+
+  /// eid -> e_pattern_str
   pub(crate) e_patterns: AHashMap<Eid, String>,
 }
 
@@ -279,6 +287,20 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   #[inline]
   pub fn get_e_entities(&self) -> Vec<EType> {
     self.e_entities.values().cloned().collect()
+  }
+  #[inline]
+  pub fn get_v_pat_str_set(&self) -> AHashSet<String> {
+    self.v_patterns.values().cloned().collect()
+  }
+  #[inline]
+  pub fn get_e_pat_str_set(&self) -> AHashSet<String> {
+    self.e_patterns.values().cloned().collect()
+  }
+  #[inline]
+  pub fn get_all_pat_str_set(&self) -> AHashSet<String> {
+    let mut res = self.get_v_pat_str_set();
+    res.extend(self.get_e_pat_str_set());
+    res
   }
   #[inline]
   pub fn get_v_pattern_pairs(&self) -> Vec<(VType, String)> {

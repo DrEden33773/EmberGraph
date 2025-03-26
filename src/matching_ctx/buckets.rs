@@ -7,19 +7,19 @@ use ahash::AHashMap;
 #[derive(Debug, Clone, Default)]
 pub struct FBucket {
   pub(crate) all_matched: Vec<DynGraph>,
-  pub(crate) matched_with_pivots: AHashMap<usize, Vec<Vid>>,
+  pub(crate) matched_with_frontiers: AHashMap<usize, Vec<Vid>>,
 }
 #[derive(Debug, Clone)]
 pub struct ABucket {
   pub(crate) curr_pat_vid: Vid,
   pub(crate) all_matched: Vec<DynGraph>,
-  pub(crate) matched_with_pivots: AHashMap<usize, Vec<Vid>>,
+  pub(crate) matched_with_frontiers: AHashMap<usize, Vec<Vid>>,
   pub(crate) next_pat_grouped_expanding: AHashMap<Vid, Vec<ExpandGraph>>,
 }
 #[derive(Debug, Clone, Default)]
 pub struct CBucket {
   pub(crate) all_expanded: Vec<ExpandGraph>,
-  pub(crate) expanded_with_pivots: AHashMap<usize, Vec<Vid>>,
+  pub(crate) expanded_with_frontiers: AHashMap<usize, Vec<Vid>>,
 }
 #[derive(Debug, Clone)]
 pub struct TBucket {

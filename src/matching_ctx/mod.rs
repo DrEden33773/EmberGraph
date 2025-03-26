@@ -22,3 +22,9 @@ pub struct MatchingCtx {
   pub(crate) c_block: AHashMap<Vid, CBucket>,
   pub(crate) t_block: AHashMap<Vid, TBucket>,
 }
+
+impl MatchingCtx {
+  pub fn update_extended_data_vids(&mut self, vid: AHashSet<Vid>) {
+    self.expanded_data_vids.extend(vid);
+  }
+}

@@ -87,7 +87,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
 }
 
 impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
-  pub fn group_dangling_e_by_pending_v(&self) -> AHashMap<String, Vec<EType>> {
+  pub async fn group_dangling_e_by_pending_v(&self) -> AHashMap<String, Vec<EType>> {
     let mut grouped: AHashMap<String, Vec<EType>> = AHashMap::new();
 
     for dangling_e in self.dangling_e_entities.values() {
@@ -111,19 +111,23 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
     self.dyn_graph.is_e_connective(e) && !self.dyn_graph.is_e_full_connective(e)
   }
 
-  pub fn update_valid_dangling_edges(
-    &mut self,
-    dangling_edges: impl IntoIterator<Item = (EType, String)>,
+  pub async fn update_valid_dangling_edges<'a>(
+    &'a mut self,
+    dangling_edges: impl Iterator<Item = (&'a EType, &'a str)>,
   ) -> AHashSet<String> {
     let mut legal_eids = AHashSet::new();
 
     for (e, pattern) in dangling_edges {
-      if !self.is_valid_edge(&e) {
+      if !self.is_valid_edge(e) {
         continue;
       }
       legal_eids.insert(e.eid().to_owned());
-      self.dangling_e_patterns.insert(e.eid().to_owned(), pattern);
-      self.dangling_e_entities.insert(e.eid().to_owned(), e);
+      self
+        .dangling_e_patterns
+        .insert(e.eid().to_owned(), pattern.to_owned());
+      self
+        .dangling_e_entities
+        .insert(e.eid().to_owned(), e.to_owned());
     }
 
     legal_eids
@@ -138,18 +142,22 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
     false
   }
 
-  pub fn update_valid_target_vertices(
-    &mut self,
-    target_vertices: impl IntoIterator<Item = (VType, String)>,
+  pub async fn update_valid_target_vertices<'a>(
+    &'a mut self,
+    target_vertices: impl Iterator<Item = (&'a VType, &'a str)>,
   ) -> AHashSet<String> {
     let mut legal_vids = AHashSet::new();
     for (v, pattern) in target_vertices {
-      if !self.is_valid_target(&v) {
+      if !self.is_valid_target(v) {
         continue;
       }
       legal_vids.insert(v.vid().to_owned());
-      self.target_v_patterns.insert(v.vid().to_owned(), pattern);
-      self.target_v_entities.insert(v.vid().to_owned(), v);
+      self
+        .target_v_patterns
+        .insert(v.vid().to_owned(), pattern.to_owned());
+      self
+        .target_v_entities
+        .insert(v.vid().to_owned(), v.to_owned());
     }
 
     for dangling_e in self.dangling_e_entities.keys() {
@@ -175,24 +183,26 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
   }
 }
 
-pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
-  left_expand_graph: &ExpandGraph<VType, EType>,
-  right_expand_graph: &ExpandGraph<VType, EType>,
+pub async fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
+  l_expand_graph: &ExpandGraph<VType, EType>,
+  r_expand_graph: &ExpandGraph<VType, EType>,
 ) -> Vec<ExpandGraph<VType, EType>> {
-  let l_graph = &left_expand_graph.dyn_graph;
-  let r_graph = &right_expand_graph.dyn_graph;
+  let l_graph = &l_expand_graph.dyn_graph;
+  let r_graph = &r_expand_graph.dyn_graph;
 
   let l_v_pat_pairs = l_graph.get_v_pattern_pairs();
   let r_v_pat_pairs = r_graph.get_v_pattern_pairs();
   let l_e_pat_pairs = l_graph.get_e_pattern_pairs();
   let r_e_pat_pairs = r_graph.get_e_pattern_pairs();
 
-  let mut new_g = DynGraph::<VType, EType>::default();
-  new_g.update_v_batch(l_v_pat_pairs.into_iter().chain(r_v_pat_pairs));
-  new_g.update_e_batch(r_e_pat_pairs.into_iter().chain(l_e_pat_pairs));
+  let mut new_graph = DynGraph::<VType, EType>::default();
+  new_graph.update_v_batch(l_v_pat_pairs.into_iter().chain(r_v_pat_pairs));
+  new_graph.update_e_batch(r_e_pat_pairs.into_iter().chain(l_e_pat_pairs));
 
-  let grouped_l = left_expand_graph.group_dangling_e_by_pending_v();
-  let grouped_r = right_expand_graph.group_dangling_e_by_pending_v();
+  let (grouped_l, grouped_r) = tokio::join!(
+    l_expand_graph.group_dangling_e_by_pending_v(),
+    r_expand_graph.group_dangling_e_by_pending_v()
+  );
 
   let mut result = vec![];
 
@@ -202,19 +212,21 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
         continue;
       }
 
-      let mut expanding_dg: ExpandGraph<VType, EType> = new_g.as_ref().into();
-      expanding_dg.update_valid_dangling_edges(l_dangling_es.clone().into_iter().map(|e| {
-        (
-          e.to_owned(),
-          left_expand_graph.dangling_e_patterns[e.eid()].to_owned(),
+      let mut expanding_dg: ExpandGraph<VType, EType> = new_graph.as_ref().into();
+      expanding_dg
+        .update_valid_dangling_edges(
+          l_dangling_es
+            .iter()
+            .map(|e| (e, l_expand_graph.dangling_e_patterns[e.eid()].as_str())),
         )
-      }));
-      expanding_dg.update_valid_dangling_edges(r_dangling_es.clone().into_iter().map(|e| {
-        (
-          e.to_owned(),
-          right_expand_graph.dangling_e_patterns[e.eid()].to_owned(),
+        .await;
+      expanding_dg
+        .update_valid_dangling_edges(
+          r_dangling_es
+            .iter()
+            .map(|e| (e, r_expand_graph.dangling_e_patterns[e.eid()].as_str())),
         )
-      }));
+        .await;
       result.push(expanding_dg);
     }
   }
