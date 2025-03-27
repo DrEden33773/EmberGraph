@@ -13,6 +13,8 @@ pub struct PlanData {
 
   pub(crate) pattern_vs: AHashMap<Vid, PatternVertex>,
   pub(crate) pattern_es: AHashMap<Vid, PatternEdge>,
+
+  #[allow(unused)]
   pub(crate) instructions: Vec<Instruction>,
 }
 

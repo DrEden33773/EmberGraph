@@ -16,7 +16,6 @@ fn resolve_var_name(target_var: &str) -> &str {
 #[derive(Debug, Clone, Default)]
 pub struct MatchingCtx {
   pub(crate) plan_data: PlanData,
-  pub(crate) empty_matched_set_appeared: bool,
   pub(crate) expanded_data_vids: AHashSet<Vid>,
 
   pub(crate) f_block: AHashMap<Vid, FBucket>,
