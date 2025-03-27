@@ -8,7 +8,9 @@ pub use {attr::*, base::*, entities::*, instruction::*};
 
 #[derive(Debug, Clone, Default)]
 pub struct PlanData {
+  #[allow(unused)]
   pub(crate) matching_order: Vec<String>,
+
   pub(crate) pattern_vs: AHashMap<Vid, PatternVertex>,
   pub(crate) pattern_es: AHashMap<Vid, PatternEdge>,
   pub(crate) instructions: Vec<Instruction>,

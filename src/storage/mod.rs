@@ -1,6 +1,7 @@
 use crate::schemas::{DataEdge, DataVertex, LabelRef, PatternAttr, VidRef};
+use std::hash::Hash;
 
-pub trait StorageAdapter: Clone {
+pub trait StorageAdapter: Clone + Hash + Send + Sync {
   fn get_v(&self, vid: VidRef) -> impl Future<Output = Option<DataVertex>> + Send;
 
   fn load_v(

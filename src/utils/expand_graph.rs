@@ -1,8 +1,6 @@
-use ahash::{AHashMap, AHashSet};
-
-use crate::schemas::{DataEdge, DataVertex, EBase, Eid, VBase, Vid};
-
 use super::dyn_graph::{DynGraph, VNode};
+use crate::schemas::{DataEdge, DataVertex, EBase, Eid, VBase, Vid};
+use ahash::{AHashMap, AHashSet};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ExpandGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
@@ -113,7 +111,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
 
   pub async fn update_valid_dangling_edges<'a>(
     &'a mut self,
-    dangling_edges: impl Iterator<Item = (&'a EType, &'a str)>,
+    dangling_edges: impl IntoIterator<Item = (&'a EType, &'a str)>,
   ) -> AHashSet<String> {
     let mut legal_eids = AHashSet::new();
 
@@ -144,7 +142,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
 
   pub async fn update_valid_target_vertices<'a>(
     &'a mut self,
-    target_vertices: impl Iterator<Item = (&'a VType, &'a str)>,
+    target_vertices: impl IntoIterator<Item = (&'a VType, &'a str)>,
   ) -> AHashSet<String> {
     let mut legal_vids = AHashSet::new();
     for (v, pattern) in target_vertices {

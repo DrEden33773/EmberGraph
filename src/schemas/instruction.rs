@@ -1,6 +1,6 @@
 use strum_macros::{Display, EnumString};
 
-use super::base::{Op, Vid};
+use super::base::Vid;
 
 #[derive(Debug, Clone, Copy, Display, EnumString)]
 pub enum InstructionType {
@@ -22,9 +22,12 @@ pub enum InstructionType {
 pub struct Instruction {
   pub(crate) vid: Vid,
   pub(crate) type_: InstructionType,
-  pub(crate) single_op: Option<Op>,
-  pub(crate) multi_ops: Vec<Op>,
+  pub(crate) expand_eids: Vec<String>,
+  pub(crate) single_op: Option<String>,
+  pub(crate) multi_ops: Vec<String>,
   pub(crate) target_var: String,
+
+  #[allow(unused)]
   pub(crate) depend_on: Vec<String>,
 }
 

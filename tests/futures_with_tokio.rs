@@ -6,8 +6,8 @@ async fn futures_with_tokio() {
 
   let outer = Vec::from_iter(1..=4);
   let inner = Vec::from_iter(1..=4);
-  let mut futures = vec![];
-  let mut handles = vec![];
+  let mut futures = Vec::with_capacity(outer.len() * inner.len());
+  let mut handles = Vec::with_capacity(outer.len() * inner.len());
 
   for i in outer.iter() {
     for j in inner.iter() {

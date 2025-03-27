@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use super::buckets::{ABucket, CBucket, FBucket, TBucket};
 use crate::{
   schemas::{DataEdge, DataVertex, EBase, PatternAttr, PatternEdge, PatternVertex, Vid, VidRef},
@@ -11,6 +9,7 @@ use crate::{
 };
 use ahash::{AHashMap, AHashSet};
 use futures::future;
+use std::sync::Arc;
 use tokio::sync::mpsc;
 
 async fn does_data_v_satisfy_pattern(
@@ -170,7 +169,7 @@ impl ABucket {
 
           // channel to send results back
           let (tx, mut rx) = mpsc::channel(next_vid_grouped_conn_es.len());
-          let mut handles = vec![];
+          let mut handles = Vec::with_capacity(next_vid_grouped_conn_es.len());
 
           // build `expanding_graph`
           // note that each `next_data_vertex` holds a `expanding_graph`
@@ -185,7 +184,7 @@ impl ABucket {
               expanding_graph
                 .update_valid_dangling_edges(edges.iter().zip(pat_strs.iter().map(String::as_str)))
                 .await;
-              let _ = tx.send(expanding_graph).await;
+              tx.send(expanding_graph).await.unwrap();
             });
 
             handles.push(handle);
@@ -259,23 +258,19 @@ async fn incremental_match<'a, S: StorageAdapter>(ctx: LoadWithCondCtx<'a, S>) -
   let edge_futures = potential_edges
     .into_iter()
     .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
-    .map(|e| {
-      let pat_v_entities = ctx.pattern_vs.clone();
-      let storage_adapter = ctx.storage_adapter.clone();
-      async move {
-        let satisfies = does_data_v_satisfy_pattern(
-          if ctx.is_src_curr_pat {
-            e.dst_vid()
-          } else {
-            e.src_vid()
-          },
-          next_pat_vid,
-          &pat_v_entities,
-          &storage_adapter,
-        )
-        .await;
-        if satisfies { Some(e) } else { None }
-      }
+    .map(|e| async {
+      let satisfies = does_data_v_satisfy_pattern(
+        if ctx.is_src_curr_pat {
+          e.dst_vid()
+        } else {
+          e.src_vid()
+        },
+        next_pat_vid,
+        ctx.pattern_vs,
+        ctx.storage_adapter,
+      )
+      .await;
+      if satisfies { Some(e) } else { None }
     });
 
   // exec
@@ -285,9 +280,8 @@ async fn incremental_match<'a, S: StorageAdapter>(ctx: LoadWithCondCtx<'a, S>) -
 }
 
 impl CBucket {
-  pub async fn build_from_a<'a>(
-    a_bucket: &'a mut ABucket,
-    curr_pat_vid: VidRef<'a>,
+  pub async fn build_from_a_group(
+    a_group: impl IntoIterator<Item = ExpandGraph>,
     loaded_v_pat_pairs: impl IntoIterator<Item = (DataVertex, String)>,
   ) -> Self {
     let loaded = Arc::new(
@@ -300,16 +294,13 @@ impl CBucket {
     let mut all_expanded = vec![];
     let mut expanded_with_frontiers = AHashMap::new();
 
-    let curr_group = a_bucket
-      .next_pat_grouped_expanding
-      .remove(curr_pat_vid)
-      .unwrap_or_default();
+    let a_group = a_group.into_iter().collect::<Vec<_>>();
 
     // create a channel to send results back
-    let (tx, mut rx) = mpsc::channel(curr_group.len());
-    let mut handles = vec![];
+    let (tx, mut rx) = mpsc::channel(a_group.len());
+    let mut handles = Vec::with_capacity(a_group.len());
 
-    for (idx, mut expanding) in curr_group.into_iter().enumerate() {
+    for (idx, mut expanding) in a_group.into_iter().enumerate() {
       let tx = tx.clone();
       let data_ref = loaded.clone();
 
@@ -319,7 +310,7 @@ impl CBucket {
           .await;
 
         // Send the results back through the channel
-        let _ = tx.send((idx, expanding, valid_targets)).await;
+        tx.send((idx, expanding, valid_targets)).await.unwrap();
       });
       handles.push(handle);
     }
@@ -364,7 +355,7 @@ impl CBucket {
 
     // Create a channel to send results back
     let (tx, mut rx) = mpsc::channel(t_bucket.expanding_graphs.len());
-    let mut handles = vec![];
+    let mut handles = Vec::with_capacity(t_bucket.expanding_graphs.len());
 
     for (idx, mut expanding) in t_bucket.expanding_graphs.into_iter().enumerate() {
       let tx = tx.clone();
@@ -376,7 +367,7 @@ impl CBucket {
           .await;
 
         // Send the results back through the channel
-        let _ = tx.send((idx, expanding, valid_targets)).await;
+        tx.send((idx, expanding, valid_targets)).await.unwrap();
       });
       handles.push(handle);
     }
@@ -409,18 +400,12 @@ impl CBucket {
 
 impl TBucket {
   pub async fn build_from_a_a(
-    left: &mut ABucket,
-    right: &mut ABucket,
+    left: impl IntoIterator<Item = ExpandGraph>,
+    right: impl IntoIterator<Item = ExpandGraph>,
     target_pat_vid: VidRef<'_>,
   ) -> Self {
-    let left_group = left
-      .next_pat_grouped_expanding
-      .remove(target_pat_vid)
-      .unwrap_or_default();
-    let right_group = right
-      .next_pat_grouped_expanding
-      .remove(target_pat_vid)
-      .unwrap_or_default();
+    let left_group = left.into_iter().collect();
+    let right_group = right.into_iter().collect();
 
     let expanding_graphs = Self::expand_edges_of_two(left_group, right_group).await;
     Self {
@@ -429,16 +414,16 @@ impl TBucket {
     }
   }
 
-  pub async fn build_from_t_a(left: TBucket, right: &mut ABucket) -> Self {
-    let left_group = left.expanding_graphs;
-    let right_group = right
-      .next_pat_grouped_expanding
-      .remove(&left.target_pat_vid)
-      .unwrap_or_default();
+  pub async fn build_from_t_a(
+    t_bucket: TBucket,
+    a_group: impl IntoIterator<Item = ExpandGraph>,
+  ) -> Self {
+    let left_group = t_bucket.expanding_graphs;
+    let right_group = a_group.into_iter().collect();
 
     let expanding_graphs = Self::expand_edges_of_two(left_group, right_group).await;
     Self {
-      target_pat_vid: left.target_pat_vid,
+      target_pat_vid: t_bucket.target_pat_vid,
       expanding_graphs,
     }
   }
