@@ -19,6 +19,10 @@ impl ForeachOperator {
 
     let c_bucket = { self.ctx.lock().await }.pop_from_c_block(instr.single_op.as_ref().unwrap());
     if c_bucket.is_none() {
+      println!(
+        "No 'c_bucket' found for '{}'\n",
+        instr.single_op.as_ref().unwrap()
+      );
       return;
     }
 

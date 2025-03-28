@@ -20,6 +20,10 @@ impl<S: StorageAdapter> InitOperator<S> {
 
     let pattern_v = { self.ctx.lock().await }.get_pattern_v(&instr.vid).cloned();
     if pattern_v.is_none() {
+      println!(
+        "No pattern_v found for '{}'\n",
+        instr.single_op.as_ref().unwrap()
+      );
       return;
     }
 

@@ -1,6 +1,8 @@
 use super::buckets::{ABucket, CBucket, FBucket, TBucket};
 use crate::{
-  schemas::{DataEdge, DataVertex, EBase, PatternAttr, PatternEdge, PatternVertex, Vid, VidRef},
+  schemas::{
+    DataEdge, DataVertex, EBase, LabelRef, PatternAttr, PatternEdge, PatternVertex, Vid, VidRef,
+  },
   storage::StorageAdapter,
   utils::{
     dyn_graph::DynGraph,
@@ -91,7 +93,7 @@ impl ABucket {
 
         // iter: `pattern_edges`
         for pat_e in pattern_es.iter() {
-          if !matched_dg.get_e_pat_str_set().contains(pat_e.eid()) {
+          if matched_dg.get_e_pat_str_set().contains(pat_e.eid()) {
             continue;
           }
 
@@ -227,9 +229,9 @@ struct LoadWithCondCtx<'a, S: StorageAdapter> {
   pattern_vs: &'a HashMap<String, PatternVertex>,
   storage_adapter: &'a S,
   curr_matched_dg: &'a DynGraph,
-  frontier_vid: &'a str,
+  frontier_vid: VidRef<'a>,
   curr_pat_e: &'a PatternEdge,
-  e_label: &'a str,
+  e_label: LabelRef<'a>,
   e_attr: Option<&'a PatternAttr>,
   is_src_curr_pat: bool,
 }

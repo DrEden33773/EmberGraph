@@ -41,6 +41,11 @@ impl<S: StorageAdapter> IntersectOperator<S> {
     let a_group = { self.ctx.lock().await }
       .pop_group_by_pat_from_a_block(instr.single_op.as_ref().unwrap(), &instr.vid);
     if a_group.is_none() {
+      println!(
+        "No 'a_group' found for '{}.{}'\n",
+        instr.single_op.as_ref().unwrap(),
+        instr.vid
+      );
       return;
     }
     let a_group = a_group.unwrap();
@@ -89,6 +94,10 @@ impl<S: StorageAdapter> IntersectOperator<S> {
 
     let t_bucket = { self.ctx.lock().await }.pop_from_t_block(instr.single_op.as_ref().unwrap());
     if t_bucket.is_none() {
+      println!(
+        "No 't_bucket' found for '{}'\n",
+        instr.single_op.as_ref().unwrap(),
+      );
       return;
     }
     let t_bucket = t_bucket.unwrap();

@@ -61,7 +61,7 @@ impl StorageAdapter for Neo4jStorageAdapter {
         labels(v) as v_label
     ";
     let query_str = query_str.split_whitespace().collect::<Vec<_>>().join(" ");
-    println!(">>> {query_str}\n");
+    // println!(">>> {query_str}\n");
 
     let mut result = self.graph.execute(query(&query_str)).await.unwrap();
     let row = result.next().await.unwrap()?;
@@ -75,7 +75,7 @@ impl StorageAdapter for Neo4jStorageAdapter {
   }
 
   async fn load_v(&self, v_label: LabelRef<'_>, v_attr: Option<&PatternAttr>) -> Vec<DataVertex> {
-    let mut query_str = format!("MATCH(v:{v_label})\n");
+    let mut query_str = format!("MATCH (v:{v_label})\n");
     if let Some(attr) = v_attr {
       let constraint = attr.to_neo4j_constraint("v");
       query_str += &format!("WHERE {constraint}\n");
@@ -86,7 +86,7 @@ impl StorageAdapter for Neo4jStorageAdapter {
         elementId(v) as vid
     ";
     let query_str = query_str.split_whitespace().collect::<Vec<_>>().join(" ");
-    println!(">>> {query_str}\n");
+    // println!(">>> {query_str}\n");
 
     let mut result = self.graph.execute(query(&query_str)).await.unwrap();
     let mut ret = vec![];
@@ -103,7 +103,7 @@ impl StorageAdapter for Neo4jStorageAdapter {
   }
 
   async fn load_e(&self, e_label: LabelRef<'_>, e_attr: Option<&PatternAttr>) -> Vec<DataEdge> {
-    let mut query_str = format!("MATCH(e:{e_label})\n");
+    let mut query_str = format!("MATCH (src)-[e:{e_label}]->(dst)\n");
     if let Some(attr) = e_attr {
       let constraint = attr.to_neo4j_constraint("e");
       query_str += &format!("WHERE {constraint}\n");
@@ -116,7 +116,7 @@ impl StorageAdapter for Neo4jStorageAdapter {
         elementId(dst) AS dst_vid
     ";
     let query_str = query_str.split_whitespace().collect::<Vec<_>>().join(" ");
-    println!(">>> {query_str}\n");
+    // println!(">>> {query_str}\n");
 
     let mut result = self.graph.execute(query(&query_str)).await.unwrap();
     let mut ret = vec![];
@@ -133,7 +133,7 @@ impl StorageAdapter for Neo4jStorageAdapter {
     e_label: LabelRef<'_>,
     e_attr: Option<&PatternAttr>,
   ) -> Vec<DataEdge> {
-    let mut query_str = format!("MATCH(e:{e_label})\n");
+    let mut query_str = format!("MATCH (src)-[e:{e_label}]->(dst)\n");
     query_str += &format!("WHERE elementId(src) = '{src_vid}'\n");
     if let Some(attr) = e_attr {
       let constraint = attr.to_neo4j_constraint("e");
@@ -147,7 +147,7 @@ impl StorageAdapter for Neo4jStorageAdapter {
         elementId(dst) AS dst_vid
     ";
     let query_str = query_str.split_whitespace().collect::<Vec<_>>().join(" ");
-    println!(">>> {query_str}\n");
+    // println!(">>> {query_str}\n");
 
     let mut result = self.graph.execute(query(&query_str)).await.unwrap();
     let mut ret = vec![];
@@ -164,7 +164,7 @@ impl StorageAdapter for Neo4jStorageAdapter {
     e_label: LabelRef<'_>,
     e_attr: Option<&PatternAttr>,
   ) -> Vec<DataEdge> {
-    let mut query_str = format!("MATCH(e:{e_label})\n");
+    let mut query_str = format!("MATCH (src)-[e:{e_label}]->(dst)\n");
     query_str += &format!("WHERE elementId(dst) = '{dst_vid}'\n");
     if let Some(attr) = e_attr {
       let constraint = attr.to_neo4j_constraint("e");
@@ -178,7 +178,7 @@ impl StorageAdapter for Neo4jStorageAdapter {
         elementId(dst) AS dst_vid
     ";
     let query_str = query_str.split_whitespace().collect::<Vec<_>>().join(" ");
-    println!(">>> {query_str}\n");
+    // println!(">>> {query_str}\n");
 
     let mut result = self.graph.execute(query(&query_str)).await.unwrap();
     let mut ret = vec![];

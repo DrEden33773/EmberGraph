@@ -26,6 +26,10 @@ impl<S: StorageAdapter> GetAdjOperator<S> {
 
     let f_bucket = { self.ctx.lock().await }.pop_from_f_block(instr.single_op.as_ref().unwrap());
     if f_bucket.is_none() {
+      println!(
+        "No 'f_bucket' found for '{}'\n",
+        instr.single_op.as_ref().unwrap()
+      );
       return;
     }
     let mut a_bucket = ABucket::from_f_bucket(f_bucket.unwrap(), curr_pat_vid);

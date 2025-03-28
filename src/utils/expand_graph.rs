@@ -106,7 +106,9 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
   }
 
   fn is_valid_edge(&self, e: &EType) -> bool {
-    self.dyn_graph.is_e_connective(e) && !self.dyn_graph.is_e_full_connective(e)
+    self.dyn_graph.is_e_connective(e)
+      && !self.dyn_graph.is_e_full_connective(e)
+      && !self.dyn_graph.has_eid(e.eid())
   }
 
   pub async fn update_valid_dangling_edges<'a>(
@@ -133,7 +135,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
 
   fn is_valid_target(&self, v: &VType) -> bool {
     for e in self.dangling_e_entities.values() {
-      if e.contains(v.vid()) {
+      if e.contains(v.vid()) && !self.dyn_graph.has_vid(v.vid()) {
         return true;
       }
     }

@@ -54,7 +54,21 @@ impl<S: StorageAdapter> ExecEngine<S> {
   }
 
   pub async fn exec(&mut self) -> Vec<DynGraph> {
-    let unmerged_results = self.exec_without_final_merge().await;
+    let unmerged_results = self
+      .exec_without_final_merge()
+      .await
+      .into_iter()
+      .filter(|v| !v.is_empty())
+      .collect::<Vec<_>>();
+
+    fn preview_scale(unmerged: &[Vec<DynGraph>]) {
+      let len_vec = unmerged.iter().map(|v| v.len()).collect::<Vec<_>>();
+      println!("unmerged_results scale: {len_vec:?}\n");
+    }
+
+    // println!("unmerged_results: {unmerged_results:#?}\n");
+    preview_scale(&unmerged_results);
+
     if unmerged_results.is_empty() {
       return vec![];
     }
