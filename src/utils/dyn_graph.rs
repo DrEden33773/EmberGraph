@@ -1,5 +1,5 @@
-use crate::schemas::{DataEdge, DataVertex, EBase, Eid, EidRef, VBase, Vid, VidRef};
-use ahash::{AHashMap, AHashSet};
+use crate::schemas::*;
+use hashbrown::{HashMap, HashSet};
 use std::{
   hash::Hash,
   ops::{BitOr, BitOrAssign},
@@ -7,8 +7,8 @@ use std::{
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct VNode {
-  pub(crate) e_in: AHashSet<Eid>,
-  pub(crate) e_out: AHashSet<Eid>,
+  pub(crate) e_in: HashSet<Eid>,
+  pub(crate) e_out: HashSet<Eid>,
 }
 
 impl Hash for VNode {
@@ -40,18 +40,18 @@ impl BitOr for VNode {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
   /// vid -> v_entity
-  pub(crate) v_entities: AHashMap<Vid, VType>,
+  pub(crate) v_entities: HashMap<Vid, VType>,
 
   /// eid -> e_entity
-  pub(crate) e_entities: AHashMap<Eid, EType>,
+  pub(crate) e_entities: HashMap<Eid, EType>,
 
-  pub(crate) adj_table: AHashMap<Vid, VNode>,
+  pub(crate) adj_table: HashMap<Vid, VNode>,
 
   /// vid -> v_pattern_str
-  pub(crate) v_patterns: AHashMap<Vid, String>,
+  pub(crate) v_patterns: HashMap<Vid, String>,
 
   /// eid -> e_pattern_str
-  pub(crate) e_patterns: AHashMap<Eid, String>,
+  pub(crate) e_patterns: HashMap<Eid, String>,
 }
 
 impl<VType: VBase, EType: EBase> Hash for DynGraph<VType, EType> {
@@ -273,11 +273,11 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   }
 
   #[inline]
-  pub fn get_vid_set(&self) -> AHashSet<Vid> {
+  pub fn get_vid_set(&self) -> HashSet<Vid> {
     self.v_entities.keys().cloned().collect()
   }
   #[inline]
-  pub fn get_eid_set(&self) -> AHashSet<Eid> {
+  pub fn get_eid_set(&self) -> HashSet<Eid> {
     self.e_entities.keys().cloned().collect()
   }
   #[inline]
@@ -289,15 +289,15 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
     self.e_entities.values().cloned().collect()
   }
   #[inline]
-  pub fn get_v_pat_str_set(&self) -> AHashSet<String> {
+  pub fn get_v_pat_str_set(&self) -> HashSet<String> {
     self.v_patterns.values().cloned().collect()
   }
   #[inline]
-  pub fn get_e_pat_str_set(&self) -> AHashSet<String> {
+  pub fn get_e_pat_str_set(&self) -> HashSet<String> {
     self.e_patterns.values().cloned().collect()
   }
   #[inline]
-  pub fn get_all_pat_str_set(&self) -> AHashSet<String> {
+  pub fn get_all_pat_str_set(&self) -> HashSet<String> {
     let mut res = self.get_v_pat_str_set();
     res.extend(self.get_e_pat_str_set());
     res

@@ -1,6 +1,6 @@
 use crate::{matching_ctx::MatchingCtx, utils::dyn_graph::DynGraph};
-use ahash::AHashMap;
 use futures::future;
+use hashbrown::HashMap;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -24,13 +24,13 @@ impl ReportOperator {
         .pattern_vs()
         .keys()
         .map(|v_pat| (v_pat.to_owned(), 1))
-        .collect::<AHashMap<_, usize>>();
+        .collect::<HashMap<_, usize>>();
       let plan_e_pat_cnt = { self.ctx.lock().await }
         .plan_data
         .pattern_es()
         .keys()
         .map(|e_pat| (e_pat.to_owned(), 1))
-        .collect::<AHashMap<_, usize>>();
+        .collect::<HashMap<_, usize>>();
 
       let graph_v_pat_cnt = graph
         .v_patterns
@@ -41,7 +41,7 @@ impl ReportOperator {
             graph.v_patterns.values().filter(|v| *v == v_pat).count(),
           )
         })
-        .collect::<AHashMap<_, usize>>();
+        .collect::<HashMap<_, usize>>();
       let graph_e_pat_cnt = graph
         .e_patterns
         .values()
@@ -51,7 +51,7 @@ impl ReportOperator {
             graph.e_patterns.values().filter(|v| *v == e_pat).count(),
           )
         })
-        .collect::<AHashMap<_, usize>>();
+        .collect::<HashMap<_, usize>>();
 
       for (v_pat, cnt) in graph_v_pat_cnt {
         if let Some(plan_cnt) = plan_v_pat_cnt.get(&v_pat) {

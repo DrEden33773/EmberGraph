@@ -2,8 +2,8 @@ use crate::{
   schemas::{PatternEdge, PatternVertex, PlanData, STR_TUPLE_SPLITTER, Vid, VidRef},
   utils::{dyn_graph::DynGraph, expand_graph::ExpandGraph},
 };
-use ahash::{AHashMap, AHashSet};
 use buckets::{ABucket, CBucket, FBucket, TBucket};
+use hashbrown::{HashMap, HashSet};
 
 pub mod buckets;
 pub mod buckets_impl;
@@ -16,27 +16,27 @@ fn resolve_var_name(target_var: &str) -> &str {
 #[derive(Debug, Clone, Default)]
 pub struct MatchingCtx {
   pub(crate) plan_data: PlanData,
-  pub(crate) expanded_data_vids: AHashSet<Vid>,
+  pub(crate) expanded_data_vids: HashSet<Vid>,
 
-  pub(crate) f_block: AHashMap<Vid, FBucket>,
-  pub(crate) a_block: AHashMap<Vid, ABucket>,
-  pub(crate) c_block: AHashMap<Vid, CBucket>,
-  pub(crate) t_block: AHashMap<Vid, TBucket>,
+  pub(crate) f_block: HashMap<Vid, FBucket>,
+  pub(crate) a_block: HashMap<Vid, ABucket>,
+  pub(crate) c_block: HashMap<Vid, CBucket>,
+  pub(crate) t_block: HashMap<Vid, TBucket>,
 
   pub(crate) grouped_partial_matches: Vec<Vec<DynGraph>>,
 }
 
 impl MatchingCtx {
   #[inline]
-  pub fn update_extended_data_vids(&mut self, vid: AHashSet<Vid>) {
+  pub fn update_extended_data_vids(&mut self, vid: HashSet<Vid>) {
     self.expanded_data_vids.extend(vid);
   }
 
-  pub fn pattern_vs(&self) -> &AHashMap<Vid, PatternVertex> {
+  pub fn pattern_vs(&self) -> &HashMap<Vid, PatternVertex> {
     &self.plan_data.pattern_vs
   }
 
-  pub fn pattern_es(&self) -> &AHashMap<Vid, PatternEdge> {
+  pub fn pattern_es(&self) -> &HashMap<Vid, PatternEdge> {
     &self.plan_data.pattern_es
   }
 }

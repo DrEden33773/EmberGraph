@@ -2,27 +2,29 @@ pub mod attr;
 pub mod base;
 pub mod entities;
 pub mod instruction;
+pub mod serde;
 
-use ahash::AHashMap;
-pub use {attr::*, base::*, entities::*, instruction::*};
+use hashbrown::HashMap;
+
+pub use {attr::*, base::*, entities::*, instruction::*, serde::*};
 
 #[derive(Debug, Clone, Default)]
 pub struct PlanData {
   #[allow(unused)]
   pub(crate) matching_order: Vec<String>,
 
-  pub(crate) pattern_vs: AHashMap<Vid, PatternVertex>,
-  pub(crate) pattern_es: AHashMap<Vid, PatternEdge>,
+  pub(crate) pattern_vs: HashMap<Vid, PatternVertex>,
+  pub(crate) pattern_es: HashMap<Vid, PatternEdge>,
 
   #[allow(unused)]
   pub(crate) instructions: Vec<Instruction>,
 }
 
 impl PlanData {
-  pub fn pattern_vs(&self) -> &AHashMap<Vid, PatternVertex> {
+  pub fn pattern_vs(&self) -> &HashMap<Vid, PatternVertex> {
     &self.pattern_vs
   }
-  pub fn pattern_es(&self) -> &AHashMap<Vid, PatternEdge> {
+  pub fn pattern_es(&self) -> &HashMap<Vid, PatternEdge> {
     &self.pattern_es
   }
 }

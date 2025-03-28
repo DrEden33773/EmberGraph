@@ -1,17 +1,17 @@
 use super::dyn_graph::{DynGraph, VNode};
-use crate::schemas::{DataEdge, DataVertex, EBase, Eid, VBase, Vid};
-use ahash::{AHashMap, AHashSet};
+use crate::schemas::*;
+use hashbrown::{HashMap, HashSet};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ExpandGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
   pub(crate) dyn_graph: DynGraph<VType, EType>,
-  pub(crate) target_v_adj_table: AHashMap<Vid, VNode>,
+  pub(crate) target_v_adj_table: HashMap<Vid, VNode>,
 
-  pub(crate) dangling_e_entities: AHashMap<Eid, EType>,
-  pub(crate) target_v_entities: AHashMap<Vid, VType>,
+  pub(crate) dangling_e_entities: HashMap<Eid, EType>,
+  pub(crate) target_v_entities: HashMap<Vid, VType>,
 
-  pub(crate) dangling_e_patterns: AHashMap<Eid, String>,
-  pub(crate) target_v_patterns: AHashMap<Vid, String>,
+  pub(crate) dangling_e_patterns: HashMap<Eid, String>,
+  pub(crate) target_v_patterns: HashMap<Vid, String>,
 }
 
 impl<VType: VBase, EType: EBase> Default for ExpandGraph<VType, EType> {
@@ -64,10 +64,10 @@ impl<VType: VBase, EType: EBase> From<ExpandGraph<VType, EType>> for DynGraph<VT
 }
 
 impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
-  pub fn get_vid_set(&self) -> AHashSet<String> {
+  pub fn get_vid_set(&self) -> HashSet<String> {
     self.dyn_graph.get_vid_set()
   }
-  pub fn get_eid_set(&self) -> AHashSet<String> {
+  pub fn get_eid_set(&self) -> HashSet<String> {
     self.dyn_graph.get_eid_set()
   }
   pub fn get_v_count(&self) -> usize {
@@ -76,17 +76,17 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
   pub fn get_e_count(&self) -> usize {
     self.dyn_graph.get_e_count()
   }
-  pub fn dangling_e_patterns(&self) -> &AHashMap<Eid, String> {
+  pub fn dangling_e_patterns(&self) -> &HashMap<Eid, String> {
     &self.dangling_e_patterns
   }
-  pub fn target_v_patterns(&self) -> &AHashMap<Vid, String> {
+  pub fn target_v_patterns(&self) -> &HashMap<Vid, String> {
     &self.target_v_patterns
   }
 }
 
 impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
-  pub async fn group_dangling_e_by_pending_v(&self) -> AHashMap<String, Vec<EType>> {
-    let mut grouped: AHashMap<String, Vec<EType>> = AHashMap::new();
+  pub async fn group_dangling_e_by_pending_v(&self) -> HashMap<String, Vec<EType>> {
+    let mut grouped: HashMap<String, Vec<EType>> = HashMap::new();
 
     for dangling_e in self.dangling_e_entities.values() {
       if self.dyn_graph.has_vid(dangling_e.src_vid()) {
@@ -112,8 +112,8 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
   pub async fn update_valid_dangling_edges<'a>(
     &'a mut self,
     dangling_edges: impl IntoIterator<Item = (&'a EType, &'a str)>,
-  ) -> AHashSet<String> {
-    let mut legal_eids = AHashSet::new();
+  ) -> HashSet<String> {
+    let mut legal_eids = HashSet::new();
 
     for (e, pattern) in dangling_edges {
       if !self.is_valid_edge(e) {
@@ -143,8 +143,8 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
   pub async fn update_valid_target_vertices<'a>(
     &'a mut self,
     target_vertices: impl IntoIterator<Item = (&'a VType, &'a str)>,
-  ) -> AHashSet<String> {
-    let mut legal_vids = AHashSet::new();
+  ) -> HashSet<String> {
+    let mut legal_vids = HashSet::new();
     for (v, pattern) in target_vertices {
       if !self.is_valid_target(v) {
         continue;

@@ -1,5 +1,5 @@
 use super::{AttrValue, Label, LabelRef, PatternAttr, Vid, VidRef};
-use ahash::AHashMap;
+use hashbrown::HashMap;
 use std::hash::Hash;
 
 pub trait VBase<T = Self>: Clone + AsRef<T> + Hash + PartialEq + Eq {
@@ -26,7 +26,7 @@ pub struct PatternVertex {
 pub struct DataVertex {
   pub(crate) vid: Vid,
   pub(crate) label: Label,
-  pub(crate) attrs: AHashMap<String, AttrValue>,
+  pub(crate) attrs: HashMap<String, AttrValue>,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PatternEdge {
@@ -42,7 +42,7 @@ pub struct DataEdge {
   pub(crate) src_vid: Vid,
   pub(crate) dst_vid: Vid,
   pub(crate) label: Label,
-  pub(crate) attrs: AHashMap<String, AttrValue>,
+  pub(crate) attrs: HashMap<String, AttrValue>,
 }
 
 impl AsRef<Self> for PatternVertex {

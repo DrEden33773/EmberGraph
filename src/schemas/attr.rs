@@ -1,6 +1,10 @@
 use super::base::Op;
-use ahash::AHashMap;
-use std::{fmt::Display, hash::Hash};
+use hashbrown::HashMap;
+use serde::{
+  Deserialize,
+  de::{self, Visitor},
+};
+use std::{fmt::Display, hash::Hash, str::FromStr};
 use strum_macros::EnumString;
 
 #[derive(Debug, Clone, Copy, strum_macros::Display, EnumString, PartialEq, Eq)]
@@ -18,6 +22,20 @@ pub enum AttrValue {
   Int(i64),
   Float(f64),
   String(String),
+}
+
+impl FromStr for AttrValue {
+  type Err = String;
+
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    if let Ok(i) = s.parse::<i64>() {
+      return Ok(AttrValue::Int(i));
+    }
+    if let Ok(f) = s.parse::<f64>() {
+      return Ok(AttrValue::Float(f));
+    }
+    Ok(AttrValue::String(s.to_string()))
+  }
 }
 
 impl From<i64> for AttrValue {
@@ -91,6 +109,20 @@ pub struct PatternAttr {
 }
 
 impl PatternAttr {
+  pub fn to_neo4j_constraint(&self, field: &str) -> String {
+    let value_repr = if self._type == AttrType::String {
+      format!("\"{}\"", self.value)
+    } else {
+      format!("{}", self.value)
+    };
+
+    let left = format!("{field}.{}", &self.key);
+    let mid = self.op.to_neo4j_op();
+    let right = value_repr;
+
+    format!("{left} {mid} {right}")
+  }
+
   pub fn is_data_attr_satisfied(&self, data_attr: Option<&AttrValue>) -> bool {
     match data_attr {
       Some(data_attr) => self.op.operate_on(data_attr, &self.value),
@@ -98,7 +130,7 @@ impl PatternAttr {
     }
   }
 
-  pub fn is_data_attrs_satisfied(&self, data_attrs: AHashMap<String, AttrValue>) -> bool {
+  pub fn is_data_attrs_satisfied(&self, data_attrs: HashMap<String, AttrValue>) -> bool {
     match data_attrs.get(&self.key) {
       Some(data_attr) => self.op.operate_on(data_attr, &self.value),
       None => false,
@@ -109,5 +141,17 @@ impl PatternAttr {
 impl Hash for PatternAttr {
   fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
     self.key.hash(state);
+  }
+}
+
+#[cfg(test)]
+mod test_deserializer {
+  use super::*;
+
+  #[test]
+  fn test_attr_value_deserializer() {
+    let str_v = "hello!";
+    let int_v = "1234567890";
+    let float_v = "123.456";
   }
 }

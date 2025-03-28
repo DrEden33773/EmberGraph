@@ -7,15 +7,15 @@ use crate::{
     expand_graph::{ExpandGraph, union_then_intersect_on_connective_v},
   },
 };
-use ahash::{AHashMap, AHashSet};
 use futures::future;
+use hashbrown::{HashMap, HashSet};
 use std::sync::Arc;
 use tokio::sync::mpsc;
 
 async fn does_data_v_satisfy_pattern(
   dg_vid: VidRef<'_>,
   pat_vid: VidRef<'_>,
-  pat_v_entities: &AHashMap<Vid, PatternVertex>,
+  pat_v_entities: &HashMap<Vid, PatternVertex>,
   storage_adapter: &impl StorageAdapter,
 ) -> bool {
   let pat_v = pat_v_entities.get(pat_vid).unwrap();
@@ -42,7 +42,7 @@ async fn does_data_v_satisfy_pattern(
 impl FBucket {
   pub async fn from_c_bucket(c_bucket: CBucket) -> Self {
     let mut all_matched = vec![];
-    let mut matched_with_pivots = AHashMap::new();
+    let mut matched_with_pivots = HashMap::new();
 
     let all_expanded = c_bucket.all_expanded;
     let mut expanded_with_pivots = c_bucket.expanded_with_frontiers;
@@ -68,18 +68,18 @@ impl ABucket {
       curr_pat_vid: curr_pat_vid.to_owned(),
       all_matched: f_bucket.all_matched,
       matched_with_frontiers: f_bucket.matched_with_frontiers,
-      next_pat_grouped_expanding: AHashMap::new(),
+      next_pat_grouped_expanding: HashMap::new(),
     }
   }
 
   pub async fn incremental_load_new_edges(
     &mut self,
     pattern_es: impl IntoIterator<Item = PatternEdge>,
-    pattern_vs: &AHashMap<Vid, PatternVertex>,
+    pattern_vs: &HashMap<Vid, PatternVertex>,
     storage_adapter: &impl StorageAdapter,
-  ) -> AHashSet<String> {
+  ) -> HashSet<String> {
     let pattern_es = pattern_es.into_iter().collect::<Vec<_>>();
-    let mut connected_data_vids = AHashSet::new();
+    let mut connected_data_vids = HashSet::new();
 
     // iter: `matched` data_graphs
     for (&idx, frontiers) in self.matched_with_frontiers.iter() {
@@ -97,8 +97,8 @@ impl ABucket {
 
           let label = pat_e.label();
           let attr = pat_e.attr.as_ref();
-          let mut next_vid_grouped_conn_es = AHashMap::new();
-          let mut next_vid_grouped_conn_pat_strs = AHashMap::new();
+          let mut next_vid_grouped_conn_es = HashMap::new();
+          let mut next_vid_grouped_conn_pat_strs = HashMap::new();
           let next_pat_vid;
 
           let is_matched_data_es_empty = if self.curr_pat_vid == pat_e.src_vid() {
@@ -224,7 +224,7 @@ impl ABucket {
 }
 
 struct LoadWithCondCtx<'a, S: StorageAdapter> {
-  pattern_vs: &'a AHashMap<String, PatternVertex>,
+  pattern_vs: &'a HashMap<String, PatternVertex>,
   storage_adapter: &'a S,
   curr_matched_dg: &'a DynGraph,
   frontier_vid: &'a str,
@@ -292,7 +292,7 @@ impl CBucket {
     );
 
     let mut all_expanded = vec![];
-    let mut expanded_with_frontiers = AHashMap::new();
+    let mut expanded_with_frontiers = HashMap::new();
 
     let a_group = a_group.into_iter().collect::<Vec<_>>();
 
@@ -351,7 +351,7 @@ impl CBucket {
         .collect::<Vec<_>>(),
     );
     let mut all_expanded = vec![];
-    let mut expanded_with_frontiers = AHashMap::new();
+    let mut expanded_with_frontiers = HashMap::new();
 
     // Create a channel to send results back
     let (tx, mut rx) = mpsc::channel(t_bucket.expanding_graphs.len());
