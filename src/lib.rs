@@ -1,3 +1,4 @@
+pub mod demos;
 pub mod executor;
 pub mod matching_ctx;
 pub mod schemas;

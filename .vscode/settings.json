@@ -2,7 +2,9 @@
     "cSpell.words": [
         "ahash",
         "dashmap",
-        "eids"
+        "eids",
+        "Itertools",
+        "ldbc"
     ],
     "[rust]": {
         "editor.defaultFormatter": "rust-lang.rust-analyzer",

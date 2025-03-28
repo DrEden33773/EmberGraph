@@ -1,32 +1,32 @@
-use strum_macros::{Display, EnumString};
-
 use super::base::Vid;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, Display, EnumString)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize)]
 pub enum InstructionType {
-  #[strum(serialize = "init")]
+  #[serde(rename = "init")]
   Init,
-  #[strum(serialize = "get_adj")]
+  #[serde(rename = "get_adj")]
   GetAdj,
-  #[strum(serialize = "intersect")]
+  #[serde(rename = "intersect")]
   Intersect,
-  #[strum(serialize = "foreach")]
+  #[serde(rename = "foreach")]
   Foreach,
-  #[strum(serialize = "t_cache")]
+  #[serde(rename = "t_cache")]
   TCache,
-  #[strum(serialize = "report")]
+  #[serde(rename = "report")]
   Report,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Instruction {
   pub(crate) vid: Vid,
+  #[serde(rename = "type")]
   pub(crate) type_: InstructionType,
+  #[serde(rename = "expand_eid_list")]
   pub(crate) expand_eids: Vec<String>,
   pub(crate) single_op: Option<String>,
   pub(crate) multi_ops: Vec<String>,
   pub(crate) target_var: String,
-
   #[allow(unused)]
   pub(crate) depend_on: Vec<String>,
 }

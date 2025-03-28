@@ -1,4 +1,10 @@
+use dotenv::dotenv;
+use ember_sgm_backend::demos::complex_sf01::*;
+use tokio::io;
+
 #[tokio::main]
-async fn main() {
-  println!("Hello, world!");
+async fn main() -> io::Result<()> {
+  dotenv().ok();
+
+  ic_1_on_sf_01().await
 }

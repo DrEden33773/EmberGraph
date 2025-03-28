@@ -27,6 +27,15 @@ pub struct MatchingCtx {
 }
 
 impl MatchingCtx {
+  pub fn new(plan_data: &PlanData) -> Self {
+    Self {
+      plan_data: plan_data.clone(),
+      ..Default::default()
+    }
+  }
+}
+
+impl MatchingCtx {
   #[inline]
   pub fn update_extended_data_vids(&mut self, vid: HashSet<Vid>) {
     self.expanded_data_vids.extend(vid);

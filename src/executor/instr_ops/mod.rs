@@ -33,11 +33,23 @@ pub enum InstrOperator<S: StorageAdapter> {
   Report(ReportOperator),
 }
 
+impl<S: StorageAdapter> InstrOperator<S> {
+  pub async fn execute(&mut self, instr: &Instruction) {
+    match self {
+      InstrOperator::Init(operator) => operator.execute(instr).await,
+      InstrOperator::GetAdj(operator) => operator.execute(instr).await,
+      InstrOperator::Foreach(operator) => operator.execute(instr).await,
+      InstrOperator::Intersect(operator) => operator.execute(instr).await,
+      InstrOperator::Report(operator) => operator.execute(instr).await,
+    }
+  }
+}
+
 pub struct InstrOperatorFactory;
 
 impl InstrOperatorFactory {
   pub fn create<S: StorageAdapter>(
-    instr: Instruction,
+    instr: &Instruction,
     storage_adapter: Arc<Mutex<S>>,
     ctx: Arc<Mutex<MatchingCtx>>,
   ) -> InstrOperator<S> {

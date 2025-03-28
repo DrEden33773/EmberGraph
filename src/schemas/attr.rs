@@ -1,19 +1,13 @@
 use super::base::Op;
 use hashbrown::HashMap;
-use serde::{
-  Deserialize,
-  de::{self, Visitor},
-};
+use serde::{Deserialize, Serialize};
 use std::{fmt::Display, hash::Hash, str::FromStr};
-use strum_macros::EnumString;
 
-#[derive(Debug, Clone, Copy, strum_macros::Display, EnumString, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum AttrType {
-  #[strum(serialize = "int")]
   Int,
-  #[strum(serialize = "float")]
   Float,
-  #[strum(serialize = "string")]
   String,
 }
 
@@ -100,11 +94,13 @@ impl PartialEq for AttrValue {
 
 impl Eq for AttrValue {}
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct PatternAttr {
+  #[serde(rename = "attr")]
   pub(crate) key: String,
   pub(crate) op: Op,
   pub(crate) value: AttrValue,
+  #[serde(rename = "type")]
   pub(crate) _type: AttrType,
 }
 
@@ -141,17 +137,5 @@ impl PatternAttr {
 impl Hash for PatternAttr {
   fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
     self.key.hash(state);
-  }
-}
-
-#[cfg(test)]
-mod test_deserializer {
-  use super::*;
-
-  #[test]
-  fn test_attr_value_deserializer() {
-    let str_v = "hello!";
-    let int_v = "1234567890";
-    let float_v = "123.456";
   }
 }

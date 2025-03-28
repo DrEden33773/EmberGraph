@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use strum_macros::{Display, EnumString};
 
@@ -12,19 +13,19 @@ pub type EidRef<'a> = &'a str;
 pub type Label = String;
 pub type LabelRef<'a> = &'a str;
 
-#[derive(Debug, Clone, Copy, Display, EnumString, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 pub enum Op {
-  #[strum(serialize = "=")]
+  #[serde(rename = "=")]
   Eq,
-  #[strum(serialize = "!=")]
+  #[serde(rename = "!=")]
   Ne,
-  #[strum(serialize = ">")]
+  #[serde(rename = ">")]
   Gt,
-  #[strum(serialize = ">=")]
+  #[serde(rename = ">=")]
   Ge,
-  #[strum(serialize = "<")]
+  #[serde(rename = "<")]
   Lt,
-  #[strum(serialize = "<=")]
+  #[serde(rename = "<=")]
   Le,
 }
 
@@ -67,19 +68,30 @@ impl Op {
   }
 }
 
-#[derive(Debug, Clone, Copy, Display, EnumString, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Display, EnumString, PartialEq, Eq, Deserialize, Serialize)]
 pub enum VarPrefix {
   #[strum(serialize = " ")]
+  #[serde(rename = " ")]
   DataGraph,
+
   #[strum(serialize = "f")]
+  #[serde(rename = "f")]
   EnumerateTarget,
+
   #[strum(serialize = "A")]
+  #[serde(rename = "A")]
   DbQueryTarget,
+
   #[strum(serialize = "T")]
+  #[serde(rename = "T")]
   IntersectTarget,
+
   #[strum(serialize = "C")]
+  #[serde(rename = "C")]
   IntersectCandidate,
+
   #[strum(serialize = "V")]
+  #[serde(rename = "V")]
   DataVertexSet,
 }
 

@@ -14,7 +14,10 @@ pub struct GetAdjOperator<S: StorageAdapter> {
 }
 
 impl<S: StorageAdapter> GetAdjOperator<S> {
-  pub async fn execute(&mut self, instr: Instruction) {
+  pub async fn execute(&mut self, instr: &Instruction) {
+    let instr_json = serde_json::to_string_pretty(instr).unwrap();
+    println!("{instr_json}\n");
+
     let (_, curr_pat_vid) = resolve_var(instr.single_op.as_ref().unwrap());
 
     let pattern_es =

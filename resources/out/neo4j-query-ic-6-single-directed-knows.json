@@ -1,0 +1,226 @@
+[
+  {
+    "post": {
+      "identity": 1129,
+      "labels": ["Post"],
+      "properties": {
+        "browserUsed": "Internet Explorer",
+        "length": "95",
+        "locationIP": "31.25.178.135",
+        "language": "tk",
+        "id": 206158430245,
+        "creationDate": "1277634605736",
+        "content": "About Michelangelo, ender for the title of the archeAbout Joan Crawford, ie Dearest, in which s"
+      },
+      "elementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:1129"
+    },
+    "a": {
+      "identity": 19684,
+      "start": 1129,
+      "end": 15608,
+      "type": "hasTag",
+      "properties": {},
+      "elementId": "5:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:19684",
+      "startNodeElementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:1129",
+      "endNodeElementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:15608"
+    },
+    "b": {
+      "identity": 19685,
+      "start": 1129,
+      "end": 24509,
+      "type": "hasTag",
+      "properties": {},
+      "elementId": "5:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:19685",
+      "startNodeElementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:1129",
+      "endNodeElementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:24509"
+    },
+    "c": {
+      "identity": 18517,
+      "start": 1129,
+      "end": 3279,
+      "type": "hasCreator",
+      "properties": {},
+      "elementId": "5:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:18517",
+      "startNodeElementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:1129",
+      "endNodeElementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:3279"
+    },
+    "tag": {
+      "identity": 15608,
+      "labels": ["Tag"],
+      "properties": {
+        "name": "Joan_Crawford",
+        "id": 3050,
+        "url": "http://dbpedia.org/resource/Joan_Crawford"
+      },
+      "elementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:15608"
+    },
+    "otherTag": {
+      "identity": 24509,
+      "labels": ["Tag"],
+      "properties": {
+        "name": "Scream_Childhood",
+        "id": 6491,
+        "url": "http://dbpedia.org/resource/Scream_Childhood"
+      },
+      "elementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:24509"
+    },
+    "person": {
+      "identity": 3488,
+      "labels": ["Person"],
+      "properties": {
+        "birthday": "345513600000",
+        "firstName": "Abdala",
+        "lastName": "Ndiaye",
+        "gender": "female",
+        "browserUsed": "Firefox",
+        "locationIP": "196.1.98.252",
+        "language": "fr;wo;en",
+        "id": 153,
+        "creationDate": "1266688948654",
+        "email": "Abdala153@gmail.com"
+      },
+      "elementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:3488"
+    },
+    "d": {
+      "identity": 17803,
+      "start": 3488,
+      "end": 3279,
+      "type": "knows",
+      "properties": {
+        "creationDate": "1271996791675"
+      },
+      "elementId": "5:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:17803",
+      "startNodeElementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:3488",
+      "endNodeElementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:3279"
+    },
+    "otherPerson": {
+      "identity": 3279,
+      "labels": ["Person"],
+      "properties": {
+        "birthday": "499219200000",
+        "firstName": "David",
+        "lastName": "Alonso",
+        "gender": "female",
+        "browserUsed": "Internet Explorer",
+        "locationIP": "31.25.178.135",
+        "language": "es;ca;en",
+        "id": 2199023255711,
+        "creationDate": "1269456932806",
+        "email": "David2199023255711@gmail.com"
+      },
+      "elementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:3279"
+    }
+  },
+  {
+    "post": {
+      "identity": 1129,
+      "labels": ["Post"],
+      "properties": {
+        "browserUsed": "Internet Explorer",
+        "length": "95",
+        "locationIP": "31.25.178.135",
+        "language": "tk",
+        "id": 206158430245,
+        "creationDate": "1277634605736",
+        "content": "About Michelangelo, ender for the title of the archeAbout Joan Crawford, ie Dearest, in which s"
+      },
+      "elementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:1129"
+    },
+    "a": {
+      "identity": 19684,
+      "start": 1129,
+      "end": 15608,
+      "type": "hasTag",
+      "properties": {},
+      "elementId": "5:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:19684",
+      "startNodeElementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:1129",
+      "endNodeElementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:15608"
+    },
+    "b": {
+      "identity": 19683,
+      "start": 1129,
+      "end": 8827,
+      "type": "hasTag",
+      "properties": {},
+      "elementId": "5:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:19683",
+      "startNodeElementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:1129",
+      "endNodeElementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:8827"
+    },
+    "c": {
+      "identity": 18517,
+      "start": 1129,
+      "end": 3279,
+      "type": "hasCreator",
+      "properties": {},
+      "elementId": "5:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:18517",
+      "startNodeElementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:1129",
+      "endNodeElementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:3279"
+    },
+    "tag": {
+      "identity": 15608,
+      "labels": ["Tag"],
+      "properties": {
+        "name": "Joan_Crawford",
+        "id": 3050,
+        "url": "http://dbpedia.org/resource/Joan_Crawford"
+      },
+      "elementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:15608"
+    },
+    "otherTag": {
+      "identity": 8827,
+      "labels": ["Tag"],
+      "properties": {
+        "name": "Michelangelo",
+        "id": 1183,
+        "url": "http://dbpedia.org/resource/Michelangelo"
+      },
+      "elementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:8827"
+    },
+    "person": {
+      "identity": 3488,
+      "labels": ["Person"],
+      "properties": {
+        "birthday": "345513600000",
+        "firstName": "Abdala",
+        "lastName": "Ndiaye",
+        "gender": "female",
+        "browserUsed": "Firefox",
+        "locationIP": "196.1.98.252",
+        "language": "fr;wo;en",
+        "id": 153,
+        "creationDate": "1266688948654",
+        "email": "Abdala153@gmail.com"
+      },
+      "elementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:3488"
+    },
+    "d": {
+      "identity": 17803,
+      "start": 3488,
+      "end": 3279,
+      "type": "knows",
+      "properties": {
+        "creationDate": "1271996791675"
+      },
+      "elementId": "5:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:17803",
+      "startNodeElementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:3488",
+      "endNodeElementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:3279"
+    },
+    "otherPerson": {
+      "identity": 3279,
+      "labels": ["Person"],
+      "properties": {
+        "birthday": "499219200000",
+        "firstName": "David",
+        "lastName": "Alonso",
+        "gender": "female",
+        "browserUsed": "Internet Explorer",
+        "locationIP": "31.25.178.135",
+        "language": "es;ca;en",
+        "id": 2199023255711,
+        "creationDate": "1269456932806",
+        "email": "David2199023255711@gmail.com"
+      },
+      "elementId": "4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:3279"
+    }
+  }
+]

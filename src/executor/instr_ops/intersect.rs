@@ -18,7 +18,10 @@ pub struct IntersectOperator<S: StorageAdapter> {
 }
 
 impl<S: StorageAdapter> IntersectOperator<S> {
-  pub async fn execute(&mut self, instr: Instruction) {
+  pub async fn execute(&mut self, instr: &Instruction) {
+    let instr_json = serde_json::to_string_pretty(instr).unwrap();
+    println!("{instr_json}\n");
+
     if instr.is_single_op() {
       let (var_prefix, _) = resolve_var(instr.single_op.as_ref().unwrap());
       match var_prefix {
@@ -32,7 +35,7 @@ impl<S: StorageAdapter> IntersectOperator<S> {
   }
 
   /// `Vi` ∩ `Ax` -> `Cy`
-  async fn with_adj_set(&mut self, instr: Instruction) {
+  async fn with_adj_set(&mut self, instr: &Instruction) {
     { self.ctx.lock().await }.init_c_block(&instr.target_var);
 
     let a_group = { self.ctx.lock().await }
@@ -42,13 +45,13 @@ impl<S: StorageAdapter> IntersectOperator<S> {
     }
     let a_group = a_group.unwrap();
 
-    let loaded_v_pat_pairs = self.load_vertices(&instr).await;
+    let loaded_v_pat_pairs = self.load_vertices(instr).await;
     let c_bucket = CBucket::build_from_a_group(a_group, loaded_v_pat_pairs).await;
     { self.ctx.lock().await }.update_c_block(&instr.target_var, c_bucket);
   }
 
   /// `A(T)_{i}` ∩ `A_{i+1}` -> `Tx`
-  async fn with_multi_adj_set(&mut self, instr: Instruction) {
+  async fn with_multi_adj_set(&mut self, instr: &Instruction) {
     { self.ctx.lock().await }.init_t_block(&instr.target_var);
 
     let mut a_groups: VecDeque<_> = {
@@ -81,7 +84,7 @@ impl<S: StorageAdapter> IntersectOperator<S> {
   }
 
   /// `Vi` ∩ `Tx` -> `Cy`
-  async fn with_temp_intersected(&mut self, instr: Instruction) {
+  async fn with_temp_intersected(&mut self, instr: &Instruction) {
     { self.ctx.lock().await }.init_c_block(&instr.target_var);
 
     let t_bucket = { self.ctx.lock().await }.pop_from_t_block(instr.single_op.as_ref().unwrap());
@@ -90,7 +93,7 @@ impl<S: StorageAdapter> IntersectOperator<S> {
     }
     let t_bucket = t_bucket.unwrap();
 
-    let loaded_v_pat_pairs = self.load_vertices(&instr).await;
+    let loaded_v_pat_pairs = self.load_vertices(instr).await;
     let c_bucket = CBucket::build_from_t(t_bucket, loaded_v_pat_pairs).await;
     { self.ctx.lock().await }.update_c_block(&instr.target_var, c_bucket);
   }

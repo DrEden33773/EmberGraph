@@ -1,5 +1,6 @@
 use super::{AttrValue, Label, LabelRef, PatternAttr, Vid, VidRef};
 use hashbrown::HashMap;
+use serde::{Deserialize, Serialize};
 use std::hash::Hash;
 
 pub trait VBase<T = Self>: Clone + AsRef<T> + Hash + PartialEq + Eq {
@@ -16,19 +17,19 @@ pub trait EBase<T = Self>: Clone + AsRef<T> + Hash + PartialEq + Eq {
   }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct PatternVertex {
   pub(crate) vid: Vid,
   pub(crate) label: Label,
   pub(crate) attr: Option<PatternAttr>,
 }
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct DataVertex {
   pub(crate) vid: Vid,
   pub(crate) label: Label,
   pub(crate) attrs: HashMap<String, AttrValue>,
 }
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct PatternEdge {
   pub(crate) eid: Vid,
   pub(crate) src_vid: Vid,
@@ -36,7 +37,7 @@ pub struct PatternEdge {
   pub(crate) label: Label,
   pub(crate) attr: Option<PatternAttr>,
 }
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct DataEdge {
   pub(crate) eid: Vid,
   pub(crate) src_vid: Vid,

@@ -1,4 +1,4 @@
-use crate::{matching_ctx::MatchingCtx, utils::dyn_graph::DynGraph};
+use crate::{matching_ctx::MatchingCtx, schemas::Instruction, utils::dyn_graph::DynGraph};
 use futures::future;
 use hashbrown::HashMap;
 use std::sync::Arc;
@@ -10,7 +10,10 @@ pub struct ReportOperator {
 }
 
 impl ReportOperator {
-  pub async fn execute(&mut self) {
+  pub async fn execute(&mut self, instr: &Instruction) {
+    let instr_json = serde_json::to_string_pretty(instr).unwrap();
+    println!("{instr_json}\n");
+
     let could_match_partial_pattern = async |graph: &DynGraph| -> bool {
       if graph.v_entities.len() > { self.ctx.lock().await }.plan_data.pattern_vs().len() {
         return false;

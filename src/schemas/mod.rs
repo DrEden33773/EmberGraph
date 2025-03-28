@@ -4,18 +4,20 @@ pub mod entities;
 pub mod instruction;
 pub mod serde;
 
+use ::serde::{Deserialize, Serialize};
 use hashbrown::HashMap;
 
+#[allow(unused_imports)]
 pub use {attr::*, base::*, entities::*, instruction::*, serde::*};
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PlanData {
   #[allow(unused)]
   pub(crate) matching_order: Vec<String>,
-
+  #[serde(rename = "vertices")]
   pub(crate) pattern_vs: HashMap<Vid, PatternVertex>,
+  #[serde(rename = "edges")]
   pub(crate) pattern_es: HashMap<Vid, PatternEdge>,
-
   #[allow(unused)]
   pub(crate) instructions: Vec<Instruction>,
 }

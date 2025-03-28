@@ -14,7 +14,10 @@ pub struct InitOperator<S: StorageAdapter> {
 }
 
 impl<S: StorageAdapter> InitOperator<S> {
-  pub async fn execute(&mut self, instr: Instruction) {
+  pub async fn execute(&mut self, instr: &Instruction) {
+    let instr_json = serde_json::to_string_pretty(instr).unwrap();
+    println!("{instr_json}\n");
+
     let pattern_v = { self.ctx.lock().await }.get_pattern_v(&instr.vid).cloned();
     if pattern_v.is_none() {
       return;
@@ -47,6 +50,9 @@ impl<S: StorageAdapter> InitOperator<S> {
 
     {
       let mut ctx = self.ctx.lock().await;
+
+      // println!("matched_results: {matched_results:#?}\n");
+
       for (matched_dg, frontier_vid) in matched_results {
         ctx.append_to_f_block(&instr.target_var, matched_dg, &frontier_vid);
       }

@@ -3,11 +3,14 @@ use crate::schemas::*;
 pub mod neo4j;
 pub mod sqlite;
 
+pub use neo4j::*;
+// pub use sqlite::*;
+
 pub trait AsyncDefault: Send + Sync {
   fn async_default() -> impl Future<Output = Self> + Send;
 }
 
-pub trait StorageAdapter: Clone + Send + Sync {
+pub trait StorageAdapter: Clone + AsyncDefault {
   fn get_v(&self, vid: VidRef<'_>) -> impl Future<Output = Option<DataVertex>> + Send;
 
   fn load_v(
