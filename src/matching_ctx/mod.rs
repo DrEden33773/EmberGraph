@@ -106,11 +106,6 @@ impl MatchingCtx {
     let next_idx = self.f_block[key].all_matched.len();
 
     let f_bucket = self.f_block.get_mut(key).unwrap();
-
-    // let next_idx = self.f_block.len(); // BUG
-    let next_idx = self.f_block[key].all_matched.len();
-
-    let f_bucket = self.f_block.get_mut(key).unwrap();
     f_bucket.all_matched.push(matched_graph);
     f_bucket
       .matched_with_frontiers
