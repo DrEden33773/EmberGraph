@@ -15,13 +15,6 @@ impl ReportOperator {
     println!("{instr_json}\n");
 
     let could_match_partial_pattern = async |graph: &DynGraph| -> bool {
-      if graph.v_entities.len() > { self.ctx.lock().await }.plan_data.pattern_vs().len() {
-        return false;
-      }
-      if graph.e_entities.len() > { self.ctx.lock().await }.plan_data.pattern_es().len() {
-        return false;
-      }
-
       let plan_v_pat_cnt = { self.ctx.lock().await }
         .plan_data
         .pattern_vs()
@@ -35,30 +28,21 @@ impl ReportOperator {
         .map(|e_pat| (e_pat.to_owned(), 1))
         .collect::<HashMap<_, usize>>();
 
-      let graph_v_pat_cnt = graph
-        .v_patterns
-        .values()
-        .map(|v_pat| {
-          (
-            v_pat.to_owned(),
-            graph.v_patterns.values().filter(|v| *v == v_pat).count(),
-          )
-        })
-        .collect::<HashMap<_, usize>>();
-      let graph_e_pat_cnt = graph
-        .e_patterns
-        .values()
-        .map(|e_pat| {
-          (
-            e_pat.to_owned(),
-            graph.e_patterns.values().filter(|v| *v == e_pat).count(),
-          )
-        })
-        .collect::<HashMap<_, usize>>();
+      let mut graph_v_pat_cnt = HashMap::new();
+      let mut graph_e_pat_cnt = HashMap::new();
+
+      for pat in graph.v_patterns.values().cloned() {
+        let cnt = graph_v_pat_cnt.entry(pat).or_insert(0);
+        *cnt += 1;
+      }
+      for pat in graph.e_patterns.values().cloned() {
+        let cnt = graph_e_pat_cnt.entry(pat).or_insert(0);
+        *cnt += 1;
+      }
 
       for (v_pat, cnt) in graph_v_pat_cnt {
-        if let Some(plan_cnt) = plan_v_pat_cnt.get(&v_pat) {
-          if cnt > *plan_cnt {
+        if let Some(&plan_cnt) = plan_v_pat_cnt.get(&v_pat) {
+          if cnt > plan_cnt {
             return false;
           }
         } else {
@@ -66,8 +50,8 @@ impl ReportOperator {
         }
       }
       for (e_pat, cnt) in graph_e_pat_cnt {
-        if let Some(plan_cnt) = plan_e_pat_cnt.get(&e_pat) {
-          if cnt > *plan_cnt {
+        if let Some(&plan_cnt) = plan_e_pat_cnt.get(&e_pat) {
+          if cnt > plan_cnt {
             return false;
           }
         } else {

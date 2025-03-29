@@ -81,28 +81,24 @@ impl<VType: VBase, EType: EBase> Default for DynGraph<VType, EType> {
   }
 }
 
-impl<VType: VBase, EType: EBase> BitOrAssign for DynGraph<VType, EType> {
-  fn bitor_assign(&mut self, rhs: Self) {
-    self.v_entities.extend(rhs.v_entities);
-    self.e_entities.extend(rhs.e_entities);
-    for (vid, v_node) in rhs.adj_table {
-      self.adj_table.entry(vid).or_default().bitor_assign(v_node);
-    }
-  }
-}
-
 impl<VType: VBase, EType: EBase> BitOr for DynGraph<VType, EType> {
   type Output = Self;
 
   fn bitor(self, rhs: Self) -> Self::Output {
     let mut v_entities = self.v_entities;
     let mut e_entities = self.e_entities;
+    let mut v_patterns = self.v_patterns;
+    let mut e_patterns = self.e_patterns;
     v_entities.extend(rhs.v_entities);
     e_entities.extend(rhs.e_entities);
+    v_patterns.extend(rhs.v_patterns);
+    e_patterns.extend(rhs.e_patterns);
 
     let mut res = DynGraph {
       v_entities,
       e_entities,
+      v_patterns,
+      e_patterns,
       ..Default::default()
     };
 
@@ -110,11 +106,11 @@ impl<VType: VBase, EType: EBase> BitOr for DynGraph<VType, EType> {
       res.adj_table.insert(vid, v_node);
     }
     for (vid, v_node) in rhs.adj_table {
-      res
-        .adj_table
-        .entry(vid.clone())
-        .or_default()
-        .bitor_assign(v_node);
+      if res.adj_table.contains_key(&vid) {
+        res.adj_table.get_mut(&vid).unwrap().bitor_assign(v_node);
+      } else {
+        res.adj_table.insert(vid, v_node);
+      }
     }
     res
   }

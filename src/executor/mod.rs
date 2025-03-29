@@ -89,33 +89,17 @@ impl<S: StorageAdapter> ExecEngine<S> {
       .collect::<HashMap<_, usize>>();
 
     let could_match_the_whole_pattern = async |graph: &DynGraph| -> bool {
-      if graph.v_entities.len() != self.plan_data.pattern_vs().len() {
-        return false;
-      }
-      if graph.e_entities.len() != self.plan_data.pattern_es().len() {
-        return false;
-      }
+      let mut graph_v_pat_cnt = HashMap::new();
+      let mut graph_e_pat_cnt = HashMap::new();
 
-      let graph_v_pat_cnt = graph
-        .v_patterns
-        .values()
-        .map(|v_pat| {
-          (
-            v_pat.to_owned(),
-            graph.v_patterns.values().filter(|v| *v == v_pat).count(),
-          )
-        })
-        .collect::<HashMap<_, usize>>();
-      let graph_e_pat_cnt = graph
-        .e_patterns
-        .values()
-        .map(|e_pat| {
-          (
-            e_pat.to_owned(),
-            graph.e_patterns.values().filter(|v| *v == e_pat).count(),
-          )
-        })
-        .collect::<HashMap<_, usize>>();
+      for pat in graph.v_patterns.values().cloned() {
+        let cnt = graph_v_pat_cnt.entry(pat).or_insert(0);
+        *cnt += 1;
+      }
+      for pat in graph.e_patterns.values().cloned() {
+        let cnt = graph_e_pat_cnt.entry(pat).or_insert(0);
+        *cnt += 1;
+      }
 
       graph_v_pat_cnt == plan_v_pat_cnt && graph_e_pat_cnt == plan_e_pat_cnt
     };
