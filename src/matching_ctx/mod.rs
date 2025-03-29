@@ -118,9 +118,9 @@ impl MatchingCtx {
   }
 
   /// `GetAdj`: Get `f_block` with `target_var` (pop it out)
-  pub fn pop_from_f_block(&mut self, single_op: &str) -> Option<FBucket> {
+  pub fn pop_from_f_block(&mut self, single_op: &str) -> FBucket {
     let key = resolve_var_name(single_op);
-    self.f_block.remove(key)
+    self.f_block.remove(key).unwrap()
   }
 }
 
@@ -146,13 +146,15 @@ impl MatchingCtx {
     &mut self,
     single_op: &str,
     curr_pat_str: &str,
-  ) -> Option<Vec<ExpandGraph>> {
+  ) -> Vec<ExpandGraph> {
     let key = resolve_var_name(single_op);
     self
       .a_block
-      .get_mut(key)?
+      .get_mut(key)
+      .unwrap()
       .next_pat_grouped_expanding
       .remove(curr_pat_str)
+      .unwrap()
   }
 }
 
@@ -170,9 +172,9 @@ impl MatchingCtx {
   }
 
   /// `Foreach`: Get `c_block` with `single_op` (pop it out)
-  pub fn pop_from_c_block(&mut self, single_op: &str) -> Option<CBucket> {
+  pub fn pop_from_c_block(&mut self, single_op: &str) -> CBucket {
     let key = resolve_var_name(single_op);
-    self.c_block.remove(key)
+    self.c_block.remove(key).unwrap()
   }
 }
 
@@ -192,8 +194,8 @@ impl MatchingCtx {
   }
 
   /// `Intersect(Tx)`: Get `t_block` with `single_op` (pop it out)
-  pub fn pop_from_t_block(&mut self, single_op: &str) -> Option<TBucket> {
+  pub fn pop_from_t_block(&mut self, single_op: &str) -> TBucket {
     let key = resolve_var_name(single_op);
-    self.t_block.remove(key)
+    self.t_block.remove(key).unwrap()
   }
 }

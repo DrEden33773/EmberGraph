@@ -40,15 +40,7 @@ impl<S: StorageAdapter> IntersectOperator<S> {
 
     let a_group = { self.ctx.lock().await }
       .pop_group_by_pat_from_a_block(instr.single_op.as_ref().unwrap(), &instr.vid);
-    if a_group.is_none() {
-      println!(
-        "No 'a_group' found for '{}.{}'\n",
-        instr.single_op.as_ref().unwrap(),
-        instr.vid
-      );
-      return;
-    }
-    let a_group = a_group.unwrap();
+    let a_group = a_group;
 
     let loaded_v_pat_pairs = self.load_vertices(instr).await;
     let c_bucket = CBucket::build_from_a_group(a_group, loaded_v_pat_pairs).await;
@@ -65,7 +57,7 @@ impl<S: StorageAdapter> IntersectOperator<S> {
       instr
         .multi_ops
         .iter()
-        .filter_map(|op| ctx.pop_group_by_pat_from_a_block(op, &instr.vid))
+        .map(|op| ctx.pop_group_by_pat_from_a_block(op, &instr.vid))
         .collect()
     };
     if a_groups.len() < 2 {
@@ -93,14 +85,6 @@ impl<S: StorageAdapter> IntersectOperator<S> {
     { self.ctx.lock().await }.init_c_block(&instr.target_var);
 
     let t_bucket = { self.ctx.lock().await }.pop_from_t_block(instr.single_op.as_ref().unwrap());
-    if t_bucket.is_none() {
-      println!(
-        "No 't_bucket' found for '{}'\n",
-        instr.single_op.as_ref().unwrap(),
-      );
-      return;
-    }
-    let t_bucket = t_bucket.unwrap();
 
     let loaded_v_pat_pairs = self.load_vertices(instr).await;
     let c_bucket = CBucket::build_from_t(t_bucket, loaded_v_pat_pairs).await;

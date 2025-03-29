@@ -11,8 +11,6 @@ use crate::{
 };
 use futures::future;
 use hashbrown::{HashMap, HashSet};
-use std::sync::Arc;
-use tokio::sync::mpsc;
 
 async fn does_data_v_satisfy_pattern(
   dg_vid: VidRef<'_>,
@@ -169,10 +167,6 @@ impl ABucket {
 
           is_frontier_connected = true;
 
-          // channel to send results back
-          let (tx, mut rx) = mpsc::channel(next_vid_grouped_conn_es.len());
-          let mut handles = Vec::with_capacity(next_vid_grouped_conn_es.len());
-
           // build `expanding_graph`
           // note that each `next_data_vertex` holds a `expanding_graph`
           for (key, edges) in next_vid_grouped_conn_es {
@@ -181,35 +175,14 @@ impl ABucket {
               .remove(&key)
               .unwrap_or_default();
 
-            let tx = tx.clone();
-            let handle = tokio::spawn(async move {
-              expanding_graph
-                .update_valid_dangling_edges(edges.iter().zip(pat_strs.iter().map(String::as_str)))
-                .await;
-              tx.send(expanding_graph).await.unwrap();
-            });
-
-            handles.push(handle);
-          }
-
-          // close channel when all tasks are done
-          drop(tx);
-
-          // collect results from the channel:
-          //     update `self.next_pat_grouped_expanding`
-          while let Some(expanding_graph) = rx.recv().await {
+            expanding_graph
+              .update_valid_dangling_edges(edges.iter().zip(pat_strs.iter().map(String::as_str)))
+              .await;
             self
               .next_pat_grouped_expanding
               .entry(next_pat_vid.to_owned())
               .or_default()
               .push(expanding_graph);
-          }
-
-          // wait for all tasks to finish
-          for handle in handles {
-            if let Err(e) = handle.await {
-              eprintln!("Task failed: {:?}", e);
-            }
           }
         }
 
@@ -286,54 +259,23 @@ impl CBucket {
     a_group: impl IntoIterator<Item = ExpandGraph>,
     loaded_v_pat_pairs: impl IntoIterator<Item = (DataVertex, String)>,
   ) -> Self {
-    let loaded = Arc::new(
-      loaded_v_pat_pairs
-        .into_iter()
-        .map(|(v, p)| (Arc::new(v), p))
-        .collect::<Vec<_>>(),
-    );
+    let loaded = loaded_v_pat_pairs.into_iter().collect::<Vec<_>>();
 
     let mut all_expanded = vec![];
     let mut expanded_with_frontiers = HashMap::new();
 
     let a_group = a_group.into_iter().collect::<Vec<_>>();
 
-    // create a channel to send results back
-    let (tx, mut rx) = mpsc::channel(a_group.len());
-    let mut handles = Vec::with_capacity(a_group.len());
-
     for (idx, mut expanding) in a_group.into_iter().enumerate() {
-      let tx = tx.clone();
-      let data_ref = loaded.clone();
+      let valid_targets = expanding
+        .update_valid_target_vertices(loaded.iter().map(|(v, p)| (v, p.as_str())))
+        .await;
 
-      let handle = tokio::spawn(async move {
-        let valid_targets = expanding
-          .update_valid_target_vertices(data_ref.iter().map(|(v, p)| (v.as_ref(), p.as_str())))
-          .await;
-
-        // Send the results back through the channel
-        tx.send((idx, expanding, valid_targets)).await.unwrap();
-      });
-      handles.push(handle);
-    }
-
-    // close channel when all tasks are done
-    drop(tx);
-
-    // collect results from the channel
-    while let Some((idx, expanding, valid_targets)) = rx.recv().await {
       all_expanded.push(expanding);
       expanded_with_frontiers
         .entry(idx)
         .or_insert_with(Vec::new)
         .extend(valid_targets);
-    }
-
-    // wait for all tasks to finish
-    for handle in handles {
-      if let Err(e) = handle.await {
-        eprintln!("Task failed: {:?}", e);
-      }
     }
 
     Self {
@@ -346,51 +288,20 @@ impl CBucket {
     t_bucket: TBucket,
     loaded_v_pat_pairs: impl IntoIterator<Item = (DataVertex, String)>,
   ) -> Self {
-    let loaded = Arc::new(
-      loaded_v_pat_pairs
-        .into_iter()
-        .map(|(v, p)| (Arc::new(v), p))
-        .collect::<Vec<_>>(),
-    );
+    let loaded = loaded_v_pat_pairs.into_iter().collect::<Vec<_>>();
     let mut all_expanded = vec![];
     let mut expanded_with_frontiers = HashMap::new();
 
-    // Create a channel to send results back
-    let (tx, mut rx) = mpsc::channel(t_bucket.expanding_graphs.len());
-    let mut handles = Vec::with_capacity(t_bucket.expanding_graphs.len());
-
     for (idx, mut expanding) in t_bucket.expanding_graphs.into_iter().enumerate() {
-      let tx = tx.clone();
-      let data_ref = loaded.clone();
+      let valid_targets = expanding
+        .update_valid_target_vertices(loaded.iter().map(|(v, p)| (v, p.as_str())))
+        .await;
 
-      let handle = tokio::spawn(async move {
-        let valid_targets = expanding
-          .update_valid_target_vertices(data_ref.iter().map(|(v, p)| (v.as_ref(), p.as_str())))
-          .await;
-
-        // Send the results back through the channel
-        tx.send((idx, expanding, valid_targets)).await.unwrap();
-      });
-      handles.push(handle);
-    }
-
-    // Close channel when all tasks are done
-    drop(tx);
-
-    // Collect results from the channel
-    while let Some((idx, expanding, valid_targets)) = rx.recv().await {
       all_expanded.push(expanding);
       expanded_with_frontiers
         .entry(idx)
         .or_insert_with(Vec::new)
         .extend(valid_targets);
-    }
-
-    // Wait for all tasks to finish
-    for handle in handles {
-      if let Err(e) = handle.await {
-        eprintln!("Task failed: {:?}", e);
-      }
     }
 
     Self {
