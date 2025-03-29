@@ -14,20 +14,22 @@ impl ReportOperator {
     let instr_json = serde_json::to_string_pretty(instr).unwrap();
     println!("{instr_json}\n");
 
-    let could_match_partial_pattern = async |graph: &DynGraph| -> bool {
-      let plan_v_pat_cnt = { self.ctx.lock().await }
-        .plan_data
-        .pattern_vs()
-        .keys()
-        .map(|v_pat| (v_pat.to_owned(), 1))
-        .collect::<HashMap<_, usize>>();
-      let plan_e_pat_cnt = { self.ctx.lock().await }
-        .plan_data
-        .pattern_es()
-        .keys()
-        .map(|e_pat| (e_pat.to_owned(), 1))
-        .collect::<HashMap<_, usize>>();
+    let mut ctx = self.ctx.lock().await;
 
+    let plan_v_pat_cnt = ctx
+      .plan_data
+      .pattern_vs()
+      .keys()
+      .map(|v_pat| (v_pat.to_owned(), 1))
+      .collect::<HashMap<_, usize>>();
+    let plan_e_pat_cnt = ctx
+      .plan_data
+      .pattern_es()
+      .keys()
+      .map(|e_pat| (e_pat.to_owned(), 1))
+      .collect::<HashMap<_, usize>>();
+
+    let could_match_partial_pattern = async |graph: &DynGraph| -> bool {
       let mut graph_v_pat_cnt = HashMap::new();
       let mut graph_e_pat_cnt = HashMap::new();
 
@@ -62,10 +64,7 @@ impl ReportOperator {
       true
     };
 
-    let f_buckets: Vec<_> = {
-      let mut ctx = self.ctx.lock().await;
-      ctx.f_block.drain().collect()
-    };
+    let f_buckets: Vec<_> = ctx.f_block.drain().collect();
 
     let mut filtered_groups = Vec::new();
     for (_, f_bucket) in f_buckets {
@@ -85,11 +84,8 @@ impl ReportOperator {
       filtered_groups.push(filtered_group);
     }
 
-    {
-      let mut ctx = self.ctx.lock().await;
-      for curr_group in filtered_groups {
-        ctx.grouped_partial_matches.push(curr_group);
-      }
+    for curr_group in filtered_groups {
+      ctx.grouped_partial_matches.push(curr_group);
     }
   }
 }
