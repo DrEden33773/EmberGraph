@@ -11,7 +11,6 @@ pub mod buckets_impl;
 #[inline]
 fn resolve_var_name(target_var: &str) -> &str {
   target_var.split(STR_TUPLE_SPLITTER).nth(1).unwrap()
-  //
 }
 
 #[derive(Debug, Clone, Default)]
