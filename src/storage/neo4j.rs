@@ -3,6 +3,7 @@ use std::env;
 use super::{AsyncDefault, StorageAdapter};
 use crate::schemas::*;
 use neo4rs::*;
+use tokio::io::{self, AsyncWriteExt};
 
 #[derive(Clone)]
 pub struct Neo4jStorageAdapter {
@@ -20,16 +21,15 @@ impl AsyncDefault for Neo4jStorageAdapter {
       .user(username)
       .password(password)
       .db(db_name)
-      .fetch_size(1000)
+      .fetch_size(600)
       .max_connections(num_cpus::get())
       .build()
       .unwrap();
 
-    println!("Connecting to Neo4j database...\n");
-
+    print!("Connecting to Neo4j database ... ");
+    io::stdout().flush().await.unwrap();
     let graph = Graph::connect(config).await.unwrap();
-
-    println!("Connected to Neo4j database.\n");
+    println!("✅\n");
 
     Self { graph }
   }
