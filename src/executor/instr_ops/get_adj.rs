@@ -14,7 +14,7 @@ pub struct GetAdjOperator<S: StorageAdapter> {
 }
 
 impl<S: StorageAdapter> GetAdjOperator<S> {
-  pub async fn execute(&mut self, instr: &Instruction) {
+  pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
     println!("{instr:#?}\n");
 
     // to resolve current `pattern_vid`
@@ -22,7 +22,7 @@ impl<S: StorageAdapter> GetAdjOperator<S> {
 
     let mut ctx = self.ctx.lock().await;
 
-    let f_bucket = ctx.pop_from_f_block(instr.single_op.as_ref().unwrap());
+    let f_bucket = ctx.pop_from_f_block(instr.single_op.as_ref().unwrap())?;
     let mut a_bucket = ABucket::from_f_bucket(f_bucket, curr_pat_vid);
 
     // must init a_block first
@@ -42,5 +42,7 @@ impl<S: StorageAdapter> GetAdjOperator<S> {
     // update the `block` and `extended data vid set`
     ctx.update_a_block(&instr.target_var, a_bucket);
     ctx.update_extended_data_vids(connected_data_vids);
+
+    Some(())
   }
 }

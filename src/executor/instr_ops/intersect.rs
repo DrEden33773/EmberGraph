@@ -18,7 +18,7 @@ pub struct IntersectOperator<S: StorageAdapter> {
 }
 
 impl<S: StorageAdapter> IntersectOperator<S> {
-  pub async fn execute(&mut self, instr: &Instruction) {
+  pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
     println!("{instr:#?}\n");
 
     if instr.is_single_op() {
@@ -29,35 +29,38 @@ impl<S: StorageAdapter> IntersectOperator<S> {
         _ => panic!("Invalid var_prefix: {var_prefix}"),
       }
     } else {
-      self.with_multi_adj_set(instr).await;
+      self.with_multi_adj_set(instr).await
     }
   }
 
   /// `Vi` ∩ `Ax` -> `Cy`
-  async fn with_adj_set(&mut self, instr: &Instruction) {
-    let loaded_v_pat_pairs = self.load_vertices(instr).await;
+  async fn with_adj_set(&mut self, instr: &Instruction) -> Option<()> {
+    let loaded_v_pat_pairs = self.load_vertices(instr).await?;
 
     let mut ctx = self.ctx.lock().await;
     ctx.init_c_block(&instr.target_var);
 
-    let a_group = ctx.pop_group_by_pat_from_a_block(instr.single_op.as_ref().unwrap(), &instr.vid);
+    let a_group =
+      ctx.pop_group_by_pat_from_a_block(instr.single_op.as_ref().unwrap(), &instr.vid)?;
 
     let c_bucket = CBucket::build_from_a_group(a_group, loaded_v_pat_pairs);
     ctx.update_c_block(&instr.target_var, c_bucket);
+
+    Some(())
   }
 
   /// `A(T)_{i}` ∩ `A_{i+1}` -> `Tx`
-  async fn with_multi_adj_set(&mut self, instr: &Instruction) {
+  async fn with_multi_adj_set(&mut self, instr: &Instruction) -> Option<()> {
     let mut ctx = self.ctx.lock().await;
     ctx.init_t_block(&instr.target_var);
 
     let mut a_groups: VecDeque<_> = instr
       .multi_ops
       .iter()
-      .map(|op| ctx.pop_group_by_pat_from_a_block(op, &instr.vid))
+      .filter_map(|op| ctx.pop_group_by_pat_from_a_block(op, &instr.vid))
       .collect();
     if a_groups.len() < 2 {
-      return;
+      return None;
     }
 
     let a1 = a_groups.pop_front().unwrap();
@@ -74,24 +77,28 @@ impl<S: StorageAdapter> IntersectOperator<S> {
     }
 
     ctx.update_t_block(&instr.target_var, t_bucket);
+
+    Some(())
   }
 
   /// `Vi` ∩ `Tx` -> `Cy`
-  async fn with_temp_intersected(&mut self, instr: &Instruction) {
-    let loaded_v_pat_pairs = self.load_vertices(instr).await;
+  async fn with_temp_intersected(&mut self, instr: &Instruction) -> Option<()> {
+    let loaded_v_pat_pairs = self.load_vertices(instr).await?;
 
     let mut ctx = self.ctx.lock().await;
     ctx.init_c_block(&instr.target_var);
 
-    let t_bucket = ctx.pop_from_t_block(instr.single_op.as_ref().unwrap());
+    let t_bucket = ctx.pop_from_t_block(instr.single_op.as_ref().unwrap())?;
 
     let c_bucket = CBucket::build_from_t(t_bucket, loaded_v_pat_pairs);
     ctx.update_c_block(&instr.target_var, c_bucket);
+
+    Some(())
   }
 
-  async fn load_vertices(&self, instr: &Instruction) -> Vec<(DataVertex, String)> {
+  async fn load_vertices(&self, instr: &Instruction) -> Option<Vec<(DataVertex, String)>> {
     let ctx = self.ctx.lock().await;
-    let pattern_v = ctx.get_pattern_v(&instr.vid).to_owned();
+    let pattern_v = ctx.get_pattern_v(&instr.vid)?.to_owned();
 
     let label = pattern_v.label.as_str();
     let attr = pattern_v.attr.as_ref();
@@ -100,6 +107,7 @@ impl<S: StorageAdapter> IntersectOperator<S> {
     matched_vs
       .into_iter()
       .map(|v| (v, pattern_v.vid.to_owned()))
-      .collect()
+      .collect::<Vec<_>>()
+      .into()
   }
 }

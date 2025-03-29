@@ -41,7 +41,7 @@ impl<S: StorageAdapter> InstrOperator<S> {
       InstrOperator::Foreach(operator) => operator.execute(instr).await,
       InstrOperator::Intersect(operator) => operator.execute(instr).await,
       InstrOperator::Report(operator) => operator.execute(instr).await,
-    }
+    };
   }
 }
 

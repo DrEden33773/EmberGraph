@@ -15,11 +15,11 @@ pub struct InitOperator<S: StorageAdapter> {
 }
 
 impl<S: StorageAdapter> InitOperator<S> {
-  pub async fn execute(&mut self, instr: &Instruction) {
+  pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
     println!("{instr:#?}\n");
 
     let pattern_v = { self.ctx.lock().await }
-      .get_pattern_v(&instr.vid)
+      .get_pattern_v(&instr.vid)?
       .to_owned();
 
     let label = pattern_v.label.as_str();
@@ -57,5 +57,7 @@ impl<S: StorageAdapter> InitOperator<S> {
     for (target_var, matched_dg, frontier_vid) in pre.into_iter().flatten() {
       ctx.append_to_f_block(target_var, matched_dg, &frontier_vid);
     }
+
+    Some(())
   }
 }

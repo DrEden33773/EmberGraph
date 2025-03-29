@@ -9,7 +9,7 @@ pub struct ReportOperator {
 }
 
 impl ReportOperator {
-  pub async fn execute(&mut self, instr: &Instruction) {
+  pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
     println!("{instr:#?}\n");
 
     let mut ctx = self.ctx.lock().await;
@@ -79,5 +79,7 @@ impl ReportOperator {
     for curr_group in filtered_groups {
       ctx.grouped_partial_matches.push(curr_group);
     }
+
+    Some(())
   }
 }

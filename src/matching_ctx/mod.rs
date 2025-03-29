@@ -52,8 +52,8 @@ impl MatchingCtx {
 
 impl MatchingCtx {
   #[inline]
-  pub fn get_pattern_v(&self, vid: VidRef) -> &PatternVertex {
-    self.plan_data.pattern_vs.get(vid).unwrap()
+  pub fn get_pattern_v(&self, vid: VidRef) -> Option<&PatternVertex> {
+    self.plan_data.pattern_vs.get(vid)
   }
 
   #[inline]
@@ -69,8 +69,8 @@ impl MatchingCtx {
   }
 
   #[inline]
-  pub fn get_pattern_e(&self, eid: VidRef) -> &PatternEdge {
-    self.plan_data.pattern_es.get(eid).unwrap()
+  pub fn get_pattern_e(&self, eid: VidRef) -> Option<&PatternEdge> {
+    self.plan_data.pattern_es.get(eid)
   }
 
   #[inline]
@@ -121,9 +121,9 @@ impl MatchingCtx {
   }
 
   /// `GetAdj`: Get `f_block` with `target_var` (pop it out)
-  pub fn pop_from_f_block(&mut self, single_op: &str) -> FBucket {
+  pub fn pop_from_f_block(&mut self, single_op: &str) -> Option<FBucket> {
     let key = resolve_var_name(single_op);
-    self.f_block.remove(key).unwrap()
+    self.f_block.remove(key)
   }
 }
 
@@ -149,7 +149,7 @@ impl MatchingCtx {
     &mut self,
     single_op: &str,
     curr_pat_str: &str,
-  ) -> Vec<ExpandGraph> {
+  ) -> Option<Vec<ExpandGraph>> {
     let key = resolve_var_name(single_op);
     self
       .a_block
@@ -157,7 +157,6 @@ impl MatchingCtx {
       .unwrap()
       .next_pat_grouped_expanding
       .remove(curr_pat_str)
-      .unwrap()
   }
 }
 
@@ -175,9 +174,9 @@ impl MatchingCtx {
   }
 
   /// `Foreach`: Get `c_block` with `single_op` (pop it out)
-  pub fn pop_from_c_block(&mut self, single_op: &str) -> CBucket {
+  pub fn pop_from_c_block(&mut self, single_op: &str) -> Option<CBucket> {
     let key = resolve_var_name(single_op);
-    self.c_block.remove(key).unwrap()
+    self.c_block.remove(key)
   }
 }
 
@@ -197,8 +196,8 @@ impl MatchingCtx {
   }
 
   /// `Intersect(Tx)`: Get `t_block` with `single_op` (pop it out)
-  pub fn pop_from_t_block(&mut self, single_op: &str) -> TBucket {
+  pub fn pop_from_t_block(&mut self, single_op: &str) -> Option<TBucket> {
     let key = resolve_var_name(single_op);
-    self.t_block.remove(key).unwrap()
+    self.t_block.remove(key)
   }
 }
