@@ -55,19 +55,19 @@ impl InstrOperatorFactory {
   ) -> InstrOperator<S> {
     match instr.type_ {
       Init => InstrOperator::Init(InitOperator {
-        storage_adapter: storage_adapter.clone(),
-        ctx: ctx.clone(),
+        storage_adapter,
+        ctx,
       }),
       GetAdj => InstrOperator::GetAdj(GetAdjOperator {
-        storage_adapter: storage_adapter.clone(),
-        ctx: ctx.clone(),
+        storage_adapter,
+        ctx,
       }),
-      Foreach => InstrOperator::Foreach(ForeachOperator { ctx: ctx.clone() }),
+      Foreach => InstrOperator::Foreach(ForeachOperator { ctx }),
       Intersect => InstrOperator::Intersect(IntersectOperator {
-        storage_adapter: storage_adapter.clone(),
-        ctx: ctx.clone(),
+        storage_adapter,
+        ctx,
       }),
-      Report => InstrOperator::Report(ReportOperator { ctx: ctx.clone() }),
+      Report => InstrOperator::Report(ReportOperator { ctx }),
       TCache => unimplemented!("`TCache` operator is not implemented yet."),
     }
   }

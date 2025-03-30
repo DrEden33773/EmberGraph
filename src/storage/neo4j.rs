@@ -1,9 +1,7 @@
-use std::env;
-
 use super::{AsyncDefault, StorageAdapter};
-use crate::schemas::*;
+use crate::{schemas::*, utils::time_async_with_desc};
 use neo4rs::*;
-use tokio::io::{self, AsyncWriteExt};
+use std::env;
 
 #[derive(Clone)]
 pub struct Neo4jStorageAdapter {
@@ -26,10 +24,9 @@ impl AsyncDefault for Neo4jStorageAdapter {
       .build()
       .unwrap();
 
-    print!("Connecting to Neo4j database ... ");
-    io::stdout().flush().await.unwrap();
-    let graph = Graph::connect(config).await.unwrap();
-    println!("✅\n");
+    let graph = time_async_with_desc(Graph::connect(config), "Connecting to Neo4j database ... ")
+      .await
+      .unwrap();
 
     Self { graph }
   }
@@ -63,9 +60,14 @@ impl StorageAdapter for Neo4jStorageAdapter {
         labels(v) as v_label
     ";
     let query_str = query_str.split_whitespace().collect::<Vec<_>>().join(" ");
-    // println!(">>> {query_str}\n");
 
-    let mut result = self.graph.execute(query(&query_str)).await.unwrap();
+    let mut result = time_async_with_desc(
+      self.graph.execute(query(&query_str)),
+      format!(">>> {query_str} "),
+    )
+    .await
+    .unwrap();
+
     let row = result.next().await.unwrap()?;
 
     let vid = vid.to_string();
@@ -88,9 +90,14 @@ impl StorageAdapter for Neo4jStorageAdapter {
         elementId(v) as vid
     ";
     let query_str = query_str.split_whitespace().collect::<Vec<_>>().join(" ");
-    // println!(">>> {query_str}\n");
 
-    let mut result = self.graph.execute(query(&query_str)).await.unwrap();
+    let mut result = time_async_with_desc(
+      self.graph.execute(query(&query_str)),
+      format!(">>> {query_str} "),
+    )
+    .await
+    .unwrap();
+
     let mut ret = vec![];
 
     while let Some(row) = result.next().await.unwrap() {
@@ -118,14 +125,20 @@ impl StorageAdapter for Neo4jStorageAdapter {
         elementId(dst) AS dst_vid
     ";
     let query_str = query_str.split_whitespace().collect::<Vec<_>>().join(" ");
-    // println!(">>> {query_str}\n");
 
-    let mut result = self.graph.execute(query(&query_str)).await.unwrap();
+    let mut result = time_async_with_desc(
+      self.graph.execute(query(&query_str)),
+      format!(">>> {query_str} "),
+    )
+    .await
+    .unwrap();
+
     let mut ret = vec![];
 
     while let Some(row) = result.next().await.unwrap() {
       ret.push(DataEdge::from((row, e_label)));
     }
+
     ret
   }
 
@@ -149,14 +162,20 @@ impl StorageAdapter for Neo4jStorageAdapter {
         elementId(dst) AS dst_vid
     ";
     let query_str = query_str.split_whitespace().collect::<Vec<_>>().join(" ");
-    // println!(">>> {query_str}\n");
 
-    let mut result = self.graph.execute(query(&query_str)).await.unwrap();
+    let mut result = time_async_with_desc(
+      self.graph.execute(query(&query_str)),
+      format!(">>> {query_str} "),
+    )
+    .await
+    .unwrap();
+
     let mut ret = vec![];
 
     while let Some(row) = result.next().await.unwrap() {
       ret.push(DataEdge::from((row, e_label)));
     }
+
     ret
   }
 
@@ -180,14 +199,20 @@ impl StorageAdapter for Neo4jStorageAdapter {
         elementId(dst) AS dst_vid
     ";
     let query_str = query_str.split_whitespace().collect::<Vec<_>>().join(" ");
-    // println!(">>> {query_str}\n");
 
-    let mut result = self.graph.execute(query(&query_str)).await.unwrap();
+    let mut result = time_async_with_desc(
+      self.graph.execute(query(&query_str)),
+      format!(">>> {query_str} "),
+    )
+    .await
+    .unwrap();
+
     let mut ret = vec![];
 
     while let Some(row) = result.next().await.unwrap() {
       ret.push(DataEdge::from((row, e_label)));
     }
+
     ret
   }
 }

@@ -1,3 +1,5 @@
+#![feature(duration_millis_float)]
+
 pub mod demos;
 pub mod executor;
 pub mod matching_ctx;

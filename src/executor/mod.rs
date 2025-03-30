@@ -62,10 +62,9 @@ impl<S: StorageAdapter> ExecEngine<S> {
 
     fn preview_scale(unmerged: &[Vec<DynGraph>]) {
       let len_vec = unmerged.iter().map(|v| v.len()).collect::<Vec<_>>();
-      println!("unmerged_results scale: {len_vec:?}\n");
+      println!("Scale(unmerged_results): {len_vec:?}\n");
     }
 
-    // println!("unmerged_results: {unmerged_results:#?}\n");
     preview_scale(&unmerged_results);
 
     if unmerged_results.is_empty() {

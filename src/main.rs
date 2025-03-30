@@ -1,7 +1,7 @@
 use dotenv::dotenv;
 #[allow(unused_imports)]
 use ember_sgm_backend::demos::{complex_interactive_sf01::*, simple_interactive_sf01::*};
-use tokio::io;
+use tokio::io::{self};
 
 #[tokio::main(flavor = "multi_thread")]
 async fn main() -> io::Result<()> {

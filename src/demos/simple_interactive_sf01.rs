@@ -14,9 +14,9 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
     .exec()
     .await;
 
-  println!("{:#?}\n", &result);
+  // println!("{:#?}\n", &result);
 
-  println!("COUNT(result) = {}\n", result.len());
+  println!("Count(result) = {}\n", result.len());
   Ok(())
 }
 
