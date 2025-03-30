@@ -10,7 +10,7 @@ use tokio::sync::Mutex;
 
 #[derive(Debug, Clone)]
 pub struct InitOperator<S: StorageAdapter> {
-  pub(crate) storage_adapter: Arc<Mutex<S>>,
+  pub(crate) storage_adapter: Arc<S>,
   pub(crate) ctx: Arc<Mutex<MatchingCtx>>,
 }
 
@@ -26,9 +26,7 @@ impl<S: StorageAdapter> InitOperator<S> {
     let attr = pattern_v.attr.as_ref();
 
     // load vertices
-    let matched_vs = { self.storage_adapter.lock().await }
-      .load_v(label, attr)
-      .await;
+    let matched_vs = self.storage_adapter.load_v(label, attr).await;
 
     // must init f_block first
     let mut ctx = self.ctx.lock().await;

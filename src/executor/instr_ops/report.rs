@@ -27,7 +27,7 @@ impl ReportOperator {
       .map(|e_pat| (e_pat.to_owned(), 1))
       .collect::<HashMap<_, usize>>();
 
-    let could_match_partial_pattern = |graph: &DynGraph| -> bool {
+    let is_subset_of_pattern = |graph: &DynGraph| -> bool {
       let graph_v_pat_cnt = graph
         .pattern_2_vids
         .iter()
@@ -70,17 +70,23 @@ impl ReportOperator {
     let f_buckets: Vec<_> = ctx.f_block.drain().collect();
 
     let mut filtered_groups = Vec::new();
+
+    // Actually, graph in f_bucket <= pattern graph (is subset of).
+    // They will be merged in later `merge` step.
+    //
+    // So, we can filter out the graph that is real-superset of pattern graph.
     for (_, f_bucket) in f_buckets {
       let curr_group = f_bucket.all_matched.into_iter().collect::<Vec<_>>();
 
       let filtered_group = curr_group
         .into_iter()
-        .filter(&could_match_partial_pattern)
+        .filter(&is_subset_of_pattern)
         .collect::<Vec<_>>();
 
       filtered_groups.push(filtered_group);
     }
 
+    // Now, we can update the `grouped_partial_matches` in ctx.
     for curr_group in filtered_groups {
       ctx.grouped_partial_matches.push(curr_group);
     }

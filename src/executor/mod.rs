@@ -12,19 +12,19 @@ pub mod instr_ops;
 #[derive(Clone)]
 pub struct ExecEngine<S: StorageAdapter> {
   pub(crate) plan_data: PlanData,
+  pub(crate) storage_adapter: Arc<S>,
   pub(crate) matching_ctx: Arc<Mutex<MatchingCtx>>,
-  pub(crate) storage_adapter: Arc<Mutex<S>>,
 }
 
 impl<S: StorageAdapter> ExecEngine<S> {
   pub async fn build_from_json(plan_json_content: &str) -> Self {
     let plan_data: PlanData = serde_json::from_str(plan_json_content).unwrap();
+    let storage_adapter = Arc::new(S::async_default().await);
     let matching_ctx = Arc::new(Mutex::new(MatchingCtx::new(&plan_data)));
-    let storage_adapter = Arc::new(Mutex::new(S::async_default().await));
     Self {
       plan_data,
-      matching_ctx,
       storage_adapter,
+      matching_ctx,
     }
   }
 
@@ -86,7 +86,7 @@ impl<S: StorageAdapter> ExecEngine<S> {
       .map(|e_pat| (e_pat.to_owned(), 1))
       .collect::<HashMap<_, usize>>();
 
-    let could_match_the_whole_pattern = |graph: &DynGraph| -> bool {
+    let is_equivalent_to_pattern = |graph: &DynGraph| -> bool {
       let graph_v_pat_cnt = graph
         .pattern_2_vids
         .iter()
@@ -119,7 +119,7 @@ impl<S: StorageAdapter> ExecEngine<S> {
 
     result
       .into_iter()
-      .filter(&could_match_the_whole_pattern)
+      .filter(&is_equivalent_to_pattern)
       .collect::<Vec<_>>()
   }
 }

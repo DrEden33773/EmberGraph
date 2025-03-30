@@ -13,7 +13,7 @@ use super::resolve_var;
 
 #[derive(Debug, Clone)]
 pub struct IntersectOperator<S: StorageAdapter> {
-  pub(crate) storage_adapter: Arc<Mutex<S>>,
+  pub(crate) storage_adapter: Arc<S>,
   pub(crate) ctx: Arc<Mutex<MatchingCtx>>,
 }
 
@@ -97,12 +97,13 @@ impl<S: StorageAdapter> IntersectOperator<S> {
   }
 
   async fn load_vertices(&self, instr: &Instruction) -> Option<Vec<(DataVertex, String)>> {
-    let ctx = self.ctx.lock().await;
-    let pattern_v = ctx.get_pattern_v(&instr.vid)?.to_owned();
+    let pattern_v = { self.ctx.lock().await }
+      .get_pattern_v(&instr.vid)?
+      .to_owned();
 
     let label = pattern_v.label.as_str();
     let attr = pattern_v.attr.as_ref();
-    let matched_vs = self.storage_adapter.lock().await.load_v(label, attr).await;
+    let matched_vs = self.storage_adapter.load_v(label, attr).await;
 
     matched_vs
       .into_iter()

@@ -16,6 +16,7 @@ impl ForeachOperator {
 
     let mut ctx = self.ctx.lock().await;
 
+    // must init f_block first
     ctx.init_f_block(&instr.target_var);
 
     let c_bucket = ctx.pop_from_c_block(instr.single_op.as_ref().unwrap())?;

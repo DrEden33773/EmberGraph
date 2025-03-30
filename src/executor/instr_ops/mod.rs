@@ -50,7 +50,7 @@ pub struct InstrOperatorFactory;
 impl InstrOperatorFactory {
   pub fn create<S: StorageAdapter>(
     instr: &Instruction,
-    storage_adapter: Arc<Mutex<S>>,
+    storage_adapter: Arc<S>,
     ctx: Arc<Mutex<MatchingCtx>>,
   ) -> InstrOperator<S> {
     match instr.type_ {
