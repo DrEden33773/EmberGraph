@@ -28,17 +28,22 @@ impl ReportOperator {
       .collect::<HashMap<_, usize>>();
 
     let could_match_partial_pattern = |graph: &DynGraph| -> bool {
-      let mut graph_v_pat_cnt = HashMap::new();
-      let mut graph_e_pat_cnt = HashMap::new();
-
-      for pat in graph.v_patterns.values().cloned() {
-        let cnt = graph_v_pat_cnt.entry(pat).or_insert(0);
-        *cnt += 1;
-      }
-      for pat in graph.e_patterns.values().cloned() {
-        let cnt = graph_e_pat_cnt.entry(pat).or_insert(0);
-        *cnt += 1;
-      }
+      let graph_v_pat_cnt = graph
+        .pattern_2_vids
+        .iter()
+        .map(|(v_pat, vids)| {
+          let cnt = vids.len();
+          (v_pat.to_owned(), cnt)
+        })
+        .collect::<HashMap<_, usize>>();
+      let graph_e_pat_cnt = graph
+        .pattern_2_eids
+        .iter()
+        .map(|(e_pat, eids)| {
+          let cnt = eids.len();
+          (e_pat.to_owned(), cnt)
+        })
+        .collect::<HashMap<_, usize>>();
 
       for (v_pat, cnt) in graph_v_pat_cnt {
         if let Some(&plan_cnt) = plan_v_pat_cnt.get(&v_pat) {

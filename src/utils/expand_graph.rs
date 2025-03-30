@@ -92,13 +92,11 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
     for dangling_e in self.dangling_e_entities.values() {
       if self.dyn_graph.has_vid(dangling_e.src_vid()) {
         grouped
-          // .entry(dangling_e.src_vid().to_owned()) // BUG
           .entry(dangling_e.dst_vid().to_owned())
           .or_default()
           .push(dangling_e.clone());
       } else if self.dyn_graph.has_vid(dangling_e.dst_vid()) {
         grouped
-          // .entry(dangling_e.dst_vid().to_owned()) // BUG
           .entry(dangling_e.src_vid().to_owned())
           .or_default()
           .push(dangling_e.clone());
@@ -192,12 +190,40 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
   }
 }
 
+/// 1. Take two expand_graphs' `vertices` and `non-dangling-edges` into a new graph
+/// 2. Iterate through the `dangling_edges` of both, select those connective ones
 pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
   l_expand_graph: &ExpandGraph<VType, EType>,
   r_expand_graph: &ExpandGraph<VType, EType>,
 ) -> Vec<ExpandGraph<VType, EType>> {
   let l_graph = &l_expand_graph.dyn_graph;
   let r_graph = &r_expand_graph.dyn_graph;
+
+  // For each pair of common_v/e_pats, they should lead to the same vs/es in both graphs.
+  //
+  // If not, we should not consider them as a match.
+  //
+  // We could also discard those patterns who lead to `multi` vs/es in either graph.
+  for common_v_pat in l_graph
+    .get_v_patterns()
+    .intersection(&r_graph.get_v_patterns())
+  {
+    let l_directed_vs = l_graph.pattern_2_vids.get(common_v_pat).unwrap();
+    let r_directed_vs = r_graph.pattern_2_vids.get(common_v_pat).unwrap();
+    if l_directed_vs != r_directed_vs || l_directed_vs.len() > 1 || r_directed_vs.len() > 1 {
+      return vec![];
+    }
+  }
+  for common_e_pat in l_graph
+    .get_e_patterns()
+    .intersection(&r_graph.get_e_patterns())
+  {
+    let l_directed_es = l_graph.pattern_2_eids.get(common_e_pat).unwrap();
+    let r_directed_es = r_graph.pattern_2_eids.get(common_e_pat).unwrap();
+    if l_directed_es != r_directed_es || l_directed_es.len() > 1 || r_directed_es.len() > 1 {
+      return vec![];
+    }
+  }
 
   let l_v_pat_pairs = l_graph.get_v_pattern_pairs();
   let r_v_pat_pairs = r_graph.get_v_pattern_pairs();

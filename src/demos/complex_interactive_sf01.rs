@@ -14,7 +14,7 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
     .exec()
     .await;
 
-  println!("{:#?}\n", &result);
+  // println!("{:#?}\n", &result);
 
   println!("Count(result) = {}\n", result.len());
   Ok(())
@@ -32,7 +32,7 @@ pub async fn ic_4_on_sf_01() -> io::Result<()> {
   exec("ldbc-ic-4-single-directed-knows.json").await
 }
 
-/// ⚠️
+/// ⚠️ -> ✅
 pub async fn ic_5_on_sf_01() -> io::Result<()> {
   println!("\nQuerying 'IC-5' on 'SF0.1' ...\n");
   exec("ldbc-ic-5-single-directed-knows.json").await

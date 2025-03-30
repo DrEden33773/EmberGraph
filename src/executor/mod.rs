@@ -62,7 +62,7 @@ impl<S: StorageAdapter> ExecEngine<S> {
 
     fn preview_scale(unmerged: &[Vec<DynGraph>]) {
       let len_vec = unmerged.iter().map(|v| v.len()).collect::<Vec<_>>();
-      println!("Scale(unmerged_results): {len_vec:?}\n");
+      println!("Scale(unmerged_results) = {len_vec:?}\n");
     }
 
     preview_scale(&unmerged_results);
@@ -87,17 +87,22 @@ impl<S: StorageAdapter> ExecEngine<S> {
       .collect::<HashMap<_, usize>>();
 
     let could_match_the_whole_pattern = |graph: &DynGraph| -> bool {
-      let mut graph_v_pat_cnt = HashMap::new();
-      let mut graph_e_pat_cnt = HashMap::new();
-
-      for pat in graph.v_patterns.values().cloned() {
-        let cnt = graph_v_pat_cnt.entry(pat).or_insert(0);
-        *cnt += 1;
-      }
-      for pat in graph.e_patterns.values().cloned() {
-        let cnt = graph_e_pat_cnt.entry(pat).or_insert(0);
-        *cnt += 1;
-      }
+      let graph_v_pat_cnt = graph
+        .pattern_2_vids
+        .iter()
+        .map(|(v_pat, vids)| {
+          let cnt = vids.len();
+          (v_pat.to_owned(), cnt)
+        })
+        .collect::<HashMap<_, usize>>();
+      let graph_e_pat_cnt = graph
+        .pattern_2_eids
+        .iter()
+        .map(|(e_pat, eids)| {
+          let cnt = eids.len();
+          (e_pat.to_owned(), cnt)
+        })
+        .collect::<HashMap<_, usize>>();
 
       graph_v_pat_cnt == plan_v_pat_cnt && graph_e_pat_cnt == plan_e_pat_cnt
     };

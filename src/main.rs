@@ -7,5 +7,5 @@ use tokio::io::{self};
 async fn main() -> io::Result<()> {
   dotenv().ok();
 
-  is_3_reversed_directed_knows_on_sf_01().await
+  ic_5_on_sf_01().await
 }
