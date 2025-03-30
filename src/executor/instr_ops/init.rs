@@ -28,15 +28,14 @@ impl<S: StorageAdapter> InitOperator<S> {
     // load vertices
     let matched_vs = self.storage_adapter.load_v(label, attr).await;
 
-    // must init f_block first
-    let mut ctx = self.ctx.lock().await;
-    ctx.init_f_block(&instr.target_var);
-
     // filter-out if the vertex has already been expanded
-    let unexpanded_matched_vs = matched_vs
-      .into_par_iter()
-      .filter(|data_v| !ctx.expanded_data_vids.contains(&data_v.vid))
-      .collect_vec_list();
+    let unexpanded_matched_vs = {
+      let ctx = self.ctx.lock().await;
+      matched_vs
+        .into_par_iter()
+        .filter(|data_v| !ctx.expanded_data_vids.contains(&data_v.vid))
+        .collect_vec_list()
+    };
 
     // prepare for: updating the block
     let pre = unexpanded_matched_vs
@@ -52,8 +51,11 @@ impl<S: StorageAdapter> InitOperator<S> {
       .collect_vec_list();
 
     // update f_block
-    for (target_var, matched_dg, frontier_vid) in pre.into_iter().flatten() {
-      ctx.append_to_f_block(target_var, matched_dg, &frontier_vid);
+    {
+      let mut ctx = self.ctx.lock().await;
+      for (target_var, matched_dg, frontier_vid) in pre.into_iter().flatten() {
+        ctx.append_to_f_block(target_var, matched_dg, &frontier_vid);
+      }
     }
 
     Some(())

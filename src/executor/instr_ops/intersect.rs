@@ -37,28 +37,27 @@ impl<S: StorageAdapter> IntersectOperator<S> {
   async fn with_adj_set(&mut self, instr: &Instruction) -> Option<()> {
     let loaded_v_pat_pairs = self.load_vertices(instr).await?;
 
-    let mut ctx = self.ctx.lock().await;
-    ctx.init_c_block(&instr.target_var);
-
-    let a_group =
-      ctx.pop_group_by_pat_from_a_block(instr.single_op.as_ref().unwrap(), &instr.vid)?;
+    let a_group = { self.ctx.lock().await }
+      .pop_group_by_pat_from_a_block(instr.single_op.as_ref().unwrap(), &instr.vid)?;
 
     let c_bucket = CBucket::build_from_a_group(a_group, loaded_v_pat_pairs);
-    ctx.update_c_block(&instr.target_var, c_bucket);
+
+    { self.ctx.lock().await }.update_c_block(&instr.target_var, c_bucket);
 
     Some(())
   }
 
   /// `A(T)_{i}` ∩ `A_{i+1}` -> `Tx`
   async fn with_multi_adj_set(&mut self, instr: &Instruction) -> Option<()> {
-    let mut ctx = self.ctx.lock().await;
-    ctx.init_t_block(&instr.target_var);
+    let mut a_groups: VecDeque<_> = {
+      let mut ctx = self.ctx.lock().await;
+      instr
+        .multi_ops
+        .iter()
+        .filter_map(|op| ctx.pop_group_by_pat_from_a_block(op, &instr.vid))
+        .collect()
+    };
 
-    let mut a_groups: VecDeque<_> = instr
-      .multi_ops
-      .iter()
-      .filter_map(|op| ctx.pop_group_by_pat_from_a_block(op, &instr.vid))
-      .collect();
     if a_groups.len() < 2 {
       return None;
     }
@@ -76,7 +75,7 @@ impl<S: StorageAdapter> IntersectOperator<S> {
       t_bucket = prev_t;
     }
 
-    ctx.update_t_block(&instr.target_var, t_bucket);
+    { self.ctx.lock().await }.update_t_block(&instr.target_var, t_bucket);
 
     Some(())
   }
@@ -85,13 +84,11 @@ impl<S: StorageAdapter> IntersectOperator<S> {
   async fn with_temp_intersected(&mut self, instr: &Instruction) -> Option<()> {
     let loaded_v_pat_pairs = self.load_vertices(instr).await?;
 
-    let mut ctx = self.ctx.lock().await;
-    ctx.init_c_block(&instr.target_var);
-
-    let t_bucket = ctx.pop_from_t_block(instr.single_op.as_ref().unwrap())?;
+    let t_bucket = { self.ctx.lock().await }.pop_from_t_block(instr.single_op.as_ref().unwrap())?;
 
     let c_bucket = CBucket::build_from_t(t_bucket, loaded_v_pat_pairs);
-    ctx.update_c_block(&instr.target_var, c_bucket);
+
+    { self.ctx.lock().await }.update_c_block(&instr.target_var, c_bucket);
 
     Some(())
   }

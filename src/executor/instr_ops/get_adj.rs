@@ -20,15 +20,12 @@ impl<S: StorageAdapter> GetAdjOperator<S> {
     // to resolve current `pattern_vid`
     let (_, curr_pat_vid) = resolve_var(instr.single_op.as_ref().unwrap());
 
-    let mut ctx = self.ctx.lock().await;
-
-    let f_bucket = ctx.pop_from_f_block(instr.single_op.as_ref().unwrap())?;
+    let f_bucket = { self.ctx.lock().await }.pop_from_f_block(instr.single_op.as_ref().unwrap())?;
     let mut a_bucket = ABucket::from_f_bucket(f_bucket, curr_pat_vid);
 
-    // must init a_block first
-    ctx.init_a_block(&instr.target_var);
-
     let connected_data_vids = {
+      let ctx = self.ctx.lock().await;
+
       let pattern_vs = ctx.pattern_vs();
       let pattern_es = ctx.fetch_pattern_e_batch(instr.expand_eids.iter().map(String::as_str));
 
@@ -39,8 +36,11 @@ impl<S: StorageAdapter> GetAdjOperator<S> {
     };
 
     // update the `block` and `extended data vid set`
-    ctx.update_a_block(&instr.target_var, a_bucket);
-    ctx.update_extended_data_vids(connected_data_vids);
+    {
+      let mut ctx = self.ctx.lock().await;
+      ctx.update_a_block(&instr.target_var, a_bucket);
+      ctx.update_extended_data_vids(connected_data_vids);
+    }
 
     Some(())
   }

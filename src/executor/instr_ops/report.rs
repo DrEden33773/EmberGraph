@@ -12,20 +12,22 @@ impl ReportOperator {
   pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
     println!("{instr:#?}\n");
 
-    let mut ctx = self.ctx.lock().await;
-
-    let plan_v_pat_cnt = ctx
-      .plan_data
-      .pattern_vs()
-      .keys()
-      .map(|v_pat| (v_pat.to_owned(), 1))
-      .collect::<HashMap<_, usize>>();
-    let plan_e_pat_cnt = ctx
-      .plan_data
-      .pattern_es()
-      .keys()
-      .map(|e_pat| (e_pat.to_owned(), 1))
-      .collect::<HashMap<_, usize>>();
+    let (plan_v_pat_cnt, plan_e_pat_cnt) = {
+      let ctx = self.ctx.lock().await;
+      let plan_v_pat_cnt = ctx
+        .plan_data
+        .pattern_vs()
+        .keys()
+        .map(|v_pat| (v_pat.to_owned(), 1))
+        .collect::<HashMap<_, usize>>();
+      let plan_e_pat_cnt = ctx
+        .plan_data
+        .pattern_es()
+        .keys()
+        .map(|e_pat| (e_pat.to_owned(), 1))
+        .collect::<HashMap<_, usize>>();
+      (plan_v_pat_cnt, plan_e_pat_cnt)
+    };
 
     let is_subset_of_pattern = |graph: &DynGraph| -> bool {
       let graph_v_pat_cnt = graph
@@ -67,7 +69,7 @@ impl ReportOperator {
       true
     };
 
-    let f_buckets: Vec<_> = ctx.f_block.drain().collect();
+    let f_buckets: Vec<_> = { self.ctx.lock().await }.f_block.drain().collect();
 
     let mut filtered_groups = Vec::new();
 
@@ -87,8 +89,11 @@ impl ReportOperator {
     }
 
     // Now, we can update the `grouped_partial_matches` in ctx.
-    for curr_group in filtered_groups {
-      ctx.grouped_partial_matches.push(curr_group);
+    {
+      let mut ctx = self.ctx.lock().await;
+      for curr_group in filtered_groups {
+        ctx.grouped_partial_matches.push(curr_group);
+      }
     }
 
     Some(())

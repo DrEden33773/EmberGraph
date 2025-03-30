@@ -87,12 +87,6 @@ impl MatchingCtx {
 }
 
 impl MatchingCtx {
-  /// `Foreach`: Initialize `f_block`
-  pub fn init_f_block(&mut self, target_var: &str) {
-    let key = resolve_var_name(target_var);
-    self.f_block.insert(key.to_string(), FBucket::default());
-  }
-
   /// `Init`: Update `f_block` with matched_graph and frontier_vid
   pub fn append_to_f_block(
     &mut self,
@@ -101,6 +95,10 @@ impl MatchingCtx {
     frontier_vid: VidRef,
   ) {
     let key = resolve_var_name(target_var);
+
+    // try to init f_block if key doesn't exist
+    self.f_block.entry(key.to_string()).or_default();
+
     let next_idx = self.f_block[key].all_matched.len();
     let f_bucket = self.f_block.get_mut(key).unwrap();
 
@@ -126,14 +124,6 @@ impl MatchingCtx {
 }
 
 impl MatchingCtx {
-  /// `GetAdj`: Initialize `a_block` with `target_var`
-  pub fn init_a_block(&mut self, target_var: &str) {
-    let key = resolve_var_name(target_var);
-    self
-      .a_block
-      .insert(key.to_string(), ABucket::new(key.to_string()));
-  }
-
   /// `GetAdj`: Update `a_block` with `a_bucket`
   pub fn update_a_block(&mut self, target_var: &str, a_bucket: ABucket) {
     let key = resolve_var_name(target_var);
@@ -159,12 +149,6 @@ impl MatchingCtx {
 }
 
 impl MatchingCtx {
-  /// `Intersect`: Initialize `c_block` with `target_var`
-  pub fn init_c_block(&mut self, target_var: &str) {
-    let key = resolve_var_name(target_var);
-    self.c_block.insert(key.to_string(), CBucket::default());
-  }
-
   /// `Intersect`: Update `c_block` with `c_bucket`
   pub fn update_c_block(&mut self, target_var: &str, c_bucket: CBucket) {
     let key = resolve_var_name(target_var);
@@ -179,14 +163,6 @@ impl MatchingCtx {
 }
 
 impl MatchingCtx {
-  /// `Intersect`: Initialize `t_block` with `target_var`
-  pub fn init_t_block(&mut self, target_var: &str) {
-    let key = resolve_var_name(target_var);
-    self
-      .t_block
-      .insert(key.to_string(), TBucket::new(key.to_string()));
-  }
-
   /// `Intersect`: Update `t_block` with `t_bucket`
   pub fn update_t_block(&mut self, target_var: &str, t_bucket: TBucket) {
     let key = resolve_var_name(target_var);
