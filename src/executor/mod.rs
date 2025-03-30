@@ -4,8 +4,8 @@ use crate::{
 use hashbrown::HashMap;
 use instr_ops::InstrOperatorFactory;
 use itertools::Itertools;
+use parking_lot::Mutex;
 use std::{collections::VecDeque, sync::Arc};
-use tokio::sync::Mutex;
 
 pub mod instr_ops;
 
@@ -46,7 +46,6 @@ impl<S: StorageAdapter> ExecEngine<S> {
     self
       .matching_ctx
       .lock()
-      .await
       .grouped_partial_matches
       .drain(0..)
       .collect()
@@ -77,13 +76,13 @@ impl<S: StorageAdapter> ExecEngine<S> {
       .plan_data
       .pattern_vs()
       .keys()
-      .map(|v_pat| (v_pat.to_owned(), 1))
+      .map(|v_pat| (v_pat.clone(), 1))
       .collect::<HashMap<_, usize>>();
     let plan_e_pat_cnt = self
       .plan_data
       .pattern_es()
       .keys()
-      .map(|e_pat| (e_pat.to_owned(), 1))
+      .map(|e_pat| (e_pat.clone(), 1))
       .collect::<HashMap<_, usize>>();
 
     let is_equivalent_to_pattern = |graph: &DynGraph| -> bool {
@@ -92,7 +91,7 @@ impl<S: StorageAdapter> ExecEngine<S> {
         .iter()
         .map(|(v_pat, vids)| {
           let cnt = vids.len();
-          (v_pat.to_owned(), cnt)
+          (v_pat.clone(), cnt)
         })
         .collect::<HashMap<_, usize>>();
       let graph_e_pat_cnt = graph
@@ -100,7 +99,7 @@ impl<S: StorageAdapter> ExecEngine<S> {
         .iter()
         .map(|(e_pat, eids)| {
           let cnt = eids.len();
-          (e_pat.to_owned(), cnt)
+          (e_pat.clone(), cnt)
         })
         .collect::<HashMap<_, usize>>();
 

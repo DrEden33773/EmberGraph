@@ -10,6 +10,7 @@ hashbrown = { version = "0.15.2", features = ["rayon", "serde"] }
 itertools = "0.14.0"
 neo4rs = "0.8.0"
 num_cpus = "1.16.0"
+parking_lot = { version = "0.12.3", features = ["hardware-lock-elision"] }
 project-root = "0.2.2"
 rayon = "1.10.0"
 serde = "1.0.219"
@@ -18,3 +19,4 @@ sqlx = "0.8.3"
 strum = "0.27.1"
 strum_macros = "0.27.1"
 tokio = { version = "1.44.1", features = ["full"] }
+tqdm = "0.7.0"

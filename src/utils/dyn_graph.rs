@@ -181,14 +181,12 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
 
 impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   pub fn update_v(&mut self, vertex: VType, pattern: String) -> &mut Self {
-    let vid = vertex.vid().to_owned();
+    let vid = vertex.vid().to_string();
 
-    self.v_entities.insert(vid.to_owned(), vertex);
-    self.adj_table.entry(vid.to_owned()).or_default();
+    self.v_entities.insert(vid.clone(), vertex);
+    self.adj_table.entry(vid.clone()).or_default();
 
-    let old_pattern = self
-      .vid_2_pattern
-      .insert(vid.to_owned(), pattern.to_owned());
+    let old_pattern = self.vid_2_pattern.insert(vid.clone(), pattern.clone());
     if let Some(old_pattern) = old_pattern {
       self
         .pattern_2_vids
@@ -212,30 +210,28 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   }
 
   pub fn update_e(&mut self, edge: EType, pattern: String) -> &mut Self {
-    let eid = edge.eid().to_owned();
-    let src_vid = edge.src_vid().to_owned();
-    let dst_vid = edge.dst_vid().to_owned();
+    let eid = edge.eid().to_string();
+    let src_vid = edge.src_vid().to_string();
+    let dst_vid = edge.dst_vid().to_string();
 
     if self.has_all_vids(&[&src_vid, &dst_vid]) {
-      self.e_entities.insert(eid.to_owned(), edge);
+      self.e_entities.insert(eid.clone(), edge);
 
       self
         .adj_table
         .entry(src_vid)
         .or_default()
         .e_out
-        .insert(eid.to_owned());
+        .insert(eid.clone());
 
       self
         .adj_table
         .entry(dst_vid)
         .or_default()
         .e_in
-        .insert(eid.to_owned());
+        .insert(eid.clone());
 
-      let old_pattern = self
-        .eid_2_pattern
-        .insert(eid.to_owned(), pattern.to_owned());
+      let old_pattern = self.eid_2_pattern.insert(eid.clone(), pattern.clone());
       if let Some(old_pattern) = old_pattern {
         self
           .pattern_2_eids
@@ -311,9 +307,9 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
     let src_vid = edge.src_vid();
     let dst_vid = edge.dst_vid();
     if self.has_vid(src_vid) {
-      Some(src_vid.to_owned())
+      Some(src_vid.to_string())
     } else if self.has_vid(dst_vid) {
-      Some(dst_vid.to_owned())
+      Some(dst_vid.to_string())
     } else {
       None
     }
@@ -355,7 +351,7 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
       .v_entities
       .iter()
       .map(|(vid, v_entity)| {
-        let pattern = self.vid_2_pattern[vid].to_owned();
+        let pattern = self.vid_2_pattern[vid].clone();
         (v_entity.clone(), pattern)
       })
       .collect()
@@ -366,7 +362,7 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
       .e_entities
       .iter()
       .map(|(eid, e_entity)| {
-        let pattern = self.eid_2_pattern[eid].to_owned();
+        let pattern = self.eid_2_pattern[eid].clone();
         (e_entity.clone(), pattern)
       })
       .collect()

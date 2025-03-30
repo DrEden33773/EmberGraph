@@ -1,3 +1,4 @@
+use super::resolve_var;
 use crate::{
   matching_ctx::{
     MatchingCtx,
@@ -6,10 +7,8 @@ use crate::{
   schemas::{DataVertex, Instruction, VarPrefix::*},
   storage::StorageAdapter,
 };
+use parking_lot::Mutex;
 use std::{collections::VecDeque, sync::Arc};
-use tokio::sync::Mutex;
-
-use super::resolve_var;
 
 #[derive(Debug, Clone)]
 pub struct IntersectOperator<S: StorageAdapter> {
@@ -37,12 +36,12 @@ impl<S: StorageAdapter> IntersectOperator<S> {
   async fn with_adj_set(&mut self, instr: &Instruction) -> Option<()> {
     let loaded_v_pat_pairs = self.load_vertices(instr).await?;
 
-    let a_group = { self.ctx.lock().await }
+    let a_group = { self.ctx.lock() }
       .pop_group_by_pat_from_a_block(instr.single_op.as_ref().unwrap(), &instr.vid)?;
 
     let c_bucket = CBucket::build_from_a_group(a_group, loaded_v_pat_pairs);
 
-    { self.ctx.lock().await }.update_c_block(&instr.target_var, c_bucket);
+    { self.ctx.lock() }.update_c_block(&instr.target_var, c_bucket);
 
     Some(())
   }
@@ -50,7 +49,7 @@ impl<S: StorageAdapter> IntersectOperator<S> {
   /// `A(T)_{i}` ∩ `A_{i+1}` -> `Tx`
   async fn with_multi_adj_set(&mut self, instr: &Instruction) -> Option<()> {
     let mut a_groups: VecDeque<_> = {
-      let mut ctx = self.ctx.lock().await;
+      let mut ctx = self.ctx.lock();
       instr
         .multi_ops
         .iter()
@@ -75,7 +74,7 @@ impl<S: StorageAdapter> IntersectOperator<S> {
       t_bucket = prev_t;
     }
 
-    { self.ctx.lock().await }.update_t_block(&instr.target_var, t_bucket);
+    { self.ctx.lock() }.update_t_block(&instr.target_var, t_bucket);
 
     Some(())
   }
@@ -84,19 +83,17 @@ impl<S: StorageAdapter> IntersectOperator<S> {
   async fn with_temp_intersected(&mut self, instr: &Instruction) -> Option<()> {
     let loaded_v_pat_pairs = self.load_vertices(instr).await?;
 
-    let t_bucket = { self.ctx.lock().await }.pop_from_t_block(instr.single_op.as_ref().unwrap())?;
+    let t_bucket = { self.ctx.lock() }.pop_from_t_block(instr.single_op.as_ref().unwrap())?;
 
     let c_bucket = CBucket::build_from_t(t_bucket, loaded_v_pat_pairs);
 
-    { self.ctx.lock().await }.update_c_block(&instr.target_var, c_bucket);
+    { self.ctx.lock() }.update_c_block(&instr.target_var, c_bucket);
 
     Some(())
   }
 
   async fn load_vertices(&self, instr: &Instruction) -> Option<Vec<(DataVertex, String)>> {
-    let pattern_v = { self.ctx.lock().await }
-      .get_pattern_v(&instr.vid)?
-      .to_owned();
+    let pattern_v = { self.ctx.lock() }.get_pattern_v(&instr.vid)?.clone();
 
     let label = pattern_v.label.as_str();
     let attr = pattern_v.attr.as_ref();
@@ -104,7 +101,7 @@ impl<S: StorageAdapter> IntersectOperator<S> {
 
     matched_vs
       .into_iter()
-      .map(|v| (v, pattern_v.vid.to_owned()))
+      .map(|v| (v, pattern_v.vid.clone()))
       .collect::<Vec<_>>()
       .into()
   }
