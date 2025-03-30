@@ -1,11 +1,11 @@
 use crate::{matching_ctx::MatchingCtx, schemas::Instruction, utils::dyn_graph::DynGraph};
 use hashbrown::HashMap;
-use parking_lot::Mutex;
+use parking_lot::RwLock;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct ReportOperator {
-  pub(crate) ctx: Arc<Mutex<MatchingCtx>>,
+  pub(crate) ctx: Arc<RwLock<MatchingCtx>>,
 }
 
 impl ReportOperator {
@@ -13,7 +13,7 @@ impl ReportOperator {
     println!("{instr:#?}\n");
 
     let (plan_v_pat_cnt, plan_e_pat_cnt) = {
-      let ctx = self.ctx.lock();
+      let ctx = self.ctx.read();
       let plan_v_pat_cnt = ctx
         .plan_data
         .pattern_vs()
@@ -69,7 +69,7 @@ impl ReportOperator {
       true
     };
 
-    let f_buckets: Vec<_> = { self.ctx.lock() }.f_block.drain().collect();
+    let f_buckets: Vec<_> = { self.ctx.write() }.f_block.drain().collect();
 
     let mut filtered_groups = Vec::new();
 
@@ -90,7 +90,7 @@ impl ReportOperator {
 
     // Now, we can update the `grouped_partial_matches` in ctx.
     {
-      let mut ctx = self.ctx.lock();
+      let mut ctx = self.ctx.write();
       for curr_group in filtered_groups {
         ctx.grouped_partial_matches.push(curr_group);
       }

@@ -7,7 +7,7 @@ use foreach::ForeachOperator;
 use get_adj::GetAdjOperator;
 use init::InitOperator;
 use intersect::IntersectOperator;
-use parking_lot::Mutex;
+use parking_lot::RwLock;
 use report::ReportOperator;
 use std::{str::FromStr, sync::Arc};
 
@@ -51,7 +51,7 @@ impl InstrOperatorFactory {
   pub fn create<S: StorageAdapter>(
     instr: &Instruction,
     storage_adapter: Arc<S>,
-    ctx: Arc<Mutex<MatchingCtx>>,
+    ctx: Arc<RwLock<MatchingCtx>>,
   ) -> InstrOperator<S> {
     match instr.type_ {
       Init => InstrOperator::Init(InitOperator {

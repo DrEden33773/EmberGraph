@@ -4,7 +4,7 @@ use crate::{
 use hashbrown::HashMap;
 use instr_ops::InstrOperatorFactory;
 use itertools::Itertools;
-use parking_lot::Mutex;
+use parking_lot::RwLock;
 use std::{collections::VecDeque, sync::Arc};
 
 pub mod instr_ops;
@@ -13,14 +13,14 @@ pub mod instr_ops;
 pub struct ExecEngine<S: StorageAdapter> {
   pub(crate) plan_data: PlanData,
   pub(crate) storage_adapter: Arc<S>,
-  pub(crate) matching_ctx: Arc<Mutex<MatchingCtx>>,
+  pub(crate) matching_ctx: Arc<RwLock<MatchingCtx>>,
 }
 
 impl<S: StorageAdapter> ExecEngine<S> {
   pub async fn build_from_json(plan_json_content: &str) -> Self {
     let plan_data: PlanData = serde_json::from_str(plan_json_content).unwrap();
     let storage_adapter = Arc::new(S::async_default().await);
-    let matching_ctx = Arc::new(Mutex::new(MatchingCtx::new(&plan_data)));
+    let matching_ctx = Arc::new(RwLock::new(MatchingCtx::new(&plan_data)));
     Self {
       plan_data,
       storage_adapter,
@@ -45,7 +45,7 @@ impl<S: StorageAdapter> ExecEngine<S> {
 
     self
       .matching_ctx
-      .lock()
+      .write()
       .grouped_partial_matches
       .drain(0..)
       .collect()

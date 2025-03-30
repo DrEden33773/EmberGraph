@@ -4,21 +4,21 @@ use crate::{
   storage::StorageAdapter,
   utils::dyn_graph::DynGraph,
 };
-use parking_lot::Mutex;
+use parking_lot::RwLock;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct InitOperator<S: StorageAdapter> {
   pub(crate) storage_adapter: Arc<S>,
-  pub(crate) ctx: Arc<Mutex<MatchingCtx>>,
+  pub(crate) ctx: Arc<RwLock<MatchingCtx>>,
 }
 
 impl<S: StorageAdapter> InitOperator<S> {
   pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
     println!("{instr:#?}\n");
 
-    let pattern_v = { self.ctx.lock() }.get_pattern_v(&instr.vid)?.clone();
+    let pattern_v = { self.ctx.read() }.get_pattern_v(&instr.vid)?.clone();
 
     let label = pattern_v.label.as_str();
     let attr = pattern_v.attr.as_ref();
@@ -28,7 +28,7 @@ impl<S: StorageAdapter> InitOperator<S> {
 
     // filter-out if the vertex has already been expanded
     let unexpanded_matched_vs = {
-      let ctx = self.ctx.lock();
+      let ctx = self.ctx.read();
       matched_vs
         .into_par_iter()
         .filter(|data_v| !ctx.expanded_data_vids.contains(&data_v.vid))
@@ -50,7 +50,7 @@ impl<S: StorageAdapter> InitOperator<S> {
 
     // update f_block
     {
-      let mut ctx = self.ctx.lock();
+      let mut ctx = self.ctx.write();
       for (target_var, matched_dg, frontier_vid) in pre.into_iter().flatten() {
         ctx.append_to_f_block(target_var, matched_dg, &frontier_vid);
       }

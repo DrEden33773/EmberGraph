@@ -4,13 +4,13 @@ use crate::{
   schemas::Instruction,
   storage::StorageAdapter,
 };
-use parking_lot::Mutex;
+use parking_lot::RwLock;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct GetAdjOperator<S: StorageAdapter> {
   pub(crate) storage_adapter: Arc<S>,
-  pub(crate) ctx: Arc<Mutex<MatchingCtx>>,
+  pub(crate) ctx: Arc<RwLock<MatchingCtx>>,
 }
 
 impl<S: StorageAdapter> GetAdjOperator<S> {
@@ -20,11 +20,11 @@ impl<S: StorageAdapter> GetAdjOperator<S> {
     // to resolve current `pattern_vid`
     let (_, curr_pat_vid) = resolve_var(instr.single_op.as_ref().unwrap());
 
-    let f_bucket = { self.ctx.lock() }.pop_from_f_block(instr.single_op.as_ref().unwrap())?;
+    let f_bucket = { self.ctx.write() }.pop_from_f_block(instr.single_op.as_ref().unwrap())?;
     let mut a_bucket = ABucket::from_f_bucket(f_bucket, curr_pat_vid);
 
     let (pattern_vs, pattern_es) = {
-      let ctx = self.ctx.lock();
+      let ctx = self.ctx.read();
       let pattern_vs = ctx.pattern_vs().clone();
       let pattern_es = ctx.fetch_pattern_e_batch(instr.expand_eids.iter().map(String::as_str));
       (pattern_vs, pattern_es)
@@ -37,7 +37,7 @@ impl<S: StorageAdapter> GetAdjOperator<S> {
 
     // update the `block` and `extended data vid set`
     {
-      let mut ctx = self.ctx.lock();
+      let mut ctx = self.ctx.write();
       ctx.update_a_block(&instr.target_var, a_bucket);
       ctx.update_extended_data_vids(connected_data_vids);
     }
