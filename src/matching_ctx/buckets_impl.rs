@@ -9,7 +9,7 @@ use crate::{
     expand_graph::{ExpandGraph, union_then_intersect_on_connective_v},
   },
 };
-use futures::future;
+use futures::{StreamExt, future, stream};
 use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 use rayon::iter::{
@@ -211,6 +211,71 @@ struct LoadWithCondCtx<'a, S: StorageAdapter> {
   is_src_curr_pat: bool,
 }
 
+#[allow(dead_code)]
+async fn incremental_match_via_batch_processing<'a, S: StorageAdapter>(
+  ctx: LoadWithCondCtx<'a, S>,
+) -> Vec<DataEdge> {
+  const BATCH_SIZE: usize = 32;
+
+  let next_pat_vid = if ctx.is_src_curr_pat {
+    ctx.curr_pat_e.dst_vid()
+  } else {
+    ctx.curr_pat_e.src_vid()
+  };
+
+  // load all edges first
+  let potential_edges = if ctx.is_src_curr_pat {
+    ctx
+      .storage_adapter
+      .load_e_with_src(ctx.frontier_vid, ctx.e_label, ctx.e_attr)
+      .await
+  } else {
+    ctx
+      .storage_adapter
+      .load_e_with_dst(ctx.frontier_vid, ctx.e_label, ctx.e_attr)
+      .await
+  };
+
+  // filter out the edges that are already matched
+  let filtered_edges = potential_edges
+    .into_iter()
+    .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
+    .collect::<Vec<_>>();
+
+  // split into chunks for parallel processing
+  let chunks = filtered_edges
+    .chunks(BATCH_SIZE)
+    .map(Vec::from)
+    .collect::<Vec<_>>();
+
+  // process each chunk in parallel
+  let batch_futures = chunks.into_iter().map(|chunk| async move {
+    let mut results = Vec::new();
+    for e in chunk {
+      let check_vid = if ctx.is_src_curr_pat {
+        e.dst_vid()
+      } else {
+        e.src_vid()
+      };
+      let satisfies =
+        does_data_v_satisfy_pattern(check_vid, next_pat_vid, ctx.pattern_vs, ctx.storage_adapter)
+          .await;
+
+      if satisfies {
+        results.push(e);
+      }
+    }
+    results
+  });
+
+  // wait for all futures to complete
+  let batch_results = future::join_all(batch_futures).await;
+
+  // flatten the results into a single vector
+  batch_results.into_iter().flatten().collect::<Vec<_>>()
+}
+
+#[allow(dead_code)]
 async fn incremental_match<'a, S: StorageAdapter>(ctx: LoadWithCondCtx<'a, S>) -> Vec<DataEdge> {
   let next_pat_vid = if ctx.is_src_curr_pat {
     ctx.curr_pat_e.dst_vid()
@@ -231,29 +296,37 @@ async fn incremental_match<'a, S: StorageAdapter>(ctx: LoadWithCondCtx<'a, S>) -
       .await
   };
 
-  // build future condition
-  let edge_futures = potential_edges
+  // filter out the edges that are already matched
+  let filtered_edges = potential_edges
     .into_iter()
     .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
-    .map(|e| async {
-      let satisfies = does_data_v_satisfy_pattern(
-        if ctx.is_src_curr_pat {
-          e.dst_vid()
-        } else {
-          e.src_vid()
-        },
-        next_pat_vid,
-        ctx.pattern_vs,
-        ctx.storage_adapter,
-      )
-      .await;
-      if satisfies { Some(e) } else { None }
-    });
+    .collect::<Vec<_>>();
 
-  // exec
-  let results = future::join_all(edge_futures).await;
+  // process each edge in parallel
+  stream::iter(filtered_edges)
+    .map(|e| {
+      let next_vid_str = if ctx.is_src_curr_pat {
+        e.dst_vid()
+      } else {
+        e.src_vid()
+      }
+      .to_string();
 
-  results.into_iter().flatten().collect::<Vec<_>>()
+      async move {
+        let satisfies = does_data_v_satisfy_pattern(
+          &next_vid_str,
+          next_pat_vid,
+          ctx.pattern_vs,
+          ctx.storage_adapter,
+        )
+        .await;
+        if satisfies { Some(e) } else { None }
+      }
+    })
+    .buffer_unordered(num_cpus::get() * 4)
+    .filter_map(|r| async move { r })
+    .collect::<Vec<_>>()
+    .await
 }
 
 impl CBucket {
