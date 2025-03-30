@@ -1,7 +1,7 @@
 use crate::{matching_ctx::MatchingCtx, schemas::Instruction, utils::dyn_graph::DynGraph};
 use hashbrown::HashMap;
+use parking_lot::Mutex;
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
 #[derive(Debug, Clone)]
 pub struct ReportOperator {
@@ -13,18 +13,18 @@ impl ReportOperator {
     println!("{instr:#?}\n");
 
     let (plan_v_pat_cnt, plan_e_pat_cnt) = {
-      let ctx = self.ctx.lock().await;
+      let ctx = self.ctx.lock();
       let plan_v_pat_cnt = ctx
         .plan_data
         .pattern_vs()
         .keys()
-        .map(|v_pat| (v_pat.to_owned(), 1))
+        .map(|v_pat| (v_pat.clone(), 1))
         .collect::<HashMap<_, usize>>();
       let plan_e_pat_cnt = ctx
         .plan_data
         .pattern_es()
         .keys()
-        .map(|e_pat| (e_pat.to_owned(), 1))
+        .map(|e_pat| (e_pat.clone(), 1))
         .collect::<HashMap<_, usize>>();
       (plan_v_pat_cnt, plan_e_pat_cnt)
     };
@@ -35,7 +35,7 @@ impl ReportOperator {
         .iter()
         .map(|(v_pat, vids)| {
           let cnt = vids.len();
-          (v_pat.to_owned(), cnt)
+          (v_pat.clone(), cnt)
         })
         .collect::<HashMap<_, usize>>();
       let graph_e_pat_cnt = graph
@@ -43,7 +43,7 @@ impl ReportOperator {
         .iter()
         .map(|(e_pat, eids)| {
           let cnt = eids.len();
-          (e_pat.to_owned(), cnt)
+          (e_pat.clone(), cnt)
         })
         .collect::<HashMap<_, usize>>();
 
@@ -69,7 +69,7 @@ impl ReportOperator {
       true
     };
 
-    let f_buckets: Vec<_> = { self.ctx.lock().await }.f_block.drain().collect();
+    let f_buckets: Vec<_> = { self.ctx.lock() }.f_block.drain().collect();
 
     let mut filtered_groups = Vec::new();
 
@@ -90,7 +90,7 @@ impl ReportOperator {
 
     // Now, we can update the `grouped_partial_matches` in ctx.
     {
-      let mut ctx = self.ctx.lock().await;
+      let mut ctx = self.ctx.lock();
       for curr_group in filtered_groups {
         ctx.grouped_partial_matches.push(curr_group);
       }

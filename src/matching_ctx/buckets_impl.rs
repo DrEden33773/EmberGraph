@@ -69,7 +69,7 @@ impl FBucket {
 impl ABucket {
   pub fn from_f_bucket(f_bucket: FBucket, curr_pat_vid: VidRef) -> Self {
     Self {
-      curr_pat_vid: curr_pat_vid.to_owned(),
+      curr_pat_vid: curr_pat_vid.to_string(),
       all_matched: f_bucket.all_matched,
       matched_with_frontiers: f_bucket.matched_with_frontiers,
       next_pat_grouped_expanding: HashMap::new(),
@@ -124,11 +124,11 @@ impl ABucket {
             // group by: next data_vertex
             for e in matched_data_es {
               next_vid_grouped_conn_pat_strs
-                .entry(e.dst_vid().to_owned())
+                .entry(e.dst_vid().to_string())
                 .or_insert_with(Vec::new)
-                .push(pat_e.eid().to_owned());
+                .push(pat_e.eid().to_string());
               next_vid_grouped_conn_es
-                .entry(e.dst_vid().to_owned())
+                .entry(e.dst_vid().to_string())
                 .or_insert_with(Vec::new)
                 .push(e);
             }
@@ -153,11 +153,11 @@ impl ABucket {
             // group by: next data_vertex
             for e in matched_data_es {
               next_vid_grouped_conn_pat_strs
-                .entry(e.src_vid().to_owned())
+                .entry(e.src_vid().to_string())
                 .or_insert_with(Vec::new)
-                .push(pat_e.eid().to_owned());
+                .push(pat_e.eid().to_string());
               next_vid_grouped_conn_es
-                .entry(e.src_vid().to_owned())
+                .entry(e.src_vid().to_string())
                 .or_insert_with(Vec::new)
                 .push(e);
             }
@@ -182,14 +182,14 @@ impl ABucket {
               .update_valid_dangling_edges(edges.iter().zip(pat_strs.iter().map(String::as_str)));
             self
               .next_pat_grouped_expanding
-              .entry(next_pat_vid.to_owned())
+              .entry(next_pat_vid.to_string())
               .or_default()
               .push(expanding_graph);
           }
         }
 
         if is_frontier_connected {
-          connected_data_vids.insert(frontier_vid.to_owned());
+          connected_data_vids.insert(frontier_vid.to_string());
         }
       }
     }

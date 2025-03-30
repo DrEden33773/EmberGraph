@@ -72,7 +72,7 @@ impl StorageAdapter for Neo4jStorageAdapter {
 
     let vid = vid.to_string();
     let labels: Vec<String> = row.get("v_label").unwrap();
-    let label = labels[0].to_owned();
+    let label = labels[0].clone();
     let attrs = row.get("props").unwrap();
 
     Some(DataVertex { vid, label, attrs })

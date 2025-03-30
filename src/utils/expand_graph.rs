@@ -46,7 +46,7 @@ impl<VType: VBase, EType: EBase> From<ExpandGraph<VType, EType>> for DynGraph<VT
     }));
 
     for target_v in val.target_v_adj_table.keys() {
-      let mut dangling_eids = val.target_v_adj_table[target_v].e_out.to_owned();
+      let mut dangling_eids = val.target_v_adj_table[target_v].e_out.clone();
       dangling_eids.extend(val.target_v_adj_table[target_v].e_in.clone());
 
       let dangling_e_pattern_pairs = dangling_eids
@@ -92,12 +92,12 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
     for dangling_e in self.dangling_e_entities.values() {
       if self.dyn_graph.has_vid(dangling_e.src_vid()) {
         grouped
-          .entry(dangling_e.dst_vid().to_owned())
+          .entry(dangling_e.dst_vid().to_string())
           .or_default()
           .push(dangling_e.clone());
       } else if self.dyn_graph.has_vid(dangling_e.dst_vid()) {
         grouped
-          .entry(dangling_e.src_vid().to_owned())
+          .entry(dangling_e.src_vid().to_string())
           .or_default()
           .push(dangling_e.clone());
       }
@@ -124,13 +124,13 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
       if !self.is_valid_dangling_edge(e) {
         continue;
       }
-      legal_eids.insert(e.eid().to_owned());
+      legal_eids.insert(e.eid().to_string());
       self
         .dangling_e_patterns
-        .insert(e.eid().to_owned(), pattern.to_owned());
+        .insert(e.eid().to_string(), pattern.to_string());
       self
         .dangling_e_entities
-        .insert(e.eid().to_owned(), e.to_owned());
+        .insert(e.eid().to_string(), e.clone());
     }
 
     legal_eids
@@ -158,13 +158,13 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
       if !self.is_valid_target(v) {
         continue;
       }
-      legal_vids.insert(v.vid().to_owned());
+      legal_vids.insert(v.vid().to_string());
       self
         .target_v_patterns
-        .insert(v.vid().to_owned(), pattern.to_owned());
+        .insert(v.vid().to_string(), pattern.to_string());
       self
         .target_v_entities
-        .insert(v.vid().to_owned(), v.to_owned());
+        .insert(v.vid().to_string(), v.clone());
     }
 
     for dangling_e in self.dangling_e_entities.keys() {
@@ -172,18 +172,18 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
       if self.target_v_entities.contains_key(e.src_vid()) {
         self
           .target_v_adj_table
-          .entry(e.src_vid().to_owned())
+          .entry(e.src_vid().to_string())
           .or_default()
           .e_out
-          .insert(e.eid().to_owned());
+          .insert(e.eid().to_string());
       }
       if self.target_v_entities.contains_key(e.dst_vid()) {
         self
           .target_v_adj_table
-          .entry(e.dst_vid().to_owned())
+          .entry(e.dst_vid().to_string())
           .or_default()
           .e_in
-          .insert(e.eid().to_owned());
+          .insert(e.eid().to_string());
       }
     }
     legal_vids

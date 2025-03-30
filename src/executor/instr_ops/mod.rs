@@ -7,9 +7,9 @@ use foreach::ForeachOperator;
 use get_adj::GetAdjOperator;
 use init::InitOperator;
 use intersect::IntersectOperator;
+use parking_lot::Mutex;
 use report::ReportOperator;
 use std::{str::FromStr, sync::Arc};
-use tokio::sync::Mutex;
 
 pub mod foreach;
 pub mod get_adj;
