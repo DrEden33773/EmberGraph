@@ -31,19 +31,7 @@ pub enum Op {
 
 impl Op {
   #[inline]
-  pub fn to_neo4j_op(&self) -> &str {
-    match self {
-      Op::Eq => "=",
-      Op::Ne => "<>",
-      Op::Gt => ">",
-      Op::Ge => ">=",
-      Op::Lt => "<",
-      Op::Le => "<=",
-    }
-  }
-
-  #[inline]
-  pub fn to_sqlite_op(&self) -> &str {
+  pub fn to_neo4j_sqlite_repr(&self) -> &str {
     match self {
       Op::Eq => "=",
       Op::Ne => "<>",

@@ -426,6 +426,7 @@ dependencies = [
  "futures",
  "hashbrown",
  "itertools",
+ "lru",
  "neo4rs",
  "num_cpus",
  "parking_lot",
@@ -951,6 +952,15 @@ name = "log"
 version = "0.4.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13dc2df351e3202783a1fe0d44375f7295ffb4049267b0f3018346dc122a1d94"
+
+[[package]]
+name = "lru"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "227748d55f2f0ab4735d87fd623798cb6b664512fe979705f829c9f81c934465"
+dependencies = [
+ "hashbrown",
+]
 
 [[package]]
 name = "matchers"

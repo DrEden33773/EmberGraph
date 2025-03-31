@@ -113,7 +113,7 @@ impl PatternAttr {
     };
 
     let left = format!("{field}.{}", &self.key);
-    let mid = self.op.to_neo4j_op();
+    let mid = self.op.to_neo4j_sqlite_repr();
     let right = value_repr;
 
     format!("{left} {mid} {right}")

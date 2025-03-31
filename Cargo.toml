@@ -8,6 +8,7 @@ dotenv = "0.15.0"
 futures = "0.3.31"
 hashbrown = { version = "0.15.2", features = ["rayon", "serde"] }
 itertools = "0.14.0"
+lru = "0.13.0"
 neo4rs = "0.8.0"
 num_cpus = "1.16.0"
 parking_lot = { version = "0.12.3", features = ["hardware-lock-elision"] }

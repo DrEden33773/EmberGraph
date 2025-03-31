@@ -12,7 +12,7 @@ async fn main() -> io::Result<()> {
 
   println!("Application started.\n");
 
-  ic_11_on_sf_01().await?;
+  is_3_reversed_directed_knows_on_sf_01().await?;
 
   println!("Application finished.\n");
 

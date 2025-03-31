@@ -1,5 +1,6 @@
 use crate::schemas::*;
 
+pub mod cached;
 pub mod neo4j;
 pub mod sqlite;
 
