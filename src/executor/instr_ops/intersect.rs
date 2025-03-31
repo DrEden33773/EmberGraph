@@ -39,7 +39,7 @@ impl<S: StorageAdapter> IntersectOperator<S> {
     let a_group = { self.ctx.lock() }
       .pop_group_by_pat_from_a_block(instr.single_op.as_ref().unwrap(), &instr.vid)?;
 
-    let c_bucket = CBucket::build_from_a_group(a_group, loaded_v_pat_pairs);
+    let c_bucket = CBucket::build_from_a_group(a_group, loaded_v_pat_pairs).await;
 
     { self.ctx.lock() }.update_c_block(&instr.target_var, c_bucket);
 
@@ -63,12 +63,12 @@ impl<S: StorageAdapter> IntersectOperator<S> {
 
     let a1 = a_groups.pop_front().unwrap();
     let a2 = a_groups.pop_front().unwrap();
-    let mut t_bucket = TBucket::build_from_a_a(a1, a2, &instr.vid);
+    let mut t_bucket = TBucket::build_from_a_a(a1, a2, &instr.vid).await;
 
     if a_groups.len() > 2 {
       let mut prev_t = t_bucket;
       while let Some(a_group) = a_groups.pop_front() {
-        t_bucket = TBucket::build_from_t_a(prev_t, a_group);
+        t_bucket = TBucket::build_from_t_a(prev_t, a_group).await;
         prev_t = t_bucket;
       }
       t_bucket = prev_t;
@@ -85,7 +85,7 @@ impl<S: StorageAdapter> IntersectOperator<S> {
 
     let t_bucket = { self.ctx.lock() }.pop_from_t_block(instr.single_op.as_ref().unwrap())?;
 
-    let c_bucket = CBucket::build_from_t(t_bucket, loaded_v_pat_pairs);
+    let c_bucket = CBucket::build_from_t(t_bucket, loaded_v_pat_pairs).await;
 
     { self.ctx.lock() }.update_c_block(&instr.target_var, c_bucket);
 

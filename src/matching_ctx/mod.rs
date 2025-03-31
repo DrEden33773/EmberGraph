@@ -90,11 +90,11 @@ impl MatchingCtx {
   /// `Init`: Update `f_block` with matched_graph and frontier_vid
   pub fn append_to_f_block(
     &mut self,
-    target_var: &str,
+    target_var: impl AsRef<str>,
     matched_graph: DynGraph,
     frontier_vid: VidRef,
   ) {
-    let key = resolve_var_name(target_var);
+    let key = resolve_var_name(target_var.as_ref());
 
     // try to init f_block if key doesn't exist
     self.f_block.entry(key.to_string()).or_default();

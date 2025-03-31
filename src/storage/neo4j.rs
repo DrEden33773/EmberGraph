@@ -24,9 +24,12 @@ impl AsyncDefault for Neo4jStorageAdapter {
       .build()
       .unwrap();
 
-    let graph = time_async_with_desc(Graph::connect(config), "Connecting to Neo4j database ... ")
-      .await
-      .unwrap();
+    let graph = time_async_with_desc(
+      Graph::connect(config),
+      "Connecting to Neo4j database ... ".to_string(),
+    )
+    .await
+    .unwrap();
 
     Self { graph }
   }

@@ -180,13 +180,15 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
 }
 
 impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
-  pub fn update_v(&mut self, vertex: VType, pattern: String) -> &mut Self {
+  pub fn update_v(&mut self, vertex: VType, pattern: impl AsRef<str>) -> &mut Self {
     let vid = vertex.vid().to_string();
 
     self.v_entities.insert(vid.clone(), vertex);
     self.adj_table.entry(vid.clone()).or_default();
 
-    let old_pattern = self.vid_2_pattern.insert(vid.clone(), pattern.clone());
+    let old_pattern = self
+      .vid_2_pattern
+      .insert(vid.clone(), pattern.as_ref().to_string());
     if let Some(old_pattern) = old_pattern {
       self
         .pattern_2_vids
@@ -194,7 +196,11 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
         .unwrap()
         .remove(&vid);
     }
-    self.pattern_2_vids.entry(pattern).or_default().insert(vid);
+    self
+      .pattern_2_vids
+      .entry(pattern.as_ref().to_string())
+      .or_default()
+      .insert(vid);
 
     self
   }

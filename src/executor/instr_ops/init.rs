@@ -30,23 +30,31 @@ impl<S: StorageAdapter> InitOperator<S> {
     let unexpanded_matched_vs = {
       let ctx = self.ctx.lock();
       matched_vs
-        .into_par_iter()
+        .into_iter()
         .filter(|data_v| !ctx.expanded_data_vids.contains(&data_v.vid))
-        .collect_vec_list()
+        .collect::<Vec<_>>()
     };
 
-    // prepare for: updating the block
-    let pre = unexpanded_matched_vs
-      .into_par_iter()
-      .flatten()
-      .map(|data_v| {
-        let frontier_vid = data_v.vid.clone();
-        let mut matched_dg = DynGraph::<DataVertex, DataEdge>::default();
-        matched_dg.update_v(data_v, pattern_v.vid.clone());
+    // prepare for updating the block
+    // let (send, recv) = tokio::sync::oneshot::channel();
+    let pattern: Arc<str> = pattern_v.vid.as_str().into();
+    let target_var: Arc<str> = instr.target_var.as_str().into();
+    let handle = tokio::task::spawn_blocking(move || {
+      let pre = unexpanded_matched_vs
+        .into_par_iter()
+        .map(|data_v| {
+          let frontier_vid = data_v.vid.clone();
+          let mut matched_dg = DynGraph::<DataVertex, DataEdge>::default();
+          matched_dg.update_v(data_v, pattern.clone());
 
-        (&instr.target_var, matched_dg, frontier_vid)
-      })
-      .collect_vec_list();
+          (target_var.clone(), matched_dg, frontier_vid)
+        })
+        .collect_vec_list();
+      // let _ = send.send(pre);
+      pre
+    });
+    // let pre = recv.await.unwrap();
+    let pre = handle.await.unwrap();
 
     // update f_block
     {

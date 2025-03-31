@@ -149,12 +149,12 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
   /// Update valid target vertices and return them
   ///
   /// - Vertices of any `dangling_edge` could be added to `target_v_adj_table`
-  pub fn update_valid_target_vertices<'a>(
-    &'a mut self,
-    target_vertices: impl IntoIterator<Item = (&'a VType, &'a str)>,
+  pub fn update_valid_target_vertices(
+    &mut self,
+    target_vertices: impl AsRef<Vec<(VType, String)>>,
   ) -> HashSet<String> {
     let mut legal_vids = HashSet::new();
-    for (v, pattern) in target_vertices {
+    for (v, pattern) in target_vertices.as_ref().iter() {
       if !self.is_valid_target(v) {
         continue;
       }
@@ -190,14 +190,18 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
   }
 }
 
+// TODO: parallelize this function
 /// 1. Take two expand_graphs' `vertices` and `non-dangling-edges` into a new graph
 /// 2. Iterate through the `dangling_edges` of both, select those connective ones
 pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
-  l_expand_graph: &ExpandGraph<VType, EType>,
-  r_expand_graph: &ExpandGraph<VType, EType>,
+  l_expand_graph: ExpandGraph<VType, EType>,
+  r_expand_graph: ExpandGraph<VType, EType>,
 ) -> Vec<ExpandGraph<VType, EType>> {
-  let l_graph = &l_expand_graph.dyn_graph;
-  let r_graph = &r_expand_graph.dyn_graph;
+  let grouped_l = l_expand_graph.group_dangling_e_by_pending_v();
+  let grouped_r = r_expand_graph.group_dangling_e_by_pending_v();
+
+  let l_graph = l_expand_graph.dyn_graph;
+  let r_graph = r_expand_graph.dyn_graph;
 
   // For each pair of common_v/e_pats, they should lead to the same vs/es in both graphs.
   //
@@ -233,11 +237,6 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
   let mut new_graph = DynGraph::<VType, EType>::default();
   new_graph.update_v_batch(l_v_pat_pairs.into_iter().chain(r_v_pat_pairs));
   new_graph.update_e_batch(l_e_pat_pairs.into_iter().chain(r_e_pat_pairs));
-
-  let (grouped_l, grouped_r) = (
-    l_expand_graph.group_dangling_e_by_pending_v(),
-    r_expand_graph.group_dangling_e_by_pending_v(),
-  );
 
   let mut result = vec![];
 

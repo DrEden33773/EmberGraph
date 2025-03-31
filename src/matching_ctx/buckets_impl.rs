@@ -12,9 +12,8 @@ use crate::{
 use futures::{StreamExt, future, stream};
 use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
-use rayon::iter::{
-  IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator, ParallelIterator,
-};
+use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
+use std::sync::Arc;
 
 async fn does_data_v_satisfy_pattern(
   dg_vid: VidRef<'_>,
@@ -330,23 +329,29 @@ async fn incremental_match<'a, S: StorageAdapter>(ctx: LoadWithCondCtx<'a, S>) -
 }
 
 impl CBucket {
-  pub fn build_from_a_group(
+  pub async fn build_from_a_group(
     a_group: Vec<ExpandGraph>,
     loaded_v_pat_pairs: Vec<(DataVertex, String)>,
   ) -> Self {
     let mut all_expanded = vec![];
     let mut expanded_with_frontiers = HashMap::new();
 
-    let pre = a_group
-      .into_par_iter()
-      .enumerate()
-      .map(|(idx, mut expanding)| {
-        let valid_targets = expanding
-          .update_valid_target_vertices(loaded_v_pat_pairs.iter().map(|(v, p)| (v, p.as_str())));
-
-        (expanding, idx, valid_targets)
-      })
-      .collect_vec_list();
+    // let (send, recv) = tokio::sync::oneshot::channel();
+    let loaded_v_pat_pairs = Arc::new(loaded_v_pat_pairs);
+    let handle = tokio::task::spawn_blocking(move || {
+      let pre = a_group
+        .into_par_iter()
+        .enumerate()
+        .map(|(idx, mut expanding)| {
+          let valid_targets = expanding.update_valid_target_vertices(loaded_v_pat_pairs.as_ref());
+          (expanding, idx, valid_targets)
+        })
+        .collect_vec_list();
+      // let _ = send.send(pre);
+      pre
+    });
+    // let pre = recv.await.unwrap();
+    let pre = handle.await.unwrap();
 
     for (expanding, idx, valid_targets) in pre.into_iter().flatten() {
       all_expanded.push(expanding);
@@ -362,21 +367,30 @@ impl CBucket {
     }
   }
 
-  pub fn build_from_t(t_bucket: TBucket, loaded_v_pat_pairs: Vec<(DataVertex, String)>) -> Self {
+  pub async fn build_from_t(
+    t_bucket: TBucket,
+    loaded_v_pat_pairs: Vec<(DataVertex, String)>,
+  ) -> Self {
     let mut all_expanded = vec![];
     let mut expanded_with_frontiers = HashMap::new();
 
-    let pre = t_bucket
-      .expanding_graphs
-      .into_par_iter()
-      .enumerate()
-      .map(|(idx, mut expanding)| {
-        let valid_targets = expanding
-          .update_valid_target_vertices(loaded_v_pat_pairs.iter().map(|(v, p)| (v, p.as_str())));
-
-        (expanding, idx, valid_targets)
-      })
-      .collect_vec_list();
+    // let (send, recv) = tokio::sync::oneshot::channel();
+    let loaded_v_pat_pairs = Arc::new(loaded_v_pat_pairs);
+    let handle = tokio::task::spawn_blocking(move || {
+      let pre = t_bucket
+        .expanding_graphs
+        .into_par_iter()
+        .enumerate()
+        .map(|(idx, mut expanding)| {
+          let valid_targets = expanding.update_valid_target_vertices(loaded_v_pat_pairs.as_ref());
+          (expanding, idx, valid_targets)
+        })
+        .collect_vec_list();
+      // let _ = send.send(pre);
+      pre
+    });
+    // let pre = recv.await.unwrap();
+    let pre = handle.await.unwrap();
 
     for (expanding, idx, valid_targets) in pre.into_iter().flatten() {
       all_expanded.push(expanding);
@@ -394,43 +408,50 @@ impl CBucket {
 }
 
 impl TBucket {
-  pub fn build_from_a_a(
+  pub async fn build_from_a_a(
     left: Vec<ExpandGraph>,
     right: Vec<ExpandGraph>,
     target_pat_vid: VidRef<'_>,
   ) -> Self {
-    let expanding_graphs = Self::expand_edges_of_two(left, right);
+    let expanding_graphs = Self::expand_edges_of_two(left, right).await;
     Self {
       target_pat_vid: target_pat_vid.to_owned(),
       expanding_graphs,
     }
   }
 
-  pub fn build_from_t_a(t_bucket: TBucket, a_group: Vec<ExpandGraph>) -> Self {
+  pub async fn build_from_t_a(t_bucket: TBucket, a_group: Vec<ExpandGraph>) -> Self {
     let left_group = t_bucket.expanding_graphs;
     let right_group = a_group;
 
-    let expanding_graphs = Self::expand_edges_of_two(left_group, right_group);
+    let expanding_graphs = Self::expand_edges_of_two(left_group, right_group).await;
     Self {
       target_pat_vid: t_bucket.target_pat_vid,
       expanding_graphs,
     }
   }
 
-  fn expand_edges_of_two(
+  async fn expand_edges_of_two(
     left_group: Vec<ExpandGraph>,
     right_group: Vec<ExpandGraph>,
   ) -> Vec<ExpandGraph> {
     // collect all combinations via `cartesian_product`
     let combinations = left_group
-      .iter()
-      .cartesian_product(right_group.iter())
+      .into_iter()
+      .cartesian_product(right_group)
       .collect::<Vec<_>>();
 
     // parallelize the process
-    combinations
-      .par_iter()
-      .flat_map(|&(outer, inner)| union_then_intersect_on_connective_v(outer, inner))
-      .collect()
+    // let (send, recv) = tokio::sync::oneshot::channel();
+    let handle = tokio::task::spawn_blocking(|| {
+      let res = combinations
+        .into_par_iter()
+        .flat_map(|(outer, inner)| union_then_intersect_on_connective_v(outer, inner))
+        .collect();
+      // let _ = send.send(res);
+      res
+    });
+    // recv.await.unwrap()
+    handle.await.unwrap()
   }
 }

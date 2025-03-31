@@ -1,0 +1,53 @@
+   0.000140800s  INFO main ThreadId(01) ember_sgm_backend: Application started.
+   0.001565800s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: neo4rs::pool: creating connection pool with max size 20    
+   0.001621100s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: ember_sgm_backend::utils: Connecting to Neo4j database ...  ✅ 0.18ms
+
+   0.003013600s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: neo4rs::pool: creating new connection...    
+   2.039240600s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: ember_sgm_backend::utils: >>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid  ✅ 2036.33ms
+
+   2.051004000s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid " name=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid "}: ember_sgm_backend::utils: >>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid  ✅ 3.82ms
+
+   0.000126200s  INFO main ThreadId(01) ember_sgm_backend: Application started.
+
+   0.001493100s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: neo4rs::pool: creating connection pool with max size 20    
+   0.001544100s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: ember_sgm_backend::utils: Connecting to Neo4j database ...  ✅ 0.15ms
+
+   0.003195200s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: neo4rs::pool: creating new connection...    
+   2.044383800s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: ember_sgm_backend::utils: >>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid  ✅ 2041.26ms
+
+   2.054579100s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid " name=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid "}: ember_sgm_backend::utils: >>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid  ✅ 2.63ms
+
+   0.000116500s  INFO main ThreadId(01) ember_sgm_backend: Application started.
+
+   0.001310200s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: neo4rs::pool: creating connection pool with max size 20    
+   0.001368600s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: ember_sgm_backend::utils: Connecting to Neo4j database ...  ✅ 0.15ms
+
+   0.002496200s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: neo4rs::pool: creating new connection...    
+   2.058190100s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: ember_sgm_backend::utils: >>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid  ✅ 2055.76ms
+
+   2.067846600s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid " name=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid "}: ember_sgm_backend::utils: >>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid  ✅ 2.77ms
+
+   0.000118700s  INFO main ThreadId(01) ember_sgm_backend: Application started.
+
+   0.001727300s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: neo4rs::pool: creating connection pool with max size 20    
+   0.003525700s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: neo4rs::pool: creating new connection...    
+   0.000149700s  INFO main ThreadId(01) ember_sgm_backend: Application started.
+
+   0.002284200s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: neo4rs::pool: creating connection pool with max size 20    
+   0.002433200s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: ember_sgm_backend::utils: Connecting to Neo4j database ...  ✅ 0.28ms
+
+   0.004281900s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: neo4rs::pool: creating new connection...    
+   2.111135300s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: ember_sgm_backend::utils: >>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid  ✅ 2107.00ms
+
+  26.473224000s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid " name=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid "}: ember_sgm_backend::utils: >>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid  ✅ 2134.48ms
+
+   0.000137300s  INFO main ThreadId(01) ember_sgm_backend: Application started.
+
+   0.001881200s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: neo4rs::pool: creating connection pool with max size 20    
+   0.001929900s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: ember_sgm_backend::utils: Connecting to Neo4j database ...  ✅ 0.17ms
+
+   0.003637900s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: neo4rs::pool: creating new connection...    
+   2.030776900s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: ember_sgm_backend::utils: >>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid  ✅ 2027.22ms
+
+   2.039870500s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid " name=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid "}: ember_sgm_backend::utils: >>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid  ✅ 2.08ms
+

@@ -1,4 +1,5 @@
 use tokio::time::Instant;
+use tracing::{info, instrument};
 
 pub mod dyn_graph;
 pub mod expand_graph;
@@ -10,13 +11,9 @@ pub async fn time_async<F: Future<Output = O>, O>(future: F) -> (O, f64) {
   (result, elapsed)
 }
 
-pub async fn time_async_with_desc<F: Future<Output = O>, O>(
-  future: F,
-  _desc: impl AsRef<str>,
-) -> O {
-  let (result, _elapsed) = time_async(future).await;
-
-  // println!("{} ✅ {_elapsed:.2}ms\n", _desc.as_ref());
-
+#[instrument(skip(future), fields(name = desc))]
+pub async fn time_async_with_desc<F: Future<Output = O>, O>(future: F, desc: String) -> O {
+  let (result, elapsed) = time_async(future).await;
+  info!("{} ✅ {elapsed:.2}ms\n", desc);
   result
 }

@@ -1,4 +1,5 @@
 #![feature(duration_millis_float)]
+#![feature(slice_pattern)]
 
 pub mod demos;
 pub mod executor;
