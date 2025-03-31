@@ -3,7 +3,7 @@ use dotenv::dotenv;
 use ember_sgm_backend::demos::{complex_interactive_sf01::*, simple_interactive_sf01::*};
 use tokio::io::{self};
 
-#[tokio::main(flavor = "multi_thread", worker_threads = 20)]
+#[tokio::main(flavor = "multi_thread")]
 async fn main() -> io::Result<()> {
   dotenv().ok();
 
@@ -14,7 +14,7 @@ async fn main() -> io::Result<()> {
 
   ic_11_on_sf_01().await?;
 
-  println!("Application started.\n");
+  println!("Application finished.\n");
 
   Ok(())
 }
