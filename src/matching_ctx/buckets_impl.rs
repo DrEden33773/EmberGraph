@@ -336,22 +336,35 @@ impl CBucket {
     let mut all_expanded = vec![];
     let mut expanded_with_frontiers = HashMap::new();
 
-    // let (send, recv) = tokio::sync::oneshot::channel();
+    // parallelize the process: update_valid_target_vertices
     let loaded_v_pat_pairs = Arc::new(loaded_v_pat_pairs);
-    let handle = tokio::task::spawn_blocking(move || {
-      let pre = a_group
-        .into_par_iter()
-        .enumerate()
-        .map(|(idx, mut expanding)| {
-          let valid_targets = expanding.update_valid_target_vertices(loaded_v_pat_pairs.as_ref());
-          (expanding, idx, valid_targets)
-        })
-        .collect_vec_list();
-      // let _ = send.send(pre);
-      pre
-    });
-    // let pre = recv.await.unwrap();
-    let pre = handle.await.unwrap();
+    let pre = if cfg!(not(feature = "block_spawn_via_rayon")) {
+      let handle = tokio::task::spawn_blocking(move || {
+        a_group
+          .into_par_iter()
+          .enumerate()
+          .map(|(idx, mut expanding)| {
+            let valid_targets = expanding.update_valid_target_vertices(loaded_v_pat_pairs.as_ref());
+            (expanding, idx, valid_targets)
+          })
+          .collect_vec_list()
+      });
+      handle.await.unwrap()
+    } else {
+      let (send, recv) = tokio::sync::oneshot::channel();
+      rayon::spawn(move || {
+        let pre = a_group
+          .into_par_iter()
+          .enumerate()
+          .map(|(idx, mut expanding)| {
+            let valid_targets = expanding.update_valid_target_vertices(loaded_v_pat_pairs.as_ref());
+            (expanding, idx, valid_targets)
+          })
+          .collect_vec_list();
+        let _ = send.send(pre);
+      });
+      recv.await.unwrap()
+    };
 
     for (expanding, idx, valid_targets) in pre.into_iter().flatten() {
       all_expanded.push(expanding);
@@ -374,23 +387,37 @@ impl CBucket {
     let mut all_expanded = vec![];
     let mut expanded_with_frontiers = HashMap::new();
 
-    // let (send, recv) = tokio::sync::oneshot::channel();
+    // parallelize the process: update_valid_target_vertices
     let loaded_v_pat_pairs = Arc::new(loaded_v_pat_pairs);
-    let handle = tokio::task::spawn_blocking(move || {
-      let pre = t_bucket
-        .expanding_graphs
-        .into_par_iter()
-        .enumerate()
-        .map(|(idx, mut expanding)| {
-          let valid_targets = expanding.update_valid_target_vertices(loaded_v_pat_pairs.as_ref());
-          (expanding, idx, valid_targets)
-        })
-        .collect_vec_list();
-      // let _ = send.send(pre);
-      pre
-    });
-    // let pre = recv.await.unwrap();
-    let pre = handle.await.unwrap();
+    let pre = if cfg!(not(feature = "block_spawn_via_rayon")) {
+      let handle = tokio::task::spawn_blocking(move || {
+        t_bucket
+          .expanding_graphs
+          .into_par_iter()
+          .enumerate()
+          .map(|(idx, mut expanding)| {
+            let valid_targets = expanding.update_valid_target_vertices(loaded_v_pat_pairs.as_ref());
+            (expanding, idx, valid_targets)
+          })
+          .collect_vec_list()
+      });
+      handle.await.unwrap()
+    } else {
+      let (send, recv) = tokio::sync::oneshot::channel();
+      rayon::spawn(move || {
+        let pre = t_bucket
+          .expanding_graphs
+          .into_par_iter()
+          .enumerate()
+          .map(|(idx, mut expanding)| {
+            let valid_targets = expanding.update_valid_target_vertices(loaded_v_pat_pairs.as_ref());
+            (expanding, idx, valid_targets)
+          })
+          .collect_vec_list();
+        let _ = send.send(pre);
+      });
+      recv.await.unwrap()
+    };
 
     for (expanding, idx, valid_targets) in pre.into_iter().flatten() {
       all_expanded.push(expanding);
@@ -441,17 +468,28 @@ impl TBucket {
       .cartesian_product(right_group)
       .collect::<Vec<_>>();
 
-    // parallelize the process
-    // let (send, recv) = tokio::sync::oneshot::channel();
-    let handle = tokio::task::spawn_blocking(|| {
-      let res = combinations
-        .into_par_iter()
-        .flat_map(|(outer, inner)| union_then_intersect_on_connective_v(outer, inner))
-        .collect();
-      // let _ = send.send(res);
-      res
-    });
-    // recv.await.unwrap()
-    handle.await.unwrap()
+    // parallelize the process: union_then_intersect_on_connective_v
+    #[cfg(not(feature = "block_spawn_via_rayon"))]
+    {
+      let res = tokio::task::spawn_blocking(move || {
+        combinations
+          .into_iter()
+          .flat_map(|(outer, inner)| union_then_intersect_on_connective_v(outer, inner))
+          .collect::<Vec<_>>()
+      });
+      res.await.unwrap()
+    }
+    #[cfg(feature = "block_spawn_via_rayon")]
+    {
+      let (send, recv) = tokio::sync::oneshot::channel();
+      rayon::spawn(|| {
+        let res = combinations
+          .into_par_iter()
+          .flat_map(|(outer, inner)| union_then_intersect_on_connective_v(outer, inner))
+          .collect();
+        let _ = send.send(res);
+      });
+      recv.await.unwrap()
+    }
   }
 }

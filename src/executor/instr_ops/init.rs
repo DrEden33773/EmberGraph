@@ -36,10 +36,10 @@ impl<S: StorageAdapter> InitOperator<S> {
     };
 
     // prepare for updating the block
-    // let (send, recv) = tokio::sync::oneshot::channel();
     let pattern: Arc<str> = pattern_v.vid.as_str().into();
     let target_var: Arc<str> = instr.target_var.as_str().into();
-    let handle = tokio::task::spawn_blocking(move || {
+    let (send, recv) = tokio::sync::oneshot::channel();
+    rayon::spawn(move || {
       let pre = unexpanded_matched_vs
         .into_par_iter()
         .map(|data_v| {
@@ -50,11 +50,9 @@ impl<S: StorageAdapter> InitOperator<S> {
           (target_var.clone(), matched_dg, frontier_vid)
         })
         .collect_vec_list();
-      // let _ = send.send(pre);
-      pre
+      let _ = send.send(pre);
     });
-    // let pre = recv.await.unwrap();
-    let pre = handle.await.unwrap();
+    let pre = recv.await.unwrap();
 
     // update f_block
     {
