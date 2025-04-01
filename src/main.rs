@@ -23,7 +23,7 @@ pub(crate) mod init_log {
   use tracing_appender::{non_blocking, rolling};
   use tracing_subscriber::{EnvFilter, Registry, layer::SubscriberExt, util::SubscriberInitExt};
 
-  #[allow(dead_code)]
+  #[must_use]
   pub async fn init_log() -> io::Result<WorkerGuard> {
     let mut path = get_project_root()?;
     path.push("logs");

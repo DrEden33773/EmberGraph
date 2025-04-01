@@ -27,7 +27,6 @@ pub struct Instruction {
   pub(crate) single_op: Option<String>,
   pub(crate) multi_ops: Vec<String>,
   pub(crate) target_var: String,
-  #[allow(unused)]
   pub(crate) depend_on: Vec<String>,
 }
 

@@ -76,6 +76,7 @@ impl ABucket {
     }
   }
 
+  // TODO: parallelize this function
   pub async fn incremental_load_new_edges(
     &mut self,
     pattern_es: Vec<PatternEdge>,
@@ -439,7 +440,7 @@ impl TBucket {
     // parallelize the process: union_then_intersect_on_connective_v
     parallel::spawn_blocking(move || {
       combinations
-        .into_iter()
+        .into_par_iter()
         .flat_map(|(outer, inner)| union_then_intersect_on_connective_v(outer, inner))
         .collect::<Vec<_>>()
     })
