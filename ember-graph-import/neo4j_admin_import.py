@@ -1,4 +1,5 @@
 import os
+import platform
 import subprocess
 from pathlib import Path
 from typing import Optional
@@ -10,9 +11,10 @@ TEST_DATASET = ROOT / "data" / "ldbc-sn-interactive-sf01"
 NODES = TEST_DATASET / "nodes"
 RELATIONSHIPS = TEST_DATASET / "relationships"
 
-NEO4J_IMPORT_PRE = "neo4j-admin database import full"
+SUDO_PREFIX = "sudo" if platform.system().lower() != "windows" else ""
+NEO4J_IMPORT_PRE = f"{SUDO_PREFIX} neo4j-admin database import full"
 NEO4J_IMPORT_OPT = f'--delimiter="|" --threads={os.cpu_count()} --high-parallel-io=on --overwrite-destination --verbose'
-NEO4J_IMPORT = f"{NEO4J_IMPORT_PRE} {NEO4J_IMPORT_OPT}"
+NEO4J_IMPORT = f"{NEO4J_IMPORT_PRE} {NEO4J_IMPORT_OPT} neo4j"
 
 
 def exec(nodes_dir: Optional[Path] = None, relationships_dir: Optional[Path] = None):
