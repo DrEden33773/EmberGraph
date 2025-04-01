@@ -2,7 +2,7 @@ use crate::{
   matching_ctx::MatchingCtx,
   schemas::{DataEdge, DataVertex, Instruction},
   storage::StorageAdapter,
-  utils::dyn_graph::DynGraph,
+  utils::{dyn_graph::DynGraph, parallel},
 };
 use parking_lot::Mutex;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
@@ -38,9 +38,8 @@ impl<S: StorageAdapter> InitOperator<S> {
     // prepare for updating the block
     let pattern: Arc<str> = pattern_v.vid.as_str().into();
     let target_var: Arc<str> = instr.target_var.as_str().into();
-    let (send, recv) = tokio::sync::oneshot::channel();
-    rayon::spawn(move || {
-      let pre = unexpanded_matched_vs
+    let pre = parallel::spawn_blocking(move || {
+      unexpanded_matched_vs
         .into_par_iter()
         .map(|data_v| {
           let frontier_vid = data_v.vid.clone();
@@ -49,10 +48,9 @@ impl<S: StorageAdapter> InitOperator<S> {
 
           (target_var.clone(), matched_dg, frontier_vid)
         })
-        .collect_vec_list();
-      let _ = send.send(pre);
-    });
-    let pre = recv.await.unwrap();
+        .collect_vec_list()
+    })
+    .await;
 
     // update f_block
     {

@@ -7,6 +7,7 @@ use crate::{
   utils::{
     dyn_graph::DynGraph,
     expand_graph::{ExpandGraph, union_then_intersect_on_connective_v},
+    parallel,
   },
 };
 use futures::{StreamExt, future, stream};
@@ -338,33 +339,17 @@ impl CBucket {
 
     // parallelize the process: update_valid_target_vertices
     let loaded_v_pat_pairs = Arc::new(loaded_v_pat_pairs);
-    let pre = if cfg!(not(feature = "block_spawn_via_rayon")) {
-      let handle = tokio::task::spawn_blocking(move || {
-        a_group
-          .into_par_iter()
-          .enumerate()
-          .map(|(idx, mut expanding)| {
-            let valid_targets = expanding.update_valid_target_vertices(loaded_v_pat_pairs.as_ref());
-            (expanding, idx, valid_targets)
-          })
-          .collect_vec_list()
-      });
-      handle.await.unwrap()
-    } else {
-      let (send, recv) = tokio::sync::oneshot::channel();
-      rayon::spawn(move || {
-        let pre = a_group
-          .into_par_iter()
-          .enumerate()
-          .map(|(idx, mut expanding)| {
-            let valid_targets = expanding.update_valid_target_vertices(loaded_v_pat_pairs.as_ref());
-            (expanding, idx, valid_targets)
-          })
-          .collect_vec_list();
-        let _ = send.send(pre);
-      });
-      recv.await.unwrap()
-    };
+    let pre = parallel::spawn_blocking(move || {
+      a_group
+        .into_par_iter()
+        .enumerate()
+        .map(|(idx, mut expanding)| {
+          let valid_targets = expanding.update_valid_target_vertices(loaded_v_pat_pairs.as_ref());
+          (expanding, idx, valid_targets)
+        })
+        .collect_vec_list()
+    })
+    .await;
 
     for (expanding, idx, valid_targets) in pre.into_iter().flatten() {
       all_expanded.push(expanding);
@@ -389,35 +374,18 @@ impl CBucket {
 
     // parallelize the process: update_valid_target_vertices
     let loaded_v_pat_pairs = Arc::new(loaded_v_pat_pairs);
-    let pre = if cfg!(not(feature = "block_spawn_via_rayon")) {
-      let handle = tokio::task::spawn_blocking(move || {
-        t_bucket
-          .expanding_graphs
-          .into_par_iter()
-          .enumerate()
-          .map(|(idx, mut expanding)| {
-            let valid_targets = expanding.update_valid_target_vertices(loaded_v_pat_pairs.as_ref());
-            (expanding, idx, valid_targets)
-          })
-          .collect_vec_list()
-      });
-      handle.await.unwrap()
-    } else {
-      let (send, recv) = tokio::sync::oneshot::channel();
-      rayon::spawn(move || {
-        let pre = t_bucket
-          .expanding_graphs
-          .into_par_iter()
-          .enumerate()
-          .map(|(idx, mut expanding)| {
-            let valid_targets = expanding.update_valid_target_vertices(loaded_v_pat_pairs.as_ref());
-            (expanding, idx, valid_targets)
-          })
-          .collect_vec_list();
-        let _ = send.send(pre);
-      });
-      recv.await.unwrap()
-    };
+    let pre = parallel::spawn_blocking(move || {
+      t_bucket
+        .expanding_graphs
+        .into_par_iter()
+        .enumerate()
+        .map(|(idx, mut expanding)| {
+          let valid_targets = expanding.update_valid_target_vertices(loaded_v_pat_pairs.as_ref());
+          (expanding, idx, valid_targets)
+        })
+        .collect_vec_list()
+    })
+    .await;
 
     for (expanding, idx, valid_targets) in pre.into_iter().flatten() {
       all_expanded.push(expanding);
@@ -469,27 +437,12 @@ impl TBucket {
       .collect::<Vec<_>>();
 
     // parallelize the process: union_then_intersect_on_connective_v
-    #[cfg(not(feature = "block_spawn_via_rayon"))]
-    {
-      let res = tokio::task::spawn_blocking(move || {
-        combinations
-          .into_iter()
-          .flat_map(|(outer, inner)| union_then_intersect_on_connective_v(outer, inner))
-          .collect::<Vec<_>>()
-      });
-      res.await.unwrap()
-    }
-    #[cfg(feature = "block_spawn_via_rayon")]
-    {
-      let (send, recv) = tokio::sync::oneshot::channel();
-      rayon::spawn(|| {
-        let res = combinations
-          .into_par_iter()
-          .flat_map(|(outer, inner)| union_then_intersect_on_connective_v(outer, inner))
-          .collect();
-        let _ = send.send(res);
-      });
-      recv.await.unwrap()
-    }
+    parallel::spawn_blocking(move || {
+      combinations
+        .into_iter()
+        .flat_map(|(outer, inner)| union_then_intersect_on_connective_v(outer, inner))
+        .collect::<Vec<_>>()
+    })
+    .await
   }
 }

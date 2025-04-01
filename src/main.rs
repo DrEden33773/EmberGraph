@@ -10,11 +10,7 @@ async fn main() -> io::Result<()> {
   #[cfg(feature = "use_tracing")]
   let _guard = init_log::init_log().await?;
 
-  println!("Application started.\n");
-
-  is_3_reversed_directed_knows_on_sf_01().await?;
-
-  println!("Application finished.\n");
+  ic_11_on_sf_01().await?;
 
   Ok(())
 }
