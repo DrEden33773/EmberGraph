@@ -5,7 +5,7 @@ use std::env;
 
 #[derive(Clone)]
 pub struct Neo4jStorageAdapter {
-  pub(crate) graph: Graph,
+  graph: Graph,
 }
 
 impl AsyncDefault for Neo4jStorageAdapter {
@@ -29,7 +29,7 @@ impl AsyncDefault for Neo4jStorageAdapter {
       "Connecting to Neo4j database ... ".to_string(),
     )
     .await
-    .unwrap();
+    .expect("⚠️  Failed to connect to Neo4j database");
 
     Self { graph }
   }

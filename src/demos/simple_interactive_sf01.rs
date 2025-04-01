@@ -1,7 +1,4 @@
-use crate::{
-  executor::ExecEngine,
-  storage::{cached::CachedStorageAdapter, *},
-};
+use crate::{executor::ExecEngine, storage::*};
 use project_root::get_project_root;
 use tokio::{fs, io};
 
@@ -13,7 +10,7 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
   let plan_json_content = fs::read_to_string(path).await?;
 
   let result =
-    ExecEngine::<CachedStorageAdapter<Neo4jStorageAdapter>>::build_from_json(&plan_json_content)
+    ExecEngine::<CachedStorageAdapter<SqliteStorageAdapter>>::build_from_json(&plan_json_content)
       .await
       .exec()
       .await;

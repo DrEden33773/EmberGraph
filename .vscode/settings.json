@@ -2,6 +2,7 @@
     "cSpell.words": [
         "ahash",
         "appender",
+        "AUTOINCREMENT",
         "colorama",
         "cpus",
         "dashmap",
@@ -33,5 +34,13 @@
         ".vscode-insiders",
         "data/**",
         "resources/**",
-    ]
+    ],
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "database": "${workspaceFolder:ember-sgm}/ldbc_sn_interactive_sf01.db",
+            "name": "ldbc_sn_interactive_sf01"
+        }
+    ],
 }

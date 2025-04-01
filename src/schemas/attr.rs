@@ -3,11 +3,14 @@ use hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
 use std::{fmt::Display, hash::Hash, str::FromStr};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize, strum_macros::Display)]
 #[serde(rename_all = "lowercase")]
 pub enum AttrType {
+  #[strum(serialize = "int")]
   Int,
+  #[strum(serialize = "float")]
   Float,
+  #[strum(serialize = "string")]
   String,
 }
 

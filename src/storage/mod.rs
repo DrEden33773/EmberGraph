@@ -4,8 +4,9 @@ pub mod cached;
 pub mod neo4j;
 pub mod sqlite;
 
+pub use cached::*;
 pub use neo4j::*;
-// pub use sqlite::*;
+pub use sqlite::*;
 
 pub trait AsyncDefault: Send + Sync {
   fn async_default() -> impl Future<Output = Self> + Send;
