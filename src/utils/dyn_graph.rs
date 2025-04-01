@@ -363,6 +363,17 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
       .collect()
   }
   #[inline]
+  pub fn drain_v_pattern_pairs(&mut self) -> Vec<(VType, String)> {
+    self
+      .v_entities
+      .drain()
+      .map(|(vid, v_entity)| {
+        let pattern = self.vid_2_pattern.remove(&vid).unwrap();
+        (v_entity, pattern)
+      })
+      .collect()
+  }
+  #[inline]
   pub fn get_e_pattern_pairs(&self) -> Vec<(EType, String)> {
     self
       .e_entities
@@ -370,6 +381,17 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
       .map(|(eid, e_entity)| {
         let pattern = self.eid_2_pattern[eid].clone();
         (e_entity.clone(), pattern)
+      })
+      .collect()
+  }
+  #[inline]
+  pub fn drain_e_pattern_pairs(&mut self) -> Vec<(EType, String)> {
+    self
+      .e_entities
+      .drain()
+      .map(|(eid, e_entity)| {
+        let pattern = self.eid_2_pattern.remove(&eid).unwrap();
+        (e_entity, pattern)
       })
       .collect()
   }

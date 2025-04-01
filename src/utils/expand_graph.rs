@@ -200,13 +200,11 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
   let grouped_l = l_expand_graph.group_dangling_e_by_pending_v();
   let grouped_r = r_expand_graph.group_dangling_e_by_pending_v();
 
-  let l_graph = l_expand_graph.dyn_graph;
-  let r_graph = r_expand_graph.dyn_graph;
+  let mut l_graph = l_expand_graph.dyn_graph;
+  let mut r_graph = r_expand_graph.dyn_graph;
 
   // For each pair of common_v/e_pats, they should lead to the same vs/es in both graphs.
-  //
   // If not, we should not consider them as a match.
-  //
   // We could also discard those patterns who lead to `multi` vs/es in either graph.
   for common_v_pat in l_graph
     .get_v_patterns()
@@ -229,10 +227,10 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
     }
   }
 
-  let l_v_pat_pairs = l_graph.get_v_pattern_pairs();
-  let r_v_pat_pairs = r_graph.get_v_pattern_pairs();
-  let l_e_pat_pairs = l_graph.get_e_pattern_pairs();
-  let r_e_pat_pairs = r_graph.get_e_pattern_pairs();
+  let l_v_pat_pairs = l_graph.drain_v_pattern_pairs();
+  let r_v_pat_pairs = r_graph.drain_v_pattern_pairs();
+  let l_e_pat_pairs = l_graph.drain_e_pattern_pairs();
+  let r_e_pat_pairs = r_graph.drain_e_pattern_pairs();
 
   let mut new_graph = DynGraph::<VType, EType>::default();
   new_graph.update_v_batch(l_v_pat_pairs.into_iter().chain(r_v_pat_pairs));
