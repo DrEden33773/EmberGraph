@@ -10,7 +10,7 @@ async fn main() -> io::Result<()> {
   #[cfg(feature = "use_tracing")]
   let _guard = init_log::init_log().await?;
 
-  ic_1_on_sf_01().await?;
+  is_3_on_sf_01().await?;
 
   Ok(())
 }
