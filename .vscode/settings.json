@@ -2,13 +2,15 @@
     "cSpell.words": [
         "ahash",
         "appender",
+        "colorama",
         "cpus",
         "dashmap",
         "eids",
         "Itertools",
         "ldbc",
         "oneshot",
-        "sqlmodel"
+        "sqlmodel",
+        "titlecase"
     ],
     "[rust]": {
         "editor.defaultFormatter": "rust-lang.rust-analyzer",
@@ -18,5 +20,7 @@
             "source.fixAll": "always"
         },
         "editor.tabSize": 2
-    }
+    },
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "strict"
 }

@@ -25,6 +25,7 @@ name = "ember-graph-import"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "colorama" },
     { name = "polars" },
     { name = "sqlmodel" },
     { name = "tqdm" },
@@ -32,6 +33,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "colorama", specifier = ">=0.4.6" },
     { name = "polars", specifier = ">=1.26.0" },
     { name = "sqlmodel", specifier = ">=0.0.24" },
     { name = "tqdm", specifier = ">=4.67.1" },

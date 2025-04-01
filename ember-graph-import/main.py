@@ -1,5 +1,8 @@
+import os
+
+
 def main():
-    print("Hello from ember-graph-import!")
+    print(os.cpu_count())
 
 
 if __name__ == "__main__":
