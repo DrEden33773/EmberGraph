@@ -26,8 +26,6 @@ class BaseAttribute(SQLModel):
 
 
 class DB_Vertex(SQLModel, table=True):
-    """顶点 (没有属性)"""
-
     vid: str = Field(primary_key=True)
     label: str = Field(index=True)
 
@@ -46,8 +44,6 @@ class DB_Vertex(SQLModel, table=True):
 
 
 class DB_Edge(SQLModel, table=True):
-    """边 (没有属性)"""
-
     eid: str = Field(primary_key=True)
     label: str = Field(index=True)
     src_vid: str = Field(index=True)
@@ -75,8 +71,6 @@ class DB_Edge(SQLModel, table=True):
 
 
 class Vertex_Attribute(BaseAttribute, table=True):
-    """顶点属性"""
-
     vid: str = Field(index=True)
 
     def __hash__(self) -> int:
@@ -85,8 +79,6 @@ class Vertex_Attribute(BaseAttribute, table=True):
 
 
 class Edge_Attribute(BaseAttribute, table=True):
-    """边属性"""
-
     eid: str = Field(index=True)
 
     def __hash__(self) -> int:
