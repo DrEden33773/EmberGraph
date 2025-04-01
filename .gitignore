@@ -2,6 +2,3 @@
 
 # ignore `.vscode` folder
 /.vscode
-
-# ignore `.idea` folder
-/.idea
