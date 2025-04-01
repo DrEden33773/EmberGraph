@@ -28,7 +28,7 @@ def exec(nodes_dir: Optional[Path] = None, relationships_dir: Optional[Path] = N
     if not nodes_dir.is_dir():
         print(
             f"""\
-            ⚠️  '{Fore.YELLOW + nodes_dir.stem + Style.RESET_ALL}' \
+            ⚠️  '{Fore.YELLOW + str(nodes_dir) + Style.RESET_ALL}' \
             is not a directory, fall back to default \
             ('{Fore.GREEN + NODES.stem + Style.RESET_ALL}').\
             """
@@ -37,7 +37,7 @@ def exec(nodes_dir: Optional[Path] = None, relationships_dir: Optional[Path] = N
     if not relationships_dir.is_dir():
         print(
             f"""\
-            ⚠️  '{Fore.YELLOW + relationships_dir.stem + Style.RESET_ALL} '\
+            ⚠️  '{Fore.YELLOW + str(relationships_dir) + Style.RESET_ALL} '\
             is not a directory, fall back to default \
             ('{Fore.GREEN + NODES.stem + Style.RESET_ALL}').\
             """
