@@ -12,8 +12,9 @@ pub async fn time_async<F: Future<Output = O>, O>(future: F) -> (O, f64) {
 }
 
 #[cfg(not(feature = "use_tracing"))]
-pub async fn time_async_with_desc<F: Future<Output = O>, O>(future: F, _: String) -> O {
-  let (result, _) = time_async(future).await;
+pub async fn time_async_with_desc<F: Future<Output = O>, O>(future: F, desc: String) -> O {
+  let (result, elapsed) = time_async(future).await;
+  println!("{} ✅ {elapsed:.2}ms\n", desc);
   result
 }
 
