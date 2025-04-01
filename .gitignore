@@ -2,3 +2,5 @@
 
 # ignore `.vscode` folder
 /.vscode
+
+/.VSCodeCounter
