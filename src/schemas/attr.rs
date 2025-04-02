@@ -14,6 +14,16 @@ pub enum AttrType {
   String,
 }
 
+impl From<&AttrValue> for AttrType {
+  fn from(value: &AttrValue) -> Self {
+    match value {
+      AttrValue::Int(_) => AttrType::Int,
+      AttrValue::Float(_) => AttrType::Float,
+      AttrValue::String(_) => AttrType::String,
+    }
+  }
+}
+
 #[derive(Debug, Clone)]
 pub enum AttrValue {
   Int(i64),
@@ -105,6 +115,63 @@ pub struct PatternAttr {
   pub(crate) value: AttrValue,
   #[serde(rename = "type")]
   pub(crate) _type: AttrType,
+}
+
+impl PatternAttr {
+  pub fn parse_from_raw(key: String, raw_pred: String) -> Self {
+    let mut cursor = 0;
+
+    // op
+    let mut raw_op = String::new();
+    for c in raw_pred.chars() {
+      if c.is_alphanumeric() || c == '\'' || c == '\"' {
+        break;
+      }
+      raw_op.push(c);
+      cursor += 1;
+    }
+    let op = Op::from_str(&raw_op)
+      .unwrap_or_else(|_| panic!("⚠️  Invalid operator: `{raw_op}` in `{raw_pred}`."));
+
+    // value
+    let last_char = raw_pred.chars().last().unwrap_or(' ');
+    let value = match raw_pred.chars().nth(cursor) {
+      Some(c) => match c {
+        c if c.is_ascii_digit() => {
+          let raw_value = &raw_pred[cursor..];
+          AttrValue::from_str(raw_value)
+            .unwrap_or_else(|_| panic!("⚠️  Malformed literal: `{raw_value}` in `{raw_pred}`."))
+        }
+        c if c == '\'' && last_char != '\'' => {
+          panic!("⚠️  Missing closing quote `'` in `{raw_pred}`.")
+        }
+        c if c == '\"' && last_char != '\"' => {
+          panic!("⚠️  Missing closing quote `\"` in `{raw_pred}`.")
+        }
+        c if c == '\'' || c == '\"' => {
+          let raw_value = &raw_pred[cursor + 1..raw_pred.len() - 1];
+          AttrValue::String(raw_value.to_string())
+        }
+        _ => panic!("⚠️  Invalid character: {c}."),
+      },
+      None => panic!("⚠️  Missing value in `{raw_pred}`."),
+    };
+
+    // Currently, `string` only support `Eq` and `Ne`.
+    if matches!(value, AttrValue::String(_)) && op != Op::Eq && op != Op::Ne {
+      panic!("⚠️  Invalid operator `{op}` for string attribute `{key}`.");
+    }
+
+    // type
+    let _type = AttrType::from(&value);
+
+    Self {
+      key,
+      op,
+      value,
+      _type,
+    }
+  }
 }
 
 impl PatternAttr {

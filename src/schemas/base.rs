@@ -13,19 +13,35 @@ pub type EidRef<'a> = &'a str;
 pub type Label = String;
 pub type LabelRef<'a> = &'a str;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(
+  Debug,
+  Clone,
+  Copy,
+  PartialEq,
+  Eq,
+  Deserialize,
+  Serialize,
+  strum_macros::EnumString,
+  strum_macros::Display,
+)]
 pub enum Op {
   #[serde(rename = "=")]
+  #[strum(serialize = "=")]
   Eq,
   #[serde(rename = "!=")]
+  #[strum(serialize = "!=")]
   Ne,
   #[serde(rename = ">")]
+  #[strum(serialize = ">")]
   Gt,
   #[serde(rename = ">=")]
+  #[strum(serialize = ">=")]
   Ge,
   #[serde(rename = "<")]
+  #[strum(serialize = "<")]
   Lt,
   #[serde(rename = "<=")]
+  #[strum(serialize = "<=")]
   Le,
 }
 
