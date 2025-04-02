@@ -1,5 +1,5 @@
 [package]
-name = "ember-sgm-backend"
+name = "ember-graph"
 version = "0.1.0"
 edition = "2024"
 
