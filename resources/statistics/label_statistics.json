@@ -1,0 +1,34 @@
+{
+  "v_cnt": 34735,
+  "e_cnt": 70842,
+  "v_label_cnt": {
+    "Comment": 2218,
+    "University": 6380,
+    "Company": 1575,
+    "Tagclass": 71,
+    "Forum": 805,
+    "Country": 111,
+    "Continent": 6,
+    "City": 1343,
+    "Person": 222,
+    "Tag": 16080,
+    "Post": 5924
+  },
+  "e_label_cnt": {
+    "hasModerator": 805,
+    "hasType": 16080,
+    "replyOf": 1109,
+    "hasTag": 2553,
+    "knows": 825,
+    "hasCreator": 5924,
+    "isPartOf": 1454,
+    "hasMember": 3584,
+    "studyAt": 180,
+    "hasInterest": 4777,
+    "isLocatedIn": 7955,
+    "likes": 624,
+    "containerOf": 5924,
+    "isSubclassOf": 70,
+    "workAt": 485
+  }
+}

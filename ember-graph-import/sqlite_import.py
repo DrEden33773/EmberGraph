@@ -3,14 +3,10 @@ from typing import Any, Optional
 
 import polars as pl
 from colorama import Fore, Style  # type: ignore
+from path_utils import ROOT, validate_nodes_relationships_dir
 from sqlite_entity import DB_Edge, DB_Vertex, init_db_with_clear
 from sqlmodel import Session
 from tqdm import tqdm
-
-ROOT = Path(__file__).parent.parent.absolute()
-TEST_DATASET = ROOT / "data" / "ldbc-sn-interactive-sf01"
-NODES = TEST_DATASET / "nodes"
-RELATIONSHIPS = TEST_DATASET / "relationships"
 
 raw_eid_cnt: dict[str, int] = {}
 
@@ -109,33 +105,9 @@ def exec(
     relationships_dir: Optional[Path] = None,
 ):
     db_name = db_name if db_name.endswith(".db") else f"{db_name}.db"
-    nodes_dir = nodes_dir or NODES
-    relationships_dir = relationships_dir or RELATIONSHIPS
-
-    if not nodes_dir.exists():
-        raise FileNotFoundError(f"⚠️  Nodes directory '{nodes_dir}' doesn't exist.")
-    if not relationships_dir.exists():
-        raise FileNotFoundError(
-            f"⚠️  Relationships directory '{relationships_dir}' doesn't exist."
-        )
-    if not nodes_dir.is_dir():
-        print(
-            f"""\
-            ⚠️  '{Fore.YELLOW + str(nodes_dir) + Style.RESET_ALL}' \
-            is not a directory, fall back to default \
-            ('{Fore.GREEN + NODES.stem + Style.RESET_ALL}').\
-            """
-        )
-        nodes_dir = NODES
-    if not relationships_dir.is_dir():
-        print(
-            f"""\
-            ⚠️  '{Fore.YELLOW + str(relationships_dir) + Style.RESET_ALL} '\
-            is not a directory, fall back to default \
-            ('{Fore.GREEN + NODES.stem + Style.RESET_ALL}').\
-            """
-        )
-        relationships_dir = RELATIONSHIPS
+    nodes_dir, relationships_dir = validate_nodes_relationships_dir(
+        nodes_dir, relationships_dir
+    )
 
     DB_URL = f"sqlite:///{ROOT}/{db_name}"
     engine = init_db_with_clear(DB_URL, echo=False)

@@ -10,6 +10,7 @@
         "Itertools",
         "ldbc",
         "oneshot",
+        "pyproject",
         "sqlmodel",
         "titlecase"
     ],
