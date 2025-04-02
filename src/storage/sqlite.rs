@@ -167,35 +167,6 @@ impl AsyncDefault for SqliteStorageAdapter {
   }
 }
 
-fn add_attr_filter(attr: &PatternAttr, query_str: &mut String, params: &mut Vec<String>) {
-  match &attr.value {
-    AttrValue::Int(val) => {
-      query_str.push_str(&format!(
-        "AND type = '{}' AND CAST(value AS INTEGER) ",
-        AttrType::Int
-      ));
-      query_str.push_str(attr.op.to_neo4j_sqlite_repr());
-      query_str.push_str(" ?)");
-      params.push(val.to_string());
-    }
-    AttrValue::Float(val) => {
-      query_str.push_str(&format!(
-        "AND type = '{}' AND CAST(value AS REAL) ",
-        AttrType::Float
-      ));
-      query_str.push_str(attr.op.to_neo4j_sqlite_repr());
-      query_str.push_str(" ?)");
-      params.push(val.to_string());
-    }
-    AttrValue::String(val) => {
-      query_str.push_str(&format!("AND type = '{}' AND value ", AttrType::String));
-      query_str.push_str(attr.op.to_neo4j_sqlite_repr());
-      query_str.push_str(" ?)");
-      params.push(val.clone());
-    }
-  }
-}
-
 fn get_typed_value(type_: &str, value: String) -> AttrValue {
   match type_ {
     "int" => AttrValue::Int(value.parse().unwrap_or(0)),
@@ -318,6 +289,35 @@ impl StorageAdapter for SqliteStorageAdapter {
     self
       .query_edge_with_attr_then_collect(e_attr, query_str, params)
       .await
+  }
+}
+
+fn add_attr_filter(attr: &PatternAttr, query_str: &mut String, params: &mut Vec<String>) {
+  match &attr.value {
+    AttrValue::Int(val) => {
+      query_str.push_str(&format!(
+        "AND type = '{}' AND CAST(value AS INTEGER) ",
+        AttrType::Int
+      ));
+      query_str.push_str(attr.op.to_neo4j_sqlite_repr());
+      query_str.push_str(" ?)");
+      params.push(val.to_string());
+    }
+    AttrValue::Float(val) => {
+      query_str.push_str(&format!(
+        "AND type = '{}' AND CAST(value AS REAL) ",
+        AttrType::Float
+      ));
+      query_str.push_str(attr.op.to_neo4j_sqlite_repr());
+      query_str.push_str(" ?)");
+      params.push(val.to_string());
+    }
+    AttrValue::String(val) => {
+      query_str.push_str(&format!("AND type = '{}' AND value ", AttrType::String));
+      query_str.push_str(attr.op.to_neo4j_sqlite_repr());
+      query_str.push_str(" ?)");
+      params.push(val.clone());
+    }
   }
 }
 
