@@ -1,10 +1,20 @@
 from typing import Optional
 
+from schema import AttrType
 from sqlmodel import Field, Session, SQLModel, create_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 type Attr = int | float | str
 type AttrDict = dict[str, Attr]
+
+
+def extract_type(value: Attr) -> str:
+    if isinstance(value, int):
+        return AttrType.Int
+    elif isinstance(value, float):
+        return AttrType.Float
+    else:
+        return AttrType.String
 
 
 class BaseAttribute(SQLModel):
@@ -36,7 +46,7 @@ class DB_Vertex(SQLModel, table=True):
     def load_pending_attrs(self, session: AsyncSession | Session):
         for key, value in self._pending_attrs.items():
             attr = Vertex_Attribute(
-                vid=self.vid, key=key, value=str(value), type=type(value).__name__
+                vid=self.vid, key=key, value=str(value), type=extract_type(value)
             )
             session.add(attr)
 
@@ -63,7 +73,7 @@ class DB_Edge(SQLModel, table=True):
     def load_pending_attrs(self, session: AsyncSession | Session):
         for key, value in self._pending_attrs.items():
             attr = Edge_Attribute(
-                eid=self.eid, key=key, value=str(value), type=type(value).__name__
+                eid=self.eid, key=key, value=str(value), type=extract_type(value)
             )
             session.add(attr)
 

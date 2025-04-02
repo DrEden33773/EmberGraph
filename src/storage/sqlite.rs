@@ -1,12 +1,33 @@
 use super::{AsyncDefault, StorageAdapter};
-use crate::schemas::{AttrType, AttrValue, DataEdge, DataVertex, LabelRef, PatternAttr, VidRef};
+use crate::{
+  schemas::{AttrType, AttrValue, DataEdge, DataVertex, LabelRef, PatternAttr, VidRef},
+  utils::time_async_with_desc,
+};
 use hashbrown::HashMap;
-use sqlx::{Row, SqlitePool, sqlite::SqliteRow};
+use sqlx::{Execute, Row, SqlitePool, sqlite::SqliteRow};
 use std::env;
 
 #[derive(Clone)]
 pub struct SqliteStorageAdapter {
   pool: SqlitePool,
+}
+
+impl AsyncDefault for SqliteStorageAdapter {
+  async fn async_default() -> Self {
+    let db_name = env::var("SQLITE_DB_PATH").unwrap();
+    let root = project_root::get_project_root().unwrap();
+    let db_path = root.join(db_name);
+    let url = format!("sqlite://{}", db_path.display());
+
+    let pool = sqlx::SqlitePool::connect(&url)
+      .await
+      .expect("⚠️  Failed to connect to SQLite database");
+
+    // create schema if it doesn't exist
+    Self::init_schema(&pool).await;
+
+    Self { pool }
+  }
 }
 
 impl SqliteStorageAdapter {
@@ -91,8 +112,8 @@ impl SqliteStorageAdapter {
       query_str.push_str(
         r#"
         AND EXISTS (
-          SELECT 1 FROM edge_attribute 
-          WHERE eid = e.eid AND key = ? 
+          SELECT * FROM edge_attribute 
+          WHERE eid = e.eid AND key = ?
         "#,
       );
       params.push(attr.key.clone());
@@ -106,7 +127,8 @@ impl SqliteStorageAdapter {
     }
 
     // collect rows
-    let rows = match query.fetch_all(&self.pool).await {
+    let sql = query.sql().trim_matches('\n');
+    let rows = match time_async_with_desc(query.fetch_all(&self.pool), sql.to_string()).await {
       Ok(rows) => rows,
       Err(_) => return vec![],
     };
@@ -125,8 +147,8 @@ impl SqliteStorageAdapter {
       query_str.push_str(
         r#"
         AND EXISTS (
-          SELECT 1 FROM vertex_attribute 
-          WHERE vid = v.vid AND key = ? 
+          SELECT * FROM vertex_attribute 
+          WHERE vid = v.vid AND key = ?
         "#,
       );
       params.push(attr.key.clone());
@@ -140,7 +162,8 @@ impl SqliteStorageAdapter {
     }
 
     // collect rows
-    let rows = match query.fetch_all(&self.pool).await {
+    let sql = query.sql().trim_matches('\n');
+    let rows = match time_async_with_desc(query.fetch_all(&self.pool), sql.to_string()).await {
       Ok(rows) => rows,
       Err(_) => return vec![],
     };
@@ -149,173 +172,42 @@ impl SqliteStorageAdapter {
   }
 }
 
-impl AsyncDefault for SqliteStorageAdapter {
-  async fn async_default() -> Self {
-    let db_name = env::var("SQLITE_DB_PATH").unwrap();
-    let root = project_root::get_project_root().unwrap();
-    let db_path = root.join(db_name);
-    let url = format!("sqlite://{}", db_path.display());
-
-    let pool = sqlx::SqlitePool::connect(&url)
-      .await
-      .expect("⚠️  Failed to connect to SQLite database");
-
-    // create schema if it doesn't exist
-    Self::init_schema(&pool).await;
-
-    Self { pool }
-  }
-}
-
-fn get_typed_value(type_: &str, value: String) -> AttrValue {
-  match type_ {
-    "int" => AttrValue::Int(value.parse().unwrap_or(0)),
-    "float" => AttrValue::Float(value.parse().unwrap_or(0.0)),
-    _ => AttrValue::String(value),
-  }
-}
-
-impl StorageAdapter for SqliteStorageAdapter {
-  async fn get_v(&self, vid: VidRef<'_>) -> Option<DataVertex> {
-    let rows = sqlx::query(
-      r#"
-      SELECT v.vid, v.label, a.key, a.value, a.type
-      FROM db_vertex v
-      LEFT JOIN vertex_attribute a ON v.vid = a.vid
-      WHERE v.vid = ?
-      "#,
-    )
-    .bind(vid)
-    .fetch_all(&self.pool)
-    .await
-    .ok()?;
-
-    if rows.is_empty() {
-      return None;
-    }
-
-    let vid: String = rows[0].get("vid");
-    let label: String = rows[0].get("label");
-    let mut attrs = HashMap::new();
-
-    // collect all attrs
-    for row in rows {
-      if let Ok(key) = row.try_get::<String, _>("key") {
-        let value: String = row.get("value");
-        let type_: String = row.get("type");
-
-        let typed_value = match type_.as_str() {
-          "int" => AttrValue::Int(value.parse().unwrap_or(0)),
-          "float" => AttrValue::Float(value.parse().unwrap_or(0.0)),
-          _ => AttrValue::String(value),
-        };
-
-        attrs.insert(key, typed_value);
-      }
-    }
-
-    Some(DataVertex { vid, label, attrs })
-  }
-
-  async fn load_v(&self, v_label: LabelRef<'_>, v_attr: Option<&PatternAttr>) -> Vec<DataVertex> {
-    let query_str = String::from(
-      r#"
-      SELECT v.vid, v.label, a.key, a.value, a.type
-      FROM db_vertex v
-      LEFT JOIN vertex_attribute a ON v.vid = a.vid
-      WHERE v.label = ?
-      "#,
-    );
-    let params = vec![v_label.to_string()];
-
-    self
-      .query_vertex_with_attr_then_collect(v_attr, query_str, params)
-      .await
-  }
-
-  async fn load_e(&self, e_label: LabelRef<'_>, e_attr: Option<&PatternAttr>) -> Vec<DataEdge> {
-    let query_str = String::from(
-      r#"
-      SELECT e.eid, e.label, e.src_vid, e.dst_vid, a.key, a.value, a.type
-      FROM db_edge e
-      LEFT JOIN edge_attribute a ON e.eid = a.eid
-      WHERE e.label = ?
-      "#,
-    );
-    let params = vec![e_label.to_string()];
-
-    self
-      .query_edge_with_attr_then_collect(e_attr, query_str, params)
-      .await
-  }
-
-  async fn load_e_with_src(
-    &self,
-    src_vid: VidRef<'_>,
-    e_label: LabelRef<'_>,
-    e_attr: Option<&PatternAttr>,
-  ) -> Vec<DataEdge> {
-    let query_str = String::from(
-      r#"
-      SELECT e.eid, e.label, e.src_vid, e.dst_vid, a.key, a.value, a.type
-      FROM db_edge e
-      LEFT JOIN edge_attribute a ON e.eid = a.eid
-      WHERE e.src_vid = ? AND e.label = ?
-      "#,
-    );
-    let params = vec![src_vid.to_string(), e_label.to_string()];
-
-    self
-      .query_edge_with_attr_then_collect(e_attr, query_str, params)
-      .await
-  }
-
-  async fn load_e_with_dst(
-    &self,
-    dst_vid: VidRef<'_>,
-    e_label: LabelRef<'_>,
-    e_attr: Option<&PatternAttr>,
-  ) -> Vec<DataEdge> {
-    let query_str = String::from(
-      r#"
-      SELECT e.eid, e.label, e.src_vid, e.dst_vid, a.key, a.value, a.type
-      FROM db_edge e
-      LEFT JOIN edge_attribute a ON e.eid = a.eid
-      WHERE e.dst_vid = ? AND e.label = ?
-      "#,
-    );
-    let params = vec![dst_vid.to_string(), e_label.to_string()];
-
-    self
-      .query_edge_with_attr_then_collect(e_attr, query_str, params)
-      .await
-  }
-}
-
 fn add_attr_filter(attr: &PatternAttr, query_str: &mut String, params: &mut Vec<String>) {
   match &attr.value {
     AttrValue::Int(val) => {
       query_str.push_str(&format!(
-        "AND type = '{}' AND CAST(value AS INTEGER) ",
+        "  AND type = '{}' AND CAST(value AS INTEGER) ",
         AttrType::Int
       ));
       query_str.push_str(attr.op.to_neo4j_sqlite_repr());
-      query_str.push_str(" ?)");
+      query_str.push_str(" ?");
+      query_str.push_str(
+        "
+        )",
+      );
       params.push(val.to_string());
     }
     AttrValue::Float(val) => {
       query_str.push_str(&format!(
-        "AND type = '{}' AND CAST(value AS REAL) ",
+        "  AND type = '{}' AND CAST(value AS REAL) ",
         AttrType::Float
       ));
       query_str.push_str(attr.op.to_neo4j_sqlite_repr());
-      query_str.push_str(" ?)");
+      query_str.push_str(" ?");
+      query_str.push_str(
+        "
+        )",
+      );
       params.push(val.to_string());
     }
     AttrValue::String(val) => {
-      query_str.push_str(&format!("AND type = '{}' AND value ", AttrType::String));
+      query_str.push_str(&format!("  AND type = '{}' AND value ", AttrType::String));
       query_str.push_str(attr.op.to_neo4j_sqlite_repr());
-      query_str.push_str(" ?)");
+      query_str.push_str(" ?");
+      query_str.push_str(
+        "
+        )",
+      );
       params.push(val.clone());
     }
   }
@@ -392,4 +284,125 @@ fn collect_edges(rows: Vec<SqliteRow>) -> HashMap<String, DataEdge> {
   }
 
   edges
+}
+
+fn get_typed_value(type_: &str, value: String) -> AttrValue {
+  match type_ {
+    "int" => AttrValue::Int(value.parse().unwrap_or(0)),
+    "float" => AttrValue::Float(value.parse().unwrap_or(0.0)),
+    _ => AttrValue::String(value),
+  }
+}
+
+impl StorageAdapter for SqliteStorageAdapter {
+  async fn get_v(&self, vid: VidRef<'_>) -> Option<DataVertex> {
+    let query = sqlx::query(
+      r#"
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?"#,
+    )
+    .bind(vid);
+    let sql = query.sql().trim_matches('\n');
+
+    let rows = time_async_with_desc(query.fetch_all(&self.pool), sql.to_string())
+      .await
+      .ok()?;
+    if rows.is_empty() {
+      return None;
+    }
+
+    let vid: String = rows[0].get("vid");
+    let label: String = rows[0].get("label");
+    let mut attrs = HashMap::new();
+
+    // collect all attrs
+    for row in rows {
+      if let Ok(key) = row.try_get::<String, _>("key") {
+        let value: String = row.get("value");
+        let type_: String = row.get("type");
+
+        let typed_value = match type_.as_str() {
+          "int" => AttrValue::Int(value.parse().unwrap_or(0)),
+          "float" => AttrValue::Float(value.parse().unwrap_or(0.0)),
+          _ => AttrValue::String(value),
+        };
+
+        attrs.insert(key, typed_value);
+      }
+    }
+
+    Some(DataVertex { vid, label, attrs })
+  }
+
+  async fn load_v(&self, v_label: LabelRef<'_>, v_attr: Option<&PatternAttr>) -> Vec<DataVertex> {
+    let query_str = String::from(
+      r#"
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ?"#,
+    );
+    let params = vec![v_label.to_string()];
+
+    self
+      .query_vertex_with_attr_then_collect(v_attr, query_str, params)
+      .await
+  }
+
+  async fn load_e(&self, e_label: LabelRef<'_>, e_attr: Option<&PatternAttr>) -> Vec<DataEdge> {
+    let query_str = String::from(
+      r#"
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, a.key, a.value, a.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute a ON e.eid = a.eid
+      WHERE e.label = ?"#,
+    );
+    let params = vec![e_label.to_string()];
+
+    self
+      .query_edge_with_attr_then_collect(e_attr, query_str, params)
+      .await
+  }
+
+  async fn load_e_with_src(
+    &self,
+    src_vid: VidRef<'_>,
+    e_label: LabelRef<'_>,
+    e_attr: Option<&PatternAttr>,
+  ) -> Vec<DataEdge> {
+    let query_str = String::from(
+      r#"
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, a.key, a.value, a.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute a ON e.eid = a.eid
+      WHERE e.src_vid = ? AND e.label = ?"#,
+    );
+    let params = vec![src_vid.to_string(), e_label.to_string()];
+
+    self
+      .query_edge_with_attr_then_collect(e_attr, query_str, params)
+      .await
+  }
+
+  async fn load_e_with_dst(
+    &self,
+    dst_vid: VidRef<'_>,
+    e_label: LabelRef<'_>,
+    e_attr: Option<&PatternAttr>,
+  ) -> Vec<DataEdge> {
+    let query_str = String::from(
+      r#"
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, a.key, a.value, a.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute a ON e.eid = a.eid
+      WHERE e.dst_vid = ? AND e.label = ?"#,
+    );
+    let params = vec![dst_vid.to_string(), e_label.to_string()];
+
+    self
+      .query_edge_with_attr_then_collect(e_attr, query_str, params)
+      .await
+  }
 }
