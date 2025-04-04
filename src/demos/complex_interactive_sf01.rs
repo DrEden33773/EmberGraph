@@ -1,7 +1,6 @@
-use std::{path::PathBuf, sync::LazyLock};
-
 use crate::{executor::ExecEngine, storage::*};
 use project_root::get_project_root;
+use std::{path::PathBuf, sync::LazyLock};
 use tokio::{fs, io};
 
 static PLAN_ROOT: LazyLock<PathBuf> =
@@ -17,8 +16,6 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
       .await
       .exec()
       .await;
-
-  // println!("{:#?}\n", &result);
 
   println!("Count(result) = {}\n", result.len());
   Ok(())
@@ -36,7 +33,7 @@ pub async fn ic_4_on_sf_01() -> io::Result<()> {
   exec("ldbc-ic-4-single-directed-knows.json").await
 }
 
-/// ⚠️ -> ✅
+/// ✅
 pub async fn ic_5_on_sf_01() -> io::Result<()> {
   println!("Querying 'IC-5' on 'SF0.1' ...\n");
   exec("ldbc-ic-5-single-directed-knows.json").await

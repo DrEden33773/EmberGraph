@@ -35,7 +35,7 @@ impl PlanOptimizer {
     }
 
     self.eliminate_cse();
-    self.flatten_multi_ops();
+    // self.flatten_multi_ops();
     self.reorder();
   }
 
@@ -80,6 +80,11 @@ impl PlanOptimizer {
   }
 
   /// Flatten multi-ops (at most 2 operands)
+  #[deprecated(
+    since = "0.1.0",
+    note = "ExecEngine supports `Intersect(A1 ... An)`, flatten may break the parallelism."
+  )]
+  #[allow(dead_code)]
   fn flatten_multi_ops(&mut self) {
     let mut instr_idx = Vec::with_capacity(self.exec_instructions.len());
     let mut defined_vars = Vec::with_capacity(self.exec_instructions.len());

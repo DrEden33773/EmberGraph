@@ -190,7 +190,6 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
   }
 }
 
-// TODO: parallelize this function
 /// 1. Take two expand_graphs' `vertices` and `non-dangling-edges` into a new graph
 /// 2. Iterate through the `dangling_edges` of both, select those connective ones
 pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
@@ -203,27 +202,31 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
   let mut l_graph = l_expand_graph.dyn_graph;
   let mut r_graph = r_expand_graph.dyn_graph;
 
-  // For each pair of common_v/e_pats, they should lead to the same vs/es in both graphs.
-  // If not, we should not consider them as a match.
-  // We could also discard those patterns who lead to `multi` vs/es in either graph.
-  for common_v_pat in l_graph
-    .get_v_patterns()
-    .intersection(&r_graph.get_v_patterns())
+  #[cfg(feature = "validate_pattern_uniqueness_before_final_merge")]
   {
-    let l_directed_vs = l_graph.pattern_2_vids.get(common_v_pat).unwrap();
-    let r_directed_vs = r_graph.pattern_2_vids.get(common_v_pat).unwrap();
-    if l_directed_vs != r_directed_vs || l_directed_vs.len() > 1 || r_directed_vs.len() > 1 {
-      return vec![];
+    // For each pair of common_v/e_pats, they should lead to the same vs/es in both graphs.
+    // If not, we should not consider them as a match.
+    // We could also discard those patterns who lead to `multi` vs/es in either graph.
+
+    for common_v_pat in l_graph
+      .get_v_patterns()
+      .intersection(&r_graph.get_v_patterns())
+    {
+      let l_directed_vs = l_graph.pattern_2_vids.get(common_v_pat).unwrap();
+      let r_directed_vs = r_graph.pattern_2_vids.get(common_v_pat).unwrap();
+      if l_directed_vs != r_directed_vs || l_directed_vs.len() > 1 || r_directed_vs.len() > 1 {
+        return vec![];
+      }
     }
-  }
-  for common_e_pat in l_graph
-    .get_e_patterns()
-    .intersection(&r_graph.get_e_patterns())
-  {
-    let l_directed_es = l_graph.pattern_2_eids.get(common_e_pat).unwrap();
-    let r_directed_es = r_graph.pattern_2_eids.get(common_e_pat).unwrap();
-    if l_directed_es != r_directed_es || l_directed_es.len() > 1 || r_directed_es.len() > 1 {
-      return vec![];
+    for common_e_pat in l_graph
+      .get_e_patterns()
+      .intersection(&r_graph.get_e_patterns())
+    {
+      let l_directed_es = l_graph.pattern_2_eids.get(common_e_pat).unwrap();
+      let r_directed_es = r_graph.pattern_2_eids.get(common_e_pat).unwrap();
+      if l_directed_es != r_directed_es || l_directed_es.len() > 1 || r_directed_es.len() > 1 {
+        return vec![];
+      }
     }
   }
 

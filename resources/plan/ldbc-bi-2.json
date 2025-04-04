@@ -11,16 +11,6 @@
       "label": "Tagclass",
       "attr": null
     },
-    "post": {
-      "vid": "post",
-      "label": "Post",
-      "attr": null
-    },
-    "comment": {
-      "vid": "comment",
-      "label": "Comment",
-      "attr": null
-    },
     "tag": {
       "vid": "tag",
       "label": "Tag",
@@ -30,14 +20,24 @@
         "value": "Patrick_Vieira",
         "type": "string"
       }
+    },
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
+    },
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
+      "attr": null
     }
   },
   "edges": {
-    "a": {
-      "eid": "a",
-      "src_vid": "post",
-      "dst_vid": "tag",
-      "label": "hasTag",
+    "c": {
+      "eid": "c",
+      "src_vid": "tag",
+      "dst_vid": "tagClass",
+      "label": "hasType",
       "attr": null
     },
     "b": {
@@ -47,11 +47,11 @@
       "label": "hasTag",
       "attr": null
     },
-    "c": {
-      "eid": "c",
-      "src_vid": "tag",
-      "dst_vid": "tagClass",
-      "label": "hasType",
+    "a": {
+      "eid": "a",
+      "src_vid": "post",
+      "dst_vid": "tag",
+      "label": "hasTag",
       "attr": null
     }
   },
@@ -69,9 +69,9 @@
       "vid": "tag",
       "type": "get_adj",
       "expand_eid_list": [
-        "a",
+        "c",
         "b",
-        "c"
+        "a"
       ],
       "single_op": "f^tag",
       "multi_ops": [],
@@ -88,8 +88,8 @@
       "multi_ops": [],
       "target_var": "C^tagClass",
       "depend_on": [
-        "f^tag",
-        "A^tag"
+        "A^tag",
+        "f^tag"
       ]
     },
     {
@@ -100,9 +100,9 @@
       "multi_ops": [],
       "target_var": "f^tagClass",
       "depend_on": [
-        "f^tag",
+        "A^tag",
         "C^tagClass",
-        "A^tag"
+        "f^tag"
       ]
     },
     {
@@ -113,8 +113,8 @@
       "multi_ops": [],
       "target_var": "C^comment",
       "depend_on": [
-        "A^tag",
-        "f^tag"
+        "f^tag",
+        "A^tag"
       ]
     },
     {
@@ -126,8 +126,8 @@
       "target_var": "f^comment",
       "depend_on": [
         "C^comment",
-        "f^tag",
-        "A^tag"
+        "A^tag",
+        "f^tag"
       ]
     },
     {
@@ -138,8 +138,8 @@
       "multi_ops": [],
       "target_var": "C^post",
       "depend_on": [
-        "f^tag",
-        "A^tag"
+        "A^tag",
+        "f^tag"
       ]
     },
     {
@@ -150,9 +150,9 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "C^post",
+        "A^tag",
         "f^tag",
-        "A^tag"
+        "C^post"
       ]
     },
     {
@@ -161,20 +161,20 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^tagClass",
         "f^post",
         "f^tag",
-        "f^comment"
+        "f^comment",
+        "f^tagClass"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^post",
-        "f^comment",
-        "A^tag",
-        "C^post",
-        "f^tag",
         "C^tagClass",
+        "f^comment",
+        "f^tag",
         "f^tagClass",
+        "A^tag",
+        "f^post",
+        "C^post",
         "C^comment"
       ]
     }

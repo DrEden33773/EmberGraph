@@ -1,11 +1,13 @@
 use crate::{executor::ExecEngine, storage::*};
 use project_root::get_project_root;
+use std::{path::PathBuf, sync::LazyLock};
 use tokio::{fs, io};
 
+static PLAN_ROOT: LazyLock<PathBuf> =
+  LazyLock::new(|| get_project_root().unwrap().join("resources").join("plan"));
+
 async fn exec(plan_filename: &str) -> io::Result<()> {
-  let mut path = get_project_root()?;
-  path.push("resources");
-  path.push("plan");
+  let mut path = PLAN_ROOT.clone();
   path.push(plan_filename);
   let plan_json_content = fs::read_to_string(path).await?;
 
@@ -14,8 +16,6 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
       .await
       .exec()
       .await;
-
-  // println!("{:#?}\n", &result);
 
   println!("Count(result) = {}\n", result.len());
   Ok(())

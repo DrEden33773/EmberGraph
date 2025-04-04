@@ -72,9 +72,9 @@
       "multi_ops": [],
       "target_var": "f^city",
       "depend_on": [
+        "f^person",
         "C^city",
-        "A^person",
-        "f^person"
+        "A^person"
       ]
     },
     {
@@ -83,15 +83,15 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^city",
-        "f^person"
+        "f^person",
+        "f^city"
       ],
       "target_var": "f",
       "depend_on": [
-        "C^city",
-        "A^person",
         "f^city",
-        "f^person"
+        "f^person",
+        "C^city",
+        "A^person"
       ]
     }
   ]

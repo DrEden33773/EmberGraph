@@ -1,9 +1,4 @@
-use colored::Colorize;
 use dotenv::dotenv;
-#[allow(unused_imports)]
-use ember_graph::demos::{complex_interactive_sf01::*, simple_interactive_sf01::*};
-use ember_graph::planner::generate_optimal_plan;
-use project_root::get_project_root;
 use tokio::io::{self};
 
 #[tokio::main(flavor = "multi_thread")]
@@ -21,11 +16,18 @@ async fn main() -> io::Result<()> {
 
 #[allow(dead_code)]
 async fn run_demo() -> io::Result<()> {
-  ic_11_on_sf_01().await
+  #[allow(unused_imports)]
+  use ember_graph::demos::{bi_sf01::*, complex_interactive_sf01::*, simple_interactive_sf01::*};
+
+  bi_6_on_sf_01().await
 }
 
 #[allow(dead_code)]
 async fn plan_gen() -> io::Result<()> {
+  use colored::Colorize;
+  use ember_graph::planner::generate_optimal_plan;
+  use project_root::get_project_root;
+
   let queries = get_project_root()?.join("resources").join("queries");
   let plans = get_project_root()?.join("resources").join("plan");
 
