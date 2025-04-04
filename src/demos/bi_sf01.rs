@@ -27,13 +27,13 @@ pub async fn bi_2_on_sf_01() -> io::Result<()> {
   exec("ldbc-bi-2.json").await
 }
 
-/// ❌⚠️  Memory usage: 96% (51G)
+/// ⚠️  Memory usage: 96% (51G)
 pub async fn bi_3_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-3' on 'SF0.1' ...\n");
   exec("ldbc-bi-3.json").await
 }
 
-/// ❌⚠️  Memory usage: 97% (51G)
+/// ⚠️  Memory usage: 97% (51G)
 pub async fn bi_5_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-5' on 'SF0.1' ...\n");
   exec("ldbc-bi-5.json").await
@@ -52,7 +52,7 @@ pub async fn bi_10_on_sf_01() -> io::Result<()> {
   exec("ldbc-bi-10.json").await
 }
 
-/// ❌⚠️  Memory usage: 98% (55G)
+/// ⚠️  Memory usage: 98% (55G)
 pub async fn bi_11_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-11' on 'SF0.1' ...\n");
   exec("ldbc-bi-11.json").await

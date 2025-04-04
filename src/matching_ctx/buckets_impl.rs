@@ -108,7 +108,7 @@ impl ABucket {
           let is_matched_data_es_empty = if self.curr_pat_vid == pat_e.src_vid() {
             next_pat_vid = pat_e.dst_vid();
 
-            let matched_data_es = incremental_match(LoadWithCondCtx {
+            let matched_data_es = incremental_match_adj_e(LoadWithCondCtx {
               pattern_vs,
               storage_adapter,
               curr_matched_dg: matched_dg,
@@ -137,7 +137,7 @@ impl ABucket {
           } else {
             next_pat_vid = pat_e.src_vid();
 
-            let matched_data_es = incremental_match(LoadWithCondCtx {
+            let matched_data_es = incremental_match_adj_e(LoadWithCondCtx {
               pattern_vs,
               storage_adapter,
               curr_matched_dg: matched_dg,
@@ -212,8 +212,64 @@ struct LoadWithCondCtx<'a, S: StorageAdapter> {
   is_src_curr_pat: bool,
 }
 
-#[allow(dead_code)]
-async fn incremental_match_via_batch_processing<'a, S: StorageAdapter>(
+#[cfg(not(feature = "batched_incremental_match_adj_e"))]
+async fn incremental_match_adj_e<'a, S: StorageAdapter>(
+  ctx: LoadWithCondCtx<'a, S>,
+) -> Vec<DataEdge> {
+  let next_pat_vid = if ctx.is_src_curr_pat {
+    ctx.curr_pat_e.dst_vid()
+  } else {
+    ctx.curr_pat_e.src_vid()
+  };
+
+  // load all edges first
+  let potential_edges = if ctx.is_src_curr_pat {
+    ctx
+      .storage_adapter
+      .load_e_with_src(ctx.frontier_vid, ctx.e_label, ctx.e_attr)
+      .await
+  } else {
+    ctx
+      .storage_adapter
+      .load_e_with_dst(ctx.frontier_vid, ctx.e_label, ctx.e_attr)
+      .await
+  };
+
+  // filter out the edges that are already matched
+  let filtered_edges = potential_edges
+    .into_iter()
+    .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
+    .collect::<Vec<_>>();
+
+  // process each edge in parallel
+  stream::iter(filtered_edges)
+    .map(|e| {
+      let next_vid_str = if ctx.is_src_curr_pat {
+        e.dst_vid()
+      } else {
+        e.src_vid()
+      }
+      .to_string();
+
+      async move {
+        let satisfies = does_data_v_satisfy_pattern(
+          &next_vid_str,
+          next_pat_vid,
+          ctx.pattern_vs,
+          ctx.storage_adapter,
+        )
+        .await;
+        if satisfies { Some(e) } else { None }
+      }
+    })
+    .buffer_unordered(num_cpus::get() * 4)
+    .filter_map(|r| async move { r })
+    .collect::<Vec<_>>()
+    .await
+}
+
+#[cfg(feature = "batched_incremental_match_adj_e")]
+async fn incremental_match_adj_e<'a, S: StorageAdapter>(
   ctx: LoadWithCondCtx<'a, S>,
 ) -> Vec<DataEdge> {
   const BATCH_SIZE: usize = 32;
@@ -274,60 +330,6 @@ async fn incremental_match_via_batch_processing<'a, S: StorageAdapter>(
 
   // flatten the results into a single vector
   batch_results.into_iter().flatten().collect::<Vec<_>>()
-}
-
-#[allow(dead_code)]
-async fn incremental_match<'a, S: StorageAdapter>(ctx: LoadWithCondCtx<'a, S>) -> Vec<DataEdge> {
-  let next_pat_vid = if ctx.is_src_curr_pat {
-    ctx.curr_pat_e.dst_vid()
-  } else {
-    ctx.curr_pat_e.src_vid()
-  };
-
-  // load all edges first
-  let potential_edges = if ctx.is_src_curr_pat {
-    ctx
-      .storage_adapter
-      .load_e_with_src(ctx.frontier_vid, ctx.e_label, ctx.e_attr)
-      .await
-  } else {
-    ctx
-      .storage_adapter
-      .load_e_with_dst(ctx.frontier_vid, ctx.e_label, ctx.e_attr)
-      .await
-  };
-
-  // filter out the edges that are already matched
-  let filtered_edges = potential_edges
-    .into_iter()
-    .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
-    .collect::<Vec<_>>();
-
-  // process each edge in parallel
-  stream::iter(filtered_edges)
-    .map(|e| {
-      let next_vid_str = if ctx.is_src_curr_pat {
-        e.dst_vid()
-      } else {
-        e.src_vid()
-      }
-      .to_string();
-
-      async move {
-        let satisfies = does_data_v_satisfy_pattern(
-          &next_vid_str,
-          next_pat_vid,
-          ctx.pattern_vs,
-          ctx.storage_adapter,
-        )
-        .await;
-        if satisfies { Some(e) } else { None }
-      }
-    })
-    .buffer_unordered(num_cpus::get() * 4)
-    .filter_map(|r| async move { r })
-    .collect::<Vec<_>>()
-    .await
 }
 
 impl CBucket {
