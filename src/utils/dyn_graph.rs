@@ -507,4 +507,20 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
       HashSet::new()
     }
   }
+
+  pub fn get_out_degree(&self, vid: VidRef) -> usize {
+    if let Some(v_node) = self.adj_table.get(vid) {
+      v_node.e_out.len()
+    } else {
+      0
+    }
+  }
+
+  pub fn get_in_degree(&self, vid: VidRef) -> usize {
+    if let Some(v_node) = self.adj_table.get(vid) {
+      v_node.e_in.len()
+    } else {
+      0
+    }
+  }
 }

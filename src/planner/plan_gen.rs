@@ -1,3 +1,4 @@
+use super::order_calc::PlanGenInput;
 use crate::{
   schemas::{
     Instruction, InstructionBuilder, InstructionType, PatternEdge, PatternVertex, VarPrefix, Vid,
@@ -5,14 +6,11 @@ use crate::{
   utils::dyn_graph::DynGraph,
 };
 use hashbrown::{HashMap, HashSet};
-use std::collections::VecDeque;
-
-use super::order_calc::PlanGenInput;
 
 #[derive(Debug, Clone)]
 pub struct PlanGenerator {
   pub(crate) pattern_graph: DynGraph<PatternVertex, PatternEdge>,
-  pub(crate) optimal_order: VecDeque<(Vid, usize)>,
+  pub(crate) optimal_order: Vec<Vid>,
   pub(crate) exec_instructions: Vec<Instruction>,
 }
 
@@ -20,7 +18,7 @@ impl From<PlanGenInput> for PlanGenerator {
   fn from(input: PlanGenInput) -> Self {
     Self {
       pattern_graph: input.pattern_graph,
-      optimal_order: input.optimal_order.into_iter().collect(),
+      optimal_order: input.optimal_order,
       exec_instructions: vec![],
     }
   }
@@ -36,7 +34,7 @@ impl PlanGenerator {
     let mut f_set = HashSet::new();
 
     // first vertex
-    let (vid, _) = self.optimal_order.pop_front().unwrap();
+    let vid = self.optimal_order[0].clone();
     let adj_eids = self.pattern_graph.get_adj_eids(&vid);
     // Init -> fx
     instructions.push(
@@ -55,9 +53,9 @@ impl PlanGenerator {
     f_set.insert(vid);
 
     // other vertices
-    for (vid, _) in self.optimal_order.drain(0..) {
+    for vid in self.optimal_order.iter().skip(1).cloned() {
       let mut operands = f_set.clone();
-      operands.extend(self.pattern_graph.get_adj_vids(&vid));
+      operands.retain(|v| self.pattern_graph.get_adj_vids(&vid).contains(v));
 
       let adj_eids = self.pattern_graph.get_adj_eids(&vid);
 
@@ -138,8 +136,6 @@ impl PlanGenerator {
 
     Self::compute_instr_dependencies(&mut instructions);
 
-    dbg!(&instructions);
-
     self.exec_instructions = Self::remove_unused_dbq(instructions);
   }
 }
@@ -187,7 +183,7 @@ impl PlanGenerator {
     instructions
       .into_iter()
       .filter(|instr| {
-        instr.type_ == InstructionType::GetAdj && !depend_set.contains(&instr.target_var)
+        instr.type_ != InstructionType::GetAdj || depend_set.contains(&instr.target_var)
       })
       .collect()
   }

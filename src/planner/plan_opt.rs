@@ -1,3 +1,4 @@
+use super::plan_gen::PlanGenerator;
 use crate::{
   schemas::{
     Instruction, InstructionBuilder, InstructionType, PatternEdge, PatternVertex, VarPrefix, Vid,
@@ -8,12 +9,10 @@ use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 use std::collections::{BTreeSet, VecDeque};
 
-use super::plan_gen::PlanGenerator;
-
 pub struct PlanOptimizer {
   pub(crate) pattern_graph: DynGraph<PatternVertex, PatternEdge>,
   pub(crate) exec_instructions: Vec<Instruction>,
-  pub(crate) matching_order: Vec<(Vid, usize)>,
+  pub(crate) matching_order: Vec<Vid>,
 
   ti: usize,
 }
@@ -23,7 +22,7 @@ impl From<PlanGenerator> for PlanOptimizer {
     Self {
       pattern_graph: plan_generator.pattern_graph,
       exec_instructions: plan_generator.exec_instructions,
-      matching_order: plan_generator.optimal_order.into_iter().collect(),
+      matching_order: plan_generator.optimal_order,
       ti: 0,
     }
   }
@@ -105,8 +104,8 @@ impl PlanOptimizer {
       operators.retain(|var| defined_vars.contains(var));
 
       while operators.len() > 2 {
-        let op1 = operators.pop_front().unwrap();
-        let op2 = operators.pop_front().unwrap();
+        let op1 = operators.pop_back().unwrap();
+        let op2 = operators.pop_back().unwrap();
         let new_operators = vec![op1, op2];
 
         self.ti += 1;

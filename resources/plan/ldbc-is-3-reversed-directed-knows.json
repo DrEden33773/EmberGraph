@@ -1,22 +1,25 @@
 {
-  "matching_order": [],
+  "matching_order": [
+    "friend",
+    "person"
+  ],
   "vertices": {
-    "person": {
-      "vid": "person",
-      "label": "Person",
-      "attr": {
-        "attr": "id",
-        "op": "=",
-        "value": 6597069766660,
-        "type": "int"
-      }
-    },
     "friend": {
       "vid": "friend",
       "label": "Person",
       "attr": {
         "attr": "id",
         "op": "!=",
+        "value": 6597069766660,
+        "type": "int"
+      }
+    },
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "=",
         "value": 6597069766660,
         "type": "int"
       }
@@ -34,6 +37,15 @@
   "instructions": [
     {
       "vid": "friend",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^friend",
+      "depend_on": []
+    },
+    {
+      "vid": "friend",
       "type": "get_adj",
       "expand_eid_list": [
         "a"
@@ -42,9 +54,48 @@
       "multi_ops": [],
       "target_var": "A^friend",
       "depend_on": [
-        "A^person",
+        "f^friend"
+      ]
+    },
+    {
+      "vid": "person",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^friend",
+      "multi_ops": [],
+      "target_var": "C^person",
+      "depend_on": [
         "f^friend",
-        "C^friend",
+        "A^friend"
+      ]
+    },
+    {
+      "vid": "person",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^person",
+      "multi_ops": [],
+      "target_var": "f^person",
+      "depend_on": [
+        "A^friend",
+        "C^person",
+        "f^friend"
+      ]
+    },
+    {
+      "vid": "",
+      "type": "report",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "f^friend",
+        "f^person"
+      ],
+      "target_var": "f",
+      "depend_on": [
+        "f^friend",
+        "A^friend",
+        "C^person",
         "f^person"
       ]
     }

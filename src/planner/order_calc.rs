@@ -1,8 +1,9 @@
 use crate::{
-  schemas::{Label, PatternEdge, PatternVertex, Vid},
+  schemas::{Label, Op, PatternEdge, PatternVertex, Vid},
   utils::dyn_graph::DynGraph,
 };
 use hashbrown::HashMap;
+use ordered_float::OrderedFloat;
 use project_root::get_project_root;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
@@ -29,12 +30,14 @@ pub struct OrderCalculator {
   statistics: Statistics,
   pattern_graph: DynGraph<PatternVertex, PatternEdge>,
   cost_2_vids: BTreeMap<usize, Vec<Vid>>,
+  order: Vec<Vid>,
+  override_v_cost: HashMap<Vid, usize>,
 }
 
 #[derive(Debug, Clone)]
 pub struct PlanGenInput {
   pub(crate) pattern_graph: DynGraph<PatternVertex, PatternEdge>,
-  pub(crate) optimal_order: Vec<(Vid, usize)>,
+  pub(crate) optimal_order: Vec<Vid>,
 }
 
 impl OrderCalculator {
@@ -44,17 +47,64 @@ impl OrderCalculator {
     )
     .expect("⚠️  Failed to parse statistics file");
 
+    let raw_order = pattern_graph.get_vid_set().into_iter().collect::<Vec<_>>();
+
     Self {
       statistics,
       pattern_graph,
       cost_2_vids: BTreeMap::default(),
+      order: raw_order,
+      override_v_cost: HashMap::default(),
     }
+  }
+
+  /// Core logic: Rule-based estimation
+  fn rule_based_estimation(&mut self) {
+    let mut v_scores = HashMap::new();
+
+    for (vid, v) in self.pattern_graph.v_entities.iter() {
+      let mut score = 0.0;
+
+      // 1. selectivity (only if `attr` is not None)
+      if let Some(ref attr) = v.attr {
+        // Eq / Ne is tent to select the least number of vertices
+        score += if attr.op == Op::Eq || attr.op == Op::Ne {
+          // don't forget to update `override_v_cost`
+          self.override_v_cost.insert(vid.clone(), 1);
+          100.0
+        }
+        // Range could also be quite selective
+        else {
+          50.0
+        }
+      }
+
+      // 2. edge connectivity
+      let in_degree = self.pattern_graph.get_in_degree(vid);
+      let out_degree = self.pattern_graph.get_out_degree(vid);
+      // the less the degree is, the faster the query could be
+      score -= (in_degree + out_degree) as f64;
+
+      // 3. vertex connectivity
+      let num_of_neighbors = self.pattern_graph.get_adj_vids(vid).len();
+      // the less the number of neighbors is, the faster the query could be
+      //
+      // and this one could be more affective than the `edge connectivity`
+      score -= num_of_neighbors as f64 * 5.0;
+
+      let score = OrderedFloat::from(score);
+
+      v_scores.insert(vid, score);
+    }
+
+    // DESC of `score`
+    self.order.sort_unstable_by_key(|vid| -v_scores[vid]);
   }
 
   /// Core logic: Heuristic-based cost estimation
   ///
   /// To keep `worst-case optimal`, we assume that each step is in the worst case.
-  pub fn compute_optimal_order(mut self) -> PlanGenInput {
+  fn cost_based_adjustment(&mut self) {
     let vs = self.pattern_graph.get_v_entities();
 
     vs.into_par_iter()
@@ -66,6 +116,10 @@ impl OrderCalculator {
           .get(&v.label)
           .copied()
           .unwrap_or(0);
+
+        if let Some(&cost) = self.override_v_cost.get(&v.vid) {
+          v_cost = cost;
+        }
 
         let grouped_adj_eids = self.pattern_graph.get_adj_es_grouped_by_target_vid(&v.vid);
         let mut grouped_e_costs = Vec::with_capacity(grouped_adj_eids.len());
@@ -111,16 +165,24 @@ impl OrderCalculator {
         self.cost_2_vids.entry(cost).or_default().push(vid);
       });
 
-    let mut optimal_order = Vec::with_capacity(self.cost_2_vids.len());
-    for (cost, vids) in self.cost_2_vids {
+    let mut v_costs = HashMap::with_capacity(self.cost_2_vids.len());
+    while let Some((cost, vids)) = self.cost_2_vids.pop_first() {
       for vid in vids {
-        optimal_order.push((vid, cost));
+        v_costs.insert(vid, cost);
       }
     }
 
+    // use `stable_sort` to keep the order of `vids` with the same cost
+    self.order.sort_by_key(|vid| v_costs[vid]);
+  }
+
+  pub fn compute_optimal_order(mut self) -> PlanGenInput {
+    self.rule_based_estimation();
+    self.cost_based_adjustment();
+
     PlanGenInput {
       pattern_graph: self.pattern_graph,
-      optimal_order,
+      optimal_order: self.order,
     }
   }
 }

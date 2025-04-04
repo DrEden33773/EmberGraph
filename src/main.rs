@@ -13,15 +13,15 @@ async fn main() -> io::Result<()> {
   #[cfg(feature = "use_tracing")]
   let _guard = ember_graph::init_log::init_log().await?;
 
-  // run_demo().await?;
   plan_gen().await?;
+  run_demo().await?;
 
   Ok(())
 }
 
 #[allow(dead_code)]
 async fn run_demo() -> io::Result<()> {
-  ic_1_on_sf_01().await
+  is_3_on_sf_01().await
 }
 
 #[allow(dead_code)]
@@ -36,7 +36,13 @@ async fn plan_gen() -> io::Result<()> {
     let entry = entry?;
 
     let path = entry.path();
-
+    if !path.is_file() {
+      eprintln!(
+        "⚠️  (Skipped) Not a file: '{}'",
+        path.to_str().unwrap().yellow()
+      );
+      continue;
+    }
     if let Some(ext) = path.extension() {
       if ext != "txt" {
         continue;

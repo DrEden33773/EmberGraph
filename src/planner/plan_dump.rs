@@ -1,26 +1,21 @@
-use hashbrown::HashMap;
-
+use super::{plan_gen::PlanGenerator, plan_opt::PlanOptimizer};
 use crate::{
   schemas::{Instruction, PatternEdge, PatternVertex, PlanData, Vid},
   utils::dyn_graph::DynGraph,
 };
-
-use super::{plan_gen::PlanGenerator, plan_opt::PlanOptimizer};
+use hashbrown::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct PlanDumper {
-  matching_order: Vec<(Vid, usize)>,
+  matching_order: Vec<Vid>,
   exec_instructions: Vec<Instruction>,
   pattern_graph: DynGraph<PatternVertex, PatternEdge>,
 }
 
 impl PlanDumper {
   pub fn to_plan_data(self) -> PlanData {
-    let matching_order = self
-      .matching_order
-      .into_iter()
-      .map(|pair| pair.0)
-      .collect::<Vec<_>>();
+    let matching_order = self.matching_order;
+
     let pattern_vs = self
       .pattern_graph
       .v_entities()
@@ -33,6 +28,7 @@ impl PlanDumper {
       .iter()
       .map(|(vid, edge)| (vid.clone(), edge.clone()))
       .collect::<HashMap<_, _>>();
+
     let instructions = self.exec_instructions;
 
     PlanData {

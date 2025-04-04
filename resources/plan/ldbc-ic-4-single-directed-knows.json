@@ -1,10 +1,27 @@
 {
-  "matching_order": [],
+  "matching_order": [
+    "person",
+    "otherPerson",
+    "friend",
+    "otherPost",
+    "post",
+    "tag"
+  ],
   "vertices": {
     "post": {
       "vid": "post",
       "label": "Post",
       "attr": null
+    },
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "!=",
+        "value": 246,
+        "type": "int"
+      }
     },
     "friend": {
       "vid": "friend",
@@ -16,15 +33,10 @@
         "type": "int"
       }
     },
-    "person": {
-      "vid": "person",
-      "label": "Person",
-      "attr": {
-        "attr": "id",
-        "op": "!=",
-        "value": 246,
-        "type": "int"
-      }
+    "otherPost": {
+      "vid": "otherPost",
+      "label": "Post",
+      "attr": null
     },
     "tag": {
       "vid": "tag",
@@ -40,19 +52,14 @@
         "value": 246,
         "type": "int"
       }
-    },
-    "otherPost": {
-      "vid": "otherPost",
-      "label": "Post",
-      "attr": null
     }
   },
   "edges": {
-    "d": {
-      "eid": "d",
-      "src_vid": "otherPost",
-      "dst_vid": "friend",
-      "label": "hasCreator",
+    "b": {
+      "eid": "b",
+      "src_vid": "friend",
+      "dst_vid": "otherPerson",
+      "label": "knows",
       "attr": null
     },
     "e": {
@@ -62,18 +69,18 @@
       "label": "hasTag",
       "attr": null
     },
-    "c": {
-      "eid": "c",
-      "src_vid": "post",
-      "dst_vid": "person",
-      "label": "hasCreator",
+    "f": {
+      "eid": "f",
+      "src_vid": "otherPost",
+      "dst_vid": "tag",
+      "label": "hasTag",
       "attr": null
     },
-    "b": {
-      "eid": "b",
-      "src_vid": "friend",
-      "dst_vid": "otherPerson",
-      "label": "knows",
+    "d": {
+      "eid": "d",
+      "src_vid": "otherPost",
+      "dst_vid": "friend",
+      "label": "hasCreator",
       "attr": null
     },
     "a": {
@@ -83,13 +90,344 @@
       "label": "knows",
       "attr": null
     },
-    "f": {
-      "eid": "f",
-      "src_vid": "otherPost",
-      "dst_vid": "tag",
-      "label": "hasTag",
+    "c": {
+      "eid": "c",
+      "src_vid": "post",
+      "dst_vid": "person",
+      "label": "hasCreator",
       "attr": null
     }
   },
-  "instructions": []
+  "instructions": [
+    {
+      "vid": "person",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^person",
+      "depend_on": []
+    },
+    {
+      "vid": "person",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "c",
+        "a"
+      ],
+      "single_op": "f^person",
+      "multi_ops": [],
+      "target_var": "A^person",
+      "depend_on": [
+        "f^person"
+      ]
+    },
+    {
+      "vid": "otherPerson",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^person",
+      "multi_ops": [],
+      "target_var": "C^otherPerson",
+      "depend_on": [
+        "A^person",
+        "f^person"
+      ]
+    },
+    {
+      "vid": "otherPerson",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^otherPerson",
+      "multi_ops": [],
+      "target_var": "f^otherPerson",
+      "depend_on": [
+        "A^person",
+        "f^person",
+        "C^otherPerson"
+      ]
+    },
+    {
+      "vid": "otherPerson",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "a",
+        "b"
+      ],
+      "single_op": "f^otherPerson",
+      "multi_ops": [],
+      "target_var": "A^otherPerson",
+      "depend_on": [
+        "f^otherPerson",
+        "f^person",
+        "C^otherPerson",
+        "A^person"
+      ]
+    },
+    {
+      "vid": "friend",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^otherPerson",
+      "multi_ops": [],
+      "target_var": "C^friend",
+      "depend_on": [
+        "C^otherPerson",
+        "f^person",
+        "f^otherPerson",
+        "A^otherPerson",
+        "A^person"
+      ]
+    },
+    {
+      "vid": "friend",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^friend",
+      "multi_ops": [],
+      "target_var": "f^friend",
+      "depend_on": [
+        "C^otherPerson",
+        "A^otherPerson",
+        "A^person",
+        "C^friend",
+        "f^person",
+        "f^otherPerson"
+      ]
+    },
+    {
+      "vid": "friend",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "b",
+        "d"
+      ],
+      "single_op": "f^friend",
+      "multi_ops": [],
+      "target_var": "A^friend",
+      "depend_on": [
+        "C^otherPerson",
+        "A^otherPerson",
+        "A^person",
+        "f^friend",
+        "C^friend",
+        "f^person",
+        "f^otherPerson"
+      ]
+    },
+    {
+      "vid": "otherPost",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^friend",
+      "multi_ops": [],
+      "target_var": "C^otherPost",
+      "depend_on": [
+        "C^otherPerson",
+        "A^person",
+        "f^friend",
+        "f^person",
+        "f^otherPerson",
+        "A^friend",
+        "C^friend",
+        "A^otherPerson"
+      ]
+    },
+    {
+      "vid": "otherPost",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^otherPost",
+      "multi_ops": [],
+      "target_var": "f^otherPost",
+      "depend_on": [
+        "A^person",
+        "A^friend",
+        "f^friend",
+        "C^otherPost",
+        "C^friend",
+        "f^person",
+        "C^otherPerson",
+        "A^otherPerson",
+        "f^otherPerson"
+      ]
+    },
+    {
+      "vid": "otherPost",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "d",
+        "f"
+      ],
+      "single_op": "f^otherPost",
+      "multi_ops": [],
+      "target_var": "A^otherPost",
+      "depend_on": [
+        "f^otherPost",
+        "f^friend",
+        "C^otherPost",
+        "A^person",
+        "C^friend",
+        "C^otherPerson",
+        "A^otherPerson",
+        "f^otherPerson",
+        "f^person",
+        "A^friend"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^person",
+      "multi_ops": [],
+      "target_var": "C^post",
+      "depend_on": [
+        "f^person",
+        "A^person"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^post",
+      "multi_ops": [],
+      "target_var": "f^post",
+      "depend_on": [
+        "A^person",
+        "C^post",
+        "f^person"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "c",
+        "e"
+      ],
+      "single_op": "f^post",
+      "multi_ops": [],
+      "target_var": "A^post",
+      "depend_on": [
+        "f^post",
+        "f^person",
+        "A^person",
+        "C^post"
+      ]
+    },
+    {
+      "vid": "tag",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^otherPost",
+        "A^post"
+      ],
+      "target_var": "T^tag",
+      "depend_on": [
+        "C^post",
+        "C^friend",
+        "A^person",
+        "C^otherPost",
+        "f^friend",
+        "f^otherPost",
+        "A^otherPost",
+        "C^otherPerson",
+        "A^otherPerson",
+        "f^otherPerson",
+        "f^person",
+        "A^friend",
+        "f^post",
+        "A^post"
+      ]
+    },
+    {
+      "vid": "tag",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^tag",
+      "multi_ops": [],
+      "target_var": "C^tag",
+      "depend_on": [
+        "f^person",
+        "A^friend",
+        "C^friend",
+        "C^otherPost",
+        "A^person",
+        "C^post",
+        "A^otherPerson",
+        "f^post",
+        "f^otherPost",
+        "f^friend",
+        "A^otherPost",
+        "C^otherPerson",
+        "T^tag",
+        "A^post",
+        "f^otherPerson"
+      ]
+    },
+    {
+      "vid": "tag",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^tag",
+      "multi_ops": [],
+      "target_var": "f^tag",
+      "depend_on": [
+        "f^otherPost",
+        "C^otherPost",
+        "C^otherPerson",
+        "T^tag",
+        "C^friend",
+        "f^person",
+        "f^friend",
+        "A^friend",
+        "C^tag",
+        "f^post",
+        "A^otherPerson",
+        "f^otherPerson",
+        "A^person",
+        "C^post",
+        "A^otherPost",
+        "A^post"
+      ]
+    },
+    {
+      "vid": "",
+      "type": "report",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "f^person",
+        "f^friend",
+        "f^otherPost",
+        "f^otherPerson",
+        "f^post",
+        "f^tag"
+      ],
+      "target_var": "f",
+      "depend_on": [
+        "C^tag",
+        "A^person",
+        "A^friend",
+        "f^otherPerson",
+        "f^person",
+        "A^post",
+        "f^tag",
+        "C^otherPerson",
+        "C^otherPost",
+        "f^friend",
+        "C^friend",
+        "f^post",
+        "f^otherPost",
+        "A^otherPost",
+        "C^post",
+        "A^otherPerson",
+        "T^tag"
+      ]
+    }
+  ]
 }

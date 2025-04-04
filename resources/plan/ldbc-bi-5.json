@@ -1,9 +1,15 @@
 {
-  "matching_order": [],
+  "matching_order": [
+    "tag",
+    "person",
+    "liker",
+    "comment",
+    "post"
+  ],
   "vertices": {
-    "person": {
-      "vid": "person",
-      "label": "Person",
+    "post": {
+      "vid": "post",
+      "label": "Post",
       "attr": null
     },
     "tag": {
@@ -21,14 +27,14 @@
       "label": "Person",
       "attr": null
     },
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": null
+    },
     "comment": {
       "vid": "comment",
       "label": "Comment",
-      "attr": null
-    },
-    "post": {
-      "vid": "post",
-      "label": "Post",
       "attr": null
     }
   },
@@ -62,5 +68,205 @@
       "attr": null
     }
   },
-  "instructions": []
+  "instructions": [
+    {
+      "vid": "tag",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^tag",
+      "depend_on": []
+    },
+    {
+      "vid": "tag",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "b"
+      ],
+      "single_op": "f^tag",
+      "multi_ops": [],
+      "target_var": "A^tag",
+      "depend_on": [
+        "f^tag"
+      ]
+    },
+    {
+      "vid": "person",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^person",
+      "depend_on": []
+    },
+    {
+      "vid": "person",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "a"
+      ],
+      "single_op": "f^person",
+      "multi_ops": [],
+      "target_var": "A^person",
+      "depend_on": [
+        "f^person"
+      ]
+    },
+    {
+      "vid": "liker",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^liker",
+      "depend_on": []
+    },
+    {
+      "vid": "liker",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "c"
+      ],
+      "single_op": "f^liker",
+      "multi_ops": [],
+      "target_var": "A^liker",
+      "depend_on": [
+        "f^liker"
+      ]
+    },
+    {
+      "vid": "comment",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^comment",
+      "depend_on": []
+    },
+    {
+      "vid": "comment",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "d"
+      ],
+      "single_op": "f^comment",
+      "multi_ops": [],
+      "target_var": "A^comment",
+      "depend_on": [
+        "f^comment"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^liker",
+        "A^comment"
+      ],
+      "target_var": "T^@1",
+      "depend_on": []
+    },
+    {
+      "vid": "post",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^person",
+        "A^tag"
+      ],
+      "target_var": "T^@2",
+      "depend_on": []
+    },
+    {
+      "vid": "post",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "T^@2",
+        "T^@1"
+      ],
+      "target_var": "T^post",
+      "depend_on": [
+        "f^tag",
+        "A^liker",
+        "f^person",
+        "A^person",
+        "f^liker",
+        "A^comment",
+        "f^comment",
+        "A^tag"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^post",
+      "multi_ops": [],
+      "target_var": "C^post",
+      "depend_on": [
+        "f^person",
+        "A^tag",
+        "A^liker",
+        "A^person",
+        "f^tag",
+        "T^post",
+        "f^comment",
+        "f^liker",
+        "A^comment"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^post",
+      "multi_ops": [],
+      "target_var": "f^post",
+      "depend_on": [
+        "f^liker",
+        "f^comment",
+        "T^post",
+        "f^tag",
+        "f^person",
+        "A^liker",
+        "C^post",
+        "A^person",
+        "A^comment",
+        "A^tag"
+      ]
+    },
+    {
+      "vid": "",
+      "type": "report",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "f^tag",
+        "f^person",
+        "f^comment",
+        "f^post",
+        "f^liker"
+      ],
+      "target_var": "f",
+      "depend_on": [
+        "A^liker",
+        "C^post",
+        "A^tag",
+        "A^person",
+        "f^liker",
+        "f^person",
+        "A^comment",
+        "f^comment",
+        "f^post",
+        "T^post",
+        "f^tag"
+      ]
+    }
+  ]
 }
