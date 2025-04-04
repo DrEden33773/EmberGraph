@@ -1,0 +1,16 @@
+6 5 1 0
+
+person2 Person
+post1 Post
+tag Tag
+person1 Person
+post2 Post
+person3 Person
+
+a person2 post1 likes
+b post1 tag hasTag
+c post1 person1 hasCreator
+d post2 person2 hasCreator
+e person3 post2 likes
+
+tag name ='The_Mouse_and_the_Mask'

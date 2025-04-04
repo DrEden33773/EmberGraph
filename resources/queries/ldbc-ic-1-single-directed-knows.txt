@@ -1,0 +1,19 @@
+7 6 2 0
+
+person Person
+otherPerson Person
+locationCity City
+company Company
+university University
+companyCountry Country
+universityCity City
+
+a person otherPerson knows
+b otherPerson locationCity isLocatedIn
+c otherPerson company workAt
+d otherPerson university studyAt
+e company companyCountry isLocatedIn
+f university universityCity isLocatedIn
+
+person id =6597069766786
+otherPerson firstName ='Jose'

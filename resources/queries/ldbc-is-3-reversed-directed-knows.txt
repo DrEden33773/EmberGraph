@@ -1,0 +1,9 @@
+2 1 2 0
+
+person Person
+friend Person
+
+a friend person knows
+
+person id =6597069766660
+friend id !=6597069766660

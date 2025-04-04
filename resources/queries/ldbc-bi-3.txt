@@ -1,0 +1,21 @@
+8 7 2 0
+
+country Country
+city City
+person Person
+forum Forum
+post Post
+comment Comment
+tag Tag
+tagClass Tagclass
+
+a city country isPartOf
+b person city isLocatedIn
+c forum person hasModerator
+d forum post containerOf
+e comment post replyOf
+f comment tag hasTag
+g tag tagClass hasType
+
+country name ='Afghanistan'
+tagClass name ='Album'

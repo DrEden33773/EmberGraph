@@ -1,6 +1,9 @@
 use hashbrown::HashMap;
 
-use crate::schemas::{Eid, Label, PatternAttr, Vid};
+use crate::{
+  schemas::{Eid, Label, PatternAttr, PatternEdge, PatternVertex, Vid},
+  utils::dyn_graph::DynGraph,
+};
 
 #[derive(Debug, Clone)]
 pub struct PatternParser {
@@ -28,8 +31,39 @@ impl PatternParser {
     }
   }
 
+  pub fn take_as_pattern_graph(mut self) -> DynGraph<PatternVertex, PatternEdge> {
+    let mut pattern_graph = DynGraph::default();
+
+    // vertices
+    for (vid, label) in self.v_labels.drain() {
+      let attr = self.v_attrs.remove(&vid);
+      let pattern_vertex = PatternVertex {
+        vid: vid.clone(),
+        label,
+        attr,
+      };
+      pattern_graph.update_v(pattern_vertex, vid);
+    }
+
+    // edges
+    for (eid, (src_vid, dst_vid)) in self.e_2_vv.drain() {
+      let label = self.e_labels.remove(&eid).unwrap();
+      let attr = self.e_attrs.remove(&eid);
+      let pattern_edge = PatternEdge {
+        eid: eid.clone(),
+        src_vid,
+        dst_vid,
+        label,
+        attr,
+      };
+      pattern_graph.update_e(pattern_edge, eid);
+    }
+
+    pattern_graph
+  }
+
   pub fn parse(&mut self) {
-    let mut lines = self.src.lines();
+    let mut lines = self.src.lines().filter(|line| !line.trim().is_empty());
     let cnt_args = lines
       .next()
       .expect("⚠️  Missing `count_args` line => Count(v, e, v_attr, e_attr).");
@@ -91,10 +125,13 @@ impl PatternParser {
       let mut args = line.split_whitespace();
 
       let vid = args.next().expect("⚠️  Missing 'vid'.").to_string();
-      let key = args.next().expect("⚠️  Missing 'key'.").to_string();
+      let key = args
+        .next()
+        .expect("⚠️  Missing 'key' for `v_attr`.")
+        .to_string();
       let raw_pred = args.collect::<Vec<_>>().join("");
       if raw_pred.is_empty() {
-        panic!("⚠️  Missing 'predicate'.");
+        panic!("⚠️  Missing 'predicate' for `v_attr`.");
       }
 
       let pattern_attr = PatternAttr::parse_from_raw(key, raw_pred);
@@ -108,10 +145,13 @@ impl PatternParser {
       let mut args = line.split_whitespace();
 
       let eid = args.next().expect("⚠️  Missing 'eid'.").to_string();
-      let key = args.next().expect("⚠️  Missing 'key'.").to_string();
+      let key = args
+        .next()
+        .expect("⚠️  Missing 'key' for `e_attr`.")
+        .to_string();
       let raw_pred = args.collect::<Vec<_>>().join("");
       if raw_pred.is_empty() {
-        panic!("⚠️  Missing 'predicate'.");
+        panic!("⚠️  Missing 'predicate' for `e_attr`.");
       }
 
       let pattern_attr = PatternAttr::parse_from_raw(key, raw_pred);

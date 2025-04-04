@@ -1,0 +1,14 @@
+4 3 3 0
+
+person Person
+otherPerson Person
+company Company
+country Country
+
+a person otherPerson knows
+b otherPerson company workAt
+c company country isLocatedIn
+
+person id =6597069766786
+otherPerson id >10995116277900
+country name ='Pakistan'

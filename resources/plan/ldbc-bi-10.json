@@ -1,0 +1,107 @@
+{
+  "matching_order": [],
+  "vertices": {
+    "tagClass": {
+      "vid": "tagClass",
+      "label": "Tagclass",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "Comedian",
+        "type": "string"
+      }
+    },
+    "startPerson": {
+      "vid": "startPerson",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "=",
+        "value": 6,
+        "type": "int"
+      }
+    },
+    "expertCandidatePerson": {
+      "vid": "expertCandidatePerson",
+      "label": "Person",
+      "attr": null
+    },
+    "city": {
+      "vid": "city",
+      "label": "City",
+      "attr": null
+    },
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": null
+    },
+    "country": {
+      "vid": "country",
+      "label": "Country",
+      "attr": null
+    },
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
+    },
+    "otherTag": {
+      "vid": "otherTag",
+      "label": "Tag",
+      "attr": null
+    }
+  },
+  "edges": {
+    "c": {
+      "eid": "c",
+      "src_vid": "post",
+      "dst_vid": "otherTag",
+      "label": "hasTag",
+      "attr": null
+    },
+    "f": {
+      "eid": "f",
+      "src_vid": "expertCandidatePerson",
+      "dst_vid": "city",
+      "label": "isLocatedIn",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "post",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    },
+    "e": {
+      "eid": "e",
+      "src_vid": "startPerson",
+      "dst_vid": "expertCandidatePerson",
+      "label": "knows",
+      "attr": null
+    },
+    "d": {
+      "eid": "d",
+      "src_vid": "post",
+      "dst_vid": "expertCandidatePerson",
+      "label": "hasCreator",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "tag",
+      "dst_vid": "tagClass",
+      "label": "hasType",
+      "attr": null
+    },
+    "g": {
+      "eid": "g",
+      "src_vid": "city",
+      "dst_vid": "country",
+      "label": "isPartOf",
+      "attr": null
+    }
+  },
+  "instructions": []
+}

@@ -1,0 +1,19 @@
+6 6 3 0
+
+person Person
+otherPerson Person
+friend Person
+post Post
+otherPost Post
+tag Tag
+
+a person otherPerson knows
+b friend otherPerson knows
+c post person hasCreator
+d otherPost friend hasCreator
+e post tag hasTag
+f otherPost tag hasTag
+
+otherPerson id =246
+person id !=246
+friend id !=246

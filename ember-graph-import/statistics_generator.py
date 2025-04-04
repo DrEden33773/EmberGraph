@@ -68,7 +68,7 @@ async def visit_node_csv(file_path: Path):
 
         print(f"""\
 ✅  '{Fore.GREEN + file_path.stem + Style.RESET_ALL}' \
-=> {Fore.YELLOW + str(v_label_cnt) + Style.RESET_ALL}
+=> {Fore.YELLOW + str(v_label_cnt) + Style.RESET_ALL}\
         """)
 
 
@@ -94,7 +94,7 @@ async def visit_relationship_csv(file_path: Path):
 
         print(f"""\
 ✅  '{Fore.GREEN + file_path.stem + Style.RESET_ALL}' \
-=> {Fore.YELLOW + str(e_label_cnt) + Style.RESET_ALL}
+=> {Fore.YELLOW + str(e_label_cnt) + Style.RESET_ALL}\
         """)
 
 

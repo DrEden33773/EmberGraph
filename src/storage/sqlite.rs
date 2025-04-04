@@ -4,6 +4,7 @@ use crate::{
   utils::time_async_with_desc,
 };
 use hashbrown::HashMap;
+use project_root::get_project_root;
 use sqlx::{Execute, Row, SqlitePool, sqlite::SqliteRow};
 use std::env;
 
@@ -15,7 +16,7 @@ pub struct SqliteStorageAdapter {
 impl AsyncDefault for SqliteStorageAdapter {
   async fn async_default() -> Self {
     let db_name = env::var("SQLITE_DB_PATH").unwrap();
-    let root = project_root::get_project_root().unwrap();
+    let root = get_project_root().unwrap();
     let db_path = root.join(db_name);
     let url = format!("sqlite://{}", db_path.display());
 

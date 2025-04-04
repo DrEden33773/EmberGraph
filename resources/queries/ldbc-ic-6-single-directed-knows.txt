@@ -1,0 +1,16 @@
+5 4 3 0
+
+person Person
+otherPerson Person
+tag Tag
+otherTag Tag
+post Post
+
+a person otherPerson knows
+b post otherPerson hasCreator
+c post tag hasTag
+d post otherTag hasTag
+
+person id =153
+tag name ='Joan_Crawford'
+otherTag name !='Joan_Crawford'

@@ -1,0 +1,21 @@
+8 7 2 0
+
+post Post
+tag Tag
+tagClass Tagclass
+otherTag Tag
+expertCandidatePerson Person
+startPerson Person
+city City
+country Country
+
+a post tag hasTag
+b tag tagClass hasType
+c post otherTag hasTag
+d post expertCandidatePerson hasCreator
+e startPerson expertCandidatePerson knows
+f expertCandidatePerson city isLocatedIn
+g city country isPartOf
+
+startPerson id =6
+tagClass name ='Comedian'

@@ -1,0 +1,17 @@
+6 5 2 0
+
+person1 Person
+person2 Person
+city1 City
+city2 City
+country1 Country
+country2 Country
+
+a person1 city1 isLocatedIn
+b person2 city2 isLocatedIn
+c person1 person2 knows
+d city1 country1 isPartOf
+e city2 country2 isPartOf
+
+country1 name ='Afghanistan'
+country2 name ='India'

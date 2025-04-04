@@ -1,0 +1,54 @@
+{
+  "matching_order": [],
+  "vertices": {
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
+    },
+    "tagClass": {
+      "vid": "tagClass",
+      "label": "Tagclass",
+      "attr": null
+    },
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
+      "attr": null
+    },
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "Patrick_Vieira",
+        "type": "string"
+      }
+    }
+  },
+  "edges": {
+    "b": {
+      "eid": "b",
+      "src_vid": "comment",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "tag",
+      "dst_vid": "tagClass",
+      "label": "hasType",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "post",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    }
+  },
+  "instructions": []
+}

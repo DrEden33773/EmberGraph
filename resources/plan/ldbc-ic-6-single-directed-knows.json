@@ -1,36 +1,10 @@
 {
-  "matching_order": [
-    "post",
-    "person",
-    "tag",
-    "otherTag",
-    "otherPerson"
-  ],
+  "matching_order": [],
   "vertices": {
-    "person": {
-      "vid": "person",
-      "label": "Person",
-      "attr": {
-        "attr": "id",
-        "op": "=",
-        "value": 153,
-        "type": "int"
-      }
-    },
     "otherPerson": {
       "vid": "otherPerson",
       "label": "Person",
       "attr": null
-    },
-    "tag": {
-      "vid": "tag",
-      "label": "Tag",
-      "attr": {
-        "attr": "name",
-        "op": "=",
-        "value": "Joan_Crawford",
-        "type": "string"
-      }
     },
     "otherTag": {
       "vid": "otherTag",
@@ -42,6 +16,26 @@
         "type": "string"
       }
     },
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "Joan_Crawford",
+        "type": "string"
+      }
+    },
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "=",
+        "value": 153,
+        "type": "int"
+      }
+    },
     "post": {
       "vid": "post",
       "label": "Post",
@@ -49,6 +43,20 @@
     }
   },
   "edges": {
+    "d": {
+      "eid": "d",
+      "src_vid": "post",
+      "dst_vid": "otherTag",
+      "label": "hasTag",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "post",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    },
     "a": {
       "eid": "a",
       "src_vid": "person",
@@ -62,193 +70,7 @@
       "dst_vid": "otherPerson",
       "label": "hasCreator",
       "attr": null
-    },
-    "c": {
-      "eid": "c",
-      "src_vid": "post",
-      "dst_vid": "tag",
-      "label": "hasTag",
-      "attr": null
-    },
-    "d": {
-      "eid": "d",
-      "src_vid": "post",
-      "dst_vid": "otherTag",
-      "label": "hasTag",
-      "attr": null
     }
   },
-  "instructions": [
-    {
-      "vid": "post",
-      "type": "init",
-      "expand_eid_list": [],
-      "single_op": null,
-      "multi_ops": [],
-      "target_var": "f^post",
-      "depend_on": []
-    },
-    {
-      "vid": "post",
-      "type": "get_adj",
-      "expand_eid_list": [
-        "b",
-        "c",
-        "d"
-      ],
-      "single_op": "f^post",
-      "multi_ops": [],
-      "target_var": "A^post",
-      "depend_on": [
-        "f^post"
-      ]
-    },
-    {
-      "vid": "person",
-      "type": "init",
-      "expand_eid_list": [],
-      "single_op": null,
-      "multi_ops": [],
-      "target_var": "f^person",
-      "depend_on": []
-    },
-    {
-      "vid": "person",
-      "type": "get_adj",
-      "expand_eid_list": [
-        "a"
-      ],
-      "single_op": "f^person",
-      "multi_ops": [],
-      "target_var": "A^person",
-      "depend_on": [
-        "f^person"
-      ]
-    },
-    {
-      "vid": "tag",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": "A^post",
-      "multi_ops": [],
-      "target_var": "C^tag",
-      "depend_on": [
-        "A^post",
-        "f^post"
-      ]
-    },
-    {
-      "vid": "tag",
-      "type": "foreach",
-      "expand_eid_list": [],
-      "single_op": "C^tag",
-      "multi_ops": [],
-      "target_var": "f^tag",
-      "depend_on": [
-        "A^post",
-        "C^tag",
-        "f^post"
-      ]
-    },
-    {
-      "vid": "otherTag",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": "A^post",
-      "multi_ops": [],
-      "target_var": "C^otherTag",
-      "depend_on": [
-        "A^post",
-        "f^post"
-      ]
-    },
-    {
-      "vid": "otherTag",
-      "type": "foreach",
-      "expand_eid_list": [],
-      "single_op": "C^otherTag",
-      "multi_ops": [],
-      "target_var": "f^otherTag",
-      "depend_on": [
-        "A^post",
-        "C^otherTag",
-        "f^post"
-      ]
-    },
-    {
-      "vid": "otherPerson",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": null,
-      "multi_ops": [
-        "A^person",
-        "A^post"
-      ],
-      "target_var": "T^otherPerson",
-      "depend_on": [
-        "A^person",
-        "A^post",
-        "f^person",
-        "f^post"
-      ]
-    },
-    {
-      "vid": "otherPerson",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": "T^otherPerson",
-      "multi_ops": [],
-      "target_var": "C^otherPerson",
-      "depend_on": [
-        "A^person",
-        "A^post",
-        "T^otherPerson",
-        "f^person",
-        "f^post"
-      ]
-    },
-    {
-      "vid": "otherPerson",
-      "type": "foreach",
-      "expand_eid_list": [],
-      "single_op": "C^otherPerson",
-      "multi_ops": [],
-      "target_var": "f^otherPerson",
-      "depend_on": [
-        "A^person",
-        "A^post",
-        "C^otherPerson",
-        "T^otherPerson",
-        "f^person",
-        "f^post"
-      ]
-    },
-    {
-      "vid": "otherPerson",
-      "type": "report",
-      "expand_eid_list": [],
-      "single_op": null,
-      "multi_ops": [
-        "f^otherPerson",
-        "f^otherTag",
-        "f^person",
-        "f^post",
-        "f^tag"
-      ],
-      "target_var": "f",
-      "depend_on": [
-        "A^person",
-        "A^post",
-        "C^otherPerson",
-        "C^otherTag",
-        "C^tag",
-        "T^otherPerson",
-        "f^otherPerson",
-        "f^otherTag",
-        "f^person",
-        "f^post",
-        "f^tag"
-      ]
-    }
-  ]
+  "instructions": []
 }

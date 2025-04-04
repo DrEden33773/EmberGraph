@@ -1,0 +1,21 @@
+7 9 1 0
+
+c Person
+a Person
+b Person
+city_c City
+city_a City
+city_b City
+country Country
+
+_a c a knows
+_b c city_c isLocatedIn
+_c c b knows
+_d a b knows
+_e a city_a isLocatedIn
+_f b city_b isLocatedIn
+_g city_a country isPartOf
+_h city_b country isPartOf
+_i city_c country isPartOf
+
+country name ='China'

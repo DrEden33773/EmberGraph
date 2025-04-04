@@ -1,9 +1,11 @@
 {
-  "matching_order": [
-    "person",
-    "city"
-  ],
+  "matching_order": [],
   "vertices": {
+    "city": {
+      "vid": "city",
+      "label": "City",
+      "attr": null
+    },
     "person": {
       "vid": "person",
       "label": "Person",
@@ -13,11 +15,6 @@
         "value": 6597069766660,
         "type": "int"
       }
-    },
-    "city": {
-      "vid": "city",
-      "label": "City",
-      "attr": null
     }
   },
   "edges": {
@@ -31,67 +28,19 @@
   },
   "instructions": [
     {
-      "vid": "person",
-      "type": "init",
-      "expand_eid_list": [],
-      "single_op": null,
-      "multi_ops": [],
-      "target_var": "f^person",
-      "depend_on": []
-    },
-    {
-      "vid": "person",
+      "vid": "city",
       "type": "get_adj",
       "expand_eid_list": [
         "a"
       ],
-      "single_op": "f^person",
+      "single_op": "f^city",
       "multi_ops": [],
-      "target_var": "A^person",
-      "depend_on": [
-        "f^person"
-      ]
-    },
-    {
-      "vid": "city",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": "A^person",
-      "multi_ops": [],
-      "target_var": "C^city",
-      "depend_on": [
-        "A^person",
-        "f^person"
-      ]
-    },
-    {
-      "vid": "city",
-      "type": "foreach",
-      "expand_eid_list": [],
-      "single_op": "C^city",
-      "multi_ops": [],
-      "target_var": "f^city",
+      "target_var": "A^city",
       "depend_on": [
         "A^person",
         "C^city",
-        "f^person"
-      ]
-    },
-    {
-      "vid": "city",
-      "type": "report",
-      "expand_eid_list": [],
-      "single_op": null,
-      "multi_ops": [
-        "f^city",
-        "f^person"
-      ],
-      "target_var": "f",
-      "depend_on": [
-        "A^person",
-        "C^city",
-        "f^city",
-        "f^person"
+        "f^person",
+        "f^city"
       ]
     }
   ]

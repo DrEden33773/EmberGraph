@@ -1,0 +1,20 @@
+7 6 3 0
+
+person Person
+friend Person
+comment Comment
+post Post
+tag Tag
+tagClass Tagclass
+otherTagClass Tagclass
+
+a person friend knows
+b comment friend hasCreator
+c comment post replyOf
+d post tag hasTag
+e tag tagClass hasType
+f tagClass otherTagClass isSubclassOf
+
+person id =8796093022390
+friend id !=8796093022390
+otherTagClass name ='Artist'

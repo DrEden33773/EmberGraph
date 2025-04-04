@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
-use strum_macros::{Display, EnumString};
+use strum_macros::{AsRefStr, Display, EnumString};
 
 pub const STR_TUPLE_SPLITTER: &str = "^";
 
@@ -72,7 +72,9 @@ impl Op {
   }
 }
 
-#[derive(Debug, Clone, Copy, Display, EnumString, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(
+  Debug, Clone, Copy, Display, EnumString, PartialEq, Eq, Deserialize, Serialize, AsRefStr,
+)]
 pub enum VarPrefix {
   #[strum(serialize = " ")]
   #[serde(rename = " ")]

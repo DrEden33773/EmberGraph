@@ -1,0 +1,14 @@
+5 4 1 0
+
+post Post
+person Person
+tag Tag
+liker Person
+comment Comment
+
+a post person hasCreator
+b post tag hasTag
+c liker post likes
+d comment post replyOf
+
+tag name ='Fridtjof_Nansen'

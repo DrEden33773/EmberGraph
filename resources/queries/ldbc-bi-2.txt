@@ -1,0 +1,12 @@
+4 3 1 0
+
+post Post
+tag Tag
+comment Comment
+tagClass Tagclass
+
+a post tag hasTag
+b comment tag hasTag
+c tag tagClass hasType
+
+tag name ='Patrick_Vieira'

@@ -1,0 +1,107 @@
+{
+  "matching_order": [],
+  "vertices": {
+    "country": {
+      "vid": "country",
+      "label": "Country",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "Afghanistan",
+        "type": "string"
+      }
+    },
+    "forum": {
+      "vid": "forum",
+      "label": "Forum",
+      "attr": null
+    },
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": null
+    },
+    "tagClass": {
+      "vid": "tagClass",
+      "label": "Tagclass",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "Album",
+        "type": "string"
+      }
+    },
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
+    },
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
+      "attr": null
+    },
+    "city": {
+      "vid": "city",
+      "label": "City",
+      "attr": null
+    },
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": null
+    }
+  },
+  "edges": {
+    "b": {
+      "eid": "b",
+      "src_vid": "person",
+      "dst_vid": "city",
+      "label": "isLocatedIn",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "city",
+      "dst_vid": "country",
+      "label": "isPartOf",
+      "attr": null
+    },
+    "f": {
+      "eid": "f",
+      "src_vid": "comment",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "forum",
+      "dst_vid": "person",
+      "label": "hasModerator",
+      "attr": null
+    },
+    "d": {
+      "eid": "d",
+      "src_vid": "forum",
+      "dst_vid": "post",
+      "label": "containerOf",
+      "attr": null
+    },
+    "e": {
+      "eid": "e",
+      "src_vid": "comment",
+      "dst_vid": "post",
+      "label": "replyOf",
+      "attr": null
+    },
+    "g": {
+      "eid": "g",
+      "src_vid": "tag",
+      "dst_vid": "tagClass",
+      "label": "hasType",
+      "attr": null
+    }
+  },
+  "instructions": []
+}

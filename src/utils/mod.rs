@@ -1,5 +1,6 @@
 use tokio::time::Instant;
 
+pub mod apriori;
 pub mod dyn_graph;
 pub mod expand_graph;
 pub mod parallel;

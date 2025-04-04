@@ -1,0 +1,78 @@
+{
+  "matching_order": [],
+  "vertices": {
+    "person3": {
+      "vid": "person3",
+      "label": "Person",
+      "attr": null
+    },
+    "person2": {
+      "vid": "person2",
+      "label": "Person",
+      "attr": null
+    },
+    "post2": {
+      "vid": "post2",
+      "label": "Post",
+      "attr": null
+    },
+    "post1": {
+      "vid": "post1",
+      "label": "Post",
+      "attr": null
+    },
+    "person1": {
+      "vid": "person1",
+      "label": "Person",
+      "attr": null
+    },
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "The_Mouse_and_the_Mask",
+        "type": "string"
+      }
+    }
+  },
+  "edges": {
+    "c": {
+      "eid": "c",
+      "src_vid": "post1",
+      "dst_vid": "person1",
+      "label": "hasCreator",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "person2",
+      "dst_vid": "post1",
+      "label": "likes",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "post1",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    },
+    "e": {
+      "eid": "e",
+      "src_vid": "person3",
+      "dst_vid": "post2",
+      "label": "likes",
+      "attr": null
+    },
+    "d": {
+      "eid": "d",
+      "src_vid": "post2",
+      "dst_vid": "person2",
+      "label": "hasCreator",
+      "attr": null
+    }
+  },
+  "instructions": []
+}

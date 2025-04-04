@@ -1,0 +1,83 @@
+{
+  "matching_order": [],
+  "vertices": {
+    "person2": {
+      "vid": "person2",
+      "label": "Person",
+      "attr": null
+    },
+    "country1": {
+      "vid": "country1",
+      "label": "Country",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "Afghanistan",
+        "type": "string"
+      }
+    },
+    "country2": {
+      "vid": "country2",
+      "label": "Country",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "India",
+        "type": "string"
+      }
+    },
+    "city1": {
+      "vid": "city1",
+      "label": "City",
+      "attr": null
+    },
+    "person1": {
+      "vid": "person1",
+      "label": "Person",
+      "attr": null
+    },
+    "city2": {
+      "vid": "city2",
+      "label": "City",
+      "attr": null
+    }
+  },
+  "edges": {
+    "d": {
+      "eid": "d",
+      "src_vid": "city1",
+      "dst_vid": "country1",
+      "label": "isPartOf",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "person1",
+      "dst_vid": "person2",
+      "label": "knows",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "person2",
+      "dst_vid": "city2",
+      "label": "isLocatedIn",
+      "attr": null
+    },
+    "e": {
+      "eid": "e",
+      "src_vid": "city2",
+      "dst_vid": "country2",
+      "label": "isPartOf",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "person1",
+      "dst_vid": "city1",
+      "label": "isLocatedIn",
+      "attr": null
+    }
+  },
+  "instructions": []
+}

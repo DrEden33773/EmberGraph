@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+colored = "3.0.0"
 dotenv = "0.15.0"
 futures = "0.3.31"
 hashbrown = { version = "0.15.2", features = ["rayon", "serde"] }
@@ -20,7 +21,6 @@ sqlx = { version = "0.8.3", features = ["runtime-tokio", "sqlite"] }
 strum = "0.27.1"
 strum_macros = "0.27.1"
 tokio = { version = "1.44.1", features = ["full"] }
-tqdm = "0.7.0"
 tracing = { version = "0.1.41", features = ["async-await"] }
 tracing-appender = "0.2.3"
 tracing-futures = "0.2.5"

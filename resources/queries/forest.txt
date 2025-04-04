@@ -1,0 +1,10 @@
+4 3 0 0
+
+red Red
+blue Blue
+green Green
+otherRed Red
+
+a red blue Edge
+b blue green Edge
+c green red Edge

@@ -1,0 +1,14 @@
+4 4 2 0
+
+person Person
+otherPerson Person
+forum Forum
+post Post
+
+a person otherPerson knows
+b forum otherPerson hasMember
+c forum post containerOf
+d post otherPerson hasCreator
+
+person id =94
+otherPerson id !=94

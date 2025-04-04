@@ -1,0 +1,111 @@
+{
+  "matching_order": [],
+  "vertices": {
+    "city_b": {
+      "vid": "city_b",
+      "label": "City",
+      "attr": null
+    },
+    "city_c": {
+      "vid": "city_c",
+      "label": "City",
+      "attr": null
+    },
+    "city_a": {
+      "vid": "city_a",
+      "label": "City",
+      "attr": null
+    },
+    "b": {
+      "vid": "b",
+      "label": "Person",
+      "attr": null
+    },
+    "a": {
+      "vid": "a",
+      "label": "Person",
+      "attr": null
+    },
+    "country": {
+      "vid": "country",
+      "label": "Country",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "China",
+        "type": "string"
+      }
+    },
+    "c": {
+      "vid": "c",
+      "label": "Person",
+      "attr": null
+    }
+  },
+  "edges": {
+    "_g": {
+      "eid": "_g",
+      "src_vid": "city_a",
+      "dst_vid": "country",
+      "label": "isPartOf",
+      "attr": null
+    },
+    "_c": {
+      "eid": "_c",
+      "src_vid": "c",
+      "dst_vid": "b",
+      "label": "knows",
+      "attr": null
+    },
+    "_b": {
+      "eid": "_b",
+      "src_vid": "c",
+      "dst_vid": "city_c",
+      "label": "isLocatedIn",
+      "attr": null
+    },
+    "_f": {
+      "eid": "_f",
+      "src_vid": "b",
+      "dst_vid": "city_b",
+      "label": "isLocatedIn",
+      "attr": null
+    },
+    "_d": {
+      "eid": "_d",
+      "src_vid": "a",
+      "dst_vid": "b",
+      "label": "knows",
+      "attr": null
+    },
+    "_e": {
+      "eid": "_e",
+      "src_vid": "a",
+      "dst_vid": "city_a",
+      "label": "isLocatedIn",
+      "attr": null
+    },
+    "_h": {
+      "eid": "_h",
+      "src_vid": "city_b",
+      "dst_vid": "country",
+      "label": "isPartOf",
+      "attr": null
+    },
+    "_a": {
+      "eid": "_a",
+      "src_vid": "c",
+      "dst_vid": "a",
+      "label": "knows",
+      "attr": null
+    },
+    "_i": {
+      "eid": "_i",
+      "src_vid": "city_c",
+      "dst_vid": "country",
+      "label": "isPartOf",
+      "attr": null
+    }
+  },
+  "instructions": []
+}

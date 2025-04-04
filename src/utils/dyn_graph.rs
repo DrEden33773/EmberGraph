@@ -177,6 +177,14 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   pub fn is_superset_of(&self, other: &Self) -> bool {
     other.is_subset_of(self)
   }
+
+  pub fn v_entities(&self) -> &HashMap<Vid, VType> {
+    &self.v_entities
+  }
+
+  pub fn e_entities(&self) -> &HashMap<Eid, EType> {
+    &self.e_entities
+  }
 }
 
 impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
@@ -449,5 +457,54 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   #[inline]
   pub fn is_e_full_connective(&self, edge: &EType) -> bool {
     self.has_all_vids(&[edge.src_vid(), edge.dst_vid()])
+  }
+}
+
+impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
+  /// get all adj edges grouped by target vid
+  /// (edge's direction: in | out)
+  pub fn get_adj_es_grouped_by_target_vid(&self, curr_vid: VidRef) -> HashMap<Vid, HashSet<EType>> {
+    let mut res: HashMap<Vid, HashSet<_>> = HashMap::new();
+    if let Some(v_node) = self.adj_table.get(curr_vid) {
+      for eid in v_node.e_in.union(&v_node.e_out) {
+        let edge = self.get_e_from_eid(eid).unwrap();
+        // target_vid != curr_vid
+        let target_vid = if edge.src_vid() == curr_vid {
+          edge.dst_vid().to_string()
+        } else {
+          edge.src_vid().to_string()
+        };
+        let target_edge = self.e_entities.get(eid).unwrap().clone();
+        res.entry(target_vid).or_default().insert(target_edge);
+      }
+    }
+    res
+  }
+
+  pub fn get_adj_eids(&self, vid: VidRef) -> HashSet<Eid> {
+    if let Some(v_node) = self.adj_table.get(vid) {
+      v_node.e_in.union(&v_node.e_out).cloned().collect()
+    } else {
+      HashSet::new()
+    }
+  }
+
+  pub fn get_adj_vids(&self, vid: VidRef) -> HashSet<Vid> {
+    if let Some(v_node) = self.adj_table.get(vid) {
+      v_node
+        .e_in
+        .union(&v_node.e_out)
+        .map(|eid| {
+          let edge = self.get_e_from_eid(eid).unwrap();
+          if edge.src_vid() == vid {
+            edge.dst_vid().to_string()
+          } else {
+            edge.src_vid().to_string()
+          }
+        })
+        .collect()
+    } else {
+      HashSet::new()
+    }
   }
 }

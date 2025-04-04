@@ -1,0 +1,66 @@
+{
+  "matching_order": [],
+  "vertices": {
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": null
+    },
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "Fridtjof_Nansen",
+        "type": "string"
+      }
+    },
+    "liker": {
+      "vid": "liker",
+      "label": "Person",
+      "attr": null
+    },
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
+      "attr": null
+    },
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
+    }
+  },
+  "edges": {
+    "d": {
+      "eid": "d",
+      "src_vid": "comment",
+      "dst_vid": "post",
+      "label": "replyOf",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "post",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "liker",
+      "dst_vid": "post",
+      "label": "likes",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "post",
+      "dst_vid": "person",
+      "label": "hasCreator",
+      "attr": null
+    }
+  },
+  "instructions": []
+}
