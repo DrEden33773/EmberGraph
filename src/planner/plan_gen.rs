@@ -32,6 +32,7 @@ impl PlanGenerator {
 
     let mut instructions = vec![];
     let mut f_set = HashSet::new();
+    let mut expanded_es = HashSet::new();
 
     // first vertex
     let vid = self.optimal_order[0].clone();
@@ -45,19 +46,23 @@ impl PlanGenerator {
     // GetAdj(fx) -> Ax
     instructions.push(
       InstructionBuilder::new(&vid, InstructionType::GetAdj)
-        .expand_eids(adj_eids)
+        .expand_eids(adj_eids.clone())
         .single_op(VarPrefix::EnumerateTarget.with(&vid))
         .target_var(VarPrefix::DbQueryTarget.with(&vid))
         .build(),
     );
+    // update `f_set` and `expanded_es`
     f_set.insert(vid);
+    expanded_es.extend(adj_eids);
 
     // other vertices
     for vid in self.optimal_order.iter().skip(1).cloned() {
       let mut operands = f_set.clone();
       operands.retain(|v| self.pattern_graph.get_adj_vids(&vid).contains(v));
 
-      let adj_eids = self.pattern_graph.get_adj_eids(&vid);
+      let mut adj_eids = self.pattern_graph.get_adj_eids(&vid);
+      // only pick those edges that are not expanded
+      adj_eids.retain(|eid| !expanded_es.contains(eid));
 
       // Init -> fx
       if operands.is_empty() {
@@ -113,13 +118,15 @@ impl PlanGenerator {
       // GetAdj(fx) -> Ax
       instructions.push(
         InstructionBuilder::new(&vid, InstructionType::GetAdj)
-          .expand_eids(adj_eids)
+          .expand_eids(adj_eids.clone())
           .single_op(VarPrefix::EnumerateTarget.with(&vid))
           .target_var(VarPrefix::DbQueryTarget.with(&vid))
           .build(),
       );
 
+      // update `f_set` and `expanded_es`
       f_set.insert(vid);
+      expanded_es.extend(adj_eids);
     }
 
     // Report

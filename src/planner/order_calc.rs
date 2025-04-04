@@ -101,7 +101,7 @@ impl OrderCalculator {
     self.order.sort_unstable_by_key(|vid| -v_scores[vid]);
   }
 
-  /// Core logic: Heuristic-based cost estimation
+  /// Core logic: Heuristic-based cost estimation & adjustment
   ///
   /// To keep `worst-case optimal`, we assume that each step is in the worst case.
   fn cost_based_adjustment(&mut self) {

@@ -13,7 +13,7 @@ async fn main() -> io::Result<()> {
   #[cfg(feature = "use_tracing")]
   let _guard = ember_graph::init_log::init_log().await?;
 
-  plan_gen().await?;
+  // plan_gen().await?;
   run_demo().await?;
 
   Ok(())
@@ -21,7 +21,7 @@ async fn main() -> io::Result<()> {
 
 #[allow(dead_code)]
 async fn run_demo() -> io::Result<()> {
-  is_3_on_sf_01().await
+  ic_11_on_sf_01().await
 }
 
 #[allow(dead_code)]

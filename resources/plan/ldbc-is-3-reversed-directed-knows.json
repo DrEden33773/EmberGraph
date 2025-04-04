@@ -1,25 +1,25 @@
 {
   "matching_order": [
-    "friend",
-    "person"
+    "person",
+    "friend"
   ],
   "vertices": {
-    "friend": {
-      "vid": "friend",
-      "label": "Person",
-      "attr": {
-        "attr": "id",
-        "op": "!=",
-        "value": 6597069766660,
-        "type": "int"
-      }
-    },
     "person": {
       "vid": "person",
       "label": "Person",
       "attr": {
         "attr": "id",
         "op": "=",
+        "value": 6597069766660,
+        "type": "int"
+      }
+    },
+    "friend": {
+      "vid": "friend",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "!=",
         "value": 6597069766660,
         "type": "int"
       }
@@ -36,50 +36,50 @@
   },
   "instructions": [
     {
-      "vid": "friend",
+      "vid": "person",
       "type": "init",
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [],
-      "target_var": "f^friend",
+      "target_var": "f^person",
       "depend_on": []
     },
     {
-      "vid": "friend",
+      "vid": "person",
       "type": "get_adj",
       "expand_eid_list": [
         "a"
       ],
-      "single_op": "f^friend",
+      "single_op": "f^person",
       "multi_ops": [],
-      "target_var": "A^friend",
+      "target_var": "A^person",
       "depend_on": [
-        "f^friend"
+        "f^person"
       ]
     },
     {
-      "vid": "person",
+      "vid": "friend",
       "type": "intersect",
       "expand_eid_list": [],
-      "single_op": "A^friend",
+      "single_op": "A^person",
       "multi_ops": [],
-      "target_var": "C^person",
+      "target_var": "C^friend",
       "depend_on": [
-        "f^friend",
-        "A^friend"
+        "A^person",
+        "f^person"
       ]
     },
     {
-      "vid": "person",
+      "vid": "friend",
       "type": "foreach",
       "expand_eid_list": [],
-      "single_op": "C^person",
+      "single_op": "C^friend",
       "multi_ops": [],
-      "target_var": "f^person",
+      "target_var": "f^friend",
       "depend_on": [
-        "A^friend",
-        "C^person",
-        "f^friend"
+        "C^friend",
+        "A^person",
+        "f^person"
       ]
     },
     {
@@ -94,8 +94,8 @@
       "target_var": "f",
       "depend_on": [
         "f^friend",
-        "A^friend",
-        "C^person",
+        "A^person",
+        "C^friend",
         "f^person"
       ]
     }

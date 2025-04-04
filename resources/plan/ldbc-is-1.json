@@ -4,11 +4,6 @@
     "city"
   ],
   "vertices": {
-    "city": {
-      "vid": "city",
-      "label": "City",
-      "attr": null
-    },
     "person": {
       "vid": "person",
       "label": "Person",
@@ -18,6 +13,11 @@
         "value": 6597069766660,
         "type": "int"
       }
+    },
+    "city": {
+      "vid": "city",
+      "label": "City",
+      "attr": null
     }
   },
   "edges": {
@@ -73,8 +73,8 @@
       "target_var": "f^city",
       "depend_on": [
         "C^city",
-        "f^person",
-        "A^person"
+        "A^person",
+        "f^person"
       ]
     },
     {
@@ -83,15 +83,15 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^person",
-        "f^city"
+        "f^city",
+        "f^person"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^person",
         "C^city",
         "A^person",
-        "f^city"
+        "f^city",
+        "f^person"
       ]
     }
   ]

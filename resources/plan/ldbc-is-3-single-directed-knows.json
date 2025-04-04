@@ -1,7 +1,7 @@
 {
   "matching_order": [
-    "person",
-    "friend"
+    "friend",
+    "person"
   ],
   "vertices": {
     "friend": {
@@ -36,50 +36,50 @@
   },
   "instructions": [
     {
-      "vid": "person",
+      "vid": "friend",
       "type": "init",
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [],
-      "target_var": "f^person",
+      "target_var": "f^friend",
       "depend_on": []
     },
     {
-      "vid": "person",
+      "vid": "friend",
       "type": "get_adj",
       "expand_eid_list": [
         "a"
       ],
-      "single_op": "f^person",
+      "single_op": "f^friend",
       "multi_ops": [],
-      "target_var": "A^person",
+      "target_var": "A^friend",
       "depend_on": [
-        "f^person"
+        "f^friend"
       ]
     },
     {
-      "vid": "friend",
+      "vid": "person",
       "type": "intersect",
       "expand_eid_list": [],
-      "single_op": "A^person",
+      "single_op": "A^friend",
       "multi_ops": [],
-      "target_var": "C^friend",
+      "target_var": "C^person",
       "depend_on": [
-        "A^person",
-        "f^person"
+        "A^friend",
+        "f^friend"
       ]
     },
     {
-      "vid": "friend",
+      "vid": "person",
       "type": "foreach",
       "expand_eid_list": [],
-      "single_op": "C^friend",
+      "single_op": "C^person",
       "multi_ops": [],
-      "target_var": "f^friend",
+      "target_var": "f^person",
       "depend_on": [
-        "C^friend",
-        "A^person",
-        "f^person"
+        "C^person",
+        "f^friend",
+        "A^friend"
       ]
     },
     {
@@ -93,10 +93,10 @@
       ],
       "target_var": "f",
       "depend_on": [
-        "f^friend",
         "f^person",
-        "C^friend",
-        "A^person"
+        "f^friend",
+        "A^friend",
+        "C^person"
       ]
     }
   ]
