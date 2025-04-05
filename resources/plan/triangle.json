@@ -10,14 +10,14 @@
       "label": "Red",
       "attr": null
     },
-    "green": {
-      "vid": "green",
-      "label": "Green",
-      "attr": null
-    },
     "blue": {
       "vid": "blue",
       "label": "Blue",
+      "attr": null
+    },
+    "green": {
+      "vid": "green",
+      "label": "Green",
       "attr": null
     }
   },
@@ -29,17 +29,17 @@
       "label": "Edge",
       "attr": null
     },
-    "c": {
-      "eid": "c",
-      "src_vid": "green",
-      "dst_vid": "red",
-      "label": "Edge",
-      "attr": null
-    },
     "a": {
       "eid": "a",
       "src_vid": "red",
       "dst_vid": "blue",
+      "label": "Edge",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "green",
+      "dst_vid": "red",
       "label": "Edge",
       "attr": null
     }
@@ -58,8 +58,8 @@
       "vid": "red",
       "type": "get_adj",
       "expand_eid_list": [
-        "a",
-        "c"
+        "c",
+        "a"
       ],
       "single_op": "f^red",
       "multi_ops": [],
@@ -76,8 +76,8 @@
       "multi_ops": [],
       "target_var": "C^green",
       "depend_on": [
-        "A^red",
-        "f^red"
+        "f^red",
+        "A^red"
       ]
     },
     {
@@ -88,9 +88,9 @@
       "multi_ops": [],
       "target_var": "f^green",
       "depend_on": [
-        "C^green",
         "A^red",
-        "f^red"
+        "f^red",
+        "C^green"
       ]
     },
     {
@@ -104,8 +104,8 @@
       "target_var": "A^green",
       "depend_on": [
         "C^green",
-        "f^green",
         "f^red",
+        "f^green",
         "A^red"
       ]
     },
@@ -135,12 +135,12 @@
       "multi_ops": [],
       "target_var": "C^blue",
       "depend_on": [
-        "A^red",
+        "A^green",
+        "f^red",
         "f^green",
         "T^blue",
         "C^green",
-        "f^red",
-        "A^green"
+        "A^red"
       ]
     },
     {
@@ -151,13 +151,13 @@
       "multi_ops": [],
       "target_var": "f^blue",
       "depend_on": [
-        "f^green",
         "T^blue",
-        "A^red",
-        "C^green",
-        "f^red",
         "A^green",
-        "C^blue"
+        "C^green",
+        "A^red",
+        "f^green",
+        "C^blue",
+        "f^red"
       ]
     },
     {
@@ -167,19 +167,19 @@
       "single_op": null,
       "multi_ops": [
         "f^green",
-        "f^red",
-        "f^blue"
+        "f^blue",
+        "f^red"
       ],
       "target_var": "f",
       "depend_on": [
         "f^green",
+        "f^blue",
         "A^red",
         "C^blue",
-        "f^blue",
-        "T^blue",
-        "C^green",
         "A^green",
-        "f^red"
+        "f^red",
+        "C^green",
+        "T^blue"
       ]
     }
   ]

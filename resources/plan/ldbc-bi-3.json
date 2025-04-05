@@ -1,7 +1,7 @@
 {
   "matching_order": [
-    "tagClass",
     "country",
+    "tagClass",
     "person",
     "forum",
     "city",
@@ -10,29 +10,24 @@
     "tag"
   ],
   "vertices": {
-    "country": {
-      "vid": "country",
-      "label": "Country",
-      "attr": {
-        "attr": "name",
-        "op": "=",
-        "value": "Afghanistan",
-        "type": "string"
-      }
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": null
     },
     "person": {
       "vid": "person",
       "label": "Person",
       "attr": null
     },
-    "post": {
-      "vid": "post",
-      "label": "Post",
-      "attr": null
-    },
     "city": {
       "vid": "city",
       "label": "City",
+      "attr": null
+    },
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
       "attr": null
     },
     "tagClass": {
@@ -45,19 +40,24 @@
         "type": "string"
       }
     },
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
+    },
+    "country": {
+      "vid": "country",
+      "label": "Country",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "Afghanistan",
+        "type": "string"
+      }
+    },
     "forum": {
       "vid": "forum",
       "label": "Forum",
-      "attr": null
-    },
-    "comment": {
-      "vid": "comment",
-      "label": "Comment",
-      "attr": null
-    },
-    "tag": {
-      "vid": "tag",
-      "label": "Tag",
       "attr": null
     }
   },
@@ -69,11 +69,25 @@
       "label": "replyOf",
       "attr": null
     },
-    "d": {
-      "eid": "d",
+    "c": {
+      "eid": "c",
       "src_vid": "forum",
-      "dst_vid": "post",
-      "label": "containerOf",
+      "dst_vid": "person",
+      "label": "hasModerator",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "person",
+      "dst_vid": "city",
+      "label": "isLocatedIn",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "city",
+      "dst_vid": "country",
+      "label": "isPartOf",
       "attr": null
     },
     "g": {
@@ -90,51 +104,15 @@
       "label": "hasTag",
       "attr": null
     },
-    "c": {
-      "eid": "c",
+    "d": {
+      "eid": "d",
       "src_vid": "forum",
-      "dst_vid": "person",
-      "label": "hasModerator",
-      "attr": null
-    },
-    "a": {
-      "eid": "a",
-      "src_vid": "city",
-      "dst_vid": "country",
-      "label": "isPartOf",
-      "attr": null
-    },
-    "b": {
-      "eid": "b",
-      "src_vid": "person",
-      "dst_vid": "city",
-      "label": "isLocatedIn",
+      "dst_vid": "post",
+      "label": "containerOf",
       "attr": null
     }
   },
   "instructions": [
-    {
-      "vid": "tagClass",
-      "type": "init",
-      "expand_eid_list": [],
-      "single_op": null,
-      "multi_ops": [],
-      "target_var": "f^tagClass",
-      "depend_on": []
-    },
-    {
-      "vid": "tagClass",
-      "type": "get_adj",
-      "expand_eid_list": [
-        "g"
-      ],
-      "single_op": "f^tagClass",
-      "multi_ops": [],
-      "target_var": "A^tagClass",
-      "depend_on": [
-        "f^tagClass"
-      ]
-    },
     {
       "vid": "country",
       "type": "init",
@@ -158,6 +136,28 @@
       ]
     },
     {
+      "vid": "tagClass",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^tagClass",
+      "depend_on": []
+    },
+    {
+      "vid": "tagClass",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "g"
+      ],
+      "single_op": "f^tagClass",
+      "multi_ops": [],
+      "target_var": "A^tagClass",
+      "depend_on": [
+        "f^tagClass"
+      ]
+    },
+    {
       "vid": "person",
       "type": "init",
       "expand_eid_list": [],
@@ -170,8 +170,8 @@
       "vid": "person",
       "type": "get_adj",
       "expand_eid_list": [
-        "b",
-        "c"
+        "c",
+        "b"
       ],
       "single_op": "f^person",
       "multi_ops": [],
@@ -215,9 +215,9 @@
       "multi_ops": [],
       "target_var": "A^forum",
       "depend_on": [
-        "f^person",
         "C^forum",
         "f^forum",
+        "f^person",
         "A^person"
       ]
     },
@@ -246,11 +246,11 @@
       "multi_ops": [],
       "target_var": "C^city",
       "depend_on": [
-        "f^country",
-        "f^person",
+        "T^city",
         "A^country",
+        "f^person",
         "A^person",
-        "T^city"
+        "f^country"
       ]
     },
     {
@@ -261,12 +261,12 @@
       "multi_ops": [],
       "target_var": "f^city",
       "depend_on": [
-        "A^country",
-        "T^city",
         "A^person",
         "C^city",
         "f^country",
-        "f^person"
+        "f^person",
+        "A^country",
+        "T^city"
       ]
     },
     {
@@ -282,8 +282,8 @@
       "vid": "comment",
       "type": "get_adj",
       "expand_eid_list": [
-        "f",
-        "e"
+        "e",
+        "f"
       ],
       "single_op": "f^comment",
       "multi_ops": [],
@@ -298,18 +298,18 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^forum",
-        "A^comment"
+        "A^comment",
+        "A^forum"
       ],
       "target_var": "T^post",
       "depend_on": [
-        "C^forum",
+        "A^person",
         "f^person",
         "A^comment",
-        "f^forum",
-        "A^person",
+        "A^forum",
+        "C^forum",
         "f^comment",
-        "A^forum"
+        "f^forum"
       ]
     },
     {
@@ -320,14 +320,14 @@
       "multi_ops": [],
       "target_var": "C^post",
       "depend_on": [
-        "f^forum",
-        "A^person",
+        "T^post",
+        "A^comment",
         "C^forum",
+        "A^person",
         "f^comment",
         "f^person",
-        "A^comment",
-        "A^forum",
-        "T^post"
+        "f^forum",
+        "A^forum"
       ]
     },
     {
@@ -338,15 +338,15 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
+        "A^comment",
+        "A^forum",
+        "A^person",
         "f^comment",
+        "C^post",
         "C^forum",
         "T^post",
-        "A^person",
-        "f^person",
-        "A^forum",
         "f^forum",
-        "A^comment",
-        "C^post"
+        "f^person"
       ]
     },
     {
@@ -355,15 +355,15 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^tagClass",
-        "A^comment"
+        "A^comment",
+        "A^tagClass"
       ],
       "target_var": "T^tag",
       "depend_on": [
         "A^comment",
         "A^tagClass",
-        "f^comment",
-        "f^tagClass"
+        "f^tagClass",
+        "f^comment"
       ]
     },
     {
@@ -374,11 +374,11 @@
       "multi_ops": [],
       "target_var": "C^tag",
       "depend_on": [
+        "f^comment",
         "T^tag",
-        "f^tagClass",
-        "A^comment",
         "A^tagClass",
-        "f^comment"
+        "A^comment",
+        "f^tagClass"
       ]
     },
     {
@@ -389,12 +389,12 @@
       "multi_ops": [],
       "target_var": "f^tag",
       "depend_on": [
-        "T^tag",
-        "f^tagClass",
-        "A^comment",
-        "A^tagClass",
         "f^comment",
-        "C^tag"
+        "f^tagClass",
+        "C^tag",
+        "A^tagClass",
+        "T^tag",
+        "A^comment"
       ]
     },
     {
@@ -403,37 +403,37 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^person",
         "f^tagClass",
-        "f^country",
         "f^forum",
-        "f^city",
         "f^tag",
+        "f^person",
+        "f^city",
         "f^post",
+        "f^country",
         "f^comment"
       ],
       "target_var": "f",
       "depend_on": [
-        "C^post",
-        "f^person",
-        "f^tagClass",
-        "A^tagClass",
-        "A^forum",
-        "T^post",
-        "A^person",
-        "f^post",
-        "T^tag",
-        "C^forum",
-        "C^city",
         "f^comment",
-        "A^comment",
-        "A^country",
-        "f^forum",
-        "T^city",
+        "A^tagClass",
+        "f^post",
+        "A^person",
+        "T^post",
+        "T^tag",
         "C^tag",
+        "C^city",
         "f^city",
+        "C^forum",
+        "T^city",
+        "f^tagClass",
+        "f^tag",
+        "f^person",
+        "C^post",
         "f^country",
-        "f^tag"
+        "A^country",
+        "A^forum",
+        "A^comment",
+        "f^forum"
       ]
     }
   ]

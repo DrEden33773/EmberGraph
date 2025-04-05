@@ -26,17 +26,17 @@
     }
   },
   "edges": {
-    "b": {
-      "eid": "b",
-      "src_vid": "friend",
-      "dst_vid": "person",
-      "label": "knows",
-      "attr": null
-    },
     "a": {
       "eid": "a",
       "src_vid": "person",
       "dst_vid": "friend",
+      "label": "knows",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "friend",
+      "dst_vid": "person",
       "label": "knows",
       "attr": null
     }
@@ -85,9 +85,9 @@
       "multi_ops": [],
       "target_var": "f^friend",
       "depend_on": [
+        "C^friend",
         "f^person",
-        "A^person",
-        "C^friend"
+        "A^person"
       ]
     },
     {
@@ -101,8 +101,8 @@
       ],
       "target_var": "f",
       "depend_on": [
-        "f^person",
         "f^friend",
+        "f^person",
         "A^person",
         "C^friend"
       ]

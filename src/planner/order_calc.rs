@@ -67,11 +67,15 @@ impl OrderCalculator {
 
       // 1. selectivity (only if `attr` is not None)
       if let Some(ref attr) = v.attr {
-        // Eq / Ne is tent to select the least number of vertices
-        score += if attr.op == Op::Eq || attr.op == Op::Ne {
+        // Eq is tent to select the least number of vertices
+        score += if attr.op == Op::Eq {
           // don't forget to update `override_v_cost`
           self.override_v_cost.insert(vid.clone(), 1);
           100.0
+        }
+        // Ne is tent to select the most number of vertices
+        else if attr.op == Op::Ne {
+          10.0
         }
         // Range could also be quite selective
         else {
