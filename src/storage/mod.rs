@@ -41,3 +41,23 @@ pub trait StorageAdapter: Clone + AsyncDefault {
     e_attr: Option<&PatternAttr>,
   ) -> impl Future<Output = Vec<DataEdge>> + Send;
 }
+
+pub trait AdvancedStorageAdapter: StorageAdapter {
+  fn load_e_with_src_and_dst_filter(
+    &self,
+    src_vid: VidRef<'_>,
+    e_label: LabelRef<'_>,
+    e_attr: Option<&PatternAttr>,
+    dst_v_label: LabelRef<'_>,
+    dst_v_attr: Option<&PatternAttr>,
+  ) -> impl Future<Output = Vec<DataEdge>> + Send;
+
+  fn load_e_with_dst_and_src_filter(
+    &self,
+    dst_vid: VidRef<'_>,
+    e_label: LabelRef<'_>,
+    e_attr: Option<&PatternAttr>,
+    src_v_label: LabelRef<'_>,
+    src_v_attr: Option<&PatternAttr>,
+  ) -> impl Future<Output = Vec<DataEdge>> + Send;
+}

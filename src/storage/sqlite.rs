@@ -1,4 +1,4 @@
-use super::{AsyncDefault, StorageAdapter};
+use super::{AdvancedStorageAdapter, AsyncDefault, StorageAdapter};
 use crate::{
   schemas::{AttrType, AttrValue, DataEdge, DataVertex, LabelRef, PatternAttr, VidRef},
   utils::time_async_with_desc,
@@ -112,10 +112,10 @@ impl SqliteStorageAdapter {
     if let Some(attr) = e_attr {
       query_str.push_str(
         r#"
-        AND EXISTS (
-          SELECT * FROM edge_attribute 
-          WHERE eid = e.eid AND key = ?
-        "#,
+      AND EXISTS (
+        SELECT * FROM edge_attribute 
+        WHERE eid = e.eid AND key = ?
+      "#,
       );
       params.push(attr.key.clone());
       add_attr_filter(attr, &mut query_str, &mut params);
@@ -128,7 +128,7 @@ impl SqliteStorageAdapter {
     }
 
     // collect rows
-    let sql = query.sql().trim_matches('\n');
+    let sql = query.sql().trim();
     let rows = match time_async_with_desc(query.fetch_all(&self.pool), sql.to_string()).await {
       Ok(rows) => rows,
       Err(_) => return vec![],
@@ -147,10 +147,10 @@ impl SqliteStorageAdapter {
     if let Some(attr) = v_attr {
       query_str.push_str(
         r#"
-        AND EXISTS (
-          SELECT * FROM vertex_attribute 
-          WHERE vid = v.vid AND key = ?
-        "#,
+      AND EXISTS (
+        SELECT * FROM vertex_attribute 
+        WHERE vid = v.vid AND key = ?
+      "#,
       );
       params.push(attr.key.clone());
       add_attr_filter(attr, &mut query_str, &mut params);
@@ -163,7 +163,7 @@ impl SqliteStorageAdapter {
     }
 
     // collect rows
-    let sql = query.sql().trim_matches('\n');
+    let sql = query.sql().trim();
     let rows = match time_async_with_desc(query.fetch_all(&self.pool), sql.to_string()).await {
       Ok(rows) => rows,
       Err(_) => return vec![],
@@ -184,7 +184,7 @@ fn add_attr_filter(attr: &PatternAttr, query_str: &mut String, params: &mut Vec<
       query_str.push_str(" ?");
       query_str.push_str(
         "
-        )",
+      )",
       );
       params.push(val.to_string());
     }
@@ -197,7 +197,7 @@ fn add_attr_filter(attr: &PatternAttr, query_str: &mut String, params: &mut Vec<
       query_str.push_str(" ?");
       query_str.push_str(
         "
-        )",
+      )",
       );
       params.push(val.to_string());
     }
@@ -207,7 +207,7 @@ fn add_attr_filter(attr: &PatternAttr, query_str: &mut String, params: &mut Vec<
       query_str.push_str(" ?");
       query_str.push_str(
         "
-        )",
+      )",
       );
       params.push(val.clone());
     }
@@ -302,10 +302,11 @@ impl StorageAdapter for SqliteStorageAdapter {
       SELECT v.vid, v.label, a.key, a.value, a.type
       FROM db_vertex v
       LEFT JOIN vertex_attribute a ON v.vid = a.vid
-      WHERE v.vid = ?"#,
+      WHERE v.vid = ?
+      "#,
     )
     .bind(vid);
-    let sql = query.sql().trim_matches('\n');
+    let sql = query.sql().trim();
 
     let rows = time_async_with_desc(query.fetch_all(&self.pool), sql.to_string())
       .await
@@ -404,6 +405,113 @@ impl StorageAdapter for SqliteStorageAdapter {
 
     self
       .query_edge_with_attr_then_collect(e_attr, query_str, params)
+      .await
+  }
+}
+
+impl SqliteStorageAdapter {
+  async fn query_edge_with_attr_and_next_v_attr_then_collect(
+    &self,
+    e_attr: Option<&PatternAttr>,
+    next_v_attr: Option<&PatternAttr>,
+    mut query_str: String,
+    mut params: Vec<String>,
+  ) -> Vec<DataEdge> {
+    // add e_attr filter
+    if let Some(e_attr) = e_attr {
+      query_str.push_str(
+        r#"
+      AND EXISTS (
+        SELECT * FROM edge_attribute 
+        WHERE eid = e.eid AND key = ?
+      "#,
+      );
+      params.push(e_attr.key.clone());
+      add_attr_filter(e_attr, &mut query_str, &mut params);
+    }
+
+    // add next_v_attr filter
+    if let Some(v_attr) = next_v_attr {
+      query_str.push_str(
+        r#"
+      AND EXISTS (
+        SELECT * FROM vertex_attribute 
+        WHERE vid = v.vid AND key = ?
+      "#,
+      );
+      params.push(v_attr.key.clone());
+      add_attr_filter(v_attr, &mut query_str, &mut params);
+    }
+
+    // execute query
+    let mut query = sqlx::query(&query_str);
+    for param in params {
+      query = query.bind(param);
+    }
+
+    // collect rows
+    let sql = query.sql().trim();
+    let rows = match time_async_with_desc(query.fetch_all(&self.pool), sql.to_string()).await {
+      Ok(rows) => rows,
+      Err(_) => return vec![],
+    };
+
+    collect_edges(rows).into_values().collect()
+  }
+}
+
+impl AdvancedStorageAdapter for SqliteStorageAdapter {
+  async fn load_e_with_src_and_dst_filter(
+    &self,
+    src_vid: VidRef<'_>,
+    e_label: LabelRef<'_>,
+    e_attr: Option<&PatternAttr>,
+    dst_v_label: LabelRef<'_>,
+    dst_v_attr: Option<&PatternAttr>,
+  ) -> Vec<DataEdge> {
+    let query_str = String::from(
+      r#"
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, ea.key, ea.value, ea.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute ea ON e.eid = ea.eid
+      JOIN db_vertex v ON e.dst_vid = v.vid
+      WHERE e.src_vid = ? AND e.label = ? AND v.label = ?"#,
+    );
+    let params = vec![
+      src_vid.to_string(),
+      e_label.to_string(),
+      dst_v_label.to_string(),
+    ];
+
+    self
+      .query_edge_with_attr_and_next_v_attr_then_collect(e_attr, dst_v_attr, query_str, params)
+      .await
+  }
+
+  async fn load_e_with_dst_and_src_filter(
+    &self,
+    dst_vid: VidRef<'_>,
+    e_label: LabelRef<'_>,
+    e_attr: Option<&PatternAttr>,
+    src_v_label: LabelRef<'_>,
+    src_v_attr: Option<&PatternAttr>,
+  ) -> Vec<DataEdge> {
+    let query_str = String::from(
+      r#"
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, ea.key, ea.value, ea.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute ea ON e.eid = ea.eid
+      JOIN db_vertex v ON e.src_vid = v.vid
+      WHERE e.dst_vid = ? AND e.label = ? AND v.label = ?"#,
+    );
+    let params = vec![
+      dst_vid.to_string(),
+      e_label.to_string(),
+      src_v_label.to_string(),
+    ];
+
+    self
+      .query_edge_with_attr_and_next_v_attr_then_collect(e_attr, src_v_attr, query_str, params)
       .await
   }
 }

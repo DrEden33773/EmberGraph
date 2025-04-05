@@ -1,4 +1,4 @@
-use super::{AsyncDefault, StorageAdapter};
+use super::{AdvancedStorageAdapter, AsyncDefault, StorageAdapter};
 use crate::{schemas::*, utils::time_async_with_desc};
 use neo4rs::*;
 use std::env;
@@ -26,7 +26,7 @@ impl AsyncDefault for Neo4jStorageAdapter {
 
     let graph = time_async_with_desc(
       Graph::connect(config),
-      "Connecting to Neo4j database ... ".to_string(),
+      "Connecting to Neo4j database ...".to_string(),
     )
     .await
     .expect("❌  Failed to connect to Neo4j database");
@@ -55,18 +55,18 @@ impl From<(Row, LabelRef<'_>)> for DataEdge {
 
 impl StorageAdapter for Neo4jStorageAdapter {
   async fn get_v(&self, vid: VidRef<'_>) -> Option<DataVertex> {
-    let mut query_str = "MATCH (v)\n".to_string();
-    query_str += &format!("WHERE elementId(v) = '{vid}'\n");
+    let mut query_str = "\tMATCH (v)\n".to_string();
+    query_str += &format!("\tWHERE elementId(v) = '{vid}'\n");
     query_str += "
-      RETURN
-        properties(v) as props,
-        labels(v) as v_label
-    ";
-    let query_str = query_str.split_whitespace().collect::<Vec<_>>().join(" ");
+    RETURN
+      properties(v) as props,
+      labels(v) as v_label
+    "
+    .trim();
 
     let mut result = time_async_with_desc(
       self.graph.execute(query(&query_str)),
-      format!(">>> {query_str} "),
+      format!("{query_str}"),
     )
     .await
     .unwrap();
@@ -82,21 +82,21 @@ impl StorageAdapter for Neo4jStorageAdapter {
   }
 
   async fn load_v(&self, v_label: LabelRef<'_>, v_attr: Option<&PatternAttr>) -> Vec<DataVertex> {
-    let mut query_str = format!("MATCH (v:{v_label})\n");
+    let mut query_str = format!("\tMATCH (v:{v_label})\n");
     if let Some(attr) = v_attr {
       let constraint = attr.to_neo4j_constraint("v");
-      query_str += &format!("WHERE {constraint}\n");
+      query_str += &format!("\tWHERE {constraint}\n");
     }
     query_str += "
-      RETURN
-        properties(v) as props,
-        elementId(v) as vid
-    ";
-    let query_str = query_str.split_whitespace().collect::<Vec<_>>().join(" ");
+    RETURN
+      properties(v) as props,
+      elementId(v) as vid
+    "
+    .trim();
 
     let mut result = time_async_with_desc(
       self.graph.execute(query(&query_str)),
-      format!(">>> {query_str} "),
+      format!("{query_str}"),
     )
     .await
     .unwrap();
@@ -115,23 +115,23 @@ impl StorageAdapter for Neo4jStorageAdapter {
   }
 
   async fn load_e(&self, e_label: LabelRef<'_>, e_attr: Option<&PatternAttr>) -> Vec<DataEdge> {
-    let mut query_str = format!("MATCH (src)-[e:{e_label}]->(dst)\n");
+    let mut query_str = format!("\tMATCH (src)-[e:{e_label}]->(dst)\n");
     if let Some(attr) = e_attr {
       let constraint = attr.to_neo4j_constraint("e");
-      query_str += &format!("WHERE {constraint}\n");
+      query_str += &format!("\tWHERE {constraint}\n");
     }
     query_str += "
-      RETURN
-        elementId(e) AS eid,
-        properties(e) AS props,
-        elementId(src) AS src_vid,
-        elementId(dst) AS dst_vid
-    ";
-    let query_str = query_str.split_whitespace().collect::<Vec<_>>().join(" ");
+    RETURN
+      elementId(e) AS eid,
+      properties(e) AS props,
+      elementId(src) AS src_vid,
+      elementId(dst) AS dst_vid
+    "
+    .trim();
 
     let mut result = time_async_with_desc(
       self.graph.execute(query(&query_str)),
-      format!(">>> {query_str} "),
+      format!("{query_str}"),
     )
     .await
     .unwrap();
@@ -151,24 +151,24 @@ impl StorageAdapter for Neo4jStorageAdapter {
     e_label: LabelRef<'_>,
     e_attr: Option<&PatternAttr>,
   ) -> Vec<DataEdge> {
-    let mut query_str = format!("MATCH (src)-[e:{e_label}]->(dst)\n");
-    query_str += &format!("WHERE elementId(src) = '{src_vid}'\n");
+    let mut query_str = format!("\tMATCH (src)-[e:{e_label}]->(dst)\n");
+    query_str += &format!("\tWHERE elementId(src) = '{src_vid}'\n");
     if let Some(attr) = e_attr {
       let constraint = attr.to_neo4j_constraint("e");
-      query_str += &format!("AND {constraint}\n");
+      query_str += &format!("\tAND {constraint}\n");
     }
     query_str += "
-      RETURN
-        elementId(e) AS eid,
-        properties(e) AS props,
-        elementId(src) AS src_vid,
-        elementId(dst) AS dst_vid
-    ";
-    let query_str = query_str.split_whitespace().collect::<Vec<_>>().join(" ");
+    RETURN
+      elementId(e) AS eid,
+      properties(e) AS props,
+      elementId(src) AS src_vid,
+      elementId(dst) AS dst_vid
+    "
+    .trim();
 
     let mut result = time_async_with_desc(
       self.graph.execute(query(&query_str)),
-      format!(">>> {query_str} "),
+      format!("{query_str}"),
     )
     .await
     .unwrap();
@@ -188,30 +188,116 @@ impl StorageAdapter for Neo4jStorageAdapter {
     e_label: LabelRef<'_>,
     e_attr: Option<&PatternAttr>,
   ) -> Vec<DataEdge> {
-    let mut query_str = format!("MATCH (src)-[e:{e_label}]->(dst)\n");
-    query_str += &format!("WHERE elementId(dst) = '{dst_vid}'\n");
+    let mut query_str = format!("\tMATCH (src)-[e:{e_label}]->(dst)\n");
+    query_str += &format!("\tWHERE elementId(dst) = '{dst_vid}'\n");
     if let Some(attr) = e_attr {
       let constraint = attr.to_neo4j_constraint("e");
-      query_str += &format!("AND {constraint}\n");
+      query_str += &format!("\tAND {constraint}\n");
     }
     query_str += "
-      RETURN
-        elementId(e) AS eid,
-        properties(e) AS props,
-        elementId(src) AS src_vid,
-        elementId(dst) AS dst_vid
-    ";
-    let query_str = query_str.split_whitespace().collect::<Vec<_>>().join(" ");
+    RETURN
+      elementId(e) AS eid,
+      properties(e) AS props,
+      elementId(src) AS src_vid,
+      elementId(dst) AS dst_vid
+    "
+    .trim();
 
     let mut result = time_async_with_desc(
       self.graph.execute(query(&query_str)),
-      format!(">>> {query_str} "),
+      format!("{query_str}"),
     )
     .await
     .unwrap();
 
     let mut ret = vec![];
 
+    while let Some(row) = result.next().await.unwrap() {
+      ret.push(DataEdge::from((row, e_label)));
+    }
+
+    ret
+  }
+}
+
+impl AdvancedStorageAdapter for Neo4jStorageAdapter {
+  async fn load_e_with_src_and_dst_filter(
+    &self,
+    src_vid: VidRef<'_>,
+    e_label: LabelRef<'_>,
+    e_attr: Option<&PatternAttr>,
+    dst_v_label: LabelRef<'_>,
+    dst_v_attr: Option<&PatternAttr>,
+  ) -> Vec<DataEdge> {
+    let mut query_str = format!("\tMATCH (src)-[e:{e_label}]->(dst:{dst_v_label})\n");
+    query_str += &format!("\tWHERE elementId(src) = '{src_vid}'\n");
+    if let Some(attr) = e_attr {
+      let constraint = attr.to_neo4j_constraint("e");
+      query_str += &format!("\tAND {constraint}\n");
+    }
+    if let Some(attr) = dst_v_attr {
+      let constraint = attr.to_neo4j_constraint("dst");
+      query_str += &format!("\tAND {constraint}\n");
+    }
+    query_str += "
+    RETURN
+      elementId(e) AS eid,
+      properties(e) AS props,
+      elementId(src) AS src_vid,
+      elementId(dst) AS dst_vid
+    "
+    .trim();
+
+    let mut result = time_async_with_desc(
+      self.graph.execute(query(&query_str)),
+      format!("{query_str}"),
+    )
+    .await
+    .unwrap();
+
+    let mut ret = vec![];
+    while let Some(row) = result.next().await.unwrap() {
+      ret.push(DataEdge::from((row, e_label)));
+    }
+
+    ret
+  }
+
+  async fn load_e_with_dst_and_src_filter(
+    &self,
+    dst_vid: VidRef<'_>,
+    e_label: LabelRef<'_>,
+    e_attr: Option<&PatternAttr>,
+    src_v_label: LabelRef<'_>,
+    src_v_attr: Option<&PatternAttr>,
+  ) -> Vec<DataEdge> {
+    let mut query_str = format!("\tMATCH (src:{src_v_label})-[e:{e_label}]->(dst)\n");
+    query_str += &format!("\tWHERE elementId(dst) = '{dst_vid}'\n");
+    if let Some(attr) = e_attr {
+      let constraint = attr.to_neo4j_constraint("e");
+      query_str += &format!("\tAND {constraint}\n");
+    }
+    if let Some(attr) = src_v_attr {
+      let constraint = attr.to_neo4j_constraint("src");
+      query_str += &format!("\tAND {constraint}\n");
+    }
+    query_str += "
+    RETURN
+      elementId(e) AS eid,
+      properties(e) AS props,
+      elementId(src) AS src_vid,
+      elementId(dst) AS dst_vid
+    "
+    .trim();
+
+    let mut result = time_async_with_desc(
+      self.graph.execute(query(&query_str)),
+      format!("{query_str}"),
+    )
+    .await
+    .unwrap();
+
+    let mut ret = vec![];
     while let Some(row) = result.next().await.unwrap() {
       ret.push(DataEdge::from((row, e_label)));
     }

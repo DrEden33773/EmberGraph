@@ -1,4 +1,4 @@
-use super::{AsyncDefault, StorageAdapter};
+use super::{AdvancedStorageAdapter, AsyncDefault, StorageAdapter};
 use crate::schemas::{DataEdge, DataVertex, LabelRef, PatternAttr, VidRef};
 use lru::LruCache;
 use parking_lot::Mutex;
@@ -14,16 +14,47 @@ const DEFAULT_CACHE_SIZE: usize = 256;
 #[derive(Clone, Eq, PartialEq, Hash)]
 enum CacheKey {
   /// Single vertex by ID.
-  Vertex(String),
+  Vertex(
+    String, // vid
+  ),
 
   /// Vertices by label and optional attribute.
-  VerticesByLabel(String, Option<CachedPatternAttr>),
+  VerticesByLabel(
+    String,                    // v_label
+    Option<CachedPatternAttr>, // v_attr
+  ),
 
   /// Edges by source vertex, label, and optional attribute.
-  EdgesBySource(String, String, Option<CachedPatternAttr>),
+  EdgesBySrc(
+    String,                    // src_vid
+    String,                    // e_label
+    Option<CachedPatternAttr>, // e_attr
+  ),
 
   /// Edges by destination vertex, label, and optional attribute.
-  EdgesByDest(String, String, Option<CachedPatternAttr>),
+  EdgesByDst(
+    String,                    // dst_vid
+    String,                    // e_label
+    Option<CachedPatternAttr>, // e_attr
+  ),
+
+  /// Edges by source vertex with destination filter, label, and optional attribute.
+  EdgesBySrcWithDstFilter(
+    String,                    // src_vid
+    String,                    // e_label
+    Option<CachedPatternAttr>, // e_attr
+    String,                    // dst_v_label
+    Option<CachedPatternAttr>, // dst_v_attr
+  ),
+
+  /// Edges by destination vertex with source filter, label, and optional attribute.
+  EdgesByDstWithSrcFilter(
+    String,                    // dst_vid
+    String,                    // e_label
+    Option<CachedPatternAttr>, // e_attr
+    String,                    // src_v_label
+    Option<CachedPatternAttr>, // src_v_attr
+  ),
 }
 
 #[derive(Clone, Eq, PartialEq, Hash)]
@@ -145,7 +176,7 @@ impl<S: StorageAdapter> StorageAdapter for CachedStorageAdapter<S> {
     e_attr: Option<&PatternAttr>,
   ) -> Vec<DataEdge> {
     let attr_cache = e_attr.map(CachedPatternAttr::from);
-    let key = CacheKey::EdgesBySource(src_vid.to_string(), e_label.to_string(), attr_cache);
+    let key = CacheKey::EdgesBySrc(src_vid.to_string(), e_label.to_string(), attr_cache);
 
     let cache = self.cache.read().await;
     if let Some(result) = { cache.edges_cache.lock() }.get(&key).cloned() {
@@ -168,7 +199,7 @@ impl<S: StorageAdapter> StorageAdapter for CachedStorageAdapter<S> {
     e_attr: Option<&PatternAttr>,
   ) -> Vec<DataEdge> {
     let attr_cache = e_attr.map(CachedPatternAttr::from);
-    let key = CacheKey::EdgesByDest(dst_vid.to_string(), e_label.to_string(), attr_cache);
+    let key = CacheKey::EdgesByDst(dst_vid.to_string(), e_label.to_string(), attr_cache);
 
     let cache = self.cache.read().await;
     if let Some(result) = { cache.edges_cache.lock() }.get(&key).cloned() {
@@ -177,6 +208,78 @@ impl<S: StorageAdapter> StorageAdapter for CachedStorageAdapter<S> {
     drop(cache);
 
     let result = self.inner.load_e_with_dst(dst_vid, e_label, e_attr).await;
+
+    let cache = self.cache.write().await;
+    { cache.edges_cache.lock() }.put(key, result.clone());
+
+    result
+  }
+}
+
+impl<S: AdvancedStorageAdapter> AdvancedStorageAdapter for CachedStorageAdapter<S> {
+  async fn load_e_with_src_and_dst_filter(
+    &self,
+    src_vid: VidRef<'_>,
+    e_label: LabelRef<'_>,
+    e_attr: Option<&PatternAttr>,
+    dst_v_label: LabelRef<'_>,
+    dst_v_attr: Option<&PatternAttr>,
+  ) -> Vec<DataEdge> {
+    let e_attr_cache = e_attr.map(CachedPatternAttr::from);
+    let dst_v_attr_cache = dst_v_attr.map(CachedPatternAttr::from);
+    let key = CacheKey::EdgesBySrcWithDstFilter(
+      src_vid.to_string(),
+      e_label.to_string(),
+      e_attr_cache,
+      dst_v_label.to_string(),
+      dst_v_attr_cache,
+    );
+
+    let cache = self.cache.read().await;
+    if let Some(result) = { cache.edges_cache.lock() }.get(&key).cloned() {
+      return result;
+    }
+    drop(cache);
+
+    let result = self
+      .inner
+      .load_e_with_src_and_dst_filter(src_vid, e_label, e_attr, dst_v_label, dst_v_attr)
+      .await;
+
+    let cache = self.cache.write().await;
+    { cache.edges_cache.lock() }.put(key, result.clone());
+
+    result
+  }
+
+  async fn load_e_with_dst_and_src_filter(
+    &self,
+    dst_vid: VidRef<'_>,
+    e_label: LabelRef<'_>,
+    e_attr: Option<&PatternAttr>,
+    src_v_label: LabelRef<'_>,
+    src_v_attr: Option<&PatternAttr>,
+  ) -> Vec<DataEdge> {
+    let e_attr_cache = e_attr.map(CachedPatternAttr::from);
+    let src_v_attr_cache = src_v_attr.map(CachedPatternAttr::from);
+    let key = CacheKey::EdgesByDstWithSrcFilter(
+      dst_vid.to_string(),
+      e_label.to_string(),
+      e_attr_cache,
+      src_v_label.to_string(),
+      src_v_attr_cache,
+    );
+
+    let cache = self.cache.read().await;
+    if let Some(result) = { cache.edges_cache.lock() }.get(&key).cloned() {
+      return result;
+    }
+    drop(cache);
+
+    let result = self
+      .inner
+      .load_e_with_dst_and_src_filter(dst_vid, e_label, e_attr, src_v_label, src_v_attr)
+      .await;
 
     let cache = self.cache.write().await;
     { cache.edges_cache.lock() }.put(key, result.clone());

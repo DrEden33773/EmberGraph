@@ -107,7 +107,7 @@ impl ABucket {
           let next_pat_vid;
 
           let is_matched_data_es_empty = if self.curr_pat_vid == pat_e.src_vid() {
-            next_pat_vid = pat_e.dst_vid();
+            next_pat_vid = &pat_e.dst_vid;
 
             let matched_data_es = incremental_match_adj_e(LoadWithCondCtx {
               pattern_vs,
@@ -136,7 +136,7 @@ impl ABucket {
             }
             is_matched_data_es_empty
           } else {
-            next_pat_vid = pat_e.src_vid();
+            next_pat_vid = &pat_e.src_vid;
 
             let matched_data_es = incremental_match_adj_e(LoadWithCondCtx {
               pattern_vs,
@@ -195,6 +195,8 @@ impl ABucket {
         }
       }
     }
+
+    self.all_matched.clear();
 
     connected_data_vids
   }
