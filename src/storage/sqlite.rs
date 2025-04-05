@@ -217,7 +217,7 @@ fn add_attr_filter(attr: &PatternAttr, query_str: &mut String, params: &mut Vec<
 fn collect_vertices(rows: Vec<SqliteRow>) -> HashMap<String, DataVertex> {
   let mut vertices = HashMap::new();
 
-  for row in rows {
+  rows.into_iter().for_each(|row| {
     let vid: String = row.get("vid");
 
     // init never-seen vertex
@@ -245,7 +245,7 @@ fn collect_vertices(rows: Vec<SqliteRow>) -> HashMap<String, DataVertex> {
         .attrs
         .insert(key, typed_value);
     }
-  }
+  });
 
   vertices
 }
@@ -253,7 +253,7 @@ fn collect_vertices(rows: Vec<SqliteRow>) -> HashMap<String, DataVertex> {
 fn collect_edges(rows: Vec<SqliteRow>) -> HashMap<String, DataEdge> {
   let mut edges = HashMap::new();
 
-  for row in rows {
+  rows.into_iter().for_each(|row| {
     let eid: String = row.get("eid");
 
     // init never-seen edge
@@ -282,7 +282,7 @@ fn collect_edges(rows: Vec<SqliteRow>) -> HashMap<String, DataEdge> {
 
       edges.get_mut(&eid).unwrap().attrs.insert(key, typed_value);
     }
-  }
+  });
 
   edges
 }
