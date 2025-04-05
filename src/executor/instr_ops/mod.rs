@@ -1,7 +1,7 @@
 use crate::{
   matching_ctx::MatchingCtx,
   schemas::{Instruction, InstructionType::*, STR_TUPLE_SPLITTER, VarPrefix},
-  storage::StorageAdapter,
+  storage::AdvancedStorageAdapter,
 };
 use foreach::ForeachOperator;
 use get_adj::GetAdjOperator;
@@ -25,7 +25,7 @@ pub(crate) fn resolve_var(target_var: &str) -> (VarPrefix, &str) {
   (VarPrefix::from_str(var_type).unwrap(), var_name)
 }
 
-pub enum InstrOperator<S: StorageAdapter> {
+pub enum InstrOperator<S: AdvancedStorageAdapter> {
   Init(InitOperator<S>),
   GetAdj(GetAdjOperator<S>),
   Foreach(ForeachOperator),
@@ -33,7 +33,7 @@ pub enum InstrOperator<S: StorageAdapter> {
   Report(ReportOperator),
 }
 
-impl<S: StorageAdapter> InstrOperator<S> {
+impl<S: AdvancedStorageAdapter> InstrOperator<S> {
   pub async fn execute(&mut self, instr: &Instruction) {
     match self {
       InstrOperator::Init(operator) => operator.execute(instr).await,
@@ -48,7 +48,7 @@ impl<S: StorageAdapter> InstrOperator<S> {
 pub struct InstrOperatorFactory;
 
 impl InstrOperatorFactory {
-  pub fn create<S: StorageAdapter>(
+  pub fn create<S: AdvancedStorageAdapter>(
     instr: &Instruction,
     storage_adapter: Arc<S>,
     ctx: Arc<Mutex<MatchingCtx>>,

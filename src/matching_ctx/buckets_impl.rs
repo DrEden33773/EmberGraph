@@ -3,7 +3,7 @@ use crate::{
   schemas::{
     DataEdge, DataVertex, EBase, LabelRef, PatternAttr, PatternEdge, PatternVertex, Vid, VidRef,
   },
-  storage::StorageAdapter,
+  storage::{AdvancedStorageAdapter, StorageAdapter},
   utils::{
     dyn_graph::DynGraph,
     expand_graph::{ExpandGraph, union_then_intersect_on_connective_v},
@@ -82,7 +82,7 @@ impl ABucket {
     &mut self,
     pattern_es: Vec<PatternEdge>,
     pattern_vs: &HashMap<Vid, PatternVertex>,
-    storage_adapter: &impl StorageAdapter,
+    storage_adapter: &impl AdvancedStorageAdapter,
   ) -> HashSet<String> {
     let mut connected_data_vids = HashSet::new();
 
@@ -100,14 +100,16 @@ impl ABucket {
             continue;
           }
 
-          let label = pat_e.label();
-          let attr = pat_e.attr.as_ref();
+          let e_label = pat_e.label();
+          let e_attr = pat_e.attr.as_ref();
           let mut next_vid_grouped_conn_es = HashMap::new();
           let mut next_vid_grouped_conn_pat_strs = HashMap::new();
           let next_pat_vid;
 
           let is_matched_data_es_empty = if self.curr_pat_vid == pat_e.src_vid() {
-            next_pat_vid = &pat_e.dst_vid;
+            next_pat_vid = pat_e.dst_vid();
+            let next_v_label = pattern_vs.get(next_pat_vid).unwrap().label.as_str();
+            let next_v_attr = pattern_vs.get(next_pat_vid).unwrap().attr.as_ref();
 
             let matched_data_es = incremental_match_adj_e(LoadWithCondCtx {
               pattern_vs,
@@ -115,8 +117,10 @@ impl ABucket {
               curr_matched_dg: &matched_dg,
               frontier_vid,
               curr_pat_e: pat_e,
-              e_label: label,
-              e_attr: attr,
+              e_label,
+              e_attr,
+              next_v_label,
+              next_v_attr,
               is_src_curr_pat: true,
             })
             .await;
@@ -136,7 +140,9 @@ impl ABucket {
             }
             is_matched_data_es_empty
           } else {
-            next_pat_vid = &pat_e.src_vid;
+            next_pat_vid = pat_e.src_vid();
+            let next_v_label = pattern_vs.get(next_pat_vid).unwrap().label.as_str();
+            let next_v_attr = pattern_vs.get(next_pat_vid).unwrap().attr.as_ref();
 
             let matched_data_es = incremental_match_adj_e(LoadWithCondCtx {
               pattern_vs,
@@ -144,8 +150,10 @@ impl ABucket {
               curr_matched_dg: &matched_dg,
               frontier_vid,
               curr_pat_e: pat_e,
-              e_label: label,
-              e_attr: attr,
+              e_label,
+              e_attr,
+              next_v_label,
+              next_v_attr,
               is_src_curr_pat: false,
             })
             .await;
@@ -202,7 +210,7 @@ impl ABucket {
   }
 }
 
-struct LoadWithCondCtx<'a, S: StorageAdapter> {
+struct LoadWithCondCtx<'a, S: AdvancedStorageAdapter> {
   pattern_vs: &'a HashMap<String, PatternVertex>,
   storage_adapter: &'a S,
   curr_matched_dg: &'a DynGraph,
@@ -210,11 +218,13 @@ struct LoadWithCondCtx<'a, S: StorageAdapter> {
   curr_pat_e: &'a PatternEdge,
   e_label: LabelRef<'a>,
   e_attr: Option<&'a PatternAttr>,
+  next_v_label: LabelRef<'a>,
+  next_v_attr: Option<&'a PatternAttr>,
   is_src_curr_pat: bool,
 }
 
 #[cfg(not(feature = "batched_incremental_match_adj_e"))]
-async fn incremental_match_adj_e<'a, S: StorageAdapter>(
+async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   ctx: LoadWithCondCtx<'a, S>,
 ) -> Vec<DataEdge> {
   use futures::{StreamExt, stream};
@@ -229,12 +239,24 @@ async fn incremental_match_adj_e<'a, S: StorageAdapter>(
   let potential_edges = if ctx.is_src_curr_pat {
     ctx
       .storage_adapter
-      .load_e_with_src(ctx.frontier_vid, ctx.e_label, ctx.e_attr)
+      .load_e_with_src_and_dst_filter(
+        ctx.frontier_vid,
+        ctx.e_label,
+        ctx.e_attr,
+        ctx.next_v_label,
+        ctx.next_v_attr,
+      )
       .await
   } else {
     ctx
       .storage_adapter
-      .load_e_with_dst(ctx.frontier_vid, ctx.e_label, ctx.e_attr)
+      .load_e_with_dst_and_src_filter(
+        ctx.frontier_vid,
+        ctx.e_label,
+        ctx.e_attr,
+        ctx.next_v_label,
+        ctx.next_v_attr,
+      )
       .await
   };
 
@@ -272,7 +294,7 @@ async fn incremental_match_adj_e<'a, S: StorageAdapter>(
 }
 
 #[cfg(feature = "batched_incremental_match_adj_e")]
-async fn incremental_match_adj_e<'a, S: StorageAdapter>(
+async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   ctx: LoadWithCondCtx<'a, S>,
 ) -> Vec<DataEdge> {
   use futures::future;
@@ -289,12 +311,24 @@ async fn incremental_match_adj_e<'a, S: StorageAdapter>(
   let potential_edges = if ctx.is_src_curr_pat {
     ctx
       .storage_adapter
-      .load_e_with_src(ctx.frontier_vid, ctx.e_label, ctx.e_attr)
+      .load_e_with_src_and_dst_filter(
+        ctx.frontier_vid,
+        ctx.e_label,
+        ctx.e_attr,
+        ctx.next_v_label,
+        ctx.next_v_attr,
+      )
       .await
   } else {
     ctx
       .storage_adapter
-      .load_e_with_dst(ctx.frontier_vid, ctx.e_label, ctx.e_attr)
+      .load_e_with_dst_and_src_filter(
+        ctx.frontier_vid,
+        ctx.e_label,
+        ctx.e_attr,
+        ctx.next_v_label,
+        ctx.next_v_attr,
+      )
       .await
   };
 

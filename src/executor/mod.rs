@@ -1,7 +1,7 @@
 use crate::{
   matching_ctx::MatchingCtx,
   schemas::*,
-  storage::StorageAdapter,
+  storage::AdvancedStorageAdapter,
   utils::{dyn_graph::DynGraph, parallel},
 };
 use hashbrown::HashMap;
@@ -14,13 +14,13 @@ use std::{collections::VecDeque, sync::Arc};
 pub mod instr_ops;
 
 #[derive(Clone)]
-pub struct ExecEngine<S: StorageAdapter> {
+pub struct ExecEngine<S: AdvancedStorageAdapter> {
   pub(crate) plan_data: PlanData,
   pub(crate) storage_adapter: Arc<S>,
   pub(crate) matching_ctx: Arc<Mutex<MatchingCtx>>,
 }
 
-impl<S: StorageAdapter> ExecEngine<S> {
+impl<S: AdvancedStorageAdapter> ExecEngine<S> {
   pub async fn build_from_json(plan_json_content: &str) -> Self {
     let plan_data: PlanData = serde_json::from_str(plan_json_content).unwrap();
     let storage_adapter = Arc::new(S::async_default().await);

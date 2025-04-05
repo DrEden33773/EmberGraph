@@ -64,12 +64,9 @@ impl StorageAdapter for Neo4jStorageAdapter {
     "
     .trim();
 
-    let mut result = time_async_with_desc(
-      self.graph.execute(query(&query_str)),
-      format!("{query_str}"),
-    )
-    .await
-    .unwrap();
+    let mut result = time_async_with_desc(self.graph.execute(query(&query_str)), query_str)
+      .await
+      .unwrap();
 
     let row = result.next().await.unwrap()?;
 
@@ -94,12 +91,9 @@ impl StorageAdapter for Neo4jStorageAdapter {
     "
     .trim();
 
-    let mut result = time_async_with_desc(
-      self.graph.execute(query(&query_str)),
-      format!("{query_str}"),
-    )
-    .await
-    .unwrap();
+    let mut result = time_async_with_desc(self.graph.execute(query(&query_str)), query_str)
+      .await
+      .unwrap();
 
     let mut ret = vec![];
 
@@ -129,12 +123,9 @@ impl StorageAdapter for Neo4jStorageAdapter {
     "
     .trim();
 
-    let mut result = time_async_with_desc(
-      self.graph.execute(query(&query_str)),
-      format!("{query_str}"),
-    )
-    .await
-    .unwrap();
+    let mut result = time_async_with_desc(self.graph.execute(query(&query_str)), query_str)
+      .await
+      .unwrap();
 
     let mut ret = vec![];
 
@@ -166,12 +157,9 @@ impl StorageAdapter for Neo4jStorageAdapter {
     "
     .trim();
 
-    let mut result = time_async_with_desc(
-      self.graph.execute(query(&query_str)),
-      format!("{query_str}"),
-    )
-    .await
-    .unwrap();
+    let mut result = time_async_with_desc(self.graph.execute(query(&query_str)), query_str)
+      .await
+      .unwrap();
 
     let mut ret = vec![];
 
@@ -203,12 +191,9 @@ impl StorageAdapter for Neo4jStorageAdapter {
     "
     .trim();
 
-    let mut result = time_async_with_desc(
-      self.graph.execute(query(&query_str)),
-      format!("{query_str}"),
-    )
-    .await
-    .unwrap();
+    let mut result = time_async_with_desc(self.graph.execute(query(&query_str)), query_str)
+      .await
+      .unwrap();
 
     let mut ret = vec![];
 
@@ -248,12 +233,9 @@ impl AdvancedStorageAdapter for Neo4jStorageAdapter {
     "
     .trim();
 
-    let mut result = time_async_with_desc(
-      self.graph.execute(query(&query_str)),
-      format!("{query_str}"),
-    )
-    .await
-    .unwrap();
+    let mut result = time_async_with_desc(self.graph.execute(query(&query_str)), query_str)
+      .await
+      .unwrap();
 
     let mut ret = vec![];
     while let Some(row) = result.next().await.unwrap() {
@@ -290,12 +272,9 @@ impl AdvancedStorageAdapter for Neo4jStorageAdapter {
     "
     .trim();
 
-    let mut result = time_async_with_desc(
-      self.graph.execute(query(&query_str)),
-      format!("{query_str}"),
-    )
-    .await
-    .unwrap();
+    let mut result = time_async_with_desc(self.graph.execute(query(&query_str)), query_str)
+      .await
+      .unwrap();
 
     let mut ret = vec![];
     while let Some(row) = result.next().await.unwrap() {

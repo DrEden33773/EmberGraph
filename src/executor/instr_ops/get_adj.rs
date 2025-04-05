@@ -2,18 +2,18 @@ use super::resolve_var;
 use crate::{
   matching_ctx::{MatchingCtx, buckets::ABucket},
   schemas::Instruction,
-  storage::StorageAdapter,
+  storage::AdvancedStorageAdapter,
 };
 use parking_lot::Mutex;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
-pub struct GetAdjOperator<S: StorageAdapter> {
+pub struct GetAdjOperator<S: AdvancedStorageAdapter> {
   pub(crate) storage_adapter: Arc<S>,
   pub(crate) ctx: Arc<Mutex<MatchingCtx>>,
 }
 
-impl<S: StorageAdapter> GetAdjOperator<S> {
+impl<S: AdvancedStorageAdapter> GetAdjOperator<S> {
   pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
     println!("{instr:#?}\n");
 
