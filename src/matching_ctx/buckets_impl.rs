@@ -12,7 +12,9 @@ use crate::{
 };
 use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
-use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
+use rayon::iter::{
+  IndexedParallelIterator, IntoParallelIterator, ParallelBridge, ParallelIterator,
+};
 use std::sync::Arc;
 
 async fn does_data_v_satisfy_pattern(
@@ -435,10 +437,14 @@ impl TBucket {
     right_group: Vec<ExpandGraph>,
   ) -> Vec<ExpandGraph> {
     // collect all combinations via `cartesian_product`
-    let combinations = left_group
-      .into_iter()
-      .cartesian_product(right_group)
-      .collect::<Vec<_>>();
+    let combinations = parallel::spawn_blocking(move || {
+      left_group
+        .into_iter()
+        .cartesian_product(right_group)
+        .par_bridge()
+        .collect::<Vec<_>>()
+    })
+    .await;
 
     // parallelize the process: union_then_intersect_on_connective_v
     parallel::spawn_blocking(move || {

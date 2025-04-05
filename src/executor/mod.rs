@@ -8,7 +8,7 @@ use hashbrown::HashMap;
 use instr_ops::InstrOperatorFactory;
 use itertools::Itertools;
 use parking_lot::Mutex;
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
 use std::{collections::VecDeque, sync::Arc};
 
 pub mod instr_ops;
@@ -99,8 +99,6 @@ impl<S: StorageAdapter> ExecEngine<S> {
       return vec![];
     }
 
-    let mut result = vec![];
-
     let plan_v_pat_cnt = self
       .plan_data
       .pattern_vs()
@@ -116,15 +114,23 @@ impl<S: StorageAdapter> ExecEngine<S> {
     let plan_v_pat_cnt = Arc::new(plan_v_pat_cnt);
     let plan_e_pat_cnt = Arc::new(plan_e_pat_cnt);
 
-    for mut combination in unmerged_results.into_iter().multi_cartesian_product() {
-      let mut successors = combination.drain(1..).collect::<VecDeque<_>>();
-      let mut curr = combination.pop().unwrap();
-      while let Some(next) = successors.pop_front() {
-        let new = curr | next;
-        curr = new;
-      }
-      result.push(curr);
-    }
+    let result = parallel::spawn_blocking(move || {
+      unmerged_results
+        .into_iter()
+        .multi_cartesian_product()
+        .map(|mut combination| {
+          let mut successors = combination.drain(1..).collect::<VecDeque<_>>();
+          let mut curr = combination.pop().unwrap();
+          while let Some(next) = successors.pop_front() {
+            let new = curr | next;
+            curr = new;
+          }
+          curr
+        })
+        .par_bridge()
+        .collect::<Vec<_>>()
+    })
+    .await;
 
     parallel::spawn_blocking(move || {
       result

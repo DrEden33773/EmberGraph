@@ -212,9 +212,9 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
       .get_v_patterns()
       .intersection(&r_graph.get_v_patterns())
     {
-      let l_directed_vs = l_graph.pattern_2_vids.get(common_v_pat).unwrap();
-      let r_directed_vs = r_graph.pattern_2_vids.get(common_v_pat).unwrap();
-      if l_directed_vs != r_directed_vs || l_directed_vs.len() > 1 || r_directed_vs.len() > 1 {
+      let l_vs = l_graph.pattern_2_vids.get(common_v_pat).unwrap();
+      let r_vs = r_graph.pattern_2_vids.get(common_v_pat).unwrap();
+      if l_vs != r_vs || l_vs.len() > 1 || r_vs.len() > 1 {
         return vec![];
       }
     }
@@ -222,9 +222,9 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
       .get_e_patterns()
       .intersection(&r_graph.get_e_patterns())
     {
-      let l_directed_es = l_graph.pattern_2_eids.get(common_e_pat).unwrap();
-      let r_directed_es = r_graph.pattern_2_eids.get(common_e_pat).unwrap();
-      if l_directed_es != r_directed_es || l_directed_es.len() > 1 || r_directed_es.len() > 1 {
+      let l_es = l_graph.pattern_2_eids.get(common_e_pat).unwrap();
+      let r_es = r_graph.pattern_2_eids.get(common_e_pat).unwrap();
+      if l_es != r_es || l_es.len() > 1 || r_es.len() > 1 {
         return vec![];
       }
     }
