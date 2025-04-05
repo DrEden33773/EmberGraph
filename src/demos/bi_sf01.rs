@@ -12,7 +12,7 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
   let plan_json_content = fs::read_to_string(path).await?;
 
   let result =
-    ExecEngine::<CachedStorageAdapter<Neo4jStorageAdapter>>::build_from_json(&plan_json_content)
+    ExecEngine::<CachedStorageAdapter<SqliteStorageAdapter>>::build_from_json(&plan_json_content)
       .await
       .exec()
       .await;
@@ -27,7 +27,7 @@ pub async fn bi_2_on_sf_01() -> io::Result<()> {
   exec("ldbc-bi-2.json").await
 }
 
-/// ⚠️✅  Memory usage: 96% (51G)
+/// ⚠️  Memory usage: 96% (51G)
 pub async fn bi_3_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-3' on 'SF0.1' ...\n");
   exec("ldbc-bi-3.json").await
@@ -47,6 +47,7 @@ pub async fn bi_6_on_sf_01() -> io::Result<()> {
 
 /// ✅⚠️  Slow query: `GetAdj("f^otherTag")`
 /// - Memory usage is normal, computation process is too slow
+/// - `Neo4jStorageAdapter` is `slower` than `SqliteStorageAdapter`
 pub async fn bi_10_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-10' on 'SF0.1' ...\n");
   exec("ldbc-bi-10.json").await

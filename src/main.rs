@@ -1,7 +1,7 @@
 use dotenv::dotenv;
 use tokio::io::{self};
 
-#[tokio::main(flavor = "multi_thread")]
+#[tokio::main(flavor = "multi_thread", worker_threads = 10)]
 async fn main() -> io::Result<()> {
   dotenv().ok();
 
@@ -23,7 +23,10 @@ async fn run_demo() -> io::Result<()> {
   // bi_2_on_sf_01().await?;
   // bi_14_on_sf_01().await?;
 
-  ic_4_on_sf_01().await?;
+  // ic_4_on_sf_01().await?;
+
+  bi_10_on_sf_01().await?;
+  // bi_3_on_sf_01().await?;
 
   Ok(())
 }
