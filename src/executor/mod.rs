@@ -1,10 +1,14 @@
 use crate::{
-  matching_ctx::MatchingCtx, schemas::*, storage::StorageAdapter, utils::dyn_graph::DynGraph,
+  matching_ctx::MatchingCtx,
+  schemas::*,
+  storage::StorageAdapter,
+  utils::{dyn_graph::DynGraph, parallel},
 };
 use hashbrown::HashMap;
 use instr_ops::InstrOperatorFactory;
 use itertools::Itertools;
 use parking_lot::Mutex;
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::{collections::VecDeque, sync::Arc};
 
 pub mod instr_ops;
@@ -51,6 +55,31 @@ impl<S: StorageAdapter> ExecEngine<S> {
       .collect()
   }
 
+  fn is_equivalent_to_pattern(
+    graph: &DynGraph,
+    plan_v_pat_cnt: Arc<HashMap<String, usize>>,
+    plan_e_pat_cnt: Arc<HashMap<String, usize>>,
+  ) -> bool {
+    let graph_v_pat_cnt = graph
+      .pattern_2_vids
+      .iter()
+      .map(|(v_pat, vids)| {
+        let cnt = vids.len();
+        (v_pat.clone(), cnt)
+      })
+      .collect::<HashMap<_, usize>>();
+    let graph_e_pat_cnt = graph
+      .pattern_2_eids
+      .iter()
+      .map(|(e_pat, eids)| {
+        let cnt = eids.len();
+        (e_pat.clone(), cnt)
+      })
+      .collect::<HashMap<_, usize>>();
+
+    graph_v_pat_cnt == *plan_v_pat_cnt && graph_e_pat_cnt == *plan_e_pat_cnt
+  }
+
   pub async fn exec(&mut self) -> Vec<DynGraph> {
     let unmerged_results = self
       .exec_without_final_merge()
@@ -84,27 +113,8 @@ impl<S: StorageAdapter> ExecEngine<S> {
       .keys()
       .map(|e_pat| (e_pat.clone(), 1))
       .collect::<HashMap<_, usize>>();
-
-    let is_equivalent_to_pattern = |graph: &DynGraph| -> bool {
-      let graph_v_pat_cnt = graph
-        .pattern_2_vids
-        .iter()
-        .map(|(v_pat, vids)| {
-          let cnt = vids.len();
-          (v_pat.clone(), cnt)
-        })
-        .collect::<HashMap<_, usize>>();
-      let graph_e_pat_cnt = graph
-        .pattern_2_eids
-        .iter()
-        .map(|(e_pat, eids)| {
-          let cnt = eids.len();
-          (e_pat.clone(), cnt)
-        })
-        .collect::<HashMap<_, usize>>();
-
-      graph_v_pat_cnt == plan_v_pat_cnt && graph_e_pat_cnt == plan_e_pat_cnt
-    };
+    let plan_v_pat_cnt = Arc::new(plan_v_pat_cnt);
+    let plan_e_pat_cnt = Arc::new(plan_e_pat_cnt);
 
     for mut combination in unmerged_results.into_iter().multi_cartesian_product() {
       let mut successors = combination.drain(1..).collect::<VecDeque<_>>();
@@ -116,9 +126,14 @@ impl<S: StorageAdapter> ExecEngine<S> {
       result.push(curr);
     }
 
-    result
-      .into_iter()
-      .filter(&is_equivalent_to_pattern)
-      .collect::<Vec<_>>()
+    parallel::spawn_blocking(move || {
+      result
+        .into_par_iter()
+        .filter(|graph| {
+          Self::is_equivalent_to_pattern(graph, plan_v_pat_cnt.clone(), plan_e_pat_cnt.clone())
+        })
+        .collect::<Vec<_>>()
+    })
+    .await
   }
 }

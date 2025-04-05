@@ -22,7 +22,7 @@ impl AsyncDefault for SqliteStorageAdapter {
 
     let pool = sqlx::SqlitePool::connect(&url)
       .await
-      .expect("⚠️  Failed to connect to SQLite database");
+      .expect("❌  Failed to connect to SQLite database");
 
     // create schema if it doesn't exist
     Self::init_schema(&pool).await;
@@ -45,7 +45,7 @@ impl SqliteStorageAdapter {
     )
     .execute(pool)
     .await
-    .expect("⚠️  Failed to create `db_vertex` table");
+    .expect("❌  Failed to create `db_vertex` table");
 
     // create db_edge table
     sqlx::query(
@@ -63,7 +63,7 @@ impl SqliteStorageAdapter {
     )
     .execute(pool)
     .await
-    .expect("⚠️  Failed to create `db_edge` table");
+    .expect("❌  Failed to create `db_edge` table");
 
     // create vertex_attribute table
     sqlx::query(
@@ -81,7 +81,7 @@ impl SqliteStorageAdapter {
     )
     .execute(pool)
     .await
-    .expect("⚠️  Failed to create `vertex_attribute` table");
+    .expect("❌  Failed to create `vertex_attribute` table");
 
     // create edge_attribute table
     sqlx::query(
@@ -99,7 +99,7 @@ impl SqliteStorageAdapter {
     )
     .execute(pool)
     .await
-    .expect("⚠️  Failed to create edge_attribute table");
+    .expect("❌  Failed to create edge_attribute table");
   }
 
   async fn query_edge_with_attr_then_collect(

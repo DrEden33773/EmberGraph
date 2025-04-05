@@ -19,7 +19,9 @@ async fn run_demo() -> io::Result<()> {
   #[allow(unused_imports)]
   use ember_graph::demos::{bi_sf01::*, complex_interactive_sf01::*, simple_interactive_sf01::*};
 
-  bi_6_on_sf_01().await
+  // bi_6_on_sf_01().await?;
+  // bi_2_on_sf_01().await?;
+  bi_14_on_sf_01().await
 }
 
 #[allow(dead_code)]
@@ -65,7 +67,7 @@ async fn plan_gen() -> io::Result<()> {
 
       tokio::fs::write(filepath.clone(), plan_json)
         .await
-        .expect("⚠️  Failed to write plan file");
+        .expect("❌  Failed to write plan file");
 
       println!(
         "✅  Plan file generated: '{}'",

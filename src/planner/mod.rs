@@ -12,7 +12,7 @@ pub mod plan_gen;
 pub mod plan_opt;
 
 pub fn generate_optimal_plan(query_path: &Path) -> PlanData {
-  let query_src = fs::read_to_string(query_path).expect("⚠️  Failed to read query file.");
+  let query_src = fs::read_to_string(query_path).expect("❌  Failed to read query file.");
 
   // Parse the query source
   let mut parser = PatternParser::new(query_src);

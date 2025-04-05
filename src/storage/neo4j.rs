@@ -29,7 +29,7 @@ impl AsyncDefault for Neo4jStorageAdapter {
       "Connecting to Neo4j database ... ".to_string(),
     )
     .await
-    .expect("⚠️  Failed to connect to Neo4j database");
+    .expect("❌  Failed to connect to Neo4j database");
 
     Self { graph }
   }

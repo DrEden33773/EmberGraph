@@ -66,39 +66,39 @@ impl PatternParser {
     let mut lines = self.src.lines().filter(|line| !line.trim().is_empty());
     let cnt_args = lines
       .next()
-      .expect("⚠️  Missing `count_args` line => Count(v, e, v_attr, e_attr).");
+      .expect("❌  Missing `count_args` line => Count(v, e, v_attr, e_attr).");
 
     // Count(v, e, v_attr, e_attr)
     let mut cnt_args = cnt_args.split_whitespace();
     let v_cnt = cnt_args
       .next()
-      .expect("⚠️  Missing 'vertex' count.")
+      .expect("❌  Missing 'vertex' count.")
       .parse::<usize>()
-      .expect("⚠️  Invalid 'vertex' count.");
+      .expect("❌  Invalid 'vertex' count.");
     let e_cnt = cnt_args
       .next()
-      .expect("⚠️  Missing 'edge' count.")
+      .expect("❌  Missing 'edge' count.")
       .parse::<usize>()
-      .expect("⚠️  Invalid 'edge' count.");
+      .expect("❌  Invalid 'edge' count.");
     let v_attr_cnt = cnt_args
       .next()
-      .expect("⚠️  Missing 'vertex attribute' count.")
+      .expect("❌  Missing 'vertex attribute' count.")
       .parse::<usize>()
-      .expect("⚠️  Invalid 'vertex attribute' count.");
+      .expect("❌  Invalid 'vertex attribute' count.");
     let e_attr_cnt = cnt_args
       .next()
-      .expect("⚠️  Missing 'edge attribute' count.")
+      .expect("❌  Missing 'edge attribute' count.")
       .parse::<usize>()
-      .expect("⚠️  Invalid 'edge attribute' count.");
+      .expect("❌  Invalid 'edge attribute' count.");
     self.line += 1;
 
     // vertices
     for _ in 0..v_cnt {
-      let line = lines.next().expect("⚠️  Missing 'vertex' line.");
+      let line = lines.next().expect("❌  Missing 'vertex' line.");
       let mut args = line.split_whitespace();
 
-      let vid = args.next().expect("⚠️  Missing 'vid'.").to_string();
-      let label = args.next().expect("⚠️  Missing 'v_label'.").to_string();
+      let vid = args.next().expect("❌  Missing 'vid'.").to_string();
+      let label = args.next().expect("❌  Missing 'v_label'.").to_string();
 
       self.v_labels.insert(vid, label);
     }
@@ -106,13 +106,13 @@ impl PatternParser {
 
     // edges
     for _ in 0..e_cnt {
-      let line = lines.next().expect("⚠️  Missing 'edge' line.");
+      let line = lines.next().expect("❌  Missing 'edge' line.");
       let mut args = line.split_whitespace();
 
-      let eid = args.next().expect("⚠️  Missing 'eid'.").to_string();
-      let src_vid = args.next().expect("⚠️  Missing 'src_vid'.").to_string();
-      let dst_vid = args.next().expect("⚠️  Missing 'dst_vid'.").to_string();
-      let label = args.next().expect("⚠️  Missing 'e_label'.").to_string();
+      let eid = args.next().expect("❌  Missing 'eid'.").to_string();
+      let src_vid = args.next().expect("❌  Missing 'src_vid'.").to_string();
+      let dst_vid = args.next().expect("❌  Missing 'dst_vid'.").to_string();
+      let label = args.next().expect("❌  Missing 'e_label'.").to_string();
 
       self.e_2_vv.insert(eid.clone(), (src_vid, dst_vid));
       self.e_labels.insert(eid, label);
@@ -121,13 +121,13 @@ impl PatternParser {
 
     // vertex attributes
     for _ in 0..v_attr_cnt {
-      let line = lines.next().expect("⚠️  Missing 'vertex attribute' line.");
+      let line = lines.next().expect("❌  Missing 'vertex attribute' line.");
       let mut args = line.split_whitespace();
 
-      let vid = args.next().expect("⚠️  Missing 'vid'.").to_string();
+      let vid = args.next().expect("❌  Missing 'vid'.").to_string();
       let key = args
         .next()
-        .expect("⚠️  Missing 'key' for `v_attr`.")
+        .expect("❌  Missing 'key' for `v_attr`.")
         .to_string();
       let raw_pred = args.collect::<Vec<_>>().join("");
       if raw_pred.is_empty() {
@@ -141,13 +141,13 @@ impl PatternParser {
 
     // edge attributes
     for _ in 0..e_attr_cnt {
-      let line = lines.next().expect("⚠️  Missing 'edge attribute' line.");
+      let line = lines.next().expect("❌  Missing 'edge attribute' line.");
       let mut args = line.split_whitespace();
 
-      let eid = args.next().expect("⚠️  Missing 'eid'.").to_string();
+      let eid = args.next().expect("❌  Missing 'eid'.").to_string();
       let key = args
         .next()
-        .expect("⚠️  Missing 'key' for `e_attr`.")
+        .expect("❌  Missing 'key' for `e_attr`.")
         .to_string();
       let raw_pred = args.collect::<Vec<_>>().join("");
       if raw_pred.is_empty() {

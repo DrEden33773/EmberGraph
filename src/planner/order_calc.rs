@@ -43,9 +43,9 @@ pub struct PlanGenInput {
 impl OrderCalculator {
   pub fn new(pattern_graph: DynGraph<PatternVertex, PatternEdge>) -> Self {
     let statistics: Statistics = serde_json::from_reader(
-      File::open(STAT_FILEPATH.as_path()).expect("⚠️  Failed to open statistics file"),
+      File::open(STAT_FILEPATH.as_path()).expect("❌  Failed to open statistics file"),
     )
-    .expect("⚠️  Failed to parse statistics file");
+    .expect("❌  Failed to parse statistics file");
 
     let raw_order = pattern_graph.get_vid_set().into_iter().collect::<Vec<_>>();
 

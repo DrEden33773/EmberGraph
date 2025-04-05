@@ -13,7 +13,7 @@ pub struct FBucket {
 #[derive(Debug, Clone)]
 pub struct ABucket {
   pub(crate) curr_pat_vid: Vid,
-  pub(crate) all_matched: Vec<DynGraph>,
+  pub(crate) all_matched: Vec<Option<DynGraph>>,
   pub(crate) matched_with_frontiers: HashMap<usize, Vec<Vid>>,
   pub(crate) next_pat_grouped_expanding: HashMap<Vid, Vec<ExpandGraph>>,
 }

@@ -10,7 +10,6 @@ use crate::{
     parallel,
   },
 };
-use futures::{StreamExt, future, stream};
 use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
@@ -70,7 +69,7 @@ impl ABucket {
   pub fn from_f_bucket(f_bucket: FBucket, curr_pat_vid: VidRef) -> Self {
     Self {
       curr_pat_vid: curr_pat_vid.to_string(),
-      all_matched: f_bucket.all_matched,
+      all_matched: f_bucket.all_matched.into_iter().map(Some).collect(),
       matched_with_frontiers: f_bucket.matched_with_frontiers,
       next_pat_grouped_expanding: HashMap::new(),
     }
@@ -86,8 +85,8 @@ impl ABucket {
     let mut connected_data_vids = HashSet::new();
 
     // iter: `matched` data_graphs
-    for (&idx, frontiers) in self.matched_with_frontiers.iter() {
-      let matched_dg = &self.all_matched[idx];
+    for (idx, frontiers) in self.matched_with_frontiers.drain() {
+      let matched_dg = self.all_matched[idx].take().unwrap();
 
       // iter: `frontier_vid` on current data_graph
       for frontier_vid in frontiers.iter() {
@@ -111,7 +110,7 @@ impl ABucket {
             let matched_data_es = incremental_match_adj_e(LoadWithCondCtx {
               pattern_vs,
               storage_adapter,
-              curr_matched_dg: matched_dg,
+              curr_matched_dg: &matched_dg,
               frontier_vid,
               curr_pat_e: pat_e,
               e_label: label,
@@ -140,7 +139,7 @@ impl ABucket {
             let matched_data_es = incremental_match_adj_e(LoadWithCondCtx {
               pattern_vs,
               storage_adapter,
-              curr_matched_dg: matched_dg,
+              curr_matched_dg: &matched_dg,
               frontier_vid,
               curr_pat_e: pat_e,
               e_label: label,
@@ -174,7 +173,7 @@ impl ABucket {
           // build `expanding_graph`
           // note that each `next_data_vertex` holds a `expanding_graph`
           for (key, edges) in next_vid_grouped_conn_es {
-            let mut expanding_graph = ExpandGraph::from(matched_dg);
+            let mut expanding_graph = ExpandGraph::from(&matched_dg);
             let pat_strs = next_vid_grouped_conn_pat_strs
               .remove(&key)
               .unwrap_or_default();
@@ -195,8 +194,6 @@ impl ABucket {
       }
     }
 
-    self.all_matched.clear();
-
     connected_data_vids
   }
 }
@@ -216,6 +213,8 @@ struct LoadWithCondCtx<'a, S: StorageAdapter> {
 async fn incremental_match_adj_e<'a, S: StorageAdapter>(
   ctx: LoadWithCondCtx<'a, S>,
 ) -> Vec<DataEdge> {
+  use futures::{StreamExt, stream};
+
   let next_pat_vid = if ctx.is_src_curr_pat {
     ctx.curr_pat_e.dst_vid()
   } else {
@@ -272,6 +271,8 @@ async fn incremental_match_adj_e<'a, S: StorageAdapter>(
 async fn incremental_match_adj_e<'a, S: StorageAdapter>(
   ctx: LoadWithCondCtx<'a, S>,
 ) -> Vec<DataEdge> {
+  use futures::future;
+
   const BATCH_SIZE: usize = 32;
 
   let next_pat_vid = if ctx.is_src_curr_pat {

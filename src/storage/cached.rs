@@ -9,7 +9,7 @@ use std::{
 };
 use tokio::sync::RwLock;
 
-const DEFAULT_CACHE_SIZE: usize = 128;
+const DEFAULT_CACHE_SIZE: usize = 256;
 
 #[derive(Clone, Eq, PartialEq, Hash)]
 enum CacheKey {
