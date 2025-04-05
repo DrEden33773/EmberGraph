@@ -20,7 +20,7 @@ async fn run_demo() -> io::Result<()> {
   use ember_graph::demos::{bi_sf01::*, complex_interactive_sf01::*, simple_interactive_sf01::*};
 
   // bi_6_on_sf_01().await?;
-  // bi_2_on_sf_01().await?;
+  bi_2_on_sf_01().await?;
   bi_14_on_sf_01().await
 }
 
