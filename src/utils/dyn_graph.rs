@@ -345,31 +345,7 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   pub fn get_e_entities(&self) -> Vec<EType> {
     self.e_entities.values().cloned().collect()
   }
-  #[inline]
-  pub fn get_v_pat_str_set(&self) -> HashSet<String> {
-    self.vid_2_pattern.values().cloned().collect()
-  }
-  #[inline]
-  pub fn get_e_pat_str_set(&self) -> HashSet<String> {
-    self.eid_2_pattern.values().cloned().collect()
-  }
-  #[inline]
-  pub fn get_all_pat_str_set(&self) -> HashSet<String> {
-    let mut res = self.get_v_pat_str_set();
-    res.extend(self.get_e_pat_str_set());
-    res
-  }
-  #[inline]
-  pub fn get_v_pattern_pairs(&self) -> Vec<(VType, String)> {
-    self
-      .v_entities
-      .iter()
-      .map(|(vid, v_entity)| {
-        let pattern = self.vid_2_pattern[vid].clone();
-        (v_entity.clone(), pattern)
-      })
-      .collect()
-  }
+
   #[inline]
   pub fn drain_v_pattern_pairs(&mut self) -> Vec<(VType, String)> {
     self
@@ -378,17 +354,6 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
       .map(|(vid, v_entity)| {
         let pattern = self.vid_2_pattern.remove(&vid).unwrap();
         (v_entity, pattern)
-      })
-      .collect()
-  }
-  #[inline]
-  pub fn get_e_pattern_pairs(&self) -> Vec<(EType, String)> {
-    self
-      .e_entities
-      .iter()
-      .map(|(eid, e_entity)| {
-        let pattern = self.eid_2_pattern[eid].clone();
-        (e_entity.clone(), pattern)
       })
       .collect()
   }
@@ -403,14 +368,7 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
       })
       .collect()
   }
-  #[inline]
-  pub fn get_v_patterns(&self) -> HashSet<String> {
-    self.vid_2_pattern.values().cloned().collect()
-  }
-  #[inline]
-  pub fn get_e_patterns(&self) -> HashSet<String> {
-    self.eid_2_pattern.values().cloned().collect()
-  }
+
   #[inline]
   pub fn get_v_count(&self) -> usize {
     self.v_entities.len()
@@ -422,6 +380,15 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
 }
 
 impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
+  #[inline]
+  pub fn contains_e_pattern(&self, pattern: &str) -> bool {
+    self.pattern_2_eids.contains_key(pattern)
+  }
+  #[inline]
+  pub fn contains_v_pattern(&self, pattern: &str) -> bool {
+    self.pattern_2_vids.contains_key(pattern)
+  }
+
   #[inline]
   pub fn has_vid(&self, vid: VidRef) -> bool {
     self.v_entities.contains_key(vid)

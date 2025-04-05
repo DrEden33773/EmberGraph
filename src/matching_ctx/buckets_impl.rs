@@ -96,7 +96,7 @@ impl ABucket {
 
         // iter: `pattern_edges`
         for pat_e in pattern_es.iter() {
-          if matched_dg.get_e_pat_str_set().contains(pat_e.eid()) {
+          if matched_dg.contains_e_pattern(pat_e.eid()) {
             continue;
           }
 
@@ -175,7 +175,8 @@ impl ABucket {
           };
 
           if is_matched_data_es_empty {
-            continue;
+            // no matched_data_es, just skip current `frontier_vid`
+            break;
           }
 
           is_frontier_connected = true;
@@ -200,6 +201,10 @@ impl ABucket {
 
         if is_frontier_connected {
           connected_data_vids.insert(frontier_vid.to_string());
+        } else {
+          // if no edges are connected, this frontier is invalid, current matched_dg is invalid,
+          // so we just skip the matched_dg
+          break;
         }
       }
     }
