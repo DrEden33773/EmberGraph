@@ -13,6 +13,7 @@
         "itemsets",
         "Itertools",
         "ldbc",
+        "mimalloc",
         "oneshot",
         "pyproject",
         "sqlmodel",

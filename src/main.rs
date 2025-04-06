@@ -1,6 +1,11 @@
 use dotenv::dotenv;
 use tokio::io::{self};
 
+use mimalloc::MiMalloc;
+
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
+
 #[tokio::main]
 async fn main() -> io::Result<()> {
   dotenv().ok();
