@@ -91,13 +91,24 @@ impl ABucket {
 
       // iter: `frontier_vid` on current data_graph
       for frontier_vid in frontiers.iter() {
+        #[cfg(feature = "trace_get_adj")]
+        use colored::Colorize;
+
+        #[cfg(feature = "trace_get_adj")]
+        println!(
+          "🧩  Current frontier vid: {}",
+          frontier_vid.to_string().green()
+        );
+
         let mut is_frontier_formalized = false;
 
         // iter: `pattern_edges`
         for pat_e in pattern_es.iter() {
-          if matched_dg.contains_e_pattern(pat_e.eid()) {
-            continue;
-          }
+          #[cfg(feature = "trace_get_adj")]
+          println!(
+            "  🔗  Current pattern edge: {}",
+            pat_e.eid().to_string().purple()
+          );
 
           let e_label = pat_e.label();
           let e_attr = pat_e.attr.as_ref();
@@ -123,6 +134,16 @@ impl ABucket {
               is_src_curr_pat: true,
             })
             .await;
+
+            #[cfg(feature = "trace_get_adj")]
+            println!(
+              "    ✨  Found {} edges that match: ({}: {})-[{}]->({})",
+              matched_data_es.len().to_string().yellow(),
+              frontier_vid.to_string().green(),
+              self.curr_pat_vid.as_str().cyan(),
+              pat_e.eid().purple(),
+              next_pat_vid.cyan()
+            );
 
             let is_matched_data_es_empty = matched_data_es.is_empty();
 
@@ -156,6 +177,16 @@ impl ABucket {
               is_src_curr_pat: false,
             })
             .await;
+
+            #[cfg(feature = "trace_get_adj")]
+            println!(
+              "    ✨  Found {} edges that match: ({}: {})<-[{}]-({})",
+              matched_data_es.len().to_string().yellow(),
+              frontier_vid.to_string().green(),
+              self.curr_pat_vid.as_str().cyan(),
+              pat_e.eid().purple(),
+              next_pat_vid.cyan()
+            );
 
             let is_matched_data_es_empty = matched_data_es.is_empty();
 
@@ -197,6 +228,9 @@ impl ABucket {
               .push(expanding_graph);
           }
         }
+
+        #[cfg(feature = "trace_get_adj")]
+        println!();
 
         if is_frontier_formalized {
           connected_data_vids.insert(frontier_vid.to_string());
@@ -292,7 +326,7 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
         if satisfies { Some(e) } else { None }
       }
     })
-    .buffer_unordered(num_cpus::get() * 4)
+    .buffer_unordered(num_cpus::get() / 2)
     .filter_map(|r| async move { r })
     .collect::<Vec<_>>()
     .await

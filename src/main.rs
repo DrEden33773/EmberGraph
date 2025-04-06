@@ -53,8 +53,8 @@ async fn to_run() -> io::Result<()> {
   let guard = ember_graph::init_log::init_log().await?;
 
   // plan_gen().await?;
-  // run_demo().await?;
-  run_test_only().await?;
+  run_demo().await?;
+  // run_test_only().await?;
 
   Ok(())
 }
@@ -132,7 +132,7 @@ async fn plan_gen() -> io::Result<()> {
         .expect("❌  Failed to write plan file");
 
       println!(
-        "✅  Plan file generated: '{}'",
+        "☑️   Plan file generated: '{}'",
         filepath.to_str().unwrap().green()
       );
     });

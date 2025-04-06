@@ -94,10 +94,12 @@ impl BI6Builder {
       storage.add_e(e).await.expect("❌  Failed to add edge");
     }
 
+    println!();
+
     let count_v = storage.count_v().await;
     let count_e = storage.count_e().await;
 
-    println!("🔍  Count(vertices) = {}", count_v);
-    println!("🔍  Count(edges) = {}\n", count_e);
+    println!("✨  Count(vertices) = {}", count_v);
+    println!("✨  Count(edges) = {}\n", count_e);
   }
 }

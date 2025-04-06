@@ -560,7 +560,7 @@ impl WritableStorageAdapter for SqliteStorageAdapter {
     let query = sqlx::query(query_str).bind(&v.vid).bind(&v.label);
 
     match query.execute(&mut *tx).await {
-      Ok(result) => println!("✅  Inserted {} rows", result.rows_affected()),
+      Ok(result) => println!("💾  Inserted {} vertex", result.rows_affected()),
       Err(e) => {
         eprintln!("❌  Error inserting vertex: {}", e);
         return Err(Box::new(e));
@@ -579,7 +579,7 @@ impl WritableStorageAdapter for SqliteStorageAdapter {
       .bind(value.to_type().to_string());
 
       match attr_query.execute(&mut *tx).await {
-        Ok(result) => println!("✅  Inserted {} rows", result.rows_affected()),
+        Ok(result) => println!("💾  Inserted {} vertex_attribute", result.rows_affected()),
         Err(e) => {
           eprintln!("❌  Error inserting vertex attribute: {}", e);
           return Err(Box::new(e));
@@ -588,7 +588,6 @@ impl WritableStorageAdapter for SqliteStorageAdapter {
     }
 
     tx.commit().await?;
-    println!("✅  Committed transaction\n");
 
     Ok(())
   }
@@ -606,7 +605,7 @@ impl WritableStorageAdapter for SqliteStorageAdapter {
       .bind(&e.dst_vid);
 
     match query.execute(&mut *tx).await {
-      Ok(result) => println!("✅  Inserted {} rows", result.rows_affected()),
+      Ok(result) => println!("💾  Inserted {} edge", result.rows_affected()),
       Err(e) => {
         eprintln!("❌  Error inserting edge: {}", e);
         return Err(Box::new(e));
@@ -625,7 +624,7 @@ impl WritableStorageAdapter for SqliteStorageAdapter {
       .bind(value.to_type().to_string());
 
       match attr_query.execute(&mut *tx).await {
-        Ok(result) => println!("✅  Inserted {} rows", result.rows_affected()),
+        Ok(result) => println!("💾  Inserted {} edge_attribute", result.rows_affected()),
         Err(e) => {
           eprintln!("❌  Error inserting edge attribute: {}", e);
           return Err(Box::new(e));
@@ -634,7 +633,6 @@ impl WritableStorageAdapter for SqliteStorageAdapter {
     }
 
     tx.commit().await?;
-    println!("✅  Committed transaction\n");
 
     Ok(())
   }

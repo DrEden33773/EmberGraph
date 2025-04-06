@@ -14,16 +14,6 @@ pub enum AttrType {
   String,
 }
 
-// impl From<&AttrValue> for AttrType {
-//   fn from(value: &AttrValue) -> Self {
-//     match value {
-//       AttrValue::Int(_) => AttrType::Int,
-//       AttrValue::Float(_) => AttrType::Float,
-//       AttrValue::String(_) => AttrType::String,
-//     }
-//   }
-// }
-
 #[derive(Debug, Clone)]
 pub enum AttrValue {
   Int(i64),

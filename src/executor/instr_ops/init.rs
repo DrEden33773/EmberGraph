@@ -4,7 +4,6 @@ use crate::{
   storage::StorageAdapter,
   utils::{dyn_graph::DynGraph, parallel},
 };
-use itertools::Itertools;
 use parking_lot::Mutex;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::sync::Arc;
@@ -27,27 +26,23 @@ impl<S: StorageAdapter> InitOperator<S> {
     // load vertices
     let matched_vs = self.storage_adapter.load_v(label, attr).await;
 
-    println!(
-      "🔍  Found {} vertices with label '{}' and attr '{:?}'\n",
-      matched_vs.len(),
-      label,
-      attr
-    );
+    #[cfg(feature = "trace_init")]
+    {
+      use crate::schemas::VBase;
+      use colored::Colorize;
 
-    // filter-out if the vertex has already been expanded
-    let unexpanded_matched_vs = {
-      let ctx = self.ctx.lock();
-      matched_vs
-        .into_iter()
-        .filter(|data_v| !ctx.formalized_data_vids.contains(&data_v.vid))
-        .collect_vec()
-    };
+      println!(
+        "✨  Found {} vertices that match: ({})\n",
+        matched_vs.len().to_string().yellow(),
+        pattern_v.vid().cyan()
+      );
+    }
 
     // prepare for updating the block
     let pattern: Arc<str> = pattern_v.vid.as_str().into();
     let target_var: Arc<str> = instr.target_var.as_str().into();
     let pre = parallel::spawn_blocking(move || {
-      unexpanded_matched_vs
+      matched_vs
         .into_par_iter()
         .map(|data_v| {
           let frontier_vid = data_v.vid.clone();

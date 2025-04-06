@@ -31,7 +31,7 @@ impl<S: AdvancedStorageAdapter> GetAdjOperator<S> {
     };
 
     // core logic: incremental load new edges
-    let connected_data_vids = a_bucket
+    let _connected_data_vids = a_bucket
       .incremental_load_new_edges(pattern_es, &pattern_vs, self.storage_adapter.as_ref())
       .await;
 
@@ -39,7 +39,6 @@ impl<S: AdvancedStorageAdapter> GetAdjOperator<S> {
     {
       let mut ctx = self.ctx.lock();
       ctx.update_a_block(&instr.target_var, a_bucket);
-      ctx.update_formalized_data_vids(connected_data_vids);
     }
 
     Some(())

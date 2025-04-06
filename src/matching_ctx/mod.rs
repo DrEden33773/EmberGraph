@@ -3,7 +3,7 @@ use crate::{
   utils::{dyn_graph::DynGraph, expand_graph::ExpandGraph},
 };
 use buckets::{ABucket, CBucket, FBucket, TBucket};
-use hashbrown::{HashMap, HashSet};
+use hashbrown::HashMap;
 
 pub mod buckets;
 pub mod buckets_impl;
@@ -16,7 +16,6 @@ fn resolve_var_name(target_var: &str) -> &str {
 #[derive(Debug, Clone, Default)]
 pub struct MatchingCtx {
   pub(crate) plan_data: PlanData,
-  pub(crate) formalized_data_vids: HashSet<Vid>,
 
   pub(crate) f_block: HashMap<Vid, FBucket>,
   pub(crate) a_block: HashMap<Vid, ABucket>,
@@ -36,11 +35,6 @@ impl MatchingCtx {
 }
 
 impl MatchingCtx {
-  #[inline]
-  pub fn update_formalized_data_vids(&mut self, vid: HashSet<Vid>) {
-    self.formalized_data_vids.extend(vid);
-  }
-
   pub fn pattern_vs(&self) -> &HashMap<Vid, PatternVertex> {
     &self.plan_data.pattern_vs
   }
@@ -141,8 +135,7 @@ impl MatchingCtx {
     let key = resolve_var_name(single_op);
     self
       .a_block
-      .get_mut(key)
-      .unwrap()
+      .get_mut(key)?
       .next_pat_grouped_expanding
       .remove(curr_pat_str)
   }
