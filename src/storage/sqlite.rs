@@ -1,8 +1,9 @@
-use super::{AdvancedStorageAdapter, AsyncDefault, StorageAdapter};
+use super::{AdvancedStorageAdapter, AsyncDefault, StorageAdapter, WritableStorageAdapter};
 use crate::{
-  schemas::{AttrType, AttrValue, DataEdge, DataVertex, LabelRef, PatternAttr, VidRef},
+  schemas::{AttrType, AttrValue, DataEdge, DataVertex, EidRef, LabelRef, PatternAttr, VidRef},
   utils::time_async_with_desc,
 };
+use futures::TryFutureExt;
 use hashbrown::HashMap;
 use project_root::get_project_root;
 use sqlx::{Execute, Row, SqlitePool, sqlite::SqliteRow};
@@ -513,5 +514,137 @@ impl AdvancedStorageAdapter for SqliteStorageAdapter {
     self
       .query_edge_with_attr_and_next_v_attr_then_collect(e_attr, src_v_attr, query_str, params)
       .await
+  }
+}
+
+impl SqliteStorageAdapter {
+  async fn add_v_attr(
+    &self,
+    vid: VidRef<'_>,
+    key: String,
+    value: String,
+    type_: AttrType,
+  ) -> Result<(), Box<dyn std::error::Error>> {
+    let query_str = String::from(
+      r#"
+      INSERT INTO vertex_attribute (vid, key, value, type) VALUES (?, ?, ?, ?)
+      "#,
+    );
+    let params = vec![vid.to_string(), key, value, type_.to_string()];
+
+    let mut query = sqlx::query(&query_str);
+    for param in params {
+      query = query.bind(param);
+    }
+
+    time_async_with_desc(
+      query.execute(&self.pool).map_err(Box::new),
+      query_str.clone(),
+    )
+    .await?;
+
+    Ok(())
+  }
+
+  async fn add_e_attr(
+    &self,
+    eid: EidRef<'_>,
+    key: String,
+    value: String,
+    type_: AttrType,
+  ) -> Result<(), Box<dyn std::error::Error>> {
+    let query_str = String::from(
+      r#"
+      INSERT INTO edge_attribute (eid, key, value, type) VALUES (?, ?, ?, ?)
+      "#,
+    );
+    let params = vec![eid.to_string(), key, value, type_.to_string()];
+
+    let mut query = sqlx::query(&query_str);
+    for param in params {
+      query = query.bind(param);
+    }
+
+    time_async_with_desc(
+      query.execute(&self.pool).map_err(Box::new),
+      query_str.clone(),
+    )
+    .await?;
+
+    Ok(())
+  }
+}
+
+impl WritableStorageAdapter for SqliteStorageAdapter {
+  async fn add_v(&self, v: DataVertex) -> Result<(), Box<dyn std::error::Error>> {
+    // add vertex (vid, label)
+    let query_str = String::from(
+      r#"
+      INSERT INTO db_vertex (vid, label) VALUES (?, ?)
+      "#,
+    );
+    let params = vec![v.vid.clone(), v.label];
+    let mut query = sqlx::query(&query_str);
+    for param in params {
+      query = query.bind(param);
+    }
+    time_async_with_desc(
+      query.execute(&self.pool).map_err(Box::new),
+      query_str.clone(),
+    )
+    .await?;
+
+    // add attributes
+    for (key, value) in v.attrs {
+      let type_ = match value {
+        AttrValue::Int(_) => AttrType::Int,
+        AttrValue::Float(_) => AttrType::Float,
+        AttrValue::String(_) => AttrType::String,
+      };
+      let value = match value {
+        AttrValue::Int(val) => val.to_string(),
+        AttrValue::Float(val) => val.to_string(),
+        AttrValue::String(val) => val,
+      };
+      self.add_v_attr(&v.vid, key, value, type_).await?;
+    }
+
+    Ok(())
+  }
+
+  async fn add_e(&self, e: DataEdge) -> Result<(), Box<dyn std::error::Error>> {
+    // add edge (eid, label, src_vid, dst_vid)
+    let query_str = String::from(
+      r#"
+      INSERT INTO db_edge (eid, label, src_vid, dst_vid) VALUES (?, ?, ?, ?)
+      "#,
+    );
+    let params = vec![e.eid.clone(), e.label, e.src_vid, e.dst_vid];
+    let mut query = sqlx::query(&query_str);
+    for param in params {
+      query = query.bind(param);
+    }
+    time_async_with_desc(
+      query.execute(&self.pool).map_err(Box::new),
+      query_str.clone(),
+    )
+    .await?;
+
+    // add attributes
+    for (key, value) in e.attrs {
+      let type_ = match value {
+        AttrValue::Int(_) => AttrType::Int,
+        AttrValue::Float(_) => AttrType::Float,
+        AttrValue::String(_) => AttrType::String,
+      };
+      let value = match value {
+        AttrValue::Int(val) => val.to_string(),
+        AttrValue::Float(val) => val.to_string(),
+        AttrValue::String(val) => val,
+      };
+      self.add_e_attr(&e.eid, key, value, type_).await?;
+    }
+
+    Ok(())
   }
 }

@@ -1,4 +1,4 @@
-use super::{AttrValue, Label, LabelRef, PatternAttr, Vid, VidRef};
+use super::{AttrValue, Eid, Label, LabelRef, PatternAttr, Vid, VidRef};
 use hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
 use std::hash::Hash;
@@ -31,7 +31,7 @@ pub struct DataVertex {
 }
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct PatternEdge {
-  pub(crate) eid: Vid,
+  pub(crate) eid: Eid,
   pub(crate) src_vid: Vid,
   pub(crate) dst_vid: Vid,
   pub(crate) label: Label,
@@ -39,7 +39,7 @@ pub struct PatternEdge {
 }
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct DataEdge {
-  pub(crate) eid: Vid,
+  pub(crate) eid: Eid,
   pub(crate) src_vid: Vid,
   pub(crate) dst_vid: Vid,
   pub(crate) label: Label,

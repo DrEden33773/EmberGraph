@@ -1,17 +1,44 @@
 use dotenv::dotenv;
-use tokio::io::{self};
-
 use mimalloc::MiMalloc;
+use std::sync::{
+  LazyLock,
+  atomic::{AtomicUsize, Ordering},
+};
+use tokio::{io, runtime};
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 
-#[tokio::main]
-async fn main() -> io::Result<()> {
+static NUM_CPUS: LazyLock<usize> = LazyLock::new(num_cpus::get);
+
+fn main() -> io::Result<()> {
+  // rayon config
+  rayon::ThreadPoolBuilder::new()
+    .num_threads(*NUM_CPUS / 2)
+    .thread_name(|i| format!("rayon-{}", i))
+    .build_global()
+    .unwrap();
+
+  // tokio config
+  runtime::Builder::new_multi_thread()
+    .enable_all()
+    .worker_threads(*NUM_CPUS / 2)
+    .thread_name_fn(|| {
+      static ATOMIC_ID: AtomicUsize = AtomicUsize::new(0);
+      let id = ATOMIC_ID.fetch_add(1, Ordering::SeqCst);
+      format!("tokio-{}", id)
+    })
+    .build()
+    .unwrap()
+    .block_on(to_run())
+}
+
+async fn to_run() -> io::Result<()> {
   dotenv().ok();
 
   #[cfg(feature = "use_tracing")]
-  let _guard = ember_graph::init_log::init_log().await?;
+  #[allow(dead_code)]
+  let guard = ember_graph::init_log::init_log().await?;
 
   // plan_gen().await?;
   run_demo().await?;
