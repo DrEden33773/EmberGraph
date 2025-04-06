@@ -1,9 +1,6 @@
 use dotenv::dotenv;
 use mimalloc::MiMalloc;
-use std::sync::{
-  LazyLock,
-  atomic::{AtomicUsize, Ordering},
-};
+use std::sync::LazyLock;
 use tokio::{io, runtime};
 
 #[global_allocator]
@@ -19,18 +16,33 @@ fn main() -> io::Result<()> {
     .build_global()
     .unwrap();
 
-  // tokio config
-  runtime::Builder::new_multi_thread()
-    .enable_all()
-    .worker_threads(*NUM_CPUS / 2)
-    .thread_name_fn(|| {
-      static ATOMIC_ID: AtomicUsize = AtomicUsize::new(0);
-      let id = ATOMIC_ID.fetch_add(1, Ordering::SeqCst);
-      format!("tokio-{}", id)
-    })
-    .build()
-    .unwrap()
-    .block_on(to_run())
+  // tokio config (multi_threaded)
+  #[cfg(not(feature = "single_thread_debug"))]
+  {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    runtime::Builder::new_multi_thread()
+      .enable_all()
+      .worker_threads(*NUM_CPUS / 2)
+      .thread_name_fn(|| {
+        static ATOMIC_ID: AtomicUsize = AtomicUsize::new(0);
+        let id = ATOMIC_ID.fetch_add(1, Ordering::SeqCst);
+        format!("tokio-{}", id)
+      })
+      .build()
+      .unwrap()
+      .block_on(to_run())
+  }
+
+  // tokio config (single_threaded)
+  #[cfg(feature = "single_thread_debug")]
+  {
+    runtime::Builder::new_current_thread()
+      .enable_all()
+      .build()
+      .unwrap()
+      .block_on(to_run())
+  }
 }
 
 async fn to_run() -> io::Result<()> {
@@ -130,7 +142,7 @@ async fn plan_gen() -> io::Result<()> {
   // wait for all tasks to complete
   for handle in handles {
     if let Err(e) = handle.await {
-      eprintln!("⚠️  Task failed: {}", e);
+      eprintln!("❌  Task failed: {}", e);
     }
   }
 

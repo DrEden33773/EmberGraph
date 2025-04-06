@@ -93,5 +93,11 @@ impl BI6Builder {
     for e in has_tag.into_iter().chain(has_creator).chain(likes) {
       storage.add_e(e).await.expect("❌  Failed to add edge");
     }
+
+    let count_v = storage.count_v().await;
+    let count_e = storage.count_e().await;
+
+    println!("🔍  Count(vertices) = {}", count_v);
+    println!("🔍  Count(edges) = {}\n", count_e);
   }
 }

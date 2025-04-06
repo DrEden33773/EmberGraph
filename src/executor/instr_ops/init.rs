@@ -27,12 +27,19 @@ impl<S: StorageAdapter> InitOperator<S> {
     // load vertices
     let matched_vs = self.storage_adapter.load_v(label, attr).await;
 
+    println!(
+      "🔍  Found {} vertices with label '{}' and attr '{:?}'\n",
+      matched_vs.len(),
+      label,
+      attr
+    );
+
     // filter-out if the vertex has already been expanded
     let unexpanded_matched_vs = {
       let ctx = self.ctx.lock();
       matched_vs
         .into_iter()
-        .filter(|data_v| !ctx.expanded_data_vids.contains(&data_v.vid))
+        .filter(|data_v| !ctx.formalized_data_vids.contains(&data_v.vid))
         .collect_vec()
     };
 

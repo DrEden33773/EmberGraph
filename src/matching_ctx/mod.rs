@@ -16,7 +16,7 @@ fn resolve_var_name(target_var: &str) -> &str {
 #[derive(Debug, Clone, Default)]
 pub struct MatchingCtx {
   pub(crate) plan_data: PlanData,
-  pub(crate) expanded_data_vids: HashSet<Vid>,
+  pub(crate) formalized_data_vids: HashSet<Vid>,
 
   pub(crate) f_block: HashMap<Vid, FBucket>,
   pub(crate) a_block: HashMap<Vid, ABucket>,
@@ -37,8 +37,8 @@ impl MatchingCtx {
 
 impl MatchingCtx {
   #[inline]
-  pub fn update_extended_data_vids(&mut self, vid: HashSet<Vid>) {
-    self.expanded_data_vids.extend(vid);
+  pub fn update_formalized_data_vids(&mut self, vid: HashSet<Vid>) {
+    self.formalized_data_vids.extend(vid);
   }
 
   pub fn pattern_vs(&self) -> &HashMap<Vid, PatternVertex> {

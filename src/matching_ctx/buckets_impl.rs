@@ -91,7 +91,7 @@ impl ABucket {
 
       // iter: `frontier_vid` on current data_graph
       for frontier_vid in frontiers.iter() {
-        let mut is_frontier_connected = false;
+        let mut is_frontier_formalized = false;
 
         // iter: `pattern_edges`
         for pat_e in pattern_es.iter() {
@@ -178,7 +178,7 @@ impl ABucket {
             break;
           }
 
-          is_frontier_connected = true;
+          is_frontier_formalized = true;
 
           // build `expanding_graph`
           // note that each `next_data_vertex` holds a `expanding_graph`
@@ -198,7 +198,7 @@ impl ABucket {
           }
         }
 
-        if is_frontier_connected {
+        if is_frontier_formalized {
           connected_data_vids.insert(frontier_vid.to_string());
         } else {
           // if no edges are connected, this frontier is invalid, current matched_dg is invalid,
@@ -303,6 +303,7 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   ctx: LoadWithCondCtx<'a, S>,
 ) -> Vec<DataEdge> {
   use futures::future;
+  use itertools::Itertools;
 
   const BATCH_SIZE: usize = 32;
 

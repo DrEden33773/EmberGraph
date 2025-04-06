@@ -3,10 +3,9 @@ use super::{
   WritableStorageAdapter,
 };
 use crate::{
-  schemas::{AttrType, AttrValue, DataEdge, DataVertex, EidRef, LabelRef, PatternAttr, VidRef},
+  schemas::{AttrType, AttrValue, DataEdge, DataVertex, LabelRef, PatternAttr, VidRef},
   utils::time_async_with_desc,
 };
-use futures::TryFutureExt;
 use hashbrown::HashMap;
 use project_root::get_project_root;
 use sqlx::{Execute, Row, SqlitePool, sqlite::SqliteRow};
@@ -22,13 +21,12 @@ impl AsyncDefault for SqliteStorageAdapter {
     let db_name = env::var("SQLITE_DB_PATH").unwrap();
     let root = get_project_root().unwrap();
     let db_path = root.join(db_name);
-    let url = format!("sqlite://{}", db_path.display());
+    let url = format!("sqlite:///{}", db_path.display());
 
     let pool = sqlx::SqlitePool::connect(&url)
       .await
       .expect("❌  Failed to connect to SQLite database");
 
-    // create schema if it doesn't exist
     Self::init_schema(&pool).await;
 
     Self { pool }
@@ -36,30 +34,36 @@ impl AsyncDefault for SqliteStorageAdapter {
 }
 
 impl SqliteStorageAdapter {
-  async fn drop_schema(pool: &SqlitePool) {
-    // drop db_vertex table
-    sqlx::query("DROP TABLE IF EXISTS db_vertex;")
-      .execute(pool)
-      .await
-      .expect("❌  Failed to drop `db_vertex` table");
+  async fn clear_tables(pool: &SqlitePool) {
+    let queries = vec![
+      "DELETE FROM db_vertex;",
+      "DELETE FROM db_edge;",
+      "DELETE FROM vertex_attribute;",
+      "DELETE FROM edge_attribute;",
+      // delete `auto_increment` values
+      "DELETE FROM sqlite_sequence WHERE name = 'vertex_attribute';",
+      "DELETE FROM sqlite_sequence WHERE name = 'edge_attribute';",
+    ];
 
-    // drop db_edge table
-    sqlx::query("DROP TABLE IF EXISTS db_edge;")
-      .execute(pool)
-      .await
-      .expect("❌  Failed to drop `db_edge` table");
+    for query in queries {
+      let q = sqlx::query(query);
+      time_async_with_desc(q.execute(pool), query.to_string())
+        .await
+        .unwrap();
+    }
 
-    // drop vertex_attribute table
-    sqlx::query("DROP TABLE IF EXISTS vertex_attribute;")
-      .execute(pool)
-      .await
-      .expect("❌  Failed to drop `vertex_attribute` table");
+    // reset auto increment values
+    let reset_queries = vec![
+      "UPDATE sqlite_sequence SET seq = 0 WHERE name = 'vertex_attribute';",
+      "UPDATE sqlite_sequence SET seq = 0 WHERE name = 'edge_attribute';",
+    ];
 
-    // drop edge_attribute table
-    sqlx::query("DROP TABLE IF EXISTS edge_attribute;")
-      .execute(pool)
-      .await
-      .expect("❌  Failed to drop `edge_attribute` table");
+    for query in reset_queries {
+      let q = sqlx::query(query);
+      time_async_with_desc(q.execute(pool), query.to_string())
+        .await
+        .unwrap();
+    }
   }
 
   async fn init_schema(pool: &SqlitePool) {
@@ -67,10 +71,10 @@ impl SqliteStorageAdapter {
     sqlx::query(
       r#"
       CREATE TABLE IF NOT EXISTS db_vertex (
-        vid TEXT PRIMARY KEY,
-        label TEXT NOT NULL
+        vid VARCHAR PRIMARY KEY,
+        label VARCHAR NOT NULL
       );
-      CREATE INDEX IF NOT EXISTS idx_vertex_label ON db_vertex(label);
+      CREATE INDEX IF NOT EXISTS ix_db_vertex_label ON db_vertex(label);
       "#,
     )
     .execute(pool)
@@ -81,14 +85,14 @@ impl SqliteStorageAdapter {
     sqlx::query(
       r#"
       CREATE TABLE IF NOT EXISTS db_edge (
-        eid TEXT PRIMARY KEY,
-        label TEXT NOT NULL,
-        src_vid TEXT NOT NULL,
-        dst_vid TEXT NOT NULL
+        eid VARCHAR PRIMARY KEY,
+        label VARCHAR NOT NULL,
+        src_vid VARCHAR NOT NULL,
+        dst_vid VARCHAR NOT NULL
       );
-      CREATE INDEX IF NOT EXISTS idx_edge_label ON db_edge(label);
-      CREATE INDEX IF NOT EXISTS idx_edge_src_vid ON db_edge(src_vid);
-      CREATE INDEX IF NOT EXISTS idx_edge_dst_vid ON db_edge(dst_vid);
+      CREATE INDEX IF NOT EXISTS ix_db_edge_label ON db_edge(label);
+      CREATE INDEX IF NOT EXISTS ix_db_edge_src_vid ON db_edge(src_vid);
+      CREATE INDEX IF NOT EXISTS ix_db_edge_dst_vid ON db_edge(dst_vid);
       "#,
     )
     .execute(pool)
@@ -100,13 +104,13 @@ impl SqliteStorageAdapter {
       r#"
       CREATE TABLE IF NOT EXISTS vertex_attribute (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        vid TEXT NOT NULL,
-        key TEXT NOT NULL,
-        value TEXT NOT NULL,
-        type TEXT NOT NULL
+        vid VARCHAR NOT NULL,
+        key VARCHAR NOT NULL,
+        value VARCHAR NOT NULL,
+        type VARCHAR NOT NULL
       );
-      CREATE INDEX IF NOT EXISTS idx_vertex_attr_vid ON vertex_attribute(vid);
-      CREATE INDEX IF NOT EXISTS idx_vertex_attr_key ON vertex_attribute(key);
+      CREATE INDEX IF NOT EXISTS ix_vertex_attribute_vid ON vertex_attribute(vid);
+      CREATE INDEX IF NOT EXISTS ix_vertex_attribute_key ON vertex_attribute(key);
       "#,
     )
     .execute(pool)
@@ -118,13 +122,13 @@ impl SqliteStorageAdapter {
       r#"
       CREATE TABLE IF NOT EXISTS edge_attribute (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        eid TEXT NOT NULL,
-        key TEXT NOT NULL,
-        value TEXT NOT NULL,
-        type TEXT NOT NULL
+        eid VARCHAR NOT NULL,
+        key VARCHAR NOT NULL,
+        value VARCHAR NOT NULL,
+        type VARCHAR NOT NULL
       );
-      CREATE INDEX IF NOT EXISTS idx_edge_attr_eid ON edge_attribute(eid);
-      CREATE INDEX IF NOT EXISTS idx_edge_attr_key ON edge_attribute(key);
+      CREATE INDEX IF NOT EXISTS ix_edge_attribute_eid ON edge_attribute(eid);
+      CREATE INDEX IF NOT EXISTS ix_edge_attribute_key ON edge_attribute(key);
       "#,
     )
     .execute(pool)
@@ -546,125 +550,91 @@ impl AdvancedStorageAdapter for SqliteStorageAdapter {
   }
 }
 
-impl SqliteStorageAdapter {
-  async fn add_v_attr(
-    &self,
-    vid: VidRef<'_>,
-    key: String,
-    value: String,
-    type_: AttrType,
-  ) -> Result<(), Box<dyn std::error::Error>> {
-    let query_str = String::from(
-      r#"
-      INSERT INTO vertex_attribute (vid, key, value, type) VALUES (?, ?, ?, ?)
-      "#,
-    );
-    let params = vec![vid.to_string(), key, value, type_.to_string()];
-
-    let mut query = sqlx::query(&query_str);
-    for param in params {
-      query = query.bind(param);
-    }
-
-    let res = time_async_with_desc(
-      query.execute(&self.pool).map_err(Box::new),
-      query_str.clone(),
-    )
-    .await?;
-
-    dbg!(res);
-
-    Ok(())
-  }
-
-  async fn add_e_attr(
-    &self,
-    eid: EidRef<'_>,
-    key: String,
-    value: String,
-    type_: AttrType,
-  ) -> Result<(), Box<dyn std::error::Error>> {
-    let query_str = String::from(
-      r#"
-      INSERT INTO edge_attribute (eid, key, value, type) VALUES (?, ?, ?, ?)
-      "#,
-    );
-    let params = vec![eid.to_string(), key, value, type_.to_string()];
-
-    let mut query = sqlx::query(&query_str);
-    for param in params {
-      query = query.bind(param);
-    }
-
-    let res = time_async_with_desc(
-      query.execute(&self.pool).map_err(Box::new),
-      query_str.clone(),
-    )
-    .await?;
-
-    dbg!(res);
-
-    Ok(())
-  }
-}
-
 impl WritableStorageAdapter for SqliteStorageAdapter {
   async fn add_v(&self, v: DataVertex) -> Result<(), Box<dyn std::error::Error>> {
-    // add vertex (vid, label)
-    let query_str = String::from(
-      r#"
+    let mut tx = self.pool.begin().await?;
+
+    let query_str = "
       INSERT INTO db_vertex (vid, label) VALUES (?, ?)
-      "#,
-    );
-    let params = vec![v.vid.clone(), v.label];
-    let mut query = sqlx::query(&query_str);
-    for param in params {
-      query = query.bind(param);
-    }
-    let res = time_async_with_desc(
-      query.execute(&self.pool).map_err(Box::new),
-      query_str.clone(),
-    )
-    .await?;
+    ";
+    let query = sqlx::query(query_str).bind(&v.vid).bind(&v.label);
 
-    dbg!(res);
+    match query.execute(&mut *tx).await {
+      Ok(result) => println!("✅  Inserted {} rows", result.rows_affected()),
+      Err(e) => {
+        eprintln!("❌  Error inserting vertex: {}", e);
+        return Err(Box::new(e));
+      }
+    };
 
-    // add attributes
-    for (key, value) in v.attrs {
-      self
-        .add_v_attr(&v.vid, key, value.to_string(), value.to_type())
-        .await?;
+    for (key, value) in &v.attrs {
+      let attr_query = sqlx::query(
+        "
+      INSERT INTO vertex_attribute (vid, key, value, type) VALUES (?, ?, ?, ?)
+      ",
+      )
+      .bind(&v.vid)
+      .bind(key)
+      .bind(value.to_string())
+      .bind(value.to_type().to_string());
+
+      match attr_query.execute(&mut *tx).await {
+        Ok(result) => println!("✅  Inserted {} rows", result.rows_affected()),
+        Err(e) => {
+          eprintln!("❌  Error inserting vertex attribute: {}", e);
+          return Err(Box::new(e));
+        }
+      }
     }
+
+    tx.commit().await?;
+    println!("✅  Committed transaction\n");
 
     Ok(())
   }
 
   async fn add_e(&self, e: DataEdge) -> Result<(), Box<dyn std::error::Error>> {
-    // add edge (eid, label, src_vid, dst_vid)
-    let query_str = String::from(
-      r#"
-      INSERT INTO db_edge (eid, label, src_vid, dst_vid) VALUES (?, ?, ?, ?)
-      "#,
-    );
-    let params = vec![e.eid.clone(), e.label, e.src_vid, e.dst_vid];
-    let mut query = sqlx::query(&query_str);
-    for param in params {
-      query = query.bind(param);
-    }
-    let res = time_async_with_desc(
-      query.execute(&self.pool).map_err(Box::new),
-      query_str.clone(),
-    )
-    .await?;
+    let mut tx = self.pool.begin().await?;
 
-    dbg!(res);
+    let query_str = "
+      INSERT INTO db_edge (eid, label, src_vid, dst_vid) VALUES ($1, $2, $3, $4)
+    ";
+    let query = sqlx::query(query_str)
+      .bind(&e.eid)
+      .bind(&e.label)
+      .bind(&e.src_vid)
+      .bind(&e.dst_vid);
 
-    // add attributes
-    for (key, value) in e.attrs {
-      self
-        .add_e_attr(&e.eid, key, value.to_string(), value.to_type())
-        .await?;
+    match query.execute(&mut *tx).await {
+      Ok(result) => println!("✅  Inserted {} rows", result.rows_affected()),
+      Err(e) => {
+        eprintln!("❌  Error inserting edge: {}", e);
+        return Err(Box::new(e));
+      }
+    };
+
+    for (key, value) in &e.attrs {
+      let attr_query = sqlx::query(
+        "
+      INSERT INTO edge_attribute (eid, key, value, type) VALUES ($1, $2, $3, $4)
+      ",
+      )
+      .bind(&e.eid)
+      .bind(key)
+      .bind(value.to_string())
+      .bind(value.to_type().to_string());
+
+      match attr_query.execute(&mut *tx).await {
+        Ok(result) => println!("✅  Inserted {} rows", result.rows_affected()),
+        Err(e) => {
+          eprintln!("❌  Error inserting edge attribute: {}", e);
+          return Err(Box::new(e));
+        }
+      }
     }
+
+    tx.commit().await?;
+    println!("✅  Committed transaction\n");
 
     Ok(())
   }
@@ -675,15 +645,47 @@ impl TestOnlyStorageAdapter for SqliteStorageAdapter {
     let db_name = env::var("TEST_ONLY_SQLITE_DB_PATH").unwrap();
     let root = get_project_root().unwrap();
     let db_path = root.join(db_name);
-    let url = format!("sqlite://{}", db_path.display());
+    let url = format!("sqlite:///{}", db_path.display());
 
     let pool = sqlx::SqlitePool::connect(&url)
       .await
       .expect("❌  Failed to connect to SQLite database");
 
-    Self::drop_schema(&pool).await;
     Self::init_schema(&pool).await;
+    Self::clear_tables(&pool).await;
 
     Self { pool }
+  }
+}
+
+impl SqliteStorageAdapter {
+  pub async fn count_v(&self) -> usize {
+    let query = sqlx::query(
+      "
+      SELECT COUNT(*) FROM db_vertex
+    ",
+    );
+    let sql = query.sql();
+
+    let row = time_async_with_desc(query.fetch_one(&self.pool), sql.to_string())
+      .await
+      .unwrap();
+
+    row.get::<i64, _>(0) as usize
+  }
+
+  pub async fn count_e(&self) -> usize {
+    let query = sqlx::query(
+      "
+      SELECT COUNT(*) FROM db_edge
+    ",
+    );
+    let sql = query.sql();
+
+    let row = time_async_with_desc(query.fetch_one(&self.pool), sql.to_string())
+      .await
+      .unwrap();
+
+    row.get::<i64, _>(0) as usize
   }
 }

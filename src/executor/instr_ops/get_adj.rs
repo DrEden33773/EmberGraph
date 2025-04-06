@@ -39,7 +39,7 @@ impl<S: AdvancedStorageAdapter> GetAdjOperator<S> {
     {
       let mut ctx = self.ctx.lock();
       ctx.update_a_block(&instr.target_var, a_bucket);
-      ctx.update_extended_data_vids(connected_data_vids);
+      ctx.update_formalized_data_vids(connected_data_vids);
     }
 
     Some(())

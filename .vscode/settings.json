@@ -17,6 +17,7 @@
         "oneshot",
         "pyproject",
         "sqlmodel",
+        "thiserror",
         "titlecase"
     ],
     "[rust]": {
