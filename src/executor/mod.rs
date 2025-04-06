@@ -8,8 +8,8 @@ use hashbrown::HashMap;
 use instr_ops::InstrOperatorFactory;
 use itertools::Itertools;
 use parking_lot::Mutex;
-use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
-use std::{collections::VecDeque, sync::Arc};
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use std::sync::Arc;
 
 pub mod instr_ops;
 
@@ -114,27 +114,21 @@ impl<S: AdvancedStorageAdapter> ExecEngine<S> {
     let plan_v_pat_cnt = Arc::new(plan_v_pat_cnt);
     let plan_e_pat_cnt = Arc::new(plan_e_pat_cnt);
 
-    let result = parallel::spawn_blocking(move || {
-      unmerged_results
-        .into_iter()
-        .multi_cartesian_product()
-        .map(|mut combination| {
-          let mut successors = combination.drain(1..).collect::<VecDeque<_>>();
-          let mut curr = combination.pop().unwrap();
-          while let Some(next) = successors.pop_front() {
-            let new = curr | next;
-            curr = new;
-          }
-          curr
-        })
-        .par_bridge()
-        .collect::<Vec<_>>()
-    })
-    .await;
+    // get all combinations of unmerged results
+    let combinations = unmerged_results
+      .into_iter()
+      .multi_cartesian_product()
+      .collect::<Vec<_>>();
 
     parallel::spawn_blocking(move || {
-      result
+      combinations
         .into_par_iter()
+        .map(|combination| {
+          combination
+            .into_iter()
+            .reduce(|acc, curr| acc | curr)
+            .unwrap()
+        })
         .filter(|graph| {
           Self::is_equivalent_to_pattern(graph, plan_v_pat_cnt.clone(), plan_e_pat_cnt.clone())
         })

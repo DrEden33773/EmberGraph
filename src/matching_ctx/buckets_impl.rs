@@ -11,9 +11,8 @@ use crate::{
   },
 };
 use hashbrown::{HashMap, HashSet};
-use itertools::Itertools;
 use rayon::iter::{
-  IndexedParallelIterator, IntoParallelIterator, ParallelBridge, ParallelIterator,
+  IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator, ParallelIterator,
 };
 use std::sync::Arc;
 
@@ -477,21 +476,24 @@ impl TBucket {
     left_group: Vec<ExpandGraph>,
     right_group: Vec<ExpandGraph>,
   ) -> Vec<ExpandGraph> {
-    // collect all combinations via `cartesian_product`
-    let combinations = parallel::spawn_blocking(move || {
-      left_group
-        .into_iter()
-        .cartesian_product(right_group)
-        .par_bridge()
-        .collect::<Vec<_>>()
-    })
-    .await;
+    if left_group.is_empty() || right_group.is_empty() {
+      return Vec::new();
+    }
 
-    // parallelize the process: union_then_intersect_on_connective_v
     parallel::spawn_blocking(move || {
-      combinations
+      let right_group = Arc::new(right_group);
+
+      left_group
         .into_par_iter()
-        .flat_map(|(outer, inner)| union_then_intersect_on_connective_v(outer, inner))
+        .flat_map(|left| {
+          right_group
+            .clone()
+            .par_iter()
+            .flat_map(move |right| {
+              union_then_intersect_on_connective_v(left.clone(), right.clone())
+            })
+            .collect::<Vec<_>>()
+        })
         .collect::<Vec<_>>()
     })
     .await

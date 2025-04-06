@@ -88,6 +88,7 @@ impl ReportOperator {
     // So, we can filter out the graph that is real-superset of pattern graph.
     for (_, f_bucket) in f_buckets {
       let curr_group = f_bucket.all_matched.into_iter().collect::<Vec<_>>();
+
       let plan_v_pat_cnt = plan_v_pat_cnt.clone();
       let plan_e_pat_cnt = plan_e_pat_cnt.clone();
 

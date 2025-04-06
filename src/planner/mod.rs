@@ -1,9 +1,8 @@
+use crate::{parser::PatternParser, schemas::PlanData};
 use order_calc::OrderCalculator;
 use plan_dump::PlanDumper;
 use plan_gen::PlanGenerator;
 use plan_opt::PlanOptimizer;
-
-use crate::{parser::PatternParser, schemas::PlanData};
 use std::{fs, path::Path};
 
 pub mod order_calc;

@@ -27,13 +27,14 @@ pub async fn bi_2_on_sf_01() -> io::Result<()> {
   exec("ldbc-bi-2.json").await
 }
 
-/// ⚠️  Memory usage: 96% (51G)
+/// ✅⚠️ (Not that fast)
+/// - `SqliteAdapter` is faster
 pub async fn bi_3_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-3' on 'SF0.1' ...\n");
   exec("ldbc-bi-3.json").await
 }
 
-/// ⚠️  Memory usage: 97% (51G)
+/// ❌  Cannot find a matching pattern
 pub async fn bi_5_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-5' on 'SF0.1' ...\n");
   exec("ldbc-bi-5.json").await
@@ -54,7 +55,8 @@ pub async fn bi_10_on_sf_01() -> io::Result<()> {
 }
 
 /// ✅⚠️  Slow query: `Intersect("A^b", "A^c")`, `Intersect("A^a", "A^country")`
-/// - Slow on `Neo4jStorageAdapter`
+/// - Slow on `Neo4jStorageAdapter` and `SqliteStorageAdapter`
+/// - `Neo4jStorageAdapter` could be a little bit faster
 pub async fn bi_11_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-11' on 'SF0.1' ...\n");
   exec("ldbc-bi-11.json").await

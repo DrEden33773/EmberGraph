@@ -1,9 +1,8 @@
-use hashbrown::HashMap;
-
 use crate::{
   schemas::{Eid, Label, PatternAttr, PatternEdge, PatternVertex, Vid},
   utils::dyn_graph::DynGraph,
 };
+use hashbrown::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct PatternParser {
@@ -131,7 +130,7 @@ impl PatternParser {
         .to_string();
       let raw_pred = args.collect::<Vec<_>>().join("");
       if raw_pred.is_empty() {
-        panic!("⚠️  Missing 'predicate' for `v_attr`.");
+        panic!("❌  Missing 'predicate' for `v_attr`.");
       }
 
       let pattern_attr = PatternAttr::parse_from_raw(key, raw_pred);
@@ -151,7 +150,7 @@ impl PatternParser {
         .to_string();
       let raw_pred = args.collect::<Vec<_>>().join("");
       if raw_pred.is_empty() {
-        panic!("⚠️  Missing 'predicate' for `e_attr`.");
+        panic!("❌  Missing 'predicate' for `e_attr`.");
       }
 
       let pattern_attr = PatternAttr::parse_from_raw(key, raw_pred);
