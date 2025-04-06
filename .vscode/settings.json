@@ -47,6 +47,12 @@
             "driver": "SQLite",
             "database": "${workspaceFolder:ember-sgm}/ldbc_sn_interactive_sf01.db",
             "name": "ldbc_sn_interactive_sf01"
+        },
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "database": "${workspaceFolder:ember-sgm}/simple_test_data_graph.db",
+            "name": "simple_test_data_graph"
         }
     ],
 }

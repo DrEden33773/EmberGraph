@@ -1,6 +1,7 @@
 use std::collections::BTreeSet;
 
 use hashbrown::{HashMap, HashSet};
+use itertools::Itertools;
 
 pub struct Apriori<'data> {
   data_list: &'data [HashSet<String>],
@@ -15,7 +16,7 @@ impl<'data> Apriori<'data> {
 
     while !temp_freq_set.is_empty() {
       max_freq_set = temp_freq_set;
-      let ck = self.apriori_gen(&max_freq_set.keys().cloned().collect::<Vec<_>>());
+      let ck = self.apriori_gen(&max_freq_set.keys().cloned().collect_vec());
       temp_freq_set = self.find_freq_set(ck.into_iter().map(|s| s.into_iter().collect()).collect());
     }
 

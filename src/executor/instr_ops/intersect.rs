@@ -7,6 +7,7 @@ use crate::{
   schemas::{DataVertex, Instruction, VarPrefix::*},
   storage::StorageAdapter,
 };
+use itertools::Itertools;
 use parking_lot::Mutex;
 use std::{collections::VecDeque, sync::Arc};
 
@@ -102,7 +103,7 @@ impl<S: StorageAdapter> IntersectOperator<S> {
     matched_vs
       .into_iter()
       .map(|v| (v, pattern_v.vid.clone()))
-      .collect::<Vec<_>>()
+      .collect_vec()
       .into()
   }
 }

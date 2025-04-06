@@ -41,7 +41,17 @@ async fn to_run() -> io::Result<()> {
   let guard = ember_graph::init_log::init_log().await?;
 
   // plan_gen().await?;
-  run_demo().await?;
+  // run_demo().await?;
+  run_test_only().await?;
+
+  Ok(())
+}
+
+#[allow(dead_code)]
+async fn run_test_only() -> io::Result<()> {
+  use ember_graph::demos::test_only::*;
+
+  bi_6_minimized().await?;
 
   Ok(())
 }

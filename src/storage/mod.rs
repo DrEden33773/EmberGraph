@@ -62,7 +62,7 @@ pub trait AdvancedStorageAdapter: StorageAdapter {
   ) -> impl Future<Output = Vec<DataEdge>> + Send;
 }
 
-pub trait WritableStorageAdapter: StorageAdapter {
+pub trait WritableStorageAdapter: AdvancedStorageAdapter {
   fn add_v(
     &self,
     v: DataVertex,
@@ -72,4 +72,8 @@ pub trait WritableStorageAdapter: StorageAdapter {
     &self,
     e: DataEdge,
   ) -> impl Future<Output = Result<(), Box<dyn std::error::Error>>> + Send;
+}
+
+pub trait TestOnlyStorageAdapter: WritableStorageAdapter {
+  fn async_init_test_only() -> impl Future<Output = Self> + Send;
 }

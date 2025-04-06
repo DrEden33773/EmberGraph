@@ -232,6 +232,7 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   ctx: LoadWithCondCtx<'a, S>,
 ) -> Vec<DataEdge> {
   use futures::{StreamExt, stream};
+  use itertools::Itertools;
 
   let next_pat_vid = if ctx.is_src_curr_pat {
     ctx.curr_pat_e.dst_vid()
@@ -268,7 +269,7 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   let filtered_edges = potential_edges
     .into_iter()
     .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
-    .collect::<Vec<_>>();
+    .collect_vec();
 
   // process each edge in parallel
   stream::iter(filtered_edges)
@@ -340,13 +341,13 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   let filtered_edges = potential_edges
     .into_iter()
     .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
-    .collect::<Vec<_>>();
+    .collect_vec();
 
   // split into chunks for parallel processing
   let chunks = filtered_edges
     .chunks(BATCH_SIZE)
     .map(Vec::from)
-    .collect::<Vec<_>>();
+    .collect_vec();
 
   // process each chunk in parallel
   let batch_futures = chunks.into_iter().map(|chunk| async move {
@@ -372,7 +373,7 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   let batch_results = future::join_all(batch_futures).await;
 
   // flatten the results into a single vector
-  batch_results.into_iter().flatten().collect::<Vec<_>>()
+  batch_results.into_iter().flatten().collect_vec()
 }
 
 impl CBucket {

@@ -4,6 +4,7 @@ use crate::{
   storage::StorageAdapter,
   utils::{dyn_graph::DynGraph, parallel},
 };
+use itertools::Itertools;
 use parking_lot::Mutex;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::sync::Arc;
@@ -32,7 +33,7 @@ impl<S: StorageAdapter> InitOperator<S> {
       matched_vs
         .into_iter()
         .filter(|data_v| !ctx.expanded_data_vids.contains(&data_v.vid))
-        .collect::<Vec<_>>()
+        .collect_vec()
     };
 
     // prepare for updating the block

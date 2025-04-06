@@ -1,7 +1,7 @@
 use crate::{
   matching_ctx::MatchingCtx,
   schemas::*,
-  storage::AdvancedStorageAdapter,
+  storage::{AdvancedStorageAdapter, TestOnlyStorageAdapter},
   utils::{dyn_graph::DynGraph, parallel},
 };
 use hashbrown::HashMap;
@@ -18,6 +18,19 @@ pub struct ExecEngine<S: AdvancedStorageAdapter> {
   pub(crate) plan_data: PlanData,
   pub(crate) storage_adapter: Arc<S>,
   pub(crate) matching_ctx: Arc<Mutex<MatchingCtx>>,
+}
+
+impl<S: TestOnlyStorageAdapter> ExecEngine<S> {
+  pub async fn build_test_only_from_json(plan_json_content: &str) -> Self {
+    let plan_data: PlanData = serde_json::from_str(plan_json_content).unwrap();
+    let storage_adapter = Arc::new(S::async_init_test_only().await);
+    let matching_ctx = Arc::new(Mutex::new(MatchingCtx::new(&plan_data)));
+    Self {
+      plan_data,
+      storage_adapter,
+      matching_ctx,
+    }
+  }
 }
 
 impl<S: AdvancedStorageAdapter> ExecEngine<S> {
@@ -86,10 +99,10 @@ impl<S: AdvancedStorageAdapter> ExecEngine<S> {
       .await
       .into_iter()
       .filter(|v| !v.is_empty())
-      .collect::<Vec<_>>();
+      .collect_vec();
 
     fn preview_scale(unmerged: &[Vec<DynGraph>]) {
-      let len_vec = unmerged.iter().map(|v| v.len()).collect::<Vec<_>>();
+      let len_vec = unmerged.iter().map(|v| v.len()).collect_vec();
       println!("Scale(unmerged_results) = {len_vec:?}\n");
     }
 
@@ -118,7 +131,7 @@ impl<S: AdvancedStorageAdapter> ExecEngine<S> {
     let combinations = unmerged_results
       .into_iter()
       .multi_cartesian_product()
-      .collect::<Vec<_>>();
+      .collect_vec();
 
     parallel::spawn_blocking(move || {
       combinations

@@ -3,6 +3,7 @@ use crate::{
   utils::dyn_graph::DynGraph,
 };
 use hashbrown::HashMap;
+use itertools::Itertools;
 use ordered_float::OrderedFloat;
 use project_root::get_project_root;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
@@ -51,7 +52,7 @@ impl OrderCalculator {
       .view_vids()
       .into_iter()
       .map(String::from)
-      .collect::<Vec<_>>();
+      .collect_vec();
 
     Self {
       statistics,

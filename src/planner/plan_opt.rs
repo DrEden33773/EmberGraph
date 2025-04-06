@@ -127,7 +127,7 @@ impl PlanOptimizer {
         offset += 1;
       }
 
-      let new_operators = operators.into_iter().collect::<Vec<_>>();
+      let new_operators = operators.into_iter().collect_vec();
       pos += 1;
       self.exec_instructions[pos].multi_ops = new_operators;
     }
@@ -169,12 +169,12 @@ impl PlanOptimizer {
             .iter()
             .map(|var| intersect_pos[var])
             .sorted_unstable()
-            .collect::<Vec<_>>();
+            .collect_vec();
           let l2 = itemset
             .iter()
             .map(|var| intersect_pos[var])
             .sorted_unstable()
-            .collect::<Vec<_>>();
+            .collect_vec();
           for (e1, e2) in l1.iter().zip(l2.iter()) {
             if e1 > e2 {
               max_freq_support = support;
@@ -206,7 +206,7 @@ impl PlanOptimizer {
               .iter()
               .cloned()
               .sorted_unstable_by_key(|s| intersect_pos[s])
-              .collect::<Vec<_>>();
+              .collect_vec();
             let old_instr = &self.exec_instructions[instr_idx[i]];
             let new_instr = InstructionBuilder::new(&old_instr.vid, InstructionType::Intersect)
               .multi_ops(operators)

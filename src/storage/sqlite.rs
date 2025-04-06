@@ -1,4 +1,7 @@
-use super::{AdvancedStorageAdapter, AsyncDefault, StorageAdapter, WritableStorageAdapter};
+use super::{
+  AdvancedStorageAdapter, AsyncDefault, StorageAdapter, TestOnlyStorageAdapter,
+  WritableStorageAdapter,
+};
 use crate::{
   schemas::{AttrType, AttrValue, DataEdge, DataVertex, EidRef, LabelRef, PatternAttr, VidRef},
   utils::time_async_with_desc,
@@ -33,6 +36,32 @@ impl AsyncDefault for SqliteStorageAdapter {
 }
 
 impl SqliteStorageAdapter {
+  async fn drop_schema(pool: &SqlitePool) {
+    // drop db_vertex table
+    sqlx::query("DROP TABLE IF EXISTS db_vertex;")
+      .execute(pool)
+      .await
+      .expect("❌  Failed to drop `db_vertex` table");
+
+    // drop db_edge table
+    sqlx::query("DROP TABLE IF EXISTS db_edge;")
+      .execute(pool)
+      .await
+      .expect("❌  Failed to drop `db_edge` table");
+
+    // drop vertex_attribute table
+    sqlx::query("DROP TABLE IF EXISTS vertex_attribute;")
+      .execute(pool)
+      .await
+      .expect("❌  Failed to drop `vertex_attribute` table");
+
+    // drop edge_attribute table
+    sqlx::query("DROP TABLE IF EXISTS edge_attribute;")
+      .execute(pool)
+      .await
+      .expect("❌  Failed to drop `edge_attribute` table");
+  }
+
   async fn init_schema(pool: &SqlitePool) {
     // create db_vertex table
     sqlx::query(
@@ -537,11 +566,13 @@ impl SqliteStorageAdapter {
       query = query.bind(param);
     }
 
-    time_async_with_desc(
+    let res = time_async_with_desc(
       query.execute(&self.pool).map_err(Box::new),
       query_str.clone(),
     )
     .await?;
+
+    dbg!(res);
 
     Ok(())
   }
@@ -565,11 +596,13 @@ impl SqliteStorageAdapter {
       query = query.bind(param);
     }
 
-    time_async_with_desc(
+    let res = time_async_with_desc(
       query.execute(&self.pool).map_err(Box::new),
       query_str.clone(),
     )
     .await?;
+
+    dbg!(res);
 
     Ok(())
   }
@@ -588,25 +621,19 @@ impl WritableStorageAdapter for SqliteStorageAdapter {
     for param in params {
       query = query.bind(param);
     }
-    time_async_with_desc(
+    let res = time_async_with_desc(
       query.execute(&self.pool).map_err(Box::new),
       query_str.clone(),
     )
     .await?;
 
+    dbg!(res);
+
     // add attributes
     for (key, value) in v.attrs {
-      let type_ = match value {
-        AttrValue::Int(_) => AttrType::Int,
-        AttrValue::Float(_) => AttrType::Float,
-        AttrValue::String(_) => AttrType::String,
-      };
-      let value = match value {
-        AttrValue::Int(val) => val.to_string(),
-        AttrValue::Float(val) => val.to_string(),
-        AttrValue::String(val) => val,
-      };
-      self.add_v_attr(&v.vid, key, value, type_).await?;
+      self
+        .add_v_attr(&v.vid, key, value.to_string(), value.to_type())
+        .await?;
     }
 
     Ok(())
@@ -624,27 +651,39 @@ impl WritableStorageAdapter for SqliteStorageAdapter {
     for param in params {
       query = query.bind(param);
     }
-    time_async_with_desc(
+    let res = time_async_with_desc(
       query.execute(&self.pool).map_err(Box::new),
       query_str.clone(),
     )
     .await?;
 
+    dbg!(res);
+
     // add attributes
     for (key, value) in e.attrs {
-      let type_ = match value {
-        AttrValue::Int(_) => AttrType::Int,
-        AttrValue::Float(_) => AttrType::Float,
-        AttrValue::String(_) => AttrType::String,
-      };
-      let value = match value {
-        AttrValue::Int(val) => val.to_string(),
-        AttrValue::Float(val) => val.to_string(),
-        AttrValue::String(val) => val,
-      };
-      self.add_e_attr(&e.eid, key, value, type_).await?;
+      self
+        .add_e_attr(&e.eid, key, value.to_string(), value.to_type())
+        .await?;
     }
 
     Ok(())
+  }
+}
+
+impl TestOnlyStorageAdapter for SqliteStorageAdapter {
+  async fn async_init_test_only() -> Self {
+    let db_name = env::var("TEST_ONLY_SQLITE_DB_PATH").unwrap();
+    let root = get_project_root().unwrap();
+    let db_path = root.join(db_name);
+    let url = format!("sqlite://{}", db_path.display());
+
+    let pool = sqlx::SqlitePool::connect(&url)
+      .await
+      .expect("❌  Failed to connect to SQLite database");
+
+    Self::drop_schema(&pool).await;
+    Self::init_schema(&pool).await;
+
+    Self { pool }
   }
 }
