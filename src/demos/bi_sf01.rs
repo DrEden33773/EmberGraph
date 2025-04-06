@@ -53,7 +53,8 @@ pub async fn bi_10_on_sf_01() -> io::Result<()> {
   exec("ldbc-bi-10.json").await
 }
 
-/// ⚠️✅  Memory usage: 98% (55G)
+/// ✅⚠️  Slow query: `Intersect("A^b", "A^c")`, `Intersect("A^a", "A^country")`
+/// - Slow on `Neo4jStorageAdapter`
 pub async fn bi_11_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-11' on 'SF0.1' ...\n");
   exec("ldbc-bi-11.json").await

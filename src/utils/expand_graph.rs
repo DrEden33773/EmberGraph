@@ -1,10 +1,12 @@
+use std::sync::Arc;
+
 use super::dyn_graph::{DynGraph, VNode};
 use crate::schemas::*;
 use hashbrown::{HashMap, HashSet};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ExpandGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
-  pub(crate) dyn_graph: DynGraph<VType, EType>,
+  pub(crate) dyn_graph: Arc<DynGraph<VType, EType>>,
   pub(crate) target_v_adj_table: HashMap<Vid, VNode>,
 
   pub(crate) dangling_e_entities: HashMap<Eid, EType>,
@@ -27,10 +29,10 @@ impl<VType: VBase, EType: EBase> Default for ExpandGraph<VType, EType> {
   }
 }
 
-impl<VType: VBase, EType: EBase> From<&DynGraph<VType, EType>> for ExpandGraph<VType, EType> {
-  fn from(val: &DynGraph<VType, EType>) -> Self {
+impl<VType: VBase, EType: EBase> From<Arc<DynGraph<VType, EType>>> for ExpandGraph<VType, EType> {
+  fn from(dyn_graph: Arc<DynGraph<VType, EType>>) -> Self {
     Self {
-      dyn_graph: val.clone(),
+      dyn_graph,
       ..Default::default()
     }
   }
@@ -38,7 +40,7 @@ impl<VType: VBase, EType: EBase> From<&DynGraph<VType, EType>> for ExpandGraph<V
 
 impl<VType: VBase, EType: EBase> From<ExpandGraph<VType, EType>> for DynGraph<VType, EType> {
   fn from(mut val: ExpandGraph<VType, EType>) -> Self {
-    let mut graph = val.dyn_graph;
+    let mut graph = (*val.dyn_graph).clone();
 
     graph.update_v_batch(val.target_v_entities.into_values().map(|v| {
       let pattern = val.target_v_patterns.remove(v.vid()).unwrap();
@@ -64,11 +66,11 @@ impl<VType: VBase, EType: EBase> From<ExpandGraph<VType, EType>> for DynGraph<VT
 }
 
 impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
-  pub fn get_vid_set(&self) -> HashSet<String> {
-    self.dyn_graph.get_vid_set()
+  pub fn get_vids(&self) -> Vec<VidRef<'_>> {
+    self.dyn_graph.view_vids()
   }
-  pub fn get_eid_set(&self) -> HashSet<String> {
-    self.dyn_graph.get_eid_set()
+  pub fn get_eids(&self) -> Vec<EidRef<'_>> {
+    self.dyn_graph.view_eids()
   }
   pub fn get_v_count(&self) -> usize {
     self.dyn_graph.get_v_count()
@@ -199,8 +201,8 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
   let grouped_l = l_expand_graph.group_dangling_e_by_pending_v();
   let grouped_r = r_expand_graph.group_dangling_e_by_pending_v();
 
-  let mut l_graph = l_expand_graph.dyn_graph;
-  let mut r_graph = r_expand_graph.dyn_graph;
+  let mut l_graph = (*l_expand_graph.dyn_graph).clone();
+  let mut r_graph = (*r_expand_graph.dyn_graph).clone();
 
   #[cfg(feature = "validate_pattern_uniqueness_before_final_merge")]
   {
@@ -208,23 +210,17 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
     // If not, we should not consider them as a match.
     // We could also discard those patterns who lead to `multi` vs/es in either graph.
 
-    for common_v_pat in l_graph
-      .get_v_patterns()
-      .intersection(&r_graph.get_v_patterns())
-    {
+    for common_v_pat in l_graph.view_common_v_patterns(&r_graph) {
       let l_vs = l_graph.pattern_2_vids.get(common_v_pat).unwrap();
       let r_vs = r_graph.pattern_2_vids.get(common_v_pat).unwrap();
-      if l_vs != r_vs || l_vs.len() > 1 || r_vs.len() > 1 {
+      if l_vs.len() > 1 || r_vs.len() > 1 || l_vs != r_vs {
         return vec![];
       }
     }
-    for common_e_pat in l_graph
-      .get_e_patterns()
-      .intersection(&r_graph.get_e_patterns())
-    {
+    for common_e_pat in l_graph.view_common_e_patterns(&r_graph) {
       let l_es = l_graph.pattern_2_eids.get(common_e_pat).unwrap();
       let r_es = r_graph.pattern_2_eids.get(common_e_pat).unwrap();
-      if l_es != r_es || l_es.len() > 1 || r_es.len() > 1 {
+      if l_es.len() > 1 || r_es.len() > 1 || l_es != r_es {
         return vec![];
       }
     }
@@ -238,6 +234,7 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
   let mut new_graph = DynGraph::<VType, EType>::default();
   new_graph.update_v_batch(l_v_pat_pairs.into_iter().chain(r_v_pat_pairs));
   new_graph.update_e_batch(l_e_pat_pairs.into_iter().chain(r_e_pat_pairs));
+  let new_graph = Arc::new(new_graph);
 
   let mut result = vec![];
 
@@ -247,7 +244,7 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
         continue;
       }
 
-      let mut expanding_dg: ExpandGraph<VType, EType> = new_graph.as_ref().into();
+      let mut expanding_dg: ExpandGraph<VType, EType> = new_graph.clone().into();
       expanding_dg.update_valid_dangling_edges(
         l_dangling_es
           .iter()

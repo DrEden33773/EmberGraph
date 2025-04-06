@@ -47,7 +47,11 @@ impl OrderCalculator {
     )
     .expect("❌  Failed to parse statistics file");
 
-    let raw_order = pattern_graph.get_vid_set().into_iter().collect::<Vec<_>>();
+    let raw_order = pattern_graph
+      .view_vids()
+      .into_iter()
+      .map(String::from)
+      .collect::<Vec<_>>();
 
     Self {
       statistics,
@@ -109,7 +113,7 @@ impl OrderCalculator {
   ///
   /// To keep `worst-case optimal`, we assume that each step is in the worst case.
   fn cost_based_adjustment(&mut self) {
-    let vs = self.pattern_graph.get_v_entities();
+    let vs = self.pattern_graph.view_v_entities();
 
     vs.into_par_iter()
       .map(|v| {
@@ -125,7 +129,7 @@ impl OrderCalculator {
           v_cost = cost;
         }
 
-        let grouped_adj_eids = self.pattern_graph.get_adj_es_grouped_by_target_vid(&v.vid);
+        let grouped_adj_eids = self.pattern_graph.view_adj_es_grouped_by_target_vid(&v.vid);
         let mut grouped_e_costs = Vec::with_capacity(grouped_adj_eids.len());
 
         // In the worst case, each vertex could match.
@@ -159,7 +163,7 @@ impl OrderCalculator {
         // Now we have the cost of `v`
         let cost = v_cost + grouped_e_costs.into_iter().sum::<usize>();
 
-        (v.vid, cost)
+        (v.vid.clone(), cost)
       })
       .collect_vec_list()
       .into_iter()

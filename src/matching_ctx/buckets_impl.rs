@@ -88,7 +88,7 @@ impl ABucket {
 
     // iter: `matched` data_graphs
     for (idx, frontiers) in self.matched_with_frontiers.drain() {
-      let matched_dg = self.all_matched[idx].take().unwrap();
+      let matched_dg = Arc::new(self.all_matched[idx].take().unwrap());
 
       // iter: `frontier_vid` on current data_graph
       for frontier_vid in frontiers.iter() {
@@ -183,10 +183,10 @@ impl ABucket {
 
           // build `expanding_graph`
           // note that each `next_data_vertex` holds a `expanding_graph`
-          for (key, edges) in next_vid_grouped_conn_es {
-            let mut expanding_graph = ExpandGraph::from(&matched_dg);
+          for (next_vid, edges) in next_vid_grouped_conn_es {
+            let mut expanding_graph = ExpandGraph::from(matched_dg.clone());
             let pat_strs = next_vid_grouped_conn_pat_strs
-              .remove(&key)
+              .remove(&next_vid)
               .unwrap_or_default();
 
             expanding_graph
