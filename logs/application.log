@@ -317,3 +317,81 @@
       LEFT JOIN vertex_attribute a ON v.vid = a.vid
       WHERE v.label = ? ☑️  216.35ms
 
+   0.058843805s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ?
+      AND EXISTS (
+        SELECT * FROM vertex_attribute 
+        WHERE vid = v.vid AND key = ?
+        AND type = 'string' AND value = ?
+      ) ☑️  53.75ms
+
+   0.064848405s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, ea.key, ea.value, ea.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute ea ON e.eid = ea.eid
+      JOIN db_vertex v ON e.dst_vid = v.vid
+      WHERE e.src_vid = ? AND e.label = ? AND v.label = ? ☑️  5.53ms
+
+   0.065436157s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?
+       ☑️  0.45ms
+
+   0.066246370s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, ea.key, ea.value, ea.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute ea ON e.eid = ea.eid
+      JOIN db_vertex v ON e.src_vid = v.vid
+      WHERE e.dst_vid = ? AND e.label = ? AND v.label = ? ☑️  0.67ms
+
+   0.066842607s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?
+       ☑️  0.36ms
+
+   0.067091523s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?
+       ☑️  0.54ms
+
+   0.068535693s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, ea.key, ea.value, ea.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute ea ON e.eid = ea.eid
+      JOIN db_vertex v ON e.src_vid = v.vid
+      WHERE e.dst_vid = ? AND e.label = ? AND v.label = ? ☑️  1.19ms
+
+   0.068874058s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?
+       ☑️  0.21ms
+
+   0.070441396s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ? ☑️  1.34ms
+
+   0.144530322s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ? ☑️  72.30ms
+
+   0.478959952s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ? ☑️  264.23ms
+
