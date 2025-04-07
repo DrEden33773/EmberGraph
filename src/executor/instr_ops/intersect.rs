@@ -66,7 +66,7 @@ impl<S: StorageAdapter> IntersectOperator<S> {
     let a2 = a_groups.pop_front().unwrap();
     let mut t_bucket = TBucket::build_from_a_a(a1, a2, &instr.vid).await;
 
-    if a_groups.len() > 2 {
+    if !a_groups.is_empty() {
       let mut prev_t = t_bucket;
       while let Some(a_group) = a_groups.pop_front() {
         t_bucket = TBucket::build_from_t_a(prev_t, a_group).await;
