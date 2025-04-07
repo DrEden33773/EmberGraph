@@ -139,6 +139,7 @@ async fn plan_gen() -> io::Result<()> {
         filepath.to_str().unwrap().green()
       );
     });
+
     handles.push(handle);
   }
 

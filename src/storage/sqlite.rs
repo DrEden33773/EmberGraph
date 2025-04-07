@@ -24,11 +24,15 @@ impl AsyncDefault for SqliteStorageAdapter {
     let db_name = env::var("SQLITE_DB_PATH").unwrap();
     let root = get_project_root().unwrap();
     let db_path = root.join(db_name);
-    let url = format!("sqlite:///{}", db_path.display());
 
-    let pool = sqlx::SqlitePool::connect(&url)
-      .await
-      .expect("❌  Failed to connect to SQLite database");
+    let pool = sqlx::SqlitePool::connect_with(
+      SqliteConnectOptions::new()
+        .filename(&db_path)
+        .create_if_missing(true)
+        .immutable(true),
+    )
+    .await
+    .expect("❌ Failed to connect to SQLite database");
 
     Self::init_schema(&pool).await;
 
