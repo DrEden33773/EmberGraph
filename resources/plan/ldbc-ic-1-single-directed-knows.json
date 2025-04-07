@@ -9,19 +9,19 @@
     "university"
   ],
   "vertices": {
-    "company": {
-      "vid": "company",
-      "label": "Company",
+    "university": {
+      "vid": "university",
+      "label": "University",
+      "attr": null
+    },
+    "companyCountry": {
+      "vid": "companyCountry",
+      "label": "Country",
       "attr": null
     },
     "universityCity": {
       "vid": "universityCity",
       "label": "City",
-      "attr": null
-    },
-    "university": {
-      "vid": "university",
-      "label": "University",
       "attr": null
     },
     "person": {
@@ -34,14 +34,14 @@
         "type": "int"
       }
     },
-    "companyCountry": {
-      "vid": "companyCountry",
-      "label": "Country",
-      "attr": null
-    },
     "locationCity": {
       "vid": "locationCity",
       "label": "City",
+      "attr": null
+    },
+    "company": {
+      "vid": "company",
+      "label": "Company",
       "attr": null
     },
     "otherPerson": {
@@ -56,25 +56,11 @@
     }
   },
   "edges": {
-    "b": {
-      "eid": "b",
-      "src_vid": "otherPerson",
-      "dst_vid": "locationCity",
+    "f": {
+      "eid": "f",
+      "src_vid": "university",
+      "dst_vid": "universityCity",
       "label": "isLocatedIn",
-      "attr": null
-    },
-    "d": {
-      "eid": "d",
-      "src_vid": "otherPerson",
-      "dst_vid": "university",
-      "label": "studyAt",
-      "attr": null
-    },
-    "a": {
-      "eid": "a",
-      "src_vid": "person",
-      "dst_vid": "otherPerson",
-      "label": "knows",
       "attr": null
     },
     "e": {
@@ -84,18 +70,32 @@
       "label": "isLocatedIn",
       "attr": null
     },
-    "f": {
-      "eid": "f",
-      "src_vid": "university",
-      "dst_vid": "universityCity",
-      "label": "isLocatedIn",
-      "attr": null
-    },
     "c": {
       "eid": "c",
       "src_vid": "otherPerson",
       "dst_vid": "company",
       "label": "workAt",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "person",
+      "dst_vid": "otherPerson",
+      "label": "knows",
+      "attr": null
+    },
+    "d": {
+      "eid": "d",
+      "src_vid": "otherPerson",
+      "dst_vid": "university",
+      "label": "studyAt",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "otherPerson",
+      "dst_vid": "locationCity",
+      "label": "isLocatedIn",
       "attr": null
     }
   },
@@ -130,8 +130,8 @@
       "multi_ops": [],
       "target_var": "C^otherPerson",
       "depend_on": [
-        "f^person",
-        "A^person"
+        "A^person",
+        "f^person"
       ]
     },
     {
@@ -142,9 +142,9 @@
       "multi_ops": [],
       "target_var": "f^otherPerson",
       "depend_on": [
-        "A^person",
         "f^person",
-        "C^otherPerson"
+        "C^otherPerson",
+        "A^person"
       ]
     },
     {
@@ -159,10 +159,10 @@
       "multi_ops": [],
       "target_var": "A^otherPerson",
       "depend_on": [
-        "A^person",
         "f^person",
         "f^otherPerson",
-        "C^otherPerson"
+        "C^otherPerson",
+        "A^person"
       ]
     },
     {
@@ -195,11 +195,11 @@
       "multi_ops": [],
       "target_var": "C^locationCity",
       "depend_on": [
-        "A^otherPerson",
-        "f^person",
-        "A^person",
         "f^otherPerson",
-        "C^otherPerson"
+        "f^person",
+        "A^otherPerson",
+        "C^otherPerson",
+        "A^person"
       ]
     },
     {
@@ -210,12 +210,12 @@
       "multi_ops": [],
       "target_var": "f^locationCity",
       "depend_on": [
-        "f^person",
-        "C^otherPerson",
-        "C^locationCity",
         "A^otherPerson",
         "A^person",
-        "f^otherPerson"
+        "C^otherPerson",
+        "f^person",
+        "f^otherPerson",
+        "C^locationCity"
       ]
     },
     {
@@ -246,18 +246,18 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^otherPerson",
-        "A^companyCountry"
+        "A^companyCountry",
+        "A^otherPerson"
       ],
       "target_var": "T^company",
       "depend_on": [
         "A^otherPerson",
-        "f^otherPerson",
-        "A^companyCountry",
         "A^person",
-        "C^otherPerson",
         "f^person",
-        "f^companyCountry"
+        "f^companyCountry",
+        "A^companyCountry",
+        "f^otherPerson",
+        "C^otherPerson"
       ]
     },
     {
@@ -268,14 +268,14 @@
       "multi_ops": [],
       "target_var": "C^company",
       "depend_on": [
-        "T^company",
-        "f^companyCountry",
-        "f^otherPerson",
-        "A^companyCountry",
-        "f^person",
+        "A^person",
         "C^otherPerson",
+        "T^company",
+        "A^companyCountry",
+        "f^companyCountry",
         "A^otherPerson",
-        "A^person"
+        "f^person",
+        "f^otherPerson"
       ]
     },
     {
@@ -286,15 +286,15 @@
       "multi_ops": [],
       "target_var": "f^company",
       "depend_on": [
+        "C^company",
         "T^company",
-        "f^person",
+        "f^otherPerson",
         "A^person",
-        "C^otherPerson",
+        "f^person",
+        "A^otherPerson",
         "A^companyCountry",
         "f^companyCountry",
-        "f^otherPerson",
-        "C^company",
-        "A^otherPerson"
+        "C^otherPerson"
       ]
     },
     {
@@ -303,17 +303,17 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^otherPerson",
-        "A^universityCity"
+        "A^universityCity",
+        "A^otherPerson"
       ],
       "target_var": "T^university",
       "depend_on": [
-        "f^person",
+        "f^otherPerson",
         "f^universityCity",
         "A^otherPerson",
-        "f^otherPerson",
         "C^otherPerson",
         "A^person",
+        "f^person",
         "A^universityCity"
       ]
     },
@@ -325,14 +325,14 @@
       "multi_ops": [],
       "target_var": "C^university",
       "depend_on": [
+        "T^university",
+        "A^otherPerson",
+        "C^otherPerson",
+        "f^person",
+        "A^universityCity",
         "f^otherPerson",
         "A^person",
-        "T^university",
-        "A^universityCity",
-        "f^person",
-        "f^universityCity",
-        "A^otherPerson",
-        "C^otherPerson"
+        "f^universityCity"
       ]
     },
     {
@@ -343,15 +343,15 @@
       "multi_ops": [],
       "target_var": "f^university",
       "depend_on": [
-        "A^otherPerson",
-        "C^otherPerson",
-        "f^person",
-        "T^university",
-        "f^universityCity",
-        "C^university",
         "f^otherPerson",
+        "f^person",
+        "f^universityCity",
+        "C^otherPerson",
         "A^person",
-        "A^universityCity"
+        "A^universityCity",
+        "C^university",
+        "A^otherPerson",
+        "T^university"
       ]
     },
     {
@@ -360,33 +360,33 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^person",
-        "f^company",
-        "f^otherPerson",
-        "f^locationCity",
-        "f^university",
         "f^universityCity",
-        "f^companyCountry"
+        "f^company",
+        "f^university",
+        "f^companyCountry",
+        "f^person",
+        "f^otherPerson",
+        "f^locationCity"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^companyCountry",
-        "A^otherPerson",
-        "C^locationCity",
-        "C^university",
-        "f^university",
-        "f^locationCity",
-        "f^otherPerson",
         "f^person",
-        "C^company",
-        "A^universityCity",
-        "T^company",
-        "f^company",
-        "T^university",
-        "C^otherPerson",
+        "A^companyCountry",
+        "C^locationCity",
         "f^universityCity",
         "A^person",
-        "A^companyCountry"
+        "f^companyCountry",
+        "f^university",
+        "C^otherPerson",
+        "f^otherPerson",
+        "T^company",
+        "A^universityCity",
+        "C^university",
+        "f^locationCity",
+        "T^university",
+        "A^otherPerson",
+        "f^company",
+        "C^company"
       ]
     }
   ]

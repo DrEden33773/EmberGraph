@@ -1,15 +1,15 @@
 use crate::{
   matching_ctx::MatchingCtx,
   schemas::*,
-  storage::AdvancedStorageAdapter,
+  storage::{AdvancedStorageAdapter, TestOnlyStorageAdapter},
   utils::{dyn_graph::DynGraph, parallel},
 };
 use hashbrown::HashMap;
 use instr_ops::InstrOperatorFactory;
 use itertools::Itertools;
 use parking_lot::Mutex;
-use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
-use std::{collections::VecDeque, sync::Arc};
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use std::sync::Arc;
 
 pub mod instr_ops;
 
@@ -18,6 +18,19 @@ pub struct ExecEngine<S: AdvancedStorageAdapter> {
   pub(crate) plan_data: PlanData,
   pub(crate) storage_adapter: Arc<S>,
   pub(crate) matching_ctx: Arc<Mutex<MatchingCtx>>,
+}
+
+impl<S: TestOnlyStorageAdapter> ExecEngine<S> {
+  pub async fn build_test_only_from_json(plan_json_content: &str) -> Self {
+    let plan_data: PlanData = serde_json::from_str(plan_json_content).unwrap();
+    let storage_adapter = Arc::new(S::async_init_test_only().await);
+    let matching_ctx = Arc::new(Mutex::new(MatchingCtx::new(&plan_data)));
+    Self {
+      plan_data,
+      storage_adapter,
+      matching_ctx,
+    }
+  }
 }
 
 impl<S: AdvancedStorageAdapter> ExecEngine<S> {
@@ -86,11 +99,11 @@ impl<S: AdvancedStorageAdapter> ExecEngine<S> {
       .await
       .into_iter()
       .filter(|v| !v.is_empty())
-      .collect::<Vec<_>>();
+      .collect_vec();
 
     fn preview_scale(unmerged: &[Vec<DynGraph>]) {
-      let len_vec = unmerged.iter().map(|v| v.len()).collect::<Vec<_>>();
-      println!("Scale(unmerged_results) = {len_vec:?}\n");
+      let len_vec = unmerged.iter().map(|v| v.len()).collect_vec();
+      println!("✨  Scale(unmerged_results) = {len_vec:?}\n");
     }
 
     preview_scale(&unmerged_results);
@@ -114,27 +127,21 @@ impl<S: AdvancedStorageAdapter> ExecEngine<S> {
     let plan_v_pat_cnt = Arc::new(plan_v_pat_cnt);
     let plan_e_pat_cnt = Arc::new(plan_e_pat_cnt);
 
-    let result = parallel::spawn_blocking(move || {
-      unmerged_results
-        .into_iter()
-        .multi_cartesian_product()
-        .map(|mut combination| {
-          let mut successors = combination.drain(1..).collect::<VecDeque<_>>();
-          let mut curr = combination.pop().unwrap();
-          while let Some(next) = successors.pop_front() {
-            let new = curr | next;
-            curr = new;
-          }
-          curr
-        })
-        .par_bridge()
-        .collect::<Vec<_>>()
-    })
-    .await;
+    // get all combinations of unmerged results
+    let combinations = unmerged_results
+      .into_iter()
+      .multi_cartesian_product()
+      .collect_vec();
 
     parallel::spawn_blocking(move || {
-      result
+      combinations
         .into_par_iter()
+        .map(|combination| {
+          combination
+            .into_iter()
+            .reduce(|acc, curr| acc | curr)
+            .unwrap()
+        })
         .filter(|graph| {
           Self::is_equivalent_to_pattern(graph, plan_v_pat_cnt.clone(), plan_e_pat_cnt.clone())
         })

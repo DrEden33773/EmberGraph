@@ -65,8 +65,8 @@
       "multi_ops": [],
       "target_var": "C^friend",
       "depend_on": [
-        "f^person",
-        "A^person"
+        "A^person",
+        "f^person"
       ]
     },
     {
@@ -77,8 +77,8 @@
       "multi_ops": [],
       "target_var": "f^friend",
       "depend_on": [
-        "C^friend",
         "A^person",
+        "C^friend",
         "f^person"
       ]
     },
@@ -88,8 +88,8 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^friend",
-        "f^person"
+        "f^person",
+        "f^friend"
       ],
       "target_var": "f",
       "depend_on": [

@@ -14,21 +14,21 @@ pub enum AttrType {
   String,
 }
 
-impl From<&AttrValue> for AttrType {
-  fn from(value: &AttrValue) -> Self {
-    match value {
-      AttrValue::Int(_) => AttrType::Int,
-      AttrValue::Float(_) => AttrType::Float,
-      AttrValue::String(_) => AttrType::String,
-    }
-  }
-}
-
 #[derive(Debug, Clone)]
 pub enum AttrValue {
   Int(i64),
   Float(f64),
   String(String),
+}
+
+impl AttrValue {
+  pub fn to_type(&self) -> AttrType {
+    match self {
+      Self::Int(_) => AttrType::Int,
+      Self::Float(_) => AttrType::Float,
+      Self::String(_) => AttrType::String,
+    }
+  }
 }
 
 impl FromStr for AttrValue {
@@ -163,7 +163,7 @@ impl PatternAttr {
     }
 
     // type
-    let _type = AttrType::from(&value);
+    let _type = value.to_type();
 
     Self {
       key,

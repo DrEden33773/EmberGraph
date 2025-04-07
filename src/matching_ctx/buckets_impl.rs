@@ -11,9 +11,8 @@ use crate::{
   },
 };
 use hashbrown::{HashMap, HashSet};
-use itertools::Itertools;
 use rayon::iter::{
-  IndexedParallelIterator, IntoParallelIterator, ParallelBridge, ParallelIterator,
+  IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator, ParallelIterator,
 };
 use std::sync::Arc;
 
@@ -88,17 +87,28 @@ impl ABucket {
 
     // iter: `matched` data_graphs
     for (idx, frontiers) in self.matched_with_frontiers.drain() {
-      let matched_dg = self.all_matched[idx].take().unwrap();
+      let matched_dg = Arc::new(self.all_matched[idx].take().unwrap());
 
       // iter: `frontier_vid` on current data_graph
       for frontier_vid in frontiers.iter() {
-        let mut is_frontier_connected = false;
+        #[cfg(feature = "trace_get_adj")]
+        use colored::Colorize;
+
+        #[cfg(feature = "trace_get_adj")]
+        println!(
+          "🧩  Current frontier vid: {}",
+          frontier_vid.to_string().green()
+        );
+
+        let mut is_frontier_formalized = false;
 
         // iter: `pattern_edges`
         for pat_e in pattern_es.iter() {
-          if matched_dg.get_e_pat_str_set().contains(pat_e.eid()) {
-            continue;
-          }
+          #[cfg(feature = "trace_get_adj")]
+          println!(
+            "  🔗  Current pattern edge: {}",
+            pat_e.eid().to_string().purple()
+          );
 
           let e_label = pat_e.label();
           let e_attr = pat_e.attr.as_ref();
@@ -124,6 +134,16 @@ impl ABucket {
               is_src_curr_pat: true,
             })
             .await;
+
+            #[cfg(feature = "trace_get_adj")]
+            println!(
+              "    ✨  Found {} edges that match: ({}: {})-[{}]->({})",
+              matched_data_es.len().to_string().yellow(),
+              frontier_vid.to_string().green(),
+              self.curr_pat_vid.as_str().cyan(),
+              pat_e.eid().purple(),
+              next_pat_vid.cyan()
+            );
 
             let is_matched_data_es_empty = matched_data_es.is_empty();
 
@@ -158,6 +178,16 @@ impl ABucket {
             })
             .await;
 
+            #[cfg(feature = "trace_get_adj")]
+            println!(
+              "    ✨  Found {} edges that match: ({}: {})<-[{}]-({})",
+              matched_data_es.len().to_string().yellow(),
+              frontier_vid.to_string().green(),
+              self.curr_pat_vid.as_str().cyan(),
+              pat_e.eid().purple(),
+              next_pat_vid.cyan()
+            );
+
             let is_matched_data_es_empty = matched_data_es.is_empty();
 
             // group by: next data_vertex
@@ -175,17 +205,18 @@ impl ABucket {
           };
 
           if is_matched_data_es_empty {
-            continue;
+            // no matched_data_es, just skip current `frontier_vid`
+            break;
           }
 
-          is_frontier_connected = true;
+          is_frontier_formalized = true;
 
           // build `expanding_graph`
           // note that each `next_data_vertex` holds a `expanding_graph`
-          for (key, edges) in next_vid_grouped_conn_es {
-            let mut expanding_graph = ExpandGraph::from(&matched_dg);
+          for (next_vid, edges) in next_vid_grouped_conn_es {
+            let mut expanding_graph = ExpandGraph::from(matched_dg.clone());
             let pat_strs = next_vid_grouped_conn_pat_strs
-              .remove(&key)
+              .remove(&next_vid)
               .unwrap_or_default();
 
             expanding_graph
@@ -198,8 +229,15 @@ impl ABucket {
           }
         }
 
-        if is_frontier_connected {
+        #[cfg(feature = "trace_get_adj")]
+        println!();
+
+        if is_frontier_formalized {
           connected_data_vids.insert(frontier_vid.to_string());
+        } else {
+          // if no edges are connected, this frontier is invalid, current matched_dg is invalid,
+          // so we just skip the matched_dg
+          break;
         }
       }
     }
@@ -228,6 +266,7 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   ctx: LoadWithCondCtx<'a, S>,
 ) -> Vec<DataEdge> {
   use futures::{StreamExt, stream};
+  use itertools::Itertools;
 
   let next_pat_vid = if ctx.is_src_curr_pat {
     ctx.curr_pat_e.dst_vid()
@@ -264,7 +303,7 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   let filtered_edges = potential_edges
     .into_iter()
     .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
-    .collect::<Vec<_>>();
+    .collect_vec();
 
   // process each edge in parallel
   stream::iter(filtered_edges)
@@ -287,7 +326,7 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
         if satisfies { Some(e) } else { None }
       }
     })
-    .buffer_unordered(num_cpus::get() * 4)
+    .buffer_unordered(num_cpus::get() / 2)
     .filter_map(|r| async move { r })
     .collect::<Vec<_>>()
     .await
@@ -298,6 +337,7 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   ctx: LoadWithCondCtx<'a, S>,
 ) -> Vec<DataEdge> {
   use futures::future;
+  use itertools::Itertools;
 
   const BATCH_SIZE: usize = 32;
 
@@ -336,13 +376,13 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   let filtered_edges = potential_edges
     .into_iter()
     .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
-    .collect::<Vec<_>>();
+    .collect_vec();
 
   // split into chunks for parallel processing
   let chunks = filtered_edges
     .chunks(BATCH_SIZE)
     .map(Vec::from)
-    .collect::<Vec<_>>();
+    .collect_vec();
 
   // process each chunk in parallel
   let batch_futures = chunks.into_iter().map(|chunk| async move {
@@ -368,7 +408,7 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   let batch_results = future::join_all(batch_futures).await;
 
   // flatten the results into a single vector
-  batch_results.into_iter().flatten().collect::<Vec<_>>()
+  batch_results.into_iter().flatten().collect_vec()
 }
 
 impl CBucket {
@@ -472,21 +512,24 @@ impl TBucket {
     left_group: Vec<ExpandGraph>,
     right_group: Vec<ExpandGraph>,
   ) -> Vec<ExpandGraph> {
-    // collect all combinations via `cartesian_product`
-    let combinations = parallel::spawn_blocking(move || {
-      left_group
-        .into_iter()
-        .cartesian_product(right_group)
-        .par_bridge()
-        .collect::<Vec<_>>()
-    })
-    .await;
+    if left_group.is_empty() || right_group.is_empty() {
+      return Vec::new();
+    }
 
-    // parallelize the process: union_then_intersect_on_connective_v
     parallel::spawn_blocking(move || {
-      combinations
+      let right_group = Arc::new(right_group);
+
+      left_group
         .into_par_iter()
-        .flat_map(|(outer, inner)| union_then_intersect_on_connective_v(outer, inner))
+        .flat_map(|left| {
+          right_group
+            .clone()
+            .par_iter()
+            .flat_map(move |right| {
+              union_then_intersect_on_connective_v(left.clone(), right.clone())
+            })
+            .collect::<Vec<_>>()
+        })
         .collect::<Vec<_>>()
     })
     .await

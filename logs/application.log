@@ -1,99 +1,319 @@
-   0.000140800s  INFO main ThreadId(01) ember_sgm_backend: Application started.
-   0.001565800s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: neo4rs::pool: creating connection pool with max size 20    
-   0.001621100s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: ember_sgm_backend::utils: Connecting to Neo4j database ...  ✅ 0.18ms
+   0.000982062s  INFO main time_async_with_desc: neo4rs::pool: creating connection pool with max size 12    
+   0.001589961s  INFO main time_async_with_desc: ember_graph::utils: Connecting to Neo4j database ... ☑️  0.67ms
 
-   0.003013600s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: neo4rs::pool: creating new connection...    
-   2.039240600s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: ember_sgm_backend::utils: >>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid  ✅ 2036.33ms
+   0.002044650s  INFO main time_async_with_desc: neo4rs::pool: creating new connection...    
+   0.015694005s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (v: Tag)
+		WHERE v.name = "Patrick_Vieira"
+      RETURN
+        properties(v) as props,
+        elementId(v) as vid ☑️  13.69ms
 
-   2.051004000s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid " name=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid "}: ember_sgm_backend::utils: >>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid  ✅ 3.82ms
+   0.025100395s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (src)-[e: hasType]->(dst: Tagclass)
+		WHERE elementId(src) = '4:653b4286-de74-43f3-b94a-dcedbed26638:11561'
+      RETURN
+        elementId(e) AS eid,
+        properties(e) AS props,
+        elementId(src) AS src_vid,
+        elementId(dst) AS dst_vid ☑️  2.61ms
 
-   0.000126200s  INFO main ThreadId(01) ember_sgm_backend: Application started.
+   0.027265097s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (v)
+		WHERE elementId(v) = '4:653b4286-de74-43f3-b94a-dcedbed26638:17'
+      RETURN
+        properties(v) as props,
+        labels(v) as v_label ☑️  1.18ms
 
-   0.001493100s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: neo4rs::pool: creating connection pool with max size 20    
-   0.001544100s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: ember_sgm_backend::utils: Connecting to Neo4j database ...  ✅ 0.15ms
+   0.029296815s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (src: Comment)-[e: hasTag]->(dst)
+		WHERE elementId(dst) = '4:653b4286-de74-43f3-b94a-dcedbed26638:11561'
+      RETURN
+        elementId(e) AS eid,
+        properties(e) AS props,
+        elementId(src) AS src_vid,
+        elementId(dst) AS dst_vid ☑️  1.37ms
 
-   0.003195200s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: neo4rs::pool: creating new connection...    
-   2.044383800s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: ember_sgm_backend::utils: >>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid  ✅ 2041.26ms
+   0.030374861s  INFO main time_async_with_desc: neo4rs::pool: creating new connection...    
+   0.032456417s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (v)
+		WHERE elementId(v) = '4:653b4286-de74-43f3-b94a-dcedbed26638:5253'
+      RETURN
+        properties(v) as props,
+        labels(v) as v_label ☑️  2.16ms
 
-   2.054579100s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid " name=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid "}: ember_sgm_backend::utils: >>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid  ✅ 2.63ms
+   0.037252258s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (v)
+		WHERE elementId(v) = '4:653b4286-de74-43f3-b94a-dcedbed26638:5249'
+      RETURN
+        properties(v) as props,
+        labels(v) as v_label ☑️  6.90ms
 
-   0.000116500s  INFO main ThreadId(01) ember_sgm_backend: Application started.
+   0.039970597s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (src: Post)-[e: hasTag]->(dst)
+		WHERE elementId(dst) = '4:653b4286-de74-43f3-b94a-dcedbed26638:11561'
+      RETURN
+        elementId(e) AS eid,
+        properties(e) AS props,
+        elementId(src) AS src_vid,
+        elementId(dst) AS dst_vid ☑️  1.88ms
 
-   0.001310200s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: neo4rs::pool: creating connection pool with max size 20    
-   0.001368600s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: ember_sgm_backend::utils: Connecting to Neo4j database ...  ✅ 0.15ms
+   0.042609431s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (v)
+		WHERE elementId(v) = '4:653b4286-de74-43f3-b94a-dcedbed26638:16296'
+      RETURN
+        properties(v) as props,
+        labels(v) as v_label ☑️  1.81ms
 
-   0.002496200s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: neo4rs::pool: creating new connection...    
-   2.058190100s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: ember_sgm_backend::utils: >>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid  ✅ 2055.76ms
+   0.045098328s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (v: Tagclass)
+      RETURN
+        properties(v) as props,
+        elementId(v) as vid ☑️  1.58ms
 
-   2.067846600s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid " name=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid "}: ember_sgm_backend::utils: >>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid  ✅ 2.77ms
+   0.049376463s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (v: Comment)
+      RETURN
+        properties(v) as props,
+        elementId(v) as vid ☑️  1.28ms
 
-   0.000118700s  INFO main ThreadId(01) ember_sgm_backend: Application started.
+   0.110865732s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (v: Post)
+      RETURN
+        properties(v) as props,
+        elementId(v) as vid ☑️  1.83ms
 
-   0.001727300s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: neo4rs::pool: creating connection pool with max size 20    
-   0.003525700s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: neo4rs::pool: creating new connection...    
-   0.000149700s  INFO main ThreadId(01) ember_sgm_backend: Application started.
+   0.053149655s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ?
+      AND EXISTS (
+        SELECT * FROM vertex_attribute 
+        WHERE vid = v.vid AND key = ?
+        AND type = 'string' AND value = ?
+      ) ☑️  48.86ms
 
-   0.002284200s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: neo4rs::pool: creating connection pool with max size 20    
-   0.002433200s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: ember_sgm_backend::utils: Connecting to Neo4j database ...  ✅ 0.28ms
+   0.058894655s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, ea.key, ea.value, ea.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute ea ON e.eid = ea.eid
+      JOIN db_vertex v ON e.dst_vid = v.vid
+      WHERE e.src_vid = ? AND e.label = ? AND v.label = ? ☑️  5.23ms
 
-   0.004281900s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: neo4rs::pool: creating new connection...    
-   2.111135300s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: ember_sgm_backend::utils: >>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid  ✅ 2107.00ms
+   0.059521924s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?
+       ☑️  0.48ms
 
-  26.473224000s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid " name=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid "}: ember_sgm_backend::utils: >>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid  ✅ 2134.48ms
+   0.060088096s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, ea.key, ea.value, ea.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute ea ON e.eid = ea.eid
+      JOIN db_vertex v ON e.src_vid = v.vid
+      WHERE e.dst_vid = ? AND e.label = ? AND v.label = ? ☑️  0.43ms
 
-   0.000137300s  INFO main ThreadId(01) ember_sgm_backend: Application started.
+   0.060582091s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?
+       ☑️  0.34ms
 
-   0.001881200s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: neo4rs::pool: creating connection pool with max size 20    
-   0.001929900s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: ember_sgm_backend::utils: Connecting to Neo4j database ...  ✅ 0.17ms
+   0.060727400s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?
+       ☑️  0.42ms
 
-   0.003637900s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: neo4rs::pool: creating new connection...    
-   2.030776900s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: ember_sgm_backend::utils: >>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid  ✅ 2027.22ms
+   0.061124974s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, ea.key, ea.value, ea.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute ea ON e.eid = ea.eid
+      JOIN db_vertex v ON e.src_vid = v.vid
+      WHERE e.dst_vid = ? AND e.label = ? AND v.label = ? ☑️  0.24ms
 
-   2.039870500s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid " name=">>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid "}: ember_sgm_backend::utils: >>> MATCH (src)-[e:knows]->(dst) WHERE elementId(src) = '4:46f7e6a9-7f06-4e29-b34c-c5d0476ff97e:760' RETURN elementId(e) AS eid, properties(e) AS props, elementId(src) AS src_vid, elementId(dst) AS dst_vid  ✅ 2.08ms
+   0.061513042s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?
+       ☑️  0.28ms
 
-   0.000117300s  INFO main ThreadId(01) ember_sgm_backend: Application started.
+   0.062978242s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ? ☑️  1.27ms
 
-   0.002691000s  INFO main ThreadId(01) time_async_with_desc{desc="Connecting to Neo4j database ... " name="Connecting to Neo4j database ... "}: neo4rs::pool: creating connection pool with max size 20    
-   0.004712800s  INFO main ThreadId(01) time_async_with_desc{desc=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid " name=">>> MATCH (v:Person) WHERE v.id = 6597069766786 RETURN properties(v) as props, elementId(v) as vid "}: neo4rs::pool: creating new connection...    
-   0.001829800s  INFO main ThreadId(01) neo4rs::pool: creating connection pool with max size 20    
-   0.003193700s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   2.072193800s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   2.072319600s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   2.072458200s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   2.072524900s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   2.072726400s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   2.072957000s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   2.073119300s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.158473800s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.158556700s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.158586100s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.158615700s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.158676300s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.158727300s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.158771800s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.158820800s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.159086800s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.159155700s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.159204400s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.159242500s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   0.002862100s  INFO main ThreadId(01) neo4rs::pool: creating connection pool with max size 20    
-   0.004912900s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   2.074005300s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   2.074082400s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   2.074153500s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   2.074208900s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   2.074250700s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   2.074313900s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   2.074378600s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.139388300s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.139483900s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.139989100s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.140206500s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.140399200s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.140499600s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.140764300s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.140894700s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.140987100s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.141088500s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.141314700s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
-   4.141518800s  INFO main ThreadId(01) neo4rs::pool: creating new connection...    
+   0.131678314s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ? ☑️  67.26ms
+
+   0.446572900s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ? ☑️  247.77ms
+
+   0.051089733s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ?
+      AND EXISTS (
+        SELECT * FROM vertex_attribute 
+        WHERE vid = v.vid AND key = ?
+        AND type = 'string' AND value = ?
+      ) ☑️  47.54ms
+
+   0.056813357s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, ea.key, ea.value, ea.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute ea ON e.eid = ea.eid
+      JOIN db_vertex v ON e.dst_vid = v.vid
+      WHERE e.src_vid = ? AND e.label = ? AND v.label = ? ☑️  5.33ms
+
+   0.057312997s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?
+       ☑️  0.32ms
+
+   0.057809130s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, ea.key, ea.value, ea.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute ea ON e.eid = ea.eid
+      JOIN db_vertex v ON e.src_vid = v.vid
+      WHERE e.dst_vid = ? AND e.label = ? AND v.label = ? ☑️  0.36ms
+
+   0.058216976s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?
+       ☑️  0.30ms
+
+   0.058334599s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?
+       ☑️  0.36ms
+
+   0.058851861s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, ea.key, ea.value, ea.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute ea ON e.eid = ea.eid
+      JOIN db_vertex v ON e.src_vid = v.vid
+      WHERE e.dst_vid = ? AND e.label = ? AND v.label = ? ☑️  0.39ms
+
+   0.059220301s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?
+       ☑️  0.26ms
+
+   0.060893963s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ? ☑️  1.45ms
+
+   0.132362627s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ? ☑️  70.03ms
+
+   0.458241979s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ? ☑️  252.13ms
+
+   0.053005238s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ?
+      AND EXISTS (
+        SELECT * FROM vertex_attribute 
+        WHERE vid = v.vid AND key = ?
+        AND type = 'string' AND value = ?
+      ) ☑️  47.80ms
+
+   0.058457981s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, ea.key, ea.value, ea.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute ea ON e.eid = ea.eid
+      JOIN db_vertex v ON e.dst_vid = v.vid
+      WHERE e.src_vid = ? AND e.label = ? AND v.label = ? ☑️  5.03ms
+
+   0.058853012s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?
+       ☑️  0.26ms
+
+   0.059328778s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, ea.key, ea.value, ea.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute ea ON e.eid = ea.eid
+      JOIN db_vertex v ON e.src_vid = v.vid
+      WHERE e.dst_vid = ? AND e.label = ? AND v.label = ? ☑️  0.36ms
+
+   0.059691938s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?
+       ☑️  0.26ms
+
+   0.059793640s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?
+       ☑️  0.31ms
+
+   0.060328545s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT e.eid, e.label, e.src_vid, e.dst_vid, ea.key, ea.value, ea.type
+      FROM db_edge e
+      LEFT JOIN edge_attribute ea ON e.eid = ea.eid
+      JOIN db_vertex v ON e.src_vid = v.vid
+      WHERE e.dst_vid = ? AND e.label = ? AND v.label = ? ☑️  0.39ms
+
+   0.060788466s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.vid = ?
+       ☑️  0.35ms
+
+   0.062559992s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ? ☑️  1.52ms
+
+   0.130335745s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ? ☑️  66.38ms
+
+   0.406560963s  INFO main time_async_with_desc: ember_graph::utils: 
+      SELECT v.vid, v.label, a.key, a.value, a.type
+      FROM db_vertex v
+      LEFT JOIN vertex_attribute a ON v.vid = a.vid
+      WHERE v.label = ? ☑️  216.35ms
+

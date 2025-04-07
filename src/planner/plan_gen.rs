@@ -6,6 +6,7 @@ use crate::{
   utils::dyn_graph::DynGraph,
 };
 use hashbrown::{HashMap, HashSet};
+use itertools::Itertools;
 
 #[derive(Debug, Clone)]
 pub struct PlanGenerator {
@@ -88,7 +89,7 @@ impl PlanGenerator {
         let multi_ops = operands
           .iter()
           .map(|vid| VarPrefix::DbQueryTarget.with(vid))
-          .collect::<Vec<_>>();
+          .collect_vec();
         // Intersect(Aw, Ax, ..., Ay, Az) -> Tx
         instructions.push(
           InstructionBuilder::new(&vid, InstructionType::Intersect)
@@ -133,7 +134,7 @@ impl PlanGenerator {
     let embedding = f_set
       .iter()
       .map(|vid| VarPrefix::EnumerateTarget.with(vid))
-      .collect::<Vec<_>>();
+      .collect_vec();
     instructions.push(
       InstructionBuilder::new("", InstructionType::Report)
         .multi_ops(embedding)

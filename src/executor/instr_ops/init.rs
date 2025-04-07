@@ -26,20 +26,23 @@ impl<S: StorageAdapter> InitOperator<S> {
     // load vertices
     let matched_vs = self.storage_adapter.load_v(label, attr).await;
 
-    // filter-out if the vertex has already been expanded
-    let unexpanded_matched_vs = {
-      let ctx = self.ctx.lock();
-      matched_vs
-        .into_iter()
-        .filter(|data_v| !ctx.expanded_data_vids.contains(&data_v.vid))
-        .collect::<Vec<_>>()
-    };
+    #[cfg(feature = "trace_init")]
+    {
+      use crate::schemas::VBase;
+      use colored::Colorize;
+
+      println!(
+        "✨  Found {} vertices that match: ({})\n",
+        matched_vs.len().to_string().yellow(),
+        pattern_v.vid().cyan()
+      );
+    }
 
     // prepare for updating the block
     let pattern: Arc<str> = pattern_v.vid.as_str().into();
     let target_var: Arc<str> = instr.target_var.as_str().into();
     let pre = parallel::spawn_blocking(move || {
-      unexpanded_matched_vs
+      matched_vs
         .into_par_iter()
         .map(|data_v| {
           let frontier_vid = data_v.vid.clone();

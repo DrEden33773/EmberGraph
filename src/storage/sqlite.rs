@@ -1,11 +1,17 @@
-use super::{AdvancedStorageAdapter, AsyncDefault, StorageAdapter};
+use super::{
+  AdvancedStorageAdapter, AsyncDefault, StorageAdapter, TestOnlyStorageAdapter,
+  WritableStorageAdapter,
+};
 use crate::{
   schemas::{AttrType, AttrValue, DataEdge, DataVertex, LabelRef, PatternAttr, VidRef},
   utils::time_async_with_desc,
 };
 use hashbrown::HashMap;
 use project_root::get_project_root;
-use sqlx::{Execute, Row, SqlitePool, sqlite::SqliteRow};
+use sqlx::{
+  Execute, Row, SqlitePool,
+  sqlite::{SqliteConnectOptions, SqliteJournalMode, SqliteRow, SqliteSynchronous},
+};
 use std::env;
 
 #[derive(Clone)]
@@ -18,13 +24,16 @@ impl AsyncDefault for SqliteStorageAdapter {
     let db_name = env::var("SQLITE_DB_PATH").unwrap();
     let root = get_project_root().unwrap();
     let db_path = root.join(db_name);
-    let url = format!("sqlite://{}", db_path.display());
 
-    let pool = sqlx::SqlitePool::connect(&url)
-      .await
-      .expect("❌  Failed to connect to SQLite database");
+    let pool = sqlx::SqlitePool::connect_with(
+      SqliteConnectOptions::new()
+        .filename(&db_path)
+        .create_if_missing(true)
+        .immutable(true),
+    )
+    .await
+    .expect("❌ Failed to connect to SQLite database");
 
-    // create schema if it doesn't exist
     Self::init_schema(&pool).await;
 
     Self { pool }
@@ -32,15 +41,47 @@ impl AsyncDefault for SqliteStorageAdapter {
 }
 
 impl SqliteStorageAdapter {
+  async fn clear_tables(pool: &SqlitePool) {
+    let queries = vec![
+      "\n\t\tDELETE FROM db_vertex",
+      "\n\t\tDELETE FROM db_edge",
+      "\n\t\tDELETE FROM vertex_attribute",
+      "\n\t\tDELETE FROM edge_attribute",
+      // delete `auto_increment` values
+      "\n\t\tDELETE FROM sqlite_sequence WHERE name = 'vertex_attribute'",
+      "\n\t\tDELETE FROM sqlite_sequence WHERE name = 'edge_attribute'",
+    ];
+
+    for query in queries {
+      let q = sqlx::query(query);
+      time_async_with_desc(q.execute(pool), query.to_string())
+        .await
+        .unwrap();
+    }
+
+    // reset auto increment values
+    let reset_queries = vec![
+      "\n\t\tUPDATE sqlite_sequence SET seq = 0 WHERE name = 'vertex_attribute'",
+      "\n\t\tUPDATE sqlite_sequence SET seq = 0 WHERE name = 'edge_attribute'",
+    ];
+
+    for query in reset_queries {
+      let q = sqlx::query(query);
+      time_async_with_desc(q.execute(pool), query.to_string())
+        .await
+        .unwrap();
+    }
+  }
+
   async fn init_schema(pool: &SqlitePool) {
     // create db_vertex table
     sqlx::query(
       r#"
       CREATE TABLE IF NOT EXISTS db_vertex (
-        vid TEXT PRIMARY KEY,
-        label TEXT NOT NULL
+        vid VARCHAR PRIMARY KEY,
+        label VARCHAR NOT NULL
       );
-      CREATE INDEX IF NOT EXISTS idx_vertex_label ON db_vertex(label);
+      CREATE INDEX IF NOT EXISTS ix_db_vertex_label ON db_vertex(label);
       "#,
     )
     .execute(pool)
@@ -51,14 +92,14 @@ impl SqliteStorageAdapter {
     sqlx::query(
       r#"
       CREATE TABLE IF NOT EXISTS db_edge (
-        eid TEXT PRIMARY KEY,
-        label TEXT NOT NULL,
-        src_vid TEXT NOT NULL,
-        dst_vid TEXT NOT NULL
+        eid VARCHAR PRIMARY KEY,
+        label VARCHAR NOT NULL,
+        src_vid VARCHAR NOT NULL,
+        dst_vid VARCHAR NOT NULL
       );
-      CREATE INDEX IF NOT EXISTS idx_edge_label ON db_edge(label);
-      CREATE INDEX IF NOT EXISTS idx_edge_src_vid ON db_edge(src_vid);
-      CREATE INDEX IF NOT EXISTS idx_edge_dst_vid ON db_edge(dst_vid);
+      CREATE INDEX IF NOT EXISTS ix_db_edge_label ON db_edge(label);
+      CREATE INDEX IF NOT EXISTS ix_db_edge_src_vid ON db_edge(src_vid);
+      CREATE INDEX IF NOT EXISTS ix_db_edge_dst_vid ON db_edge(dst_vid);
       "#,
     )
     .execute(pool)
@@ -70,13 +111,13 @@ impl SqliteStorageAdapter {
       r#"
       CREATE TABLE IF NOT EXISTS vertex_attribute (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        vid TEXT NOT NULL,
-        key TEXT NOT NULL,
-        value TEXT NOT NULL,
-        type TEXT NOT NULL
+        vid VARCHAR NOT NULL,
+        key VARCHAR NOT NULL,
+        value VARCHAR NOT NULL,
+        type VARCHAR NOT NULL
       );
-      CREATE INDEX IF NOT EXISTS idx_vertex_attr_vid ON vertex_attribute(vid);
-      CREATE INDEX IF NOT EXISTS idx_vertex_attr_key ON vertex_attribute(key);
+      CREATE INDEX IF NOT EXISTS ix_vertex_attribute_vid ON vertex_attribute(vid);
+      CREATE INDEX IF NOT EXISTS ix_vertex_attribute_key ON vertex_attribute(key);
       "#,
     )
     .execute(pool)
@@ -88,13 +129,13 @@ impl SqliteStorageAdapter {
       r#"
       CREATE TABLE IF NOT EXISTS edge_attribute (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        eid TEXT NOT NULL,
-        key TEXT NOT NULL,
-        value TEXT NOT NULL,
-        type TEXT NOT NULL
+        eid VARCHAR NOT NULL,
+        key VARCHAR NOT NULL,
+        value VARCHAR NOT NULL,
+        type VARCHAR NOT NULL
       );
-      CREATE INDEX IF NOT EXISTS idx_edge_attr_eid ON edge_attribute(eid);
-      CREATE INDEX IF NOT EXISTS idx_edge_attr_key ON edge_attribute(key);
+      CREATE INDEX IF NOT EXISTS ix_edge_attribute_eid ON edge_attribute(eid);
+      CREATE INDEX IF NOT EXISTS ix_edge_attribute_key ON edge_attribute(key);
       "#,
     )
     .execute(pool)
@@ -128,7 +169,7 @@ impl SqliteStorageAdapter {
     }
 
     // collect rows
-    let sql = query.sql().trim();
+    let sql = query.sql();
     let rows = match time_async_with_desc(query.fetch_all(&self.pool), sql.to_string()).await {
       Ok(rows) => rows,
       Err(_) => return vec![],
@@ -163,7 +204,7 @@ impl SqliteStorageAdapter {
     }
 
     // collect rows
-    let sql = query.sql().trim();
+    let sql = query.sql();
     let rows = match time_async_with_desc(query.fetch_all(&self.pool), sql.to_string()).await {
       Ok(rows) => rows,
       Err(_) => return vec![],
@@ -306,7 +347,7 @@ impl StorageAdapter for SqliteStorageAdapter {
       "#,
     )
     .bind(vid);
-    let sql = query.sql().trim();
+    let sql = query.sql();
 
     let rows = time_async_with_desc(query.fetch_all(&self.pool), sql.to_string())
       .await
@@ -450,7 +491,7 @@ impl SqliteStorageAdapter {
     }
 
     // collect rows
-    let sql = query.sql().trim();
+    let sql = query.sql();
     let rows = match time_async_with_desc(query.fetch_all(&self.pool), sql.to_string()).await {
       Ok(rows) => rows,
       Err(_) => return vec![],
@@ -513,5 +554,154 @@ impl AdvancedStorageAdapter for SqliteStorageAdapter {
     self
       .query_edge_with_attr_and_next_v_attr_then_collect(e_attr, src_v_attr, query_str, params)
       .await
+  }
+}
+
+impl WritableStorageAdapter for SqliteStorageAdapter {
+  async fn add_v(&self, v: DataVertex) -> Result<(), Box<dyn std::error::Error>> {
+    let mut tx = self.pool.begin().await?;
+
+    let query_str = "
+      INSERT INTO db_vertex (vid, label) VALUES (?, ?)";
+    let query = sqlx::query(query_str).bind(&v.vid).bind(&v.label);
+    let sql = query.sql();
+
+    match time_async_with_desc(query.execute(&mut *tx), sql.to_string()).await {
+      Ok(result) => println!("💾  Inserted {} vertex", result.rows_affected()),
+      Err(e) => {
+        eprintln!("❌  Error inserting vertex: {}", e);
+        return Err(Box::new(e));
+      }
+    };
+
+    for (key, value) in &v.attrs {
+      let attr_query = sqlx::query(
+        "
+      INSERT INTO vertex_attribute (vid, key, value, type) VALUES (?, ?, ?, ?)",
+      )
+      .bind(&v.vid)
+      .bind(key)
+      .bind(value.to_string())
+      .bind(value.to_type().to_string());
+      let sql = attr_query.sql();
+
+      match time_async_with_desc(attr_query.execute(&mut *tx), sql.to_string()).await {
+        Ok(result) => println!("💾  Inserted {} vertex_attribute", result.rows_affected()),
+        Err(e) => {
+          eprintln!("❌  Error inserting vertex attribute: {}", e);
+          return Err(Box::new(e));
+        }
+      }
+    }
+
+    tx.commit().await?;
+
+    Ok(())
+  }
+
+  async fn add_e(&self, e: DataEdge) -> Result<(), Box<dyn std::error::Error>> {
+    let mut tx = self.pool.begin().await?;
+
+    let query_str = "
+      INSERT INTO db_edge (eid, label, src_vid, dst_vid) VALUES (?, ?, ?, ?)";
+    let query = sqlx::query(query_str)
+      .bind(&e.eid)
+      .bind(&e.label)
+      .bind(&e.src_vid)
+      .bind(&e.dst_vid);
+    let sql = query.sql();
+
+    match time_async_with_desc(query.execute(&mut *tx), sql.to_string()).await {
+      Ok(result) => println!("💾  Inserted {} edge", result.rows_affected()),
+      Err(e) => {
+        eprintln!("❌  Error inserting edge: {}", e);
+        return Err(Box::new(e));
+      }
+    };
+
+    for (key, value) in &e.attrs {
+      let attr_query = sqlx::query(
+        "
+      INSERT INTO edge_attribute (eid, key, value, type) VALUES (?, ?, ?, ?)",
+      )
+      .bind(&e.eid)
+      .bind(key)
+      .bind(value.to_string())
+      .bind(value.to_type().to_string());
+      let sql = attr_query.sql();
+
+      match time_async_with_desc(attr_query.execute(&mut *tx), sql.to_string()).await {
+        Ok(result) => println!("💾  Inserted {} edge_attribute", result.rows_affected()),
+        Err(e) => {
+          eprintln!("❌  Error inserting edge attribute: {}", e);
+          return Err(Box::new(e));
+        }
+      }
+    }
+
+    tx.commit().await?;
+
+    Ok(())
+  }
+}
+
+impl TestOnlyStorageAdapter for SqliteStorageAdapter {
+  async fn async_init_test_only() -> Self {
+    let db_name = env::var("TEST_ONLY_SQLITE_DB_PATH").unwrap();
+    // Create an absolute path to the current directory
+    let root = get_project_root().unwrap();
+    let db_path = root.join(db_name);
+    println!("🔍  Using database at: {}\n", db_path.display());
+
+    // Delete existing file if it exists to ensure we start fresh
+    if db_path.exists() {
+      std::fs::remove_file(&db_path).expect("Failed to remove existing database file");
+      println!("🗑️  Removed existing database file\n");
+    }
+
+    let pool = sqlx::SqlitePool::connect_with(
+      SqliteConnectOptions::new()
+        .filename(&db_path)
+        .create_if_missing(true)
+        .journal_mode(SqliteJournalMode::Truncate)
+        .synchronous(SqliteSynchronous::Off),
+    )
+    .await
+    .expect("❌ Failed to connect to SQLite database");
+
+    Self::init_schema(&pool).await;
+    Self::clear_tables(&pool).await;
+
+    Self { pool }
+  }
+}
+
+impl SqliteStorageAdapter {
+  pub async fn count_v(&self) -> usize {
+    let query = sqlx::query(
+      "
+      SELECT COUNT(*) FROM db_vertex",
+    );
+    let sql = query.sql();
+
+    let row = time_async_with_desc(query.fetch_one(&self.pool), sql.to_string())
+      .await
+      .unwrap();
+
+    row.get::<i64, _>(0) as usize
+  }
+
+  pub async fn count_e(&self) -> usize {
+    let query = sqlx::query(
+      "
+      SELECT COUNT(*) FROM db_edge",
+    );
+    let sql = query.sql();
+
+    let row = time_async_with_desc(query.fetch_one(&self.pool), sql.to_string())
+      .await
+      .unwrap();
+
+    row.get::<i64, _>(0) as usize
   }
 }

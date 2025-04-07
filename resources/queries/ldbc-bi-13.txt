@@ -1,0 +1,17 @@
+5 4 4 0
+
+post Post
+zombie Person
+city City
+country Country
+likerPerson Person
+
+a post zombie hasCreator
+b zombie city isLocatedIn
+c city country isPartOf
+d likerPerson post likes
+
+country name ='China'
+post creationDate <1266275323907
+zombie creationDate <1262778975430
+likerPerson creationDate <1281656675810

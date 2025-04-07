@@ -5,6 +5,7 @@ description = "Data importer of `ember-graph`, will generate statistics data for
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "aiosqlite>=0.21.0",
     "colorama>=0.4.6",
     "polars>=1.26.0",
     "sqlmodel>=0.0.24",

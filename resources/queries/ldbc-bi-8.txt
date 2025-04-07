@@ -1,0 +1,14 @@
+4 4 2 0
+
+comment Comment
+tag Tag
+person Person
+friend Person
+
+a comment tag hasTag
+b comment person hasCreator
+c person tag hasInterest
+d person friend knows
+
+comment creationDate >1289146646222
+tag name ='Theodore_Roosevelt'

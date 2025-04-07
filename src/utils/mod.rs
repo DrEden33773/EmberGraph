@@ -15,7 +15,7 @@ pub async fn time_async<F: Future<Output = O>, O>(future: F) -> (O, f64) {
 #[cfg(not(feature = "use_tracing"))]
 pub async fn time_async_with_desc<F: Future<Output = O>, O>(future: F, _desc: String) -> O {
   let (result, _elapsed) = time_async(future).await;
-  // println!("{} ✅ {_elapsed:.2}ms\n", _desc);
+  // println!("{} ☑️  {_elapsed:.2}ms\n", _desc);
   result
 }
 
@@ -23,9 +23,9 @@ pub async fn time_async_with_desc<F: Future<Output = O>, O>(future: F, _desc: St
 use tracing::{info, instrument};
 
 #[cfg(feature = "use_tracing")]
-#[instrument(skip(future), fields(name = desc))]
+#[instrument(skip(future, desc))]
 pub async fn time_async_with_desc<F: Future<Output = O>, O>(future: F, desc: String) -> O {
   let (result, elapsed) = time_async(future).await;
-  info!("{} ✅ {elapsed:.2}ms\n", desc);
+  info!("{} ☑️  {elapsed:.2}ms\n", desc);
   result
 }

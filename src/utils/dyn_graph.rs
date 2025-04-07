@@ -309,11 +309,11 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
 
 impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   #[inline]
-  pub fn get_v_from_vid(&self, vid: VidRef) -> Option<&VType> {
+  pub fn view_v_from_vid(&self, vid: VidRef) -> Option<&VType> {
     self.v_entities.get(vid)
   }
   #[inline]
-  pub fn get_e_from_eid(&self, eid: EidRef) -> Option<&EType> {
+  pub fn view_e_from_eid(&self, eid: EidRef) -> Option<&EType> {
     self.e_entities.get(eid)
   }
 
@@ -330,46 +330,22 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   }
 
   #[inline]
-  pub fn get_vid_set(&self) -> HashSet<Vid> {
-    self.v_entities.keys().cloned().collect()
+  pub fn view_vids(&self) -> Vec<VidRef<'_>> {
+    self.v_entities.keys().map(String::as_str).collect()
   }
   #[inline]
-  pub fn get_eid_set(&self) -> HashSet<Eid> {
-    self.e_entities.keys().cloned().collect()
+  pub fn view_eids(&self) -> Vec<EidRef<'_>> {
+    self.e_entities.keys().map(String::as_str).collect()
   }
   #[inline]
-  pub fn get_v_entities(&self) -> Vec<VType> {
-    self.v_entities.values().cloned().collect()
+  pub fn view_v_entities(&self) -> Vec<&VType> {
+    self.v_entities.values().collect()
   }
   #[inline]
-  pub fn get_e_entities(&self) -> Vec<EType> {
-    self.e_entities.values().cloned().collect()
+  pub fn view_e_entities(&self) -> Vec<&EType> {
+    self.e_entities.values().collect()
   }
-  #[inline]
-  pub fn get_v_pat_str_set(&self) -> HashSet<String> {
-    self.vid_2_pattern.values().cloned().collect()
-  }
-  #[inline]
-  pub fn get_e_pat_str_set(&self) -> HashSet<String> {
-    self.eid_2_pattern.values().cloned().collect()
-  }
-  #[inline]
-  pub fn get_all_pat_str_set(&self) -> HashSet<String> {
-    let mut res = self.get_v_pat_str_set();
-    res.extend(self.get_e_pat_str_set());
-    res
-  }
-  #[inline]
-  pub fn get_v_pattern_pairs(&self) -> Vec<(VType, String)> {
-    self
-      .v_entities
-      .iter()
-      .map(|(vid, v_entity)| {
-        let pattern = self.vid_2_pattern[vid].clone();
-        (v_entity.clone(), pattern)
-      })
-      .collect()
-  }
+
   #[inline]
   pub fn drain_v_pattern_pairs(&mut self) -> Vec<(VType, String)> {
     self
@@ -378,17 +354,6 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
       .map(|(vid, v_entity)| {
         let pattern = self.vid_2_pattern.remove(&vid).unwrap();
         (v_entity, pattern)
-      })
-      .collect()
-  }
-  #[inline]
-  pub fn get_e_pattern_pairs(&self) -> Vec<(EType, String)> {
-    self
-      .e_entities
-      .iter()
-      .map(|(eid, e_entity)| {
-        let pattern = self.eid_2_pattern[eid].clone();
-        (e_entity.clone(), pattern)
       })
       .collect()
   }
@@ -403,14 +368,7 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
       })
       .collect()
   }
-  #[inline]
-  pub fn get_v_patterns(&self) -> HashSet<String> {
-    self.vid_2_pattern.values().cloned().collect()
-  }
-  #[inline]
-  pub fn get_e_patterns(&self) -> HashSet<String> {
-    self.eid_2_pattern.values().cloned().collect()
-  }
+
   #[inline]
   pub fn get_v_count(&self) -> usize {
     self.v_entities.len()
@@ -422,6 +380,15 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
 }
 
 impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
+  #[inline]
+  pub fn contains_e_pattern(&self, pattern: &str) -> bool {
+    self.pattern_2_eids.contains_key(pattern)
+  }
+  #[inline]
+  pub fn contains_v_pattern(&self, pattern: &str) -> bool {
+    self.pattern_2_vids.contains_key(pattern)
+  }
+
   #[inline]
   pub fn has_vid(&self, vid: VidRef) -> bool {
     self.v_entities.contains_key(vid)
@@ -463,18 +430,21 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
 impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   /// get all adj edges grouped by target vid
   /// (edge's direction: in | out)
-  pub fn get_adj_es_grouped_by_target_vid(&self, curr_vid: VidRef) -> HashMap<Vid, HashSet<EType>> {
-    let mut res: HashMap<Vid, HashSet<_>> = HashMap::new();
+  pub fn view_adj_es_grouped_by_target_vid<'g>(
+    &'g self,
+    curr_vid: VidRef<'g>,
+  ) -> HashMap<VidRef<'g>, HashSet<&'g EType>> {
+    let mut res: HashMap<VidRef<'g>, HashSet<_>> = HashMap::new();
     if let Some(v_node) = self.adj_table.get(curr_vid) {
       for eid in v_node.e_in.union(&v_node.e_out) {
-        let edge = self.get_e_from_eid(eid).unwrap();
+        let edge = self.view_e_from_eid(eid).unwrap();
         // target_vid != curr_vid
         let target_vid = if edge.src_vid() == curr_vid {
-          edge.dst_vid().to_string()
+          edge.dst_vid()
         } else {
-          edge.src_vid().to_string()
+          edge.src_vid()
         };
-        let target_edge = self.e_entities.get(eid).unwrap().clone();
+        let target_edge = self.e_entities.get(eid).unwrap();
         res.entry(target_vid).or_default().insert(target_edge);
       }
     }
@@ -495,7 +465,7 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
         .e_in
         .union(&v_node.e_out)
         .map(|eid| {
-          let edge = self.get_e_from_eid(eid).unwrap();
+          let edge = self.view_e_from_eid(eid).unwrap();
           if edge.src_vid() == vid {
             edge.dst_vid().to_string()
           } else {
@@ -522,5 +492,25 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
     } else {
       0
     }
+  }
+
+  pub fn view_common_v_patterns<'g>(
+    &'g self,
+    other: &'g Self,
+  ) -> impl IntoIterator<Item = &'g String> {
+    self
+      .pattern_2_vids
+      .keys()
+      .filter(|p| other.pattern_2_vids.contains_key(*p))
+  }
+
+  pub fn view_common_e_patterns<'g>(
+    &'g self,
+    other: &'g Self,
+  ) -> impl IntoIterator<Item = &'g String> {
+    self
+      .pattern_2_eids
+      .keys()
+      .filter(|p| other.pattern_2_eids.contains_key(*p))
   }
 }

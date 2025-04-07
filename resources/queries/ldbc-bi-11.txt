@@ -1,4 +1,4 @@
-7 9 1 0
+7 9 1 3
 
 c Person
 a Person
@@ -19,3 +19,7 @@ _h city_b country isPartOf
 _i city_c country isPartOf
 
 country name ='China'
+
+_a creationDate >=1284505856158
+_c creationDate >=1282382587409
+_d creationDate >=1281681940915

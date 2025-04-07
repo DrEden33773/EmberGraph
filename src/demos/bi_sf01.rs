@@ -12,28 +12,35 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
   let plan_json_content = fs::read_to_string(path).await?;
 
   let result =
-    ExecEngine::<CachedStorageAdapter<Neo4jStorageAdapter>>::build_from_json(&plan_json_content)
+    ExecEngine::<CachedStorageAdapter<SqliteStorageAdapter>>::build_from_json(&plan_json_content)
       .await
       .exec()
       .await;
 
-  println!("Count(result) = {}\n", result.len());
+  println!("✨  Count(result) = {}\n", result.len());
   Ok(())
 }
 
-/// ✅
+/// ☑️
 pub async fn bi_2_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-2' on 'SF0.1' ...\n");
   exec("ldbc-bi-2.json").await
 }
 
-/// ⚠️  Memory usage: 96% (51G)
+/// ☑️ ⚠️ (Not that fast)
+/// - `SqliteAdapter` is faster
 pub async fn bi_3_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-3' on 'SF0.1' ...\n");
   exec("ldbc-bi-3.json").await
 }
 
-/// ⚠️  Memory usage: 97% (51G)
+/// ☑️
+pub async fn bi_4_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-4' on 'SF0.1' ...\n");
+  exec("ldbc-bi-4.json").await
+}
+
+/// ❌  Cannot find a matching pattern
 pub async fn bi_5_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-5' on 'SF0.1' ...\n");
   exec("ldbc-bi-5.json").await
@@ -45,7 +52,25 @@ pub async fn bi_6_on_sf_01() -> io::Result<()> {
   exec("ldbc-bi-6.json").await
 }
 
-/// ✅⚠️  Slow query: `GetAdj("f^otherTag")`
+/// ☑️
+pub async fn bi_7_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-7' on 'SF0.1' ...\n");
+  exec("ldbc-bi-7.json").await
+}
+
+/// ☑️
+pub async fn bi_8_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-8' on 'SF0.1' ...\n");
+  exec("ldbc-bi-8.json").await
+}
+
+/// ☑️
+pub async fn bi_9_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-9' on 'SF0.1' ...\n");
+  exec("ldbc-bi-9.json").await
+}
+
+/// ☑️ ⚠️  Slow query: `GetAdj("f^otherTag")`
 /// - Memory usage is normal, computation process is too slow
 /// - `Neo4jStorageAdapter` is `slower` than `SqliteStorageAdapter`
 pub async fn bi_10_on_sf_01() -> io::Result<()> {
@@ -53,13 +78,27 @@ pub async fn bi_10_on_sf_01() -> io::Result<()> {
   exec("ldbc-bi-10.json").await
 }
 
-/// ⚠️✅  Memory usage: 98% (55G)
+/// ☑️ ⚠️  Slow query: `Intersect("A^b", "A^c")`, `Intersect("A^a", "A^country")`
+/// - Slow on `Neo4jStorageAdapter` and `SqliteStorageAdapter`
+/// - `Neo4jStorageAdapter` could be a little bit faster
 pub async fn bi_11_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-11' on 'SF0.1' ...\n");
   exec("ldbc-bi-11.json").await
 }
 
-/// ✅
+/// ☑️
+pub async fn bi_12_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-12' on 'SF0.1' ...\n");
+  exec("ldbc-bi-12.json").await
+}
+
+/// ☑️
+pub async fn bi_13_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-13' on 'SF0.1' ...\n");
+  exec("ldbc-bi-13.json").await
+}
+
+/// ☑️
 pub async fn bi_14_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-14' on 'SF0.1' ...\n");
   exec("ldbc-bi-14.json").await

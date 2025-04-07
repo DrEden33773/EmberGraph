@@ -10,6 +10,7 @@ futures = "0.3.31"
 hashbrown = { version = "0.15.2", features = ["rayon", "serde"] }
 itertools = "0.14.0"
 lru = "0.13.0"
+mimalloc = "0.1.45"
 neo4rs = "0.8.0"
 num_cpus = "1.16.0"
 ordered-float = "5.0.0"
@@ -21,7 +22,8 @@ serde_json = "1.0.140"
 sqlx = { version = "0.8.3", features = ["runtime-tokio", "sqlite"] }
 strum = "0.27.1"
 strum_macros = "0.27.1"
-tokio = { version = "1.44.1", features = ["full"] }
+thiserror = "2.0.12"
+tokio = { version = "1.44.2", features = ["full"] }
 tracing = { version = "0.1.41", features = ["async-await"] }
 tracing-appender = "0.2.3"
 tracing-futures = "0.2.5"
@@ -30,9 +32,17 @@ tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 [features]
 default = [
     "block_spawn_via_rayon",
-    # "validate_pattern_uniqueness_before_final_merge",
+    "validate_pattern_uniqueness_before_final_merge",
+    "use_tracing",
+    # "batched_incremental_match_adj_e",
+    # "single_thread_debug",
+    # "trace_all",
 ]
 block_spawn_via_rayon = []
 use_tracing = []
 validate_pattern_uniqueness_before_final_merge = []
 batched_incremental_match_adj_e = []
+single_thread_debug = []
+trace_all = ["trace_init", "trace_get_adj"]
+trace_init = []
+trace_get_adj = []

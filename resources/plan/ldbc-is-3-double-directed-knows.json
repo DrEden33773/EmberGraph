@@ -55,8 +55,8 @@
       "vid": "person",
       "type": "get_adj",
       "expand_eid_list": [
-        "a",
-        "b"
+        "b",
+        "a"
       ],
       "single_op": "f^person",
       "multi_ops": [],
@@ -101,10 +101,10 @@
       ],
       "target_var": "f",
       "depend_on": [
-        "f^friend",
-        "f^person",
         "A^person",
-        "C^friend"
+        "C^friend",
+        "f^person",
+        "f^friend"
       ]
     }
   ]

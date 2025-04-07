@@ -1,15 +1,66 @@
 use dotenv::dotenv;
-use tokio::io::{self};
+use mimalloc::MiMalloc;
+use tokio::{io, runtime};
 
-#[tokio::main]
-async fn main() -> io::Result<()> {
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
+
+async fn to_run() -> io::Result<()> {
   dotenv().ok();
 
   #[cfg(feature = "use_tracing")]
-  let _guard = ember_graph::init_log::init_log().await?;
+  #[allow(unused_variables)]
+  let guard = ember_graph::init_log::init_log().await?;
 
   // plan_gen().await?;
   run_demo().await?;
+  // run_test_only().await?;
+
+  Ok(())
+}
+
+fn main() -> io::Result<()> {
+  // rayon config
+  rayon::ThreadPoolBuilder::new()
+    .num_threads(num_cpus::get() / 2)
+    .thread_name(|i| format!("rayon-{}", i))
+    .build_global()
+    .unwrap();
+
+  // tokio config (multi_threaded)
+  #[cfg(not(feature = "single_thread_debug"))]
+  {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    runtime::Builder::new_multi_thread()
+      .enable_all()
+      .worker_threads(num_cpus::get() / 2)
+      .thread_name_fn(|| {
+        static ATOMIC_ID: AtomicUsize = AtomicUsize::new(0);
+        let id = ATOMIC_ID.fetch_add(1, Ordering::SeqCst);
+        format!("tokio-{}", id)
+      })
+      .build()
+      .unwrap()
+      .block_on(to_run())
+  }
+
+  // tokio config (single_threaded)
+  #[cfg(feature = "single_thread_debug")]
+  {
+    runtime::Builder::new_current_thread()
+      .enable_all()
+      .build()
+      .unwrap()
+      .block_on(to_run())
+  }
+}
+
+#[allow(dead_code)]
+async fn run_test_only() -> io::Result<()> {
+  use ember_graph::demos::test_only::*;
+
+  bi_6_minimized().await?;
 
   Ok(())
 }
@@ -19,13 +70,21 @@ async fn run_demo() -> io::Result<()> {
   #[allow(unused_imports)]
   use ember_graph::demos::{bi_sf01::*, complex_interactive_sf01::*, simple_interactive_sf01::*};
 
-  // bi_6_on_sf_01().await?;
-  // bi_2_on_sf_01().await?;
+  bi_2_on_sf_01().await?;
+  // bi_4_on_sf_01().await?;
+  // bi_7_on_sf_01().await?;
+  // bi_8_on_sf_01().await?;
+  // bi_9_on_sf_01().await?;
+  // bi_12_on_sf_01().await?;
+  // bi_13_on_sf_01().await?;
   // bi_14_on_sf_01().await?;
 
-  ic_4_on_sf_01().await?;
-
+  // bi_3_on_sf_01().await?;
   // bi_10_on_sf_01().await?;
+  // bi_11_on_sf_01().await?;
+
+  // bi_5_on_sf_01().await?;
+  // bi_6_on_sf_01().await?;
 
   Ok(())
 }
@@ -76,17 +135,18 @@ async fn plan_gen() -> io::Result<()> {
         .expect("❌  Failed to write plan file");
 
       println!(
-        "✅  Plan file generated: '{}'",
+        "☑️   Plan file generated: '{}'",
         filepath.to_str().unwrap().green()
       );
     });
+
     handles.push(handle);
   }
 
   // wait for all tasks to complete
   for handle in handles {
     if let Err(e) = handle.await {
-      eprintln!("⚠️  Task failed: {}", e);
+      eprintln!("❌  Task failed: {}", e);
     }
   }
 

@@ -1,0 +1,14 @@
+4 4 2 0
+
+comment Comment
+post Post
+tag Tag
+relatedTag Tag
+
+a comment post replyOf
+b post tag hasTag
+c comment tag hasTag
+d comment relatedTag hasTag
+
+tag name ='50_Cent'
+relatedTag name !='50_Cent'
