@@ -32,10 +32,11 @@ tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 [features]
 default = [
     "block_spawn_via_rayon",
-    # "validate_pattern_uniqueness_before_final_merge",
+    "validate_pattern_uniqueness_before_final_merge",
+    "use_tracing",
     # "batched_incremental_match_adj_e",
     # "single_thread_debug",
-    "trace_all",
+    # "trace_all",
 ]
 block_spawn_via_rayon = []
 use_tracing = []

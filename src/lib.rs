@@ -10,7 +10,7 @@ pub mod storage;
 pub mod utils;
 
 #[cfg(feature = "use_tracing")]
-pub(crate) mod init_log {
+pub mod init_log {
   use project_root::get_project_root;
   use tokio::io::{self};
   use tracing_appender::non_blocking::WorkerGuard;
@@ -29,7 +29,6 @@ pub(crate) mod init_log {
       .with_ansi(false)
       .with_writer(non_blocking)
       .with_timer(tracing_subscriber::fmt::time::uptime())
-      .with_thread_ids(true)
       .with_thread_names(true);
 
     Registry::default().with(env_filter).with(file_layer).init();

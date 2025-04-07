@@ -1,0 +1,85 @@
+   0.001547680s  INFO main time_async_with_desc: neo4rs::pool: creating connection pool with max size 12    
+   0.002010563s  INFO main time_async_with_desc: ember_graph::utils: Connecting to Neo4j database ... ☑️  0.52ms
+
+   0.002412485s  INFO main time_async_with_desc: neo4rs::pool: creating new connection...    
+   0.012970841s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (v: Tag)
+		WHERE v.name = "Patrick_Vieira"
+      RETURN
+        properties(v) as props,
+        elementId(v) as vid ☑️  10.60ms
+
+   0.029822770s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (src)-[e: hasType]->(dst: Tagclass)
+		WHERE elementId(src) = '4:653b4286-de74-43f3-b94a-dcedbed26638:11561'
+      RETURN
+        elementId(e) AS eid,
+        properties(e) AS props,
+        elementId(src) AS src_vid,
+        elementId(dst) AS dst_vid ☑️  10.18ms
+
+   0.036688024s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (v)
+		WHERE elementId(v) = '4:653b4286-de74-43f3-b94a-dcedbed26638:17'
+      RETURN
+        properties(v) as props,
+        labels(v) as v_label ☑️  5.81ms
+
+   0.045852045s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (src: Comment)-[e: hasTag]->(dst)
+		WHERE elementId(dst) = '4:653b4286-de74-43f3-b94a-dcedbed26638:11561'
+      RETURN
+        elementId(e) AS eid,
+        properties(e) AS props,
+        elementId(src) AS src_vid,
+        elementId(dst) AS dst_vid ☑️  8.18ms
+
+   0.046936031s  INFO main time_async_with_desc: neo4rs::pool: creating new connection...    
+   0.052802210s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (v)
+		WHERE elementId(v) = '4:653b4286-de74-43f3-b94a-dcedbed26638:5253'
+      RETURN
+        properties(v) as props,
+        labels(v) as v_label ☑️  5.93ms
+
+   0.054671499s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (v)
+		WHERE elementId(v) = '4:653b4286-de74-43f3-b94a-dcedbed26638:5249'
+      RETURN
+        properties(v) as props,
+        labels(v) as v_label ☑️  7.76ms
+
+   0.063895436s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (src: Post)-[e: hasTag]->(dst)
+		WHERE elementId(dst) = '4:653b4286-de74-43f3-b94a-dcedbed26638:11561'
+      RETURN
+        elementId(e) AS eid,
+        properties(e) AS props,
+        elementId(src) AS src_vid,
+        elementId(dst) AS dst_vid ☑️  8.26ms
+
+   0.071481617s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (v)
+		WHERE elementId(v) = '4:653b4286-de74-43f3-b94a-dcedbed26638:16296'
+      RETURN
+        properties(v) as props,
+        labels(v) as v_label ☑️  6.55ms
+
+   0.078666583s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (v: Tagclass)
+      RETURN
+        properties(v) as props,
+        elementId(v) as vid ☑️  6.05ms
+
+   0.088014498s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (v: Comment)
+      RETURN
+        properties(v) as props,
+        elementId(v) as vid ☑️  6.68ms
+
+   0.151126058s  INFO main time_async_with_desc: ember_graph::utils: 
+		MATCH (v: Post)
+      RETURN
+        properties(v) as props,
+        elementId(v) as vid ☑️  5.37ms
+

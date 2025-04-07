@@ -36,13 +36,13 @@ impl AsyncDefault for SqliteStorageAdapter {
 impl SqliteStorageAdapter {
   async fn clear_tables(pool: &SqlitePool) {
     let queries = vec![
-      "DELETE FROM db_vertex;",
-      "DELETE FROM db_edge;",
-      "DELETE FROM vertex_attribute;",
-      "DELETE FROM edge_attribute;",
+      "\n\t\tDELETE FROM db_vertex",
+      "\n\t\tDELETE FROM db_edge",
+      "\n\t\tDELETE FROM vertex_attribute",
+      "\n\t\tDELETE FROM edge_attribute",
       // delete `auto_increment` values
-      "DELETE FROM sqlite_sequence WHERE name = 'vertex_attribute';",
-      "DELETE FROM sqlite_sequence WHERE name = 'edge_attribute';",
+      "\n\t\tDELETE FROM sqlite_sequence WHERE name = 'vertex_attribute'",
+      "\n\t\tDELETE FROM sqlite_sequence WHERE name = 'edge_attribute'",
     ];
 
     for query in queries {
@@ -54,8 +54,8 @@ impl SqliteStorageAdapter {
 
     // reset auto increment values
     let reset_queries = vec![
-      "UPDATE sqlite_sequence SET seq = 0 WHERE name = 'vertex_attribute';",
-      "UPDATE sqlite_sequence SET seq = 0 WHERE name = 'edge_attribute';",
+      "\n\t\tUPDATE sqlite_sequence SET seq = 0 WHERE name = 'vertex_attribute'",
+      "\n\t\tUPDATE sqlite_sequence SET seq = 0 WHERE name = 'edge_attribute'",
     ];
 
     for query in reset_queries {
@@ -162,7 +162,7 @@ impl SqliteStorageAdapter {
     }
 
     // collect rows
-    let sql = query.sql().trim();
+    let sql = query.sql();
     let rows = match time_async_with_desc(query.fetch_all(&self.pool), sql.to_string()).await {
       Ok(rows) => rows,
       Err(_) => return vec![],
@@ -197,7 +197,7 @@ impl SqliteStorageAdapter {
     }
 
     // collect rows
-    let sql = query.sql().trim();
+    let sql = query.sql();
     let rows = match time_async_with_desc(query.fetch_all(&self.pool), sql.to_string()).await {
       Ok(rows) => rows,
       Err(_) => return vec![],
@@ -340,7 +340,7 @@ impl StorageAdapter for SqliteStorageAdapter {
       "#,
     )
     .bind(vid);
-    let sql = query.sql().trim();
+    let sql = query.sql();
 
     let rows = time_async_with_desc(query.fetch_all(&self.pool), sql.to_string())
       .await
@@ -484,7 +484,7 @@ impl SqliteStorageAdapter {
     }
 
     // collect rows
-    let sql = query.sql().trim();
+    let sql = query.sql();
     let rows = match time_async_with_desc(query.fetch_all(&self.pool), sql.to_string()).await {
       Ok(rows) => rows,
       Err(_) => return vec![],
@@ -555,11 +555,11 @@ impl WritableStorageAdapter for SqliteStorageAdapter {
     let mut tx = self.pool.begin().await?;
 
     let query_str = "
-      INSERT INTO db_vertex (vid, label) VALUES (?, ?)
-    ";
+      INSERT INTO db_vertex (vid, label) VALUES (?, ?)";
     let query = sqlx::query(query_str).bind(&v.vid).bind(&v.label);
+    let sql = query.sql();
 
-    match query.execute(&mut *tx).await {
+    match time_async_with_desc(query.execute(&mut *tx), sql.to_string()).await {
       Ok(result) => println!("💾  Inserted {} vertex", result.rows_affected()),
       Err(e) => {
         eprintln!("❌  Error inserting vertex: {}", e);
@@ -570,15 +570,15 @@ impl WritableStorageAdapter for SqliteStorageAdapter {
     for (key, value) in &v.attrs {
       let attr_query = sqlx::query(
         "
-      INSERT INTO vertex_attribute (vid, key, value, type) VALUES (?, ?, ?, ?)
-      ",
+      INSERT INTO vertex_attribute (vid, key, value, type) VALUES (?, ?, ?, ?)",
       )
       .bind(&v.vid)
       .bind(key)
       .bind(value.to_string())
       .bind(value.to_type().to_string());
+      let sql = attr_query.sql();
 
-      match attr_query.execute(&mut *tx).await {
+      match time_async_with_desc(attr_query.execute(&mut *tx), sql.to_string()).await {
         Ok(result) => println!("💾  Inserted {} vertex_attribute", result.rows_affected()),
         Err(e) => {
           eprintln!("❌  Error inserting vertex attribute: {}", e);
@@ -596,15 +596,15 @@ impl WritableStorageAdapter for SqliteStorageAdapter {
     let mut tx = self.pool.begin().await?;
 
     let query_str = "
-      INSERT INTO db_edge (eid, label, src_vid, dst_vid) VALUES ($1, $2, $3, $4)
-    ";
+      INSERT INTO db_edge (eid, label, src_vid, dst_vid) VALUES (?, ?, ?, ?)";
     let query = sqlx::query(query_str)
       .bind(&e.eid)
       .bind(&e.label)
       .bind(&e.src_vid)
       .bind(&e.dst_vid);
+    let sql = query.sql();
 
-    match query.execute(&mut *tx).await {
+    match time_async_with_desc(query.execute(&mut *tx), sql.to_string()).await {
       Ok(result) => println!("💾  Inserted {} edge", result.rows_affected()),
       Err(e) => {
         eprintln!("❌  Error inserting edge: {}", e);
@@ -615,15 +615,15 @@ impl WritableStorageAdapter for SqliteStorageAdapter {
     for (key, value) in &e.attrs {
       let attr_query = sqlx::query(
         "
-      INSERT INTO edge_attribute (eid, key, value, type) VALUES ($1, $2, $3, $4)
-      ",
+      INSERT INTO edge_attribute (eid, key, value, type) VALUES (?, ?, ?, ?)",
       )
       .bind(&e.eid)
       .bind(key)
       .bind(value.to_string())
       .bind(value.to_type().to_string());
+      let sql = attr_query.sql();
 
-      match attr_query.execute(&mut *tx).await {
+      match time_async_with_desc(attr_query.execute(&mut *tx), sql.to_string()).await {
         Ok(result) => println!("💾  Inserted {} edge_attribute", result.rows_affected()),
         Err(e) => {
           eprintln!("❌  Error inserting edge attribute: {}", e);
@@ -660,8 +660,7 @@ impl SqliteStorageAdapter {
   pub async fn count_v(&self) -> usize {
     let query = sqlx::query(
       "
-      SELECT COUNT(*) FROM db_vertex
-    ",
+      SELECT COUNT(*) FROM db_vertex",
     );
     let sql = query.sql();
 
@@ -675,8 +674,7 @@ impl SqliteStorageAdapter {
   pub async fn count_e(&self) -> usize {
     let query = sqlx::query(
       "
-      SELECT COUNT(*) FROM db_edge
-    ",
+      SELECT COUNT(*) FROM db_edge",
     );
     let sql = query.sql();
 

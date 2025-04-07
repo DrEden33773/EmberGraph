@@ -46,11 +46,11 @@ async fn to_run() -> io::Result<()> {
   dotenv().ok();
 
   #[cfg(feature = "use_tracing")]
-  #[allow(dead_code)]
+  #[allow(unused_variables)]
   let guard = ember_graph::init_log::init_log().await?;
 
-  plan_gen().await?;
-  // run_demo().await?;
+  // plan_gen().await?;
+  run_demo().await?;
   // run_test_only().await?;
 
   Ok(())
@@ -71,7 +71,7 @@ async fn run_demo() -> io::Result<()> {
   use ember_graph::demos::{bi_sf01::*, complex_interactive_sf01::*, simple_interactive_sf01::*};
 
   // bi_6_on_sf_01().await?;
-  // bi_2_on_sf_01().await?;
+  bi_2_on_sf_01().await?;
   // bi_14_on_sf_01().await?;
 
   // ic_4_on_sf_01().await?;
@@ -79,7 +79,7 @@ async fn run_demo() -> io::Result<()> {
   // bi_10_on_sf_01().await?;
   // bi_3_on_sf_01().await?;
   // bi_5_on_sf_01().await?;
-  bi_11_on_sf_01().await?;
+  // bi_11_on_sf_01().await?;
 
   Ok(())
 }
