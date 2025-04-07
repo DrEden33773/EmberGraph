@@ -194,16 +194,17 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
     self.v_entities.insert(vid.clone(), vertex);
     self.adj_table.entry(vid.clone()).or_default();
 
-    let old_pattern = self
+    let _old_pattern = self
       .vid_2_pattern
       .insert(vid.clone(), pattern.as_ref().to_string());
-    if let Some(old_pattern) = old_pattern {
-      self
-        .pattern_2_vids
-        .get_mut(&old_pattern)
-        .unwrap()
-        .remove(&vid);
-    }
+    // if let Some(old_pattern) = _old_pattern {
+    //   self
+    //     .pattern_2_vids
+    //     .get_mut(&old_pattern)
+    //     .unwrap()
+    //     .remove(&vid);
+    // }
+
     self
       .pattern_2_vids
       .entry(pattern.as_ref().to_string())
@@ -245,14 +246,15 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
         .e_in
         .insert(eid.clone());
 
-      let old_pattern = self.eid_2_pattern.insert(eid.clone(), pattern.clone());
-      if let Some(old_pattern) = old_pattern {
-        self
-          .pattern_2_eids
-          .get_mut(&old_pattern)
-          .unwrap()
-          .remove(&eid);
-      }
+      let _old_pattern = self.eid_2_pattern.insert(eid.clone(), pattern.clone());
+      // if let Some(old_pattern) = _old_pattern {
+      //   self
+      //     .pattern_2_eids
+      //     .get_mut(&old_pattern)
+      //     .unwrap()
+      //     .remove(&eid);
+      // }
+
       self.pattern_2_eids.entry(pattern).or_default().insert(eid);
 
       self
