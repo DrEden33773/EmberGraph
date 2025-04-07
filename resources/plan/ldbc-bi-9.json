@@ -98,15 +98,15 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^person",
-        "A^comment"
+        "A^comment",
+        "A^person"
       ],
       "target_var": "T^post",
       "depend_on": [
         "A^person",
+        "A^comment",
         "f^comment",
-        "f^person",
-        "A^comment"
+        "f^person"
       ]
     },
     {
@@ -117,11 +117,11 @@
       "multi_ops": [],
       "target_var": "C^post",
       "depend_on": [
-        "T^post",
         "A^person",
-        "f^comment",
         "A^comment",
-        "f^person"
+        "f^person",
+        "T^post",
+        "f^comment"
       ]
     },
     {
@@ -133,11 +133,11 @@
       "target_var": "f^post",
       "depend_on": [
         "T^post",
-        "A^comment",
         "f^person",
-        "A^person",
+        "C^post",
         "f^comment",
-        "C^post"
+        "A^person",
+        "A^comment"
       ]
     },
     {
@@ -146,19 +146,19 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^person",
         "f^comment",
+        "f^person",
         "f^post"
       ],
       "target_var": "f",
       "depend_on": [
-        "C^post",
-        "f^comment",
-        "T^post",
-        "f^post",
         "f^person",
+        "f^post",
+        "T^post",
+        "C^post",
+        "A^person",
         "A^comment",
-        "A^person"
+        "f^comment"
       ]
     }
   ]

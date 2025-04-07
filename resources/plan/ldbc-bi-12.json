@@ -10,16 +10,6 @@
       "label": "Person",
       "attr": null
     },
-    "comment": {
-      "vid": "comment",
-      "label": "Comment",
-      "attr": {
-        "attr": "creationDate",
-        "op": ">",
-        "value": 1290666911352,
-        "type": "int"
-      }
-    },
     "post": {
       "vid": "post",
       "label": "Post",
@@ -28,6 +18,16 @@
         "op": "=",
         "value": "tk",
         "type": "string"
+      }
+    },
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
+      "attr": {
+        "attr": "creationDate",
+        "op": ">",
+        "value": 1290666911352,
+        "type": "int"
       }
     }
   },
@@ -104,9 +104,9 @@
       "target_var": "T^comment",
       "depend_on": [
         "f^person",
+        "A^post",
         "f^post",
-        "A^person",
-        "A^post"
+        "A^person"
       ]
     },
     {
@@ -117,11 +117,11 @@
       "multi_ops": [],
       "target_var": "C^comment",
       "depend_on": [
-        "T^comment",
-        "A^person",
         "f^person",
         "f^post",
-        "A^post"
+        "A^post",
+        "A^person",
+        "T^comment"
       ]
     },
     {
@@ -132,12 +132,12 @@
       "multi_ops": [],
       "target_var": "f^comment",
       "depend_on": [
-        "f^post",
         "T^comment",
-        "A^post",
-        "C^comment",
+        "f^post",
         "A^person",
-        "f^person"
+        "C^comment",
+        "f^person",
+        "A^post"
       ]
     },
     {
@@ -152,13 +152,13 @@
       ],
       "target_var": "f",
       "depend_on": [
-        "C^comment",
-        "f^post",
-        "f^comment",
-        "f^person",
-        "T^comment",
         "A^person",
-        "A^post"
+        "f^person",
+        "C^comment",
+        "A^post",
+        "f^comment",
+        "T^comment",
+        "f^post"
       ]
     }
   ]

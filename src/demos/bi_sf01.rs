@@ -12,7 +12,7 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
   let plan_json_content = fs::read_to_string(path).await?;
 
   let result =
-    ExecEngine::<CachedStorageAdapter<SqliteStorageAdapter>>::build_from_json(&plan_json_content)
+    ExecEngine::<CachedStorageAdapter<Neo4jStorageAdapter>>::build_from_json(&plan_json_content)
       .await
       .exec()
       .await;
@@ -46,7 +46,7 @@ pub async fn bi_5_on_sf_01() -> io::Result<()> {
   exec("ldbc-bi-5.json").await
 }
 
-/// ❌  Cannot find a matching pattern
+/// ☑️
 pub async fn bi_6_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-6' on 'SF0.1' ...\n");
   exec("ldbc-bi-6.json").await
@@ -78,9 +78,7 @@ pub async fn bi_10_on_sf_01() -> io::Result<()> {
   exec("ldbc-bi-10.json").await
 }
 
-/// ☑️ ⚠️  Slow query: `Intersect("A^b", "A^c")`, `Intersect("A^a", "A^country")`
-/// - Slow on `Neo4jStorageAdapter` and `SqliteStorageAdapter`
-/// - `Neo4jStorageAdapter` could be a little bit faster
+/// ☑️
 pub async fn bi_11_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-11' on 'SF0.1' ...\n");
   exec("ldbc-bi-11.json").await
@@ -102,4 +100,9 @@ pub async fn bi_13_on_sf_01() -> io::Result<()> {
 pub async fn bi_14_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-14' on 'SF0.1' ...\n");
   exec("ldbc-bi-14.json").await
+}
+
+pub async fn bi_17_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-17' on 'SF0.1' ...\n");
+  exec("ldbc-bi-17.json").await
 }

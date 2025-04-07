@@ -6,6 +6,11 @@
     "relatedTag"
   ],
   "vertices": {
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
+      "attr": null
+    },
     "tag": {
       "vid": "tag",
       "label": "Tag",
@@ -16,6 +21,11 @@
         "type": "string"
       }
     },
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
+    },
     "relatedTag": {
       "vid": "relatedTag",
       "label": "Tag",
@@ -25,16 +35,6 @@
         "value": "50_Cent",
         "type": "string"
       }
-    },
-    "post": {
-      "vid": "post",
-      "label": "Post",
-      "attr": null
-    },
-    "comment": {
-      "vid": "comment",
-      "label": "Comment",
-      "attr": null
     }
   },
   "edges": {
@@ -45,18 +45,18 @@
       "label": "hasTag",
       "attr": null
     },
-    "a": {
-      "eid": "a",
-      "src_vid": "comment",
-      "dst_vid": "post",
-      "label": "replyOf",
-      "attr": null
-    },
     "c": {
       "eid": "c",
       "src_vid": "comment",
       "dst_vid": "tag",
       "label": "hasTag",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "comment",
+      "dst_vid": "post",
+      "label": "replyOf",
       "attr": null
     },
     "b": {
@@ -99,8 +99,8 @@
       "multi_ops": [],
       "target_var": "C^comment",
       "depend_on": [
-        "f^tag",
-        "A^tag"
+        "A^tag",
+        "f^tag"
       ]
     },
     {
@@ -111,26 +111,26 @@
       "multi_ops": [],
       "target_var": "f^comment",
       "depend_on": [
+        "A^tag",
         "C^comment",
-        "f^tag",
-        "A^tag"
+        "f^tag"
       ]
     },
     {
       "vid": "comment",
       "type": "get_adj",
       "expand_eid_list": [
-        "d",
-        "a"
+        "a",
+        "d"
       ],
       "single_op": "f^comment",
       "multi_ops": [],
       "target_var": "A^comment",
       "depend_on": [
-        "f^tag",
+        "A^tag",
         "C^comment",
-        "f^comment",
-        "A^tag"
+        "f^tag",
+        "f^comment"
       ]
     },
     {
@@ -144,11 +144,11 @@
       ],
       "target_var": "T^post",
       "depend_on": [
-        "f^tag",
-        "A^tag",
         "A^comment",
+        "A^tag",
         "C^comment",
-        "f^comment"
+        "f^comment",
+        "f^tag"
       ]
     },
     {
@@ -159,11 +159,11 @@
       "multi_ops": [],
       "target_var": "C^post",
       "depend_on": [
-        "T^post",
         "C^comment",
-        "f^tag",
-        "A^tag",
         "A^comment",
+        "f^tag",
+        "T^post",
+        "A^tag",
         "f^comment"
       ]
     },
@@ -175,13 +175,13 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "f^tag",
-        "f^comment",
         "C^post",
+        "A^comment",
+        "f^tag",
         "C^comment",
-        "A^tag",
         "T^post",
-        "A^comment"
+        "f^comment",
+        "A^tag"
       ]
     },
     {
@@ -195,8 +195,8 @@
         "A^tag",
         "C^comment",
         "f^tag",
-        "f^comment",
-        "A^comment"
+        "A^comment",
+        "f^comment"
       ]
     },
     {
@@ -207,12 +207,12 @@
       "multi_ops": [],
       "target_var": "f^relatedTag",
       "depend_on": [
-        "f^comment",
         "A^comment",
-        "A^tag",
-        "C^relatedTag",
+        "f^comment",
+        "C^comment",
         "f^tag",
-        "C^comment"
+        "C^relatedTag",
+        "A^tag"
       ]
     },
     {
@@ -223,21 +223,21 @@
       "multi_ops": [
         "f^tag",
         "f^comment",
-        "f^post",
-        "f^relatedTag"
+        "f^relatedTag",
+        "f^post"
       ],
       "target_var": "f",
       "depend_on": [
-        "A^tag",
-        "T^post",
-        "A^comment",
-        "f^post",
-        "C^relatedTag",
-        "C^comment",
-        "f^relatedTag",
         "C^post",
+        "f^post",
+        "f^relatedTag",
+        "A^tag",
+        "C^relatedTag",
+        "T^post",
+        "C^comment",
         "f^tag",
-        "f^comment"
+        "f^comment",
+        "A^comment"
       ]
     }
   ]

@@ -26,17 +26,17 @@
     }
   },
   "edges": {
-    "a": {
-      "eid": "a",
-      "src_vid": "person",
-      "dst_vid": "friend",
-      "label": "knows",
-      "attr": null
-    },
     "b": {
       "eid": "b",
       "src_vid": "friend",
       "dst_vid": "person",
+      "label": "knows",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "person",
+      "dst_vid": "friend",
       "label": "knows",
       "attr": null
     }
@@ -73,8 +73,8 @@
       "multi_ops": [],
       "target_var": "C^friend",
       "depend_on": [
-        "f^person",
-        "A^person"
+        "A^person",
+        "f^person"
       ]
     },
     {
@@ -86,8 +86,8 @@
       "target_var": "f^friend",
       "depend_on": [
         "C^friend",
-        "f^person",
-        "A^person"
+        "A^person",
+        "f^person"
       ]
     },
     {
@@ -96,15 +96,15 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^person",
-        "f^friend"
+        "f^friend",
+        "f^person"
       ],
       "target_var": "f",
       "depend_on": [
-        "A^person",
         "C^friend",
+        "f^friend",
         "f^person",
-        "f^friend"
+        "A^person"
       ]
     }
   ]
