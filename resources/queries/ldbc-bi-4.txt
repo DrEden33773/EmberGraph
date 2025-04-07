@@ -1,0 +1,12 @@
+4 3 1 0
+
+forum Forum
+member Person
+city City
+country Country
+
+a forum member hasMember
+b member city isLocatedIn
+c city country isPartOf
+
+forum creationDate >1290494980289

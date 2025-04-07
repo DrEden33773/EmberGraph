@@ -101,5 +101,11 @@ impl BI6Builder {
 
     println!("✨  Count(vertices) = {}", count_v);
     println!("✨  Count(edges) = {}\n", count_e);
+
+    // Force connection pool to close and flush changes to disk
+    drop(storage);
+
+    // Small delay to ensure writes complete
+    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
   }
 }

@@ -1,0 +1,11 @@
+3 2 2 0
+
+comment Comment
+post Post
+person Person
+
+a comment post replyOf
+b post person hasCreator
+
+comment creationDate >=1290666911352
+post creationDate >=1290661462488

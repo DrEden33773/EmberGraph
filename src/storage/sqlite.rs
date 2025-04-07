@@ -8,7 +8,10 @@ use crate::{
 };
 use hashbrown::HashMap;
 use project_root::get_project_root;
-use sqlx::{Execute, Row, SqlitePool, sqlite::SqliteRow};
+use sqlx::{
+  Execute, Row, SqlitePool,
+  sqlite::{SqliteConnectOptions, SqliteJournalMode, SqliteRow, SqliteSynchronous},
+};
 use std::env;
 
 #[derive(Clone)]
@@ -641,13 +644,26 @@ impl WritableStorageAdapter for SqliteStorageAdapter {
 impl TestOnlyStorageAdapter for SqliteStorageAdapter {
   async fn async_init_test_only() -> Self {
     let db_name = env::var("TEST_ONLY_SQLITE_DB_PATH").unwrap();
+    // Create an absolute path to the current directory
     let root = get_project_root().unwrap();
     let db_path = root.join(db_name);
-    let url = format!("sqlite:///{}", db_path.display());
+    println!("🔍  Using database at: {}\n", db_path.display());
 
-    let pool = sqlx::SqlitePool::connect(&url)
-      .await
-      .expect("❌  Failed to connect to SQLite database");
+    // Delete existing file if it exists to ensure we start fresh
+    if db_path.exists() {
+      std::fs::remove_file(&db_path).expect("Failed to remove existing database file");
+      println!("🗑️  Removed existing database file\n");
+    }
+
+    let pool = sqlx::SqlitePool::connect_with(
+      SqliteConnectOptions::new()
+        .filename(&db_path)
+        .create_if_missing(true)
+        .journal_mode(SqliteJournalMode::Truncate)
+        .synchronous(SqliteSynchronous::Off),
+    )
+    .await
+    .expect("❌ Failed to connect to SQLite database");
 
     Self::init_schema(&pool).await;
     Self::clear_tables(&pool).await;

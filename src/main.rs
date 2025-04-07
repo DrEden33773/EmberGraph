@@ -5,6 +5,20 @@ use tokio::{io, runtime};
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 
+async fn to_run() -> io::Result<()> {
+  dotenv().ok();
+
+  #[cfg(feature = "use_tracing")]
+  #[allow(unused_variables)]
+  let guard = ember_graph::init_log::init_log().await?;
+
+  // plan_gen().await?;
+  run_demo().await?;
+  // run_test_only().await?;
+
+  Ok(())
+}
+
 fn main() -> io::Result<()> {
   // rayon config
   rayon::ThreadPoolBuilder::new()
@@ -42,20 +56,6 @@ fn main() -> io::Result<()> {
   }
 }
 
-async fn to_run() -> io::Result<()> {
-  dotenv().ok();
-
-  #[cfg(feature = "use_tracing")]
-  #[allow(unused_variables)]
-  let guard = ember_graph::init_log::init_log().await?;
-
-  // plan_gen().await?;
-  run_demo().await?;
-  // run_test_only().await?;
-
-  Ok(())
-}
-
 #[allow(dead_code)]
 async fn run_test_only() -> io::Result<()> {
   use ember_graph::demos::test_only::*;
@@ -70,16 +70,21 @@ async fn run_demo() -> io::Result<()> {
   #[allow(unused_imports)]
   use ember_graph::demos::{bi_sf01::*, complex_interactive_sf01::*, simple_interactive_sf01::*};
 
-  // bi_6_on_sf_01().await?;
   bi_2_on_sf_01().await?;
+  // bi_4_on_sf_01().await?;
+  // bi_7_on_sf_01().await?;
+  // bi_8_on_sf_01().await?;
+  // bi_9_on_sf_01().await?;
+  // bi_12_on_sf_01().await?;
+  // bi_13_on_sf_01().await?;
   // bi_14_on_sf_01().await?;
 
-  // ic_4_on_sf_01().await?;
-
-  // bi_10_on_sf_01().await?;
   // bi_3_on_sf_01().await?;
-  // bi_5_on_sf_01().await?;
+  // bi_10_on_sf_01().await?;
   // bi_11_on_sf_01().await?;
+
+  // bi_5_on_sf_01().await?;
+  // bi_6_on_sf_01().await?;
 
   Ok(())
 }
