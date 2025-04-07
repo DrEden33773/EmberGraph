@@ -10,7 +10,7 @@ futures = "0.3.31"
 hashbrown = { version = "0.15.2", features = ["rayon", "serde"] }
 itertools = "0.14.0"
 lru = "0.13.0"
-mimalloc = "0.1.45"
+mimalloc = "0.1.44"
 neo4rs = "0.8.0"
 num_cpus = "1.16.0"
 ordered-float = "5.0.0"
@@ -33,7 +33,7 @@ tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 default = [
     "block_spawn_via_rayon",
     "validate_pattern_uniqueness_before_final_merge",
-    "use_tracing",
+    # "use_tracing",
     # "batched_incremental_match_adj_e",
     # "single_thread_debug",
     # "trace_all",
