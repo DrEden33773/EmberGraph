@@ -40,7 +40,7 @@ pub async fn bi_4_on_sf_01() -> io::Result<()> {
   exec("ldbc-bi-4.json").await
 }
 
-/// ❌  Cannot find a matching pattern
+/// ☑️
 pub async fn bi_5_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-5' on 'SF0.1' ...\n");
   exec("ldbc-bi-5.json").await

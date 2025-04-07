@@ -83,8 +83,8 @@ async fn run_demo() -> io::Result<()> {
   // bi_10_on_sf_01().await?;
   // bi_11_on_sf_01().await?;
 
-  // bi_5_on_sf_01().await?;
-  bi_6_on_sf_01().await?;
+  bi_5_on_sf_01().await?;
+  // bi_6_on_sf_01().await?;
 
   Ok(())
 }
