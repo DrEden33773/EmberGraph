@@ -1,17 +1,14 @@
 use dotenv::dotenv;
 use mimalloc::MiMalloc;
-use std::sync::LazyLock;
 use tokio::{io, runtime};
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 
-static NUM_CPUS: LazyLock<usize> = LazyLock::new(num_cpus::get);
-
 fn main() -> io::Result<()> {
   // rayon config
   rayon::ThreadPoolBuilder::new()
-    .num_threads(*NUM_CPUS / 2)
+    .num_threads(num_cpus::get() / 2)
     .thread_name(|i| format!("rayon-{}", i))
     .build_global()
     .unwrap();
@@ -23,7 +20,7 @@ fn main() -> io::Result<()> {
 
     runtime::Builder::new_multi_thread()
       .enable_all()
-      .worker_threads(*NUM_CPUS / 2)
+      .worker_threads(num_cpus::get() / 2)
       .thread_name_fn(|| {
         static ATOMIC_ID: AtomicUsize = AtomicUsize::new(0);
         let id = ATOMIC_ID.fetch_add(1, Ordering::SeqCst);
@@ -52,8 +49,8 @@ async fn to_run() -> io::Result<()> {
   #[allow(dead_code)]
   let guard = ember_graph::init_log::init_log().await?;
 
-  // plan_gen().await?;
-  run_demo().await?;
+  plan_gen().await?;
+  // run_demo().await?;
   // run_test_only().await?;
 
   Ok(())
@@ -81,7 +78,8 @@ async fn run_demo() -> io::Result<()> {
 
   // bi_10_on_sf_01().await?;
   // bi_3_on_sf_01().await?;
-  bi_5_on_sf_01().await?;
+  // bi_5_on_sf_01().await?;
+  bi_11_on_sf_01().await?;
 
   Ok(())
 }
