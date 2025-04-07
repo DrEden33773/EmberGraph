@@ -201,8 +201,8 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
   let grouped_l = l_expand_graph.group_dangling_e_by_pending_v();
   let grouped_r = r_expand_graph.group_dangling_e_by_pending_v();
 
-  let mut l_graph = (*l_expand_graph.dyn_graph).clone();
-  let mut r_graph = (*r_expand_graph.dyn_graph).clone();
+  let l_graph = l_expand_graph.dyn_graph;
+  let r_graph = r_expand_graph.dyn_graph;
 
   #[cfg(feature = "validate_pattern_uniqueness_before_final_merge")]
   {
@@ -226,10 +226,10 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
     }
   }
 
-  let l_v_pat_pairs = l_graph.drain_v_pattern_pairs();
-  let r_v_pat_pairs = r_graph.drain_v_pattern_pairs();
-  let l_e_pat_pairs = l_graph.drain_e_pattern_pairs();
-  let r_e_pat_pairs = r_graph.drain_e_pattern_pairs();
+  let l_v_pat_pairs = l_graph.get_v_pattern_pairs_cloned();
+  let r_v_pat_pairs = r_graph.get_v_pattern_pairs_cloned();
+  let l_e_pat_pairs = l_graph.get_e_pattern_pairs_cloned();
+  let r_e_pat_pairs = r_graph.get_e_pattern_pairs_cloned();
 
   let mut new_graph = DynGraph::<VType, EType>::default();
   new_graph.update_v_batch(l_v_pat_pairs.into_iter().chain(r_v_pat_pairs));
