@@ -1,69 +1,62 @@
 {
   "matching_order": [
     "tag",
-    "comment",
-    "friend",
-    "person"
+    "post",
+    "person2",
+    "person1"
   ],
   "vertices": {
+    "person2": {
+      "vid": "person2",
+      "label": "Person",
+      "attr": null
+    },
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": {
+        "attr": "creationDate",
+        "op": "=",
+        "value": 1268422500645,
+        "type": "int"
+      }
+    },
     "tag": {
       "vid": "tag",
       "label": "Tag",
       "attr": {
         "attr": "name",
         "op": "=",
-        "value": "Theodore_Roosevelt",
+        "value": "Best_Thing_I_Never_Had",
         "type": "string"
       }
     },
-    "person": {
-      "vid": "person",
-      "label": "Person",
-      "attr": null
-    },
-    "comment": {
-      "vid": "comment",
-      "label": "Comment",
-      "attr": {
-        "attr": "creationDate",
-        "op": ">",
-        "value": 1289146646222,
-        "type": "int"
-      }
-    },
-    "friend": {
-      "vid": "friend",
+    "person1": {
+      "vid": "person1",
       "label": "Person",
       "attr": null
     }
   },
   "edges": {
-    "d": {
-      "eid": "d",
-      "src_vid": "person",
-      "dst_vid": "friend",
-      "label": "knows",
-      "attr": null
-    },
-    "a": {
-      "eid": "a",
-      "src_vid": "comment",
+    "b": {
+      "eid": "b",
+      "src_vid": "post",
       "dst_vid": "tag",
       "label": "hasTag",
       "attr": null
     },
-    "b": {
-      "eid": "b",
-      "src_vid": "comment",
-      "dst_vid": "person",
+    "a": {
+      "eid": "a",
+      "src_vid": "post",
+      "dst_vid": "person1",
       "label": "hasCreator",
       "attr": null
     },
     "c": {
       "eid": "c",
-      "src_vid": "person",
-      "dst_vid": "tag",
-      "label": "hasInterest",
+      "src_vid": "person1",
+      "dst_vid": "person2",
+      "label": "knows",
       "attr": null
     }
   },
@@ -81,8 +74,7 @@
       "vid": "tag",
       "type": "get_adj",
       "expand_eid_list": [
-        "c",
-        "a"
+        "b"
       ],
       "single_op": "f^tag",
       "multi_ops": [],
@@ -92,124 +84,123 @@
       ]
     },
     {
-      "vid": "comment",
+      "vid": "post",
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": "A^tag",
       "multi_ops": [],
-      "target_var": "C^comment",
+      "target_var": "C^post",
       "depend_on": [
         "A^tag",
         "f^tag"
       ]
     },
     {
-      "vid": "comment",
+      "vid": "post",
       "type": "foreach",
       "expand_eid_list": [],
-      "single_op": "C^comment",
+      "single_op": "C^post",
       "multi_ops": [],
-      "target_var": "f^comment",
+      "target_var": "f^post",
       "depend_on": [
-        "f^tag",
+        "C^post",
         "A^tag",
-        "C^comment"
+        "f^tag"
       ]
     },
     {
-      "vid": "comment",
+      "vid": "post",
       "type": "get_adj",
       "expand_eid_list": [
-        "b"
+        "a"
       ],
-      "single_op": "f^comment",
+      "single_op": "f^post",
       "multi_ops": [],
-      "target_var": "A^comment",
+      "target_var": "A^post",
       "depend_on": [
-        "C^comment",
-        "A^tag",
         "f^tag",
-        "f^comment"
+        "f^post",
+        "C^post",
+        "A^tag"
       ]
     },
     {
-      "vid": "friend",
+      "vid": "person2",
       "type": "init",
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [],
-      "target_var": "f^friend",
+      "target_var": "f^person2",
       "depend_on": []
     },
     {
-      "vid": "friend",
+      "vid": "person2",
       "type": "get_adj",
       "expand_eid_list": [
-        "d"
+        "c"
       ],
-      "single_op": "f^friend",
+      "single_op": "f^person2",
       "multi_ops": [],
-      "target_var": "A^friend",
+      "target_var": "A^person2",
       "depend_on": [
-        "f^friend"
+        "f^person2"
       ]
     },
     {
-      "vid": "person",
+      "vid": "person1",
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^comment",
-        "A^friend",
-        "A^tag"
+        "A^person2",
+        "A^post"
       ],
-      "target_var": "T^person",
+      "target_var": "T^person1",
       "depend_on": [
-        "A^friend",
-        "f^friend",
-        "A^comment",
-        "f^comment",
+        "f^tag",
+        "f^post",
+        "A^post",
         "A^tag",
-        "C^comment",
-        "f^tag"
+        "f^person2",
+        "A^person2",
+        "C^post"
       ]
     },
     {
-      "vid": "person",
+      "vid": "person1",
       "type": "intersect",
       "expand_eid_list": [],
-      "single_op": "T^person",
+      "single_op": "T^person1",
       "multi_ops": [],
-      "target_var": "C^person",
+      "target_var": "C^person1",
       "depend_on": [
-        "C^comment",
-        "f^friend",
-        "T^person",
-        "A^tag",
-        "f^comment",
-        "A^comment",
+        "T^person1",
+        "C^post",
+        "f^post",
         "f^tag",
-        "A^friend"
+        "A^person2",
+        "f^person2",
+        "A^post",
+        "A^tag"
       ]
     },
     {
-      "vid": "person",
+      "vid": "person1",
       "type": "foreach",
       "expand_eid_list": [],
-      "single_op": "C^person",
+      "single_op": "C^person1",
       "multi_ops": [],
-      "target_var": "f^person",
+      "target_var": "f^person1",
       "depend_on": [
-        "C^person",
-        "T^person",
         "A^tag",
-        "A^comment",
+        "f^post",
+        "f^person2",
         "f^tag",
-        "f^comment",
-        "A^friend",
-        "C^comment",
-        "f^friend"
+        "A^post",
+        "T^person1",
+        "C^post",
+        "A^person2",
+        "C^person1"
       ]
     },
     {
@@ -218,23 +209,23 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^friend",
         "f^tag",
-        "f^person",
-        "f^comment"
+        "f^person2",
+        "f^person1",
+        "f^post"
       ],
       "target_var": "f",
       "depend_on": [
-        "A^friend",
-        "C^person",
-        "A^comment",
-        "f^tag",
+        "f^person1",
+        "f^person2",
+        "A^person2",
+        "f^post",
+        "A^post",
         "A^tag",
-        "f^person",
-        "C^comment",
-        "T^person",
-        "f^friend",
-        "f^comment"
+        "C^post",
+        "C^person1",
+        "f^tag",
+        "T^person1"
       ]
     }
   ]

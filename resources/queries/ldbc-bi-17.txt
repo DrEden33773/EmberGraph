@@ -1,4 +1,4 @@
-11 14 2 0
+11 13 4 0
 
 tag Tag
 message1 Comment
@@ -25,7 +25,8 @@ j comment message2 replyOf
 k message2 person3 hasCreator
 l message2 post2 replyOf
 m forum2 post2 containerOf
-n forum2 person1 hasMember
 
-tag name ='Zine_El_Abidine_Ben_Ali'
-message2 creationDate <1288759005460
+tag name ='Leonardo_DiCaprio'
+message2 creationDate <1289070384400
+forum1 id =206158431133
+forum2 id !=206158431133

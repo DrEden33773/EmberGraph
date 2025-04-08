@@ -1,4 +1,4 @@
-4 4 2 0
+4 3 2 0
 
 comment Comment
 post Post
@@ -7,8 +7,7 @@ relatedTag Tag
 
 a comment post replyOf
 b post tag hasTag
-c comment tag hasTag
-d comment relatedTag hasTag
+c comment relatedTag hasTag
 
 tag name ='50_Cent'
 relatedTag name !='50_Cent'

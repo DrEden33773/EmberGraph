@@ -12,14 +12,12 @@ MATCH
     (comment)-[j: replyOf]->(message2),
     (person3)<-[k: hasCreator]-(message2),
     (message2)-[l: replyOf]->(post2: Post),
-    (post2)<-[m: containerOf]-(forum2: Forum),
-    (forum2)-[n: hasMember]->(person1)
+    (post2)<-[m: containerOf]-(forum2: Forum)
 WHERE
-    tag.name = 'Zine_El_Abidine_Ben_Ali'
-    AND message2.creationDate < 1288759005460
-ORDER BY
-    tag.name DESC,
-    message2.creationDate ASC
+    tag.name = 'Leonardo_DiCaprio'
+    AND message2.creationDate < 1289070384400
+    AND forum1.id = 206158431133
+    AND forum2.id <> 206158431133
 RETURN
     tag,
     message1,
@@ -44,5 +42,4 @@ RETURN
     j,
     k,
     l,
-    m,
-    n
+    m

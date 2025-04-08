@@ -5,6 +5,11 @@
     "v2"
   ],
   "vertices": {
+    "v1": {
+      "vid": "v1",
+      "label": "V1",
+      "attr": null
+    },
     "v3": {
       "vid": "v3",
       "label": "V3",
@@ -13,11 +18,6 @@
     "v2": {
       "vid": "v2",
       "label": "V2",
-      "attr": null
-    },
-    "v1": {
-      "vid": "v1",
-      "label": "V1",
       "attr": null
     }
   },
@@ -88,15 +88,15 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^v1",
-        "A^v3"
+        "A^v3",
+        "A^v1"
       ],
       "target_var": "T^v2",
       "depend_on": [
-        "f^v3",
         "A^v3",
-        "A^v1",
-        "f^v1"
+        "f^v3",
+        "f^v1",
+        "A^v1"
       ]
     },
     {
@@ -107,11 +107,11 @@
       "multi_ops": [],
       "target_var": "C^v2",
       "depend_on": [
-        "T^v2",
+        "f^v1",
         "A^v3",
-        "A^v1",
+        "T^v2",
         "f^v3",
-        "f^v1"
+        "A^v1"
       ]
     },
     {
@@ -122,12 +122,12 @@
       "multi_ops": [],
       "target_var": "f^v2",
       "depend_on": [
-        "C^v2",
-        "f^v3",
-        "A^v3",
-        "f^v1",
         "A^v1",
-        "T^v2"
+        "A^v3",
+        "f^v3",
+        "T^v2",
+        "C^v2",
+        "f^v1"
       ]
     },
     {
@@ -136,19 +136,19 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^v1",
+        "f^v2",
         "f^v3",
-        "f^v2"
+        "f^v1"
       ],
       "target_var": "f",
       "depend_on": [
-        "T^v2",
-        "f^v1",
+        "A^v1",
+        "f^v3",
         "C^v2",
         "f^v2",
-        "A^v3",
-        "f^v3",
-        "A^v1"
+        "T^v2",
+        "f^v1",
+        "A^v3"
       ]
     }
   ]

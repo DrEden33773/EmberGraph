@@ -9,6 +9,21 @@
     "tag"
   ],
   "vertices": {
+    "otherTagClass": {
+      "vid": "otherTagClass",
+      "label": "Tagclass",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "Artist",
+        "type": "string"
+      }
+    },
+    "tagClass": {
+      "vid": "tagClass",
+      "label": "Tagclass",
+      "attr": null
+    },
     "friend": {
       "vid": "friend",
       "label": "Person",
@@ -18,6 +33,11 @@
         "value": 8796093022390,
         "type": "int"
       }
+    },
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": null
     },
     "post": {
       "vid": "post",
@@ -38,29 +58,23 @@
         "value": 8796093022390,
         "type": "int"
       }
-    },
-    "tagClass": {
-      "vid": "tagClass",
-      "label": "Tagclass",
-      "attr": null
-    },
-    "otherTagClass": {
-      "vid": "otherTagClass",
-      "label": "Tagclass",
-      "attr": {
-        "attr": "name",
-        "op": "=",
-        "value": "Artist",
-        "type": "string"
-      }
-    },
-    "tag": {
-      "vid": "tag",
-      "label": "Tag",
-      "attr": null
     }
   },
   "edges": {
+    "d": {
+      "eid": "d",
+      "src_vid": "post",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    },
+    "f": {
+      "eid": "f",
+      "src_vid": "tagClass",
+      "dst_vid": "otherTagClass",
+      "label": "isSubclassOf",
+      "attr": null
+    },
     "a": {
       "eid": "a",
       "src_vid": "person",
@@ -75,11 +89,11 @@
       "label": "hasType",
       "attr": null
     },
-    "d": {
-      "eid": "d",
-      "src_vid": "post",
-      "dst_vid": "tag",
-      "label": "hasTag",
+    "c": {
+      "eid": "c",
+      "src_vid": "comment",
+      "dst_vid": "post",
+      "label": "replyOf",
       "attr": null
     },
     "b": {
@@ -87,20 +101,6 @@
       "src_vid": "comment",
       "dst_vid": "friend",
       "label": "hasCreator",
-      "attr": null
-    },
-    "f": {
-      "eid": "f",
-      "src_vid": "tagClass",
-      "dst_vid": "otherTagClass",
-      "label": "isSubclassOf",
-      "attr": null
-    },
-    "c": {
-      "eid": "c",
-      "src_vid": "comment",
-      "dst_vid": "post",
-      "label": "replyOf",
       "attr": null
     }
   },
@@ -157,8 +157,8 @@
       "multi_ops": [],
       "target_var": "C^friend",
       "depend_on": [
-        "f^person",
-        "A^person"
+        "A^person",
+        "f^person"
       ]
     },
     {
@@ -170,8 +170,8 @@
       "target_var": "f^friend",
       "depend_on": [
         "f^person",
-        "A^person",
-        "C^friend"
+        "C^friend",
+        "A^person"
       ]
     },
     {
@@ -184,9 +184,9 @@
       "multi_ops": [],
       "target_var": "A^friend",
       "depend_on": [
-        "A^person",
         "C^friend",
         "f^friend",
+        "A^person",
         "f^person"
       ]
     },
@@ -210,9 +210,9 @@
       "multi_ops": [],
       "target_var": "f^tagClass",
       "depend_on": [
-        "A^otherTagClass",
+        "f^otherTagClass",
         "C^tagClass",
-        "f^otherTagClass"
+        "A^otherTagClass"
       ]
     },
     {
@@ -225,9 +225,9 @@
       "multi_ops": [],
       "target_var": "A^tagClass",
       "depend_on": [
-        "f^tagClass",
-        "A^otherTagClass",
         "C^tagClass",
+        "A^otherTagClass",
+        "f^tagClass",
         "f^otherTagClass"
       ]
     },
@@ -239,11 +239,11 @@
       "multi_ops": [],
       "target_var": "C^comment",
       "depend_on": [
+        "f^friend",
         "A^person",
-        "C^friend",
         "A^friend",
-        "f^person",
-        "f^friend"
+        "C^friend",
+        "f^person"
       ]
     },
     {
@@ -254,11 +254,11 @@
       "multi_ops": [],
       "target_var": "f^comment",
       "depend_on": [
-        "A^person",
+        "C^friend",
         "A^friend",
         "f^person",
         "f^friend",
-        "C^friend",
+        "A^person",
         "C^comment"
       ]
     },
@@ -272,13 +272,13 @@
       "multi_ops": [],
       "target_var": "A^comment",
       "depend_on": [
-        "A^person",
-        "f^friend",
-        "f^comment",
+        "A^friend",
+        "C^friend",
         "f^person",
         "C^comment",
-        "A^friend",
-        "C^friend"
+        "A^person",
+        "f^friend",
+        "f^comment"
       ]
     },
     {
@@ -289,14 +289,14 @@
       "multi_ops": [],
       "target_var": "C^post",
       "depend_on": [
-        "A^friend",
-        "C^comment",
-        "f^person",
-        "f^friend",
         "A^person",
+        "A^friend",
         "C^friend",
+        "f^comment",
+        "C^comment",
         "A^comment",
-        "f^comment"
+        "f^person",
+        "f^friend"
       ]
     },
     {
@@ -307,15 +307,15 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "A^person",
-        "A^comment",
+        "C^friend",
+        "f^person",
         "f^friend",
+        "C^post",
         "f^comment",
         "A^friend",
         "C^comment",
-        "C^post",
-        "C^friend",
-        "f^person"
+        "A^person",
+        "A^comment"
       ]
     },
     {
@@ -329,15 +329,15 @@
       "target_var": "A^post",
       "depend_on": [
         "f^post",
-        "A^person",
-        "A^friend",
-        "C^comment",
-        "C^friend",
         "A^comment",
-        "f^comment",
+        "C^friend",
+        "f^person",
+        "A^friend",
         "f^friend",
+        "A^person",
+        "C^comment",
         "C^post",
-        "f^person"
+        "f^comment"
       ]
     },
     {
@@ -346,27 +346,27 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^tagClass",
-        "A^post"
+        "A^post",
+        "A^tagClass"
       ],
       "target_var": "T^tag",
       "depend_on": [
-        "f^post",
+        "A^comment",
+        "A^post",
+        "C^friend",
+        "f^person",
+        "C^post",
+        "A^friend",
+        "C^comment",
+        "f^comment",
+        "f^otherTagClass",
+        "f^tagClass",
+        "C^tagClass",
+        "A^otherTagClass",
         "f^friend",
         "A^tagClass",
-        "A^comment",
-        "A^person",
-        "A^friend",
-        "f^person",
-        "f^tagClass",
-        "C^post",
-        "A^otherTagClass",
-        "C^tagClass",
-        "f^otherTagClass",
-        "f^comment",
-        "C^comment",
-        "A^post",
-        "C^friend"
+        "f^post",
+        "A^person"
       ]
     },
     {
@@ -377,23 +377,23 @@
       "multi_ops": [],
       "target_var": "C^tag",
       "depend_on": [
-        "A^friend",
-        "A^otherTagClass",
-        "C^comment",
         "f^otherTagClass",
-        "f^tagClass",
-        "A^post",
         "f^friend",
         "A^comment",
-        "A^person",
         "C^post",
-        "C^friend",
-        "T^tag",
-        "f^person",
-        "f^comment",
-        "f^post",
+        "A^friend",
         "A^tagClass",
-        "C^tagClass"
+        "C^friend",
+        "f^post",
+        "f^person",
+        "A^otherTagClass",
+        "A^person",
+        "C^tagClass",
+        "C^comment",
+        "f^tagClass",
+        "A^post",
+        "T^tag",
+        "f^comment"
       ]
     },
     {
@@ -404,24 +404,24 @@
       "multi_ops": [],
       "target_var": "f^tag",
       "depend_on": [
-        "A^person",
+        "f^otherTagClass",
+        "A^comment",
+        "C^post",
         "f^person",
+        "A^otherTagClass",
+        "C^friend",
+        "f^post",
+        "A^tagClass",
+        "T^tag",
+        "f^tagClass",
         "f^comment",
         "C^tag",
-        "A^comment",
-        "f^otherTagClass",
-        "f^friend",
-        "A^post",
-        "f^tagClass",
-        "C^post",
-        "C^comment",
-        "C^friend",
-        "T^tag",
-        "f^post",
-        "C^tagClass",
-        "A^tagClass",
         "A^friend",
-        "A^otherTagClass"
+        "A^person",
+        "A^post",
+        "C^comment",
+        "C^tagClass",
+        "f^friend"
       ]
     },
     {
@@ -430,35 +430,35 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^tagClass",
-        "f^friend",
+        "f^comment",
         "f^post",
+        "f^tag",
         "f^otherTagClass",
         "f^person",
-        "f^tag",
-        "f^comment"
+        "f^friend",
+        "f^tagClass"
       ],
       "target_var": "f",
       "depend_on": [
-        "A^otherTagClass",
-        "f^tag",
-        "A^comment",
-        "f^comment",
-        "C^post",
-        "f^post",
-        "f^otherTagClass",
-        "A^post",
         "f^friend",
-        "C^comment",
-        "A^friend",
-        "C^friend",
+        "f^tagClass",
         "T^tag",
+        "f^comment",
+        "A^post",
+        "f^post",
+        "A^comment",
+        "A^otherTagClass",
+        "C^tag",
+        "C^friend",
+        "C^tagClass",
+        "f^otherTagClass",
         "f^person",
         "A^person",
+        "f^tag",
+        "C^comment",
         "A^tagClass",
-        "C^tagClass",
-        "f^tagClass",
-        "C^tag"
+        "A^friend",
+        "C^post"
       ]
     }
   ]

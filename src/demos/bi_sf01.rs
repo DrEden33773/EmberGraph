@@ -12,7 +12,7 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
   let plan_json_content = fs::read_to_string(path).await?;
 
   let result =
-    ExecEngine::<CachedStorageAdapter<SqliteStorageAdapter>>::build_from_json(&plan_json_content)
+    ExecEngine::<CachedStorageAdapter<Neo4jStorageAdapter>>::build_from_json(&plan_json_content)
       .await
       .exec()
       .await;
@@ -108,8 +108,38 @@ pub async fn bi_14_on_sf_01() -> io::Result<()> {
   exec("ldbc-bi-14.json").await
 }
 
-/// ❌  Match more (5 > 3)
+/// ⚠️  Slow query: `Intersect("A^personB", "A^c1")`, `Intersect("A^c2", "A^forum")`
+pub async fn bi_15_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-15' on 'SF0.1' ...\n");
+  exec("ldbc-bi-15.json").await
+}
+
+/// ☑️
+pub async fn bi_16_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-16' on 'SF0.1' ...\n");
+  exec("ldbc-bi-16.json").await
+}
+
+/// ☑️
 pub async fn bi_17_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-17' on 'SF0.1' ...\n");
   exec("ldbc-bi-17.json").await
+}
+
+/// ☑️
+pub async fn bi_18_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-18' on 'SF0.1' ...\n");
+  exec("ldbc-bi-18.json").await
+}
+
+/// ☑️
+pub async fn bi_19_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-19' on 'SF0.1' ...\n");
+  exec("ldbc-bi-19.json").await
+}
+
+/// ☑️
+pub async fn bi_20_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-20' on 'SF0.1' ...\n");
+  exec("ldbc-bi-20.json").await
 }

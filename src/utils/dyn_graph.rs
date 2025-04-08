@@ -37,7 +37,7 @@ impl BitOr for VNode {
   }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
   /// vid -> v_entity
   pub(crate) v_entities: HashMap<Vid, VType>,
@@ -47,26 +47,12 @@ pub struct DynGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
 
   pub(crate) adj_table: HashMap<Vid, VNode>,
 
-  /// vid -> v_pattern_str
-  pub(crate) vid_2_pattern: HashMap<Vid, String>,
-
-  /// eid -> e_pattern_str
-  pub(crate) eid_2_pattern: HashMap<Eid, String>,
-
   /// v_pattern_str -> [vid]
   pub(crate) pattern_2_vids: HashMap<String, HashSet<Vid>>,
 
   /// e_pattern_str -> [eid]
   pub(crate) pattern_2_eids: HashMap<String, HashSet<Eid>>,
 }
-
-impl<VType: VBase, EType: EBase> PartialEq for DynGraph<VType, EType> {
-  fn eq(&self, other: &Self) -> bool {
-    self.adj_table == other.adj_table
-  }
-}
-
-impl<VType: VBase, EType: EBase> Eq for DynGraph<VType, EType> {}
 
 impl<VType: VBase, EType: EBase> Hash for DynGraph<VType, EType> {
   fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
@@ -89,8 +75,6 @@ impl<VType: VBase, EType: EBase> Default for DynGraph<VType, EType> {
       v_entities: Default::default(),
       e_entities: Default::default(),
       adj_table: Default::default(),
-      vid_2_pattern: Default::default(),
-      eid_2_pattern: Default::default(),
       pattern_2_vids: Default::default(),
       pattern_2_eids: Default::default(),
     }
@@ -103,18 +87,12 @@ impl<VType: VBase, EType: EBase> BitOr for DynGraph<VType, EType> {
   fn bitor(self, rhs: Self) -> Self::Output {
     let mut v_entities = self.v_entities;
     let mut e_entities = self.e_entities;
-    let mut v_patterns = self.vid_2_pattern;
-    let mut e_patterns = self.eid_2_pattern;
     v_entities.extend(rhs.v_entities);
     e_entities.extend(rhs.e_entities);
-    v_patterns.extend(rhs.vid_2_pattern);
-    e_patterns.extend(rhs.eid_2_pattern);
 
     let mut res = DynGraph {
       v_entities,
       e_entities,
-      vid_2_pattern: v_patterns,
-      eid_2_pattern: e_patterns,
       ..Default::default()
     };
 
@@ -161,24 +139,6 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
         return false;
       }
     }
-    // v_patterns
-    for (vid, v_pattern) in self.vid_2_pattern.iter() {
-      if !other.vid_2_pattern.contains_key(vid) {
-        return false;
-      }
-      if other.vid_2_pattern[vid] != *v_pattern {
-        return false;
-      }
-    }
-    // e_patterns
-    for (eid, e_pattern) in self.eid_2_pattern.iter() {
-      if !other.eid_2_pattern.contains_key(eid) {
-        return false;
-      }
-      if other.eid_2_pattern[eid] != *e_pattern {
-        return false;
-      }
-    }
     true
   }
 
@@ -201,17 +161,6 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
 
     self.v_entities.insert(vid.clone(), vertex);
     self.adj_table.entry(vid.clone()).or_default();
-
-    let _old_pattern = self
-      .vid_2_pattern
-      .insert(vid.clone(), pattern.as_ref().to_string());
-    // if let Some(old_pattern) = _old_pattern {
-    //   self
-    //     .pattern_2_vids
-    //     .get_mut(&old_pattern)
-    //     .unwrap()
-    //     .remove(&vid);
-    // }
 
     self
       .pattern_2_vids
@@ -254,15 +203,6 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
         .e_in
         .insert(eid.clone());
 
-      let _old_pattern = self.eid_2_pattern.insert(eid.clone(), pattern.clone());
-      // if let Some(old_pattern) = _old_pattern {
-      //   self
-      //     .pattern_2_eids
-      //     .get_mut(&old_pattern)
-      //     .unwrap()
-      //     .remove(&eid);
-      // }
-
       self.pattern_2_eids.entry(pattern).or_default().insert(eid);
 
       self
@@ -302,8 +242,8 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
     }
     self.e_entities.remove(eid);
 
-    if let Some(pattern) = self.eid_2_pattern.remove(eid) {
-      self.pattern_2_eids.get_mut(&pattern).unwrap().remove(eid);
+    for eids in self.pattern_2_eids.values_mut() {
+      eids.remove(eid);
     }
 
     self
@@ -357,47 +297,32 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   }
 
   #[inline]
-  pub fn drain_v_pattern_pairs(&mut self) -> Vec<(VType, String)> {
-    self
-      .v_entities
-      .drain()
-      .map(|(vid, v_entity)| {
-        let pattern = self.vid_2_pattern.remove(&vid).unwrap();
-        (v_entity, pattern)
-      })
-      .collect()
-  }
-  #[inline]
-  pub fn drain_e_pattern_pairs(&mut self) -> Vec<(EType, String)> {
-    self
-      .e_entities
-      .drain()
-      .map(|(eid, e_entity)| {
-        let pattern = self.eid_2_pattern.remove(&eid).unwrap();
-        (e_entity, pattern)
-      })
-      .collect()
-  }
-
-  #[inline]
   pub fn get_v_pattern_pairs_cloned(&self) -> Vec<(VType, String)> {
     self
-      .v_entities
+      .pattern_2_vids
       .iter()
-      .map(|(vid, v_entity)| {
-        let pattern = self.vid_2_pattern.get(vid).unwrap().clone();
-        (v_entity.clone(), pattern)
+      .flat_map(|(pattern, vids)| {
+        vids.iter().filter_map(|vid| {
+          self
+            .v_entities
+            .get(vid)
+            .map(|v_entity| (v_entity.clone(), pattern.clone()))
+        })
       })
       .collect()
   }
   #[inline]
   pub fn get_e_pattern_pairs_cloned(&self) -> Vec<(EType, String)> {
     self
-      .e_entities
+      .pattern_2_eids
       .iter()
-      .map(|(eid, e_entity)| {
-        let pattern = self.eid_2_pattern.get(eid).unwrap().clone();
-        (e_entity.clone(), pattern)
+      .flat_map(|(pattern, eids)| {
+        eids.iter().filter_map(|eid| {
+          self
+            .e_entities
+            .get(eid)
+            .map(|e_entity| (e_entity.clone(), pattern.clone()))
+        })
       })
       .collect()
   }

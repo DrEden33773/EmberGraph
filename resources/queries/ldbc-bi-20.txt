@@ -1,0 +1,15 @@
+4 4 3 0
+
+person1 Person
+person2 Person
+company Company
+university University
+
+a person1 person2 knows
+b person1 company workAt
+c person1 university studyAt
+d person2 university studyAt
+
+person2 id =8796093022379
+person1 id !=8796093022379
+company name ='MDLR_Airlines'

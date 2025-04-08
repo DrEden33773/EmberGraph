@@ -5,6 +5,11 @@
     "person"
   ],
   "vertices": {
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": null
+    },
     "post": {
       "vid": "post",
       "label": "Post",
@@ -24,11 +29,6 @@
         "value": 1290666911352,
         "type": "int"
       }
-    },
-    "person": {
-      "vid": "person",
-      "label": "Person",
-      "attr": null
     }
   },
   "edges": {
@@ -78,8 +78,8 @@
       "multi_ops": [],
       "target_var": "C^comment",
       "depend_on": [
-        "f^post",
-        "A^post"
+        "A^post",
+        "f^post"
       ]
     },
     {
@@ -90,8 +90,8 @@
       "multi_ops": [],
       "target_var": "f^comment",
       "depend_on": [
-        "f^post",
         "C^comment",
+        "f^post",
         "A^post"
       ]
     },
@@ -105,10 +105,10 @@
       "multi_ops": [],
       "target_var": "A^comment",
       "depend_on": [
-        "A^post",
-        "f^post",
+        "f^comment",
         "C^comment",
-        "f^comment"
+        "A^post",
+        "f^post"
       ]
     },
     {
@@ -119,11 +119,11 @@
       "multi_ops": [],
       "target_var": "C^person",
       "depend_on": [
-        "A^comment",
-        "f^comment",
-        "f^post",
         "A^post",
-        "C^comment"
+        "f^post",
+        "C^comment",
+        "f^comment",
+        "A^comment"
       ]
     },
     {
@@ -134,12 +134,12 @@
       "multi_ops": [],
       "target_var": "f^person",
       "depend_on": [
-        "C^person",
-        "f^comment",
-        "f^post",
-        "A^comment",
         "A^post",
-        "C^comment"
+        "f^comment",
+        "A^comment",
+        "C^comment",
+        "f^post",
+        "C^person"
       ]
     },
     {
@@ -148,19 +148,19 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^person",
+        "f^comment",
         "f^post",
-        "f^comment"
+        "f^person"
       ],
       "target_var": "f",
       "depend_on": [
-        "A^post",
-        "C^comment",
-        "f^person",
-        "C^person",
         "f^post",
+        "A^post",
+        "f^person",
         "f^comment",
-        "A^comment"
+        "A^comment",
+        "C^person",
+        "C^comment"
       ]
     }
   ]

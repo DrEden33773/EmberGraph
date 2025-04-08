@@ -4,22 +4,22 @@
     "friend"
   ],
   "vertices": {
-    "friend": {
-      "vid": "friend",
-      "label": "Person",
-      "attr": {
-        "attr": "id",
-        "op": "!=",
-        "value": 6597069766660,
-        "type": "int"
-      }
-    },
     "person": {
       "vid": "person",
       "label": "Person",
       "attr": {
         "attr": "id",
         "op": "=",
+        "value": 6597069766660,
+        "type": "int"
+      }
+    },
+    "friend": {
+      "vid": "friend",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "!=",
         "value": 6597069766660,
         "type": "int"
       }
@@ -77,8 +77,8 @@
       "multi_ops": [],
       "target_var": "f^friend",
       "depend_on": [
-        "C^friend",
         "f^person",
+        "C^friend",
         "A^person"
       ]
     },
@@ -95,8 +95,8 @@
       "depend_on": [
         "f^person",
         "f^friend",
-        "A^person",
-        "C^friend"
+        "C^friend",
+        "A^person"
       ]
     }
   ]

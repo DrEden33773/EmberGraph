@@ -5,15 +5,10 @@
     "person"
   ],
   "vertices": {
-    "comment": {
-      "vid": "comment",
-      "label": "Comment",
-      "attr": {
-        "attr": "creationDate",
-        "op": ">=",
-        "value": 1290666911352,
-        "type": "int"
-      }
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": null
     },
     "post": {
       "vid": "post",
@@ -25,25 +20,30 @@
         "type": "int"
       }
     },
-    "person": {
-      "vid": "person",
-      "label": "Person",
-      "attr": null
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
+      "attr": {
+        "attr": "creationDate",
+        "op": ">=",
+        "value": 1290666911352,
+        "type": "int"
+      }
     }
   },
   "edges": {
-    "a": {
-      "eid": "a",
-      "src_vid": "comment",
-      "dst_vid": "post",
-      "label": "replyOf",
-      "attr": null
-    },
     "b": {
       "eid": "b",
       "src_vid": "post",
       "dst_vid": "person",
       "label": "hasCreator",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "comment",
+      "dst_vid": "post",
+      "label": "replyOf",
       "attr": null
     }
   },
@@ -78,8 +78,8 @@
       "multi_ops": [],
       "target_var": "C^post",
       "depend_on": [
-        "f^comment",
-        "A^comment"
+        "A^comment",
+        "f^comment"
       ]
     },
     {
@@ -90,9 +90,9 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
+        "f^comment",
         "A^comment",
-        "C^post",
-        "f^comment"
+        "C^post"
       ]
     },
     {
@@ -105,9 +105,9 @@
       "multi_ops": [],
       "target_var": "A^post",
       "depend_on": [
-        "f^post",
-        "A^comment",
         "f^comment",
+        "A^comment",
+        "f^post",
         "C^post"
       ]
     },
@@ -119,8 +119,8 @@
       "multi_ops": [],
       "target_var": "C^person",
       "depend_on": [
-        "A^post",
         "f^post",
+        "A^post",
         "A^comment",
         "f^comment",
         "C^post"
@@ -134,12 +134,12 @@
       "multi_ops": [],
       "target_var": "f^person",
       "depend_on": [
-        "A^comment",
-        "A^post",
-        "C^post",
         "f^post",
+        "A^comment",
+        "C^post",
+        "C^person",
         "f^comment",
-        "C^person"
+        "A^post"
       ]
     },
     {
@@ -148,19 +148,19 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^comment",
         "f^post",
-        "f^person"
+        "f^person",
+        "f^comment"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^post",
-        "A^post",
-        "A^comment",
-        "C^person",
         "f^comment",
+        "f^person",
+        "A^comment",
+        "f^post",
         "C^post",
-        "f^person"
+        "A^post",
+        "C^person"
       ]
     }
   ]
