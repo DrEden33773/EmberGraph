@@ -1,3 +1,4 @@
+PROFILE
 MATCH
     (c: Person)-[_a: knows]->(a: Person),
     (c)-[_b: isLocatedIn]->(city_c: City),

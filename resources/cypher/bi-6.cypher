@@ -1,3 +1,4 @@
+PROFILE
 MATCH
     (person2: Person)-[a: likes]->(post1: Post),
     (post1)-[b: hasTag]->(tag: Tag),

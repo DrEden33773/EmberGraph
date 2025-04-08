@@ -1,3 +1,4 @@
+PROFILE
 MATCH
     (post: Post)-[a: hasCreator]->(person: Person),
     (post)-[b: hasTag]->(tag: Tag),

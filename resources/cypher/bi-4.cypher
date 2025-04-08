@@ -1,3 +1,4 @@
+PROFILE
 MATCH
     (forum: Forum)-[a: hasMember]->(member: Person),
     (member)-[b: isLocatedIn]->(city: City),

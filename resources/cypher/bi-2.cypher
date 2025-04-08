@@ -1,3 +1,4 @@
+PROFILE
 MATCH
     (post: Post)-[a: hasTag]->(tag: Tag),
     (comment: Comment)-[b: hasTag]->(tag),
