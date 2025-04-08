@@ -66,8 +66,7 @@ async fn run_test_only() -> io::Result<()> {
 
 #[allow(dead_code)]
 async fn run_demo() -> io::Result<()> {
-  #[allow(unused_imports)]
-  use ember_graph::demos::{bi_sf01::*, complex_interactive_sf01::*, simple_interactive_sf01::*};
+  use ember_graph::demos::bi_sf01::*;
 
   bi_1_on_sf_01().await?;
   // bi_2_on_sf_01().await?;
