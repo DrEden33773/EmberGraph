@@ -37,7 +37,7 @@ impl BitOr for VNode {
   }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct DynGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
   /// vid -> v_entity
   pub(crate) v_entities: HashMap<Vid, VType>,
@@ -59,6 +59,14 @@ pub struct DynGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
   /// e_pattern_str -> [eid]
   pub(crate) pattern_2_eids: HashMap<String, HashSet<Eid>>,
 }
+
+impl<VType: VBase, EType: EBase> PartialEq for DynGraph<VType, EType> {
+  fn eq(&self, other: &Self) -> bool {
+    self.adj_table == other.adj_table
+  }
+}
+
+impl<VType: VBase, EType: EBase> Eq for DynGraph<VType, EType> {}
 
 impl<VType: VBase, EType: EBase> Hash for DynGraph<VType, EType> {
   fn hash<H: std::hash::Hasher>(&self, state: &mut H) {

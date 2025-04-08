@@ -9,8 +9,8 @@ dotenv = "0.15.0"
 futures = "0.3.31"
 hashbrown = { version = "0.15.2", features = ["rayon", "serde"] }
 itertools = "0.14.0"
-lru = "0.13.0"
 mimalloc = "0.1.44"
+moka = { version = "0.12.10", features = ["future"] }
 neo4rs = "0.8.0"
 num_cpus = "1.16.0"
 ordered-float = "5.0.0"
