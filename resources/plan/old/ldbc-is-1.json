@@ -60,8 +60,8 @@
       "multi_ops": [],
       "target_var": "C^city",
       "depend_on": [
-        "f^person",
-        "A^person"
+        "A^person",
+        "f^person"
       ]
     },
     {
@@ -72,9 +72,9 @@
       "multi_ops": [],
       "target_var": "f^city",
       "depend_on": [
-        "f^person",
         "C^city",
-        "A^person"
+        "A^person",
+        "f^person"
       ]
     },
     {
@@ -83,15 +83,15 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^person",
-        "f^city"
+        "f^city",
+        "f^person"
       ],
       "target_var": "f",
       "depend_on": [
-        "A^person",
-        "f^person",
         "C^city",
-        "f^city"
+        "f^city",
+        "A^person",
+        "f^person"
       ]
     }
   ]

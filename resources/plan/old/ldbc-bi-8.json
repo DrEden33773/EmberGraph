@@ -1,13 +1,13 @@
 {
   "matching_order": [
     "tag",
-    "comment",
     "friend",
-    "person"
+    "person",
+    "comment"
   ],
   "vertices": {
-    "person": {
-      "vid": "person",
+    "friend": {
+      "vid": "friend",
       "label": "Person",
       "attr": null
     },
@@ -21,6 +21,11 @@
         "type": "string"
       }
     },
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": null
+    },
     "comment": {
       "vid": "comment",
       "label": "Comment",
@@ -30,26 +35,21 @@
         "value": 1289146646222,
         "type": "int"
       }
-    },
-    "friend": {
-      "vid": "friend",
-      "label": "Person",
-      "attr": null
     }
   },
   "edges": {
-    "c": {
-      "eid": "c",
-      "src_vid": "person",
-      "dst_vid": "tag",
-      "label": "hasInterest",
-      "attr": null
-    },
     "b": {
       "eid": "b",
       "src_vid": "comment",
       "dst_vid": "person",
       "label": "hasCreator",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "person",
+      "dst_vid": "tag",
+      "label": "hasInterest",
       "attr": null
     },
     "a": {
@@ -92,47 +92,6 @@
       ]
     },
     {
-      "vid": "comment",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": "A^tag",
-      "multi_ops": [],
-      "target_var": "C^comment",
-      "depend_on": [
-        "f^tag",
-        "A^tag"
-      ]
-    },
-    {
-      "vid": "comment",
-      "type": "foreach",
-      "expand_eid_list": [],
-      "single_op": "C^comment",
-      "multi_ops": [],
-      "target_var": "f^comment",
-      "depend_on": [
-        "C^comment",
-        "f^tag",
-        "A^tag"
-      ]
-    },
-    {
-      "vid": "comment",
-      "type": "get_adj",
-      "expand_eid_list": [
-        "b"
-      ],
-      "single_op": "f^comment",
-      "multi_ops": [],
-      "target_var": "A^comment",
-      "depend_on": [
-        "A^tag",
-        "C^comment",
-        "f^comment",
-        "f^tag"
-      ]
-    },
-    {
       "vid": "friend",
       "type": "init",
       "expand_eid_list": [],
@@ -161,18 +120,14 @@
       "single_op": null,
       "multi_ops": [
         "A^friend",
-        "A^tag",
-        "A^comment"
+        "A^tag"
       ],
       "target_var": "T^person",
       "depend_on": [
-        "C^comment",
-        "A^tag",
-        "A^friend",
         "f^tag",
-        "f^comment",
-        "A^comment",
-        "f^friend"
+        "A^friend",
+        "f^friend",
+        "A^tag"
       ]
     },
     {
@@ -183,13 +138,10 @@
       "multi_ops": [],
       "target_var": "C^person",
       "depend_on": [
-        "A^comment",
-        "f^tag",
-        "T^person",
-        "C^comment",
         "A^friend",
         "A^tag",
-        "f^comment",
+        "T^person",
+        "f^tag",
         "f^friend"
       ]
     },
@@ -201,15 +153,91 @@
       "multi_ops": [],
       "target_var": "f^person",
       "depend_on": [
-        "f^tag",
-        "T^person",
-        "f^comment",
-        "A^tag",
-        "C^comment",
-        "A^comment",
         "f^friend",
+        "C^person",
+        "T^person",
+        "A^tag",
+        "f^tag",
+        "A^friend"
+      ]
+    },
+    {
+      "vid": "person",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "b"
+      ],
+      "single_op": "f^person",
+      "multi_ops": [],
+      "target_var": "A^person",
+      "depend_on": [
         "A^friend",
-        "C^person"
+        "A^tag",
+        "f^friend",
+        "C^person",
+        "T^person",
+        "f^person",
+        "f^tag"
+      ]
+    },
+    {
+      "vid": "comment",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^tag",
+        "A^person"
+      ],
+      "target_var": "T^comment",
+      "depend_on": [
+        "f^person",
+        "A^person",
+        "A^friend",
+        "f^friend",
+        "A^tag",
+        "C^person",
+        "T^person",
+        "f^tag"
+      ]
+    },
+    {
+      "vid": "comment",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^comment",
+      "multi_ops": [],
+      "target_var": "C^comment",
+      "depend_on": [
+        "T^comment",
+        "A^friend",
+        "f^person",
+        "T^person",
+        "A^person",
+        "C^person",
+        "A^tag",
+        "f^tag",
+        "f^friend"
+      ]
+    },
+    {
+      "vid": "comment",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^comment",
+      "multi_ops": [],
+      "target_var": "f^comment",
+      "depend_on": [
+        "T^comment",
+        "f^person",
+        "A^tag",
+        "f^tag",
+        "C^person",
+        "A^friend",
+        "A^person",
+        "f^friend",
+        "C^comment",
+        "T^person"
       ]
     },
     {
@@ -218,23 +246,24 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^friend",
-        "f^tag",
         "f^comment",
-        "f^person"
+        "f^person",
+        "f^friend",
+        "f^tag"
       ],
       "target_var": "f",
       "depend_on": [
+        "A^tag",
+        "C^person",
+        "A^friend",
         "f^comment",
         "f^tag",
-        "C^person",
-        "A^tag",
         "T^person",
-        "A^comment",
-        "A^friend",
-        "C^comment",
+        "A^person",
+        "f^person",
         "f^friend",
-        "f^person"
+        "T^comment",
+        "C^comment"
       ]
     }
   ]

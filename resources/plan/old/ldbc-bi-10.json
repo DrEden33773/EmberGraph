@@ -1,7 +1,7 @@
 {
   "matching_order": [
-    "tagClass",
     "startPerson",
+    "tagClass",
     "country",
     "expertCandidatePerson",
     "city",
@@ -10,14 +10,24 @@
     "tag"
   ],
   "vertices": {
-    "country": {
-      "vid": "country",
-      "label": "Country",
+    "expertCandidatePerson": {
+      "vid": "expertCandidatePerson",
+      "label": "Person",
       "attr": null
     },
-    "city": {
-      "vid": "city",
-      "label": "City",
+    "otherTag": {
+      "vid": "otherTag",
+      "label": "Tag",
+      "attr": null
+    },
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": null
+    },
+    "post": {
+      "vid": "post",
+      "label": "Post",
       "attr": null
     },
     "tagClass": {
@@ -30,16 +40,6 @@
         "type": "string"
       }
     },
-    "post": {
-      "vid": "post",
-      "label": "Post",
-      "attr": null
-    },
-    "tag": {
-      "vid": "tag",
-      "label": "Tag",
-      "attr": null
-    },
     "startPerson": {
       "vid": "startPerson",
       "label": "Person",
@@ -50,37 +50,23 @@
         "type": "int"
       }
     },
-    "expertCandidatePerson": {
-      "vid": "expertCandidatePerson",
-      "label": "Person",
+    "city": {
+      "vid": "city",
+      "label": "City",
       "attr": null
     },
-    "otherTag": {
-      "vid": "otherTag",
-      "label": "Tag",
+    "country": {
+      "vid": "country",
+      "label": "Country",
       "attr": null
     }
   },
   "edges": {
-    "a": {
-      "eid": "a",
-      "src_vid": "post",
-      "dst_vid": "tag",
-      "label": "hasTag",
-      "attr": null
-    },
     "e": {
       "eid": "e",
       "src_vid": "startPerson",
       "dst_vid": "expertCandidatePerson",
       "label": "knows",
-      "attr": null
-    },
-    "g": {
-      "eid": "g",
-      "src_vid": "city",
-      "dst_vid": "country",
-      "label": "isPartOf",
       "attr": null
     },
     "b": {
@@ -90,11 +76,11 @@
       "label": "hasType",
       "attr": null
     },
-    "d": {
-      "eid": "d",
-      "src_vid": "post",
-      "dst_vid": "expertCandidatePerson",
-      "label": "hasCreator",
+    "g": {
+      "eid": "g",
+      "src_vid": "city",
+      "dst_vid": "country",
+      "label": "isPartOf",
       "attr": null
     },
     "c": {
@@ -104,37 +90,29 @@
       "label": "hasTag",
       "attr": null
     },
+    "a": {
+      "eid": "a",
+      "src_vid": "post",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    },
     "f": {
       "eid": "f",
       "src_vid": "expertCandidatePerson",
       "dst_vid": "city",
       "label": "isLocatedIn",
       "attr": null
+    },
+    "d": {
+      "eid": "d",
+      "src_vid": "post",
+      "dst_vid": "expertCandidatePerson",
+      "label": "hasCreator",
+      "attr": null
     }
   },
   "instructions": [
-    {
-      "vid": "tagClass",
-      "type": "init",
-      "expand_eid_list": [],
-      "single_op": null,
-      "multi_ops": [],
-      "target_var": "f^tagClass",
-      "depend_on": []
-    },
-    {
-      "vid": "tagClass",
-      "type": "get_adj",
-      "expand_eid_list": [
-        "b"
-      ],
-      "single_op": "f^tagClass",
-      "multi_ops": [],
-      "target_var": "A^tagClass",
-      "depend_on": [
-        "f^tagClass"
-      ]
-    },
     {
       "vid": "startPerson",
       "type": "init",
@@ -155,6 +133,28 @@
       "target_var": "A^startPerson",
       "depend_on": [
         "f^startPerson"
+      ]
+    },
+    {
+      "vid": "tagClass",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^tagClass",
+      "depend_on": []
+    },
+    {
+      "vid": "tagClass",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "b"
+      ],
+      "single_op": "f^tagClass",
+      "multi_ops": [],
+      "target_var": "A^tagClass",
+      "depend_on": [
+        "f^tagClass"
       ]
     },
     {
@@ -199,9 +199,9 @@
       "multi_ops": [],
       "target_var": "f^expertCandidatePerson",
       "depend_on": [
-        "f^startPerson",
+        "A^startPerson",
         "C^expertCandidatePerson",
-        "A^startPerson"
+        "f^startPerson"
       ]
     },
     {
@@ -215,9 +215,9 @@
       "multi_ops": [],
       "target_var": "A^expertCandidatePerson",
       "depend_on": [
-        "C^expertCandidatePerson",
         "f^expertCandidatePerson",
         "f^startPerson",
+        "C^expertCandidatePerson",
         "A^startPerson"
       ]
     },
@@ -227,18 +227,18 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^country",
-        "A^expertCandidatePerson"
+        "A^expertCandidatePerson",
+        "A^country"
       ],
       "target_var": "T^city",
       "depend_on": [
-        "f^country",
-        "A^country",
-        "f^expertCandidatePerson",
-        "f^startPerson",
-        "A^startPerson",
         "A^expertCandidatePerson",
-        "C^expertCandidatePerson"
+        "C^expertCandidatePerson",
+        "A^startPerson",
+        "f^country",
+        "f^startPerson",
+        "A^country",
+        "f^expertCandidatePerson"
       ]
     },
     {
@@ -250,11 +250,11 @@
       "target_var": "C^city",
       "depend_on": [
         "A^startPerson",
-        "T^city",
-        "f^startPerson",
-        "A^expertCandidatePerson",
-        "f^country",
         "C^expertCandidatePerson",
+        "f^country",
+        "T^city",
+        "A^expertCandidatePerson",
+        "f^startPerson",
         "A^country",
         "f^expertCandidatePerson"
       ]
@@ -267,15 +267,15 @@
       "multi_ops": [],
       "target_var": "f^city",
       "depend_on": [
-        "C^expertCandidatePerson",
+        "A^expertCandidatePerson",
         "C^city",
-        "f^country",
-        "f^startPerson",
         "A^startPerson",
+        "C^expertCandidatePerson",
         "A^country",
+        "f^startPerson",
         "T^city",
-        "f^expertCandidatePerson",
-        "A^expertCandidatePerson"
+        "f^country",
+        "f^expertCandidatePerson"
       ]
     },
     {
@@ -306,18 +306,18 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^expertCandidatePerson",
-        "A^otherTag"
+        "A^otherTag",
+        "A^expertCandidatePerson"
       ],
       "target_var": "T^post",
       "depend_on": [
-        "A^otherTag",
         "f^startPerson",
-        "f^otherTag",
-        "C^expertCandidatePerson",
+        "A^startPerson",
         "A^expertCandidatePerson",
+        "C^expertCandidatePerson",
+        "A^otherTag",
         "f^expertCandidatePerson",
-        "A^startPerson"
+        "f^otherTag"
       ]
     },
     {
@@ -328,14 +328,14 @@
       "multi_ops": [],
       "target_var": "C^post",
       "depend_on": [
+        "f^expertCandidatePerson",
+        "f^startPerson",
         "A^startPerson",
+        "A^expertCandidatePerson",
         "C^expertCandidatePerson",
         "T^post",
         "A^otherTag",
-        "f^startPerson",
-        "f^otherTag",
-        "A^expertCandidatePerson",
-        "f^expertCandidatePerson"
+        "f^otherTag"
       ]
     },
     {
@@ -346,15 +346,15 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "f^otherTag",
-        "A^startPerson",
-        "T^post",
+        "f^expertCandidatePerson",
+        "C^post",
         "A^expertCandidatePerson",
         "A^otherTag",
-        "f^expertCandidatePerson",
+        "T^post",
+        "A^startPerson",
         "f^startPerson",
-        "C^post",
-        "C^expertCandidatePerson"
+        "C^expertCandidatePerson",
+        "f^otherTag"
       ]
     },
     {
@@ -367,15 +367,15 @@
       "multi_ops": [],
       "target_var": "A^post",
       "depend_on": [
+        "f^post",
         "f^startPerson",
-        "C^expertCandidatePerson",
+        "f^expertCandidatePerson",
+        "C^post",
+        "A^expertCandidatePerson",
         "f^otherTag",
         "A^startPerson",
-        "C^post",
-        "f^expertCandidatePerson",
-        "A^expertCandidatePerson",
+        "C^expertCandidatePerson",
         "A^otherTag",
-        "f^post",
         "T^post"
       ]
     },
@@ -390,19 +390,19 @@
       ],
       "target_var": "T^tag",
       "depend_on": [
-        "A^tagClass",
-        "A^post",
         "A^startPerson",
         "C^post",
-        "f^post",
+        "A^tagClass",
         "A^expertCandidatePerson",
+        "C^expertCandidatePerson",
+        "A^post",
+        "A^otherTag",
         "T^post",
         "f^tagClass",
-        "C^expertCandidatePerson",
         "f^expertCandidatePerson",
         "f^startPerson",
         "f^otherTag",
-        "A^otherTag"
+        "f^post"
       ]
     },
     {
@@ -414,19 +414,19 @@
       "target_var": "C^tag",
       "depend_on": [
         "C^expertCandidatePerson",
-        "f^expertCandidatePerson",
-        "f^startPerson",
-        "f^otherTag",
-        "A^tagClass",
-        "A^post",
-        "A^otherTag",
-        "A^startPerson",
-        "f^post",
-        "T^tag",
-        "A^expertCandidatePerson",
-        "T^post",
         "C^post",
-        "f^tagClass"
+        "f^startPerson",
+        "A^otherTag",
+        "f^otherTag",
+        "T^post",
+        "f^expertCandidatePerson",
+        "f^post",
+        "A^expertCandidatePerson",
+        "A^tagClass",
+        "A^startPerson",
+        "T^tag",
+        "f^tagClass",
+        "A^post"
       ]
     },
     {
@@ -437,20 +437,20 @@
       "multi_ops": [],
       "target_var": "f^tag",
       "depend_on": [
-        "f^startPerson",
         "C^expertCandidatePerson",
-        "T^tag",
-        "f^tagClass",
+        "f^expertCandidatePerson",
+        "T^post",
+        "f^startPerson",
+        "A^tagClass",
         "C^post",
         "A^expertCandidatePerson",
-        "A^startPerson",
-        "T^post",
-        "f^post",
-        "C^tag",
-        "A^tagClass",
-        "f^expertCandidatePerson",
-        "A^otherTag",
+        "f^tagClass",
         "f^otherTag",
+        "A^startPerson",
+        "C^tag",
+        "T^tag",
+        "A^otherTag",
+        "f^post",
         "A^post"
       ]
     },
@@ -460,38 +460,38 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^post",
-        "f^tagClass",
-        "f^country",
-        "f^expertCandidatePerson",
         "f^city",
-        "f^otherTag",
         "f^startPerson",
-        "f^tag"
+        "f^post",
+        "f^expertCandidatePerson",
+        "f^tag",
+        "f^otherTag",
+        "f^tagClass",
+        "f^country"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^otherTag",
-        "C^post",
         "f^city",
-        "T^city",
-        "C^tag",
-        "f^country",
-        "f^tag",
-        "A^otherTag",
-        "f^startPerson",
-        "f^expertCandidatePerson",
-        "A^tagClass",
-        "A^post",
         "f^post",
         "A^startPerson",
-        "T^tag",
-        "A^country",
-        "C^expertCandidatePerson",
+        "A^post",
         "f^tagClass",
-        "T^post",
+        "T^tag",
+        "f^startPerson",
+        "f^tag",
+        "f^country",
         "A^expertCandidatePerson",
-        "C^city"
+        "A^country",
+        "C^city",
+        "C^tag",
+        "C^expertCandidatePerson",
+        "f^expertCandidatePerson",
+        "T^post",
+        "A^tagClass",
+        "f^otherTag",
+        "C^post",
+        "T^city",
+        "A^otherTag"
       ]
     }
   ]
