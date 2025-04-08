@@ -8,6 +8,8 @@ MATCH
     (post)<-[f: containerOf]-(forum: Forum)
 WHERE
     forum.creationDate >= 1282431075745
+    AND personA.id = 4398046511220
+    AND personB.id = 8796093022320
 RETURN
     personA,
     personB,

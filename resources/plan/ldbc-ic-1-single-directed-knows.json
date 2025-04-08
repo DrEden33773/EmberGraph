@@ -3,8 +3,8 @@
     "person",
     "otherPerson",
     "companyCountry",
-    "universityCity",
     "locationCity",
+    "universityCity",
     "company",
     "university"
   ],
@@ -24,21 +24,6 @@
         "type": "int"
       }
     },
-    "otherPerson": {
-      "vid": "otherPerson",
-      "label": "Person",
-      "attr": {
-        "attr": "firstName",
-        "op": "=",
-        "value": "Jose",
-        "type": "string"
-      }
-    },
-    "company": {
-      "vid": "company",
-      "label": "Company",
-      "attr": null
-    },
     "universityCity": {
       "vid": "universityCity",
       "label": "City",
@@ -53,20 +38,28 @@
       "vid": "locationCity",
       "label": "City",
       "attr": null
+    },
+    "company": {
+      "vid": "company",
+      "label": "Company",
+      "attr": null
+    },
+    "otherPerson": {
+      "vid": "otherPerson",
+      "label": "Person",
+      "attr": {
+        "attr": "firstName",
+        "op": "=",
+        "value": "Jose",
+        "type": "string"
+      }
     }
   },
   "edges": {
-    "b": {
-      "eid": "b",
-      "src_vid": "otherPerson",
-      "dst_vid": "locationCity",
-      "label": "isLocatedIn",
-      "attr": null
-    },
-    "f": {
-      "eid": "f",
-      "src_vid": "university",
-      "dst_vid": "universityCity",
+    "e": {
+      "eid": "e",
+      "src_vid": "company",
+      "dst_vid": "companyCountry",
       "label": "isLocatedIn",
       "attr": null
     },
@@ -77,13 +70,6 @@
       "label": "workAt",
       "attr": null
     },
-    "d": {
-      "eid": "d",
-      "src_vid": "otherPerson",
-      "dst_vid": "university",
-      "label": "studyAt",
-      "attr": null
-    },
     "a": {
       "eid": "a",
       "src_vid": "person",
@@ -91,10 +77,24 @@
       "label": "knows",
       "attr": null
     },
-    "e": {
-      "eid": "e",
-      "src_vid": "company",
-      "dst_vid": "companyCountry",
+    "d": {
+      "eid": "d",
+      "src_vid": "otherPerson",
+      "dst_vid": "university",
+      "label": "studyAt",
+      "attr": null
+    },
+    "f": {
+      "eid": "f",
+      "src_vid": "university",
+      "dst_vid": "universityCity",
+      "label": "isLocatedIn",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "otherPerson",
+      "dst_vid": "locationCity",
       "label": "isLocatedIn",
       "attr": null
     }
@@ -130,8 +130,8 @@
       "multi_ops": [],
       "target_var": "C^otherPerson",
       "depend_on": [
-        "A^person",
-        "f^person"
+        "f^person",
+        "A^person"
       ]
     },
     {
@@ -142,27 +142,27 @@
       "multi_ops": [],
       "target_var": "f^otherPerson",
       "depend_on": [
-        "A^person",
+        "C^otherPerson",
         "f^person",
-        "C^otherPerson"
+        "A^person"
       ]
     },
     {
       "vid": "otherPerson",
       "type": "get_adj",
       "expand_eid_list": [
-        "b",
         "c",
-        "d"
+        "d",
+        "b"
       ],
       "single_op": "f^otherPerson",
       "multi_ops": [],
       "target_var": "A^otherPerson",
       "depend_on": [
-        "f^person",
         "C^otherPerson",
         "f^otherPerson",
-        "A^person"
+        "A^person",
+        "f^person"
       ]
     },
     {
@@ -188,6 +188,37 @@
       ]
     },
     {
+      "vid": "locationCity",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^otherPerson",
+      "multi_ops": [],
+      "target_var": "C^locationCity",
+      "depend_on": [
+        "A^person",
+        "A^otherPerson",
+        "f^otherPerson",
+        "f^person",
+        "C^otherPerson"
+      ]
+    },
+    {
+      "vid": "locationCity",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^locationCity",
+      "multi_ops": [],
+      "target_var": "f^locationCity",
+      "depend_on": [
+        "f^person",
+        "f^otherPerson",
+        "C^otherPerson",
+        "A^otherPerson",
+        "C^locationCity",
+        "A^person"
+      ]
+    },
+    {
       "vid": "universityCity",
       "type": "init",
       "expand_eid_list": [],
@@ -210,54 +241,23 @@
       ]
     },
     {
-      "vid": "locationCity",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": "A^otherPerson",
-      "multi_ops": [],
-      "target_var": "C^locationCity",
-      "depend_on": [
-        "f^otherPerson",
-        "A^person",
-        "A^otherPerson",
-        "f^person",
-        "C^otherPerson"
-      ]
-    },
-    {
-      "vid": "locationCity",
-      "type": "foreach",
-      "expand_eid_list": [],
-      "single_op": "C^locationCity",
-      "multi_ops": [],
-      "target_var": "f^locationCity",
-      "depend_on": [
-        "f^person",
-        "f^otherPerson",
-        "C^otherPerson",
-        "C^locationCity",
-        "A^otherPerson",
-        "A^person"
-      ]
-    },
-    {
       "vid": "company",
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^companyCountry",
-        "A^otherPerson"
+        "A^otherPerson",
+        "A^companyCountry"
       ],
       "target_var": "T^company",
       "depend_on": [
-        "C^otherPerson",
+        "A^otherPerson",
         "A^person",
         "f^person",
-        "A^companyCountry",
         "f^otherPerson",
-        "f^companyCountry",
-        "A^otherPerson"
+        "C^otherPerson",
+        "A^companyCountry",
+        "f^companyCountry"
       ]
     },
     {
@@ -268,14 +268,14 @@
       "multi_ops": [],
       "target_var": "C^company",
       "depend_on": [
+        "f^companyCountry",
+        "A^person",
+        "f^otherPerson",
+        "T^company",
         "A^companyCountry",
         "A^otherPerson",
-        "f^otherPerson",
-        "f^companyCountry",
-        "T^company",
-        "C^otherPerson",
-        "A^person",
-        "f^person"
+        "f^person",
+        "C^otherPerson"
       ]
     },
     {
@@ -286,15 +286,15 @@
       "multi_ops": [],
       "target_var": "f^company",
       "depend_on": [
+        "T^company",
+        "A^person",
         "A^companyCountry",
         "f^companyCountry",
-        "C^otherPerson",
         "f^otherPerson",
-        "C^company",
         "f^person",
-        "A^otherPerson",
-        "T^company",
-        "A^person"
+        "C^company",
+        "C^otherPerson",
+        "A^otherPerson"
       ]
     },
     {
@@ -303,18 +303,18 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^universityCity",
-        "A^otherPerson"
+        "A^otherPerson",
+        "A^universityCity"
       ],
       "target_var": "T^university",
       "depend_on": [
         "f^otherPerson",
         "f^universityCity",
-        "A^universityCity",
         "A^otherPerson",
         "f^person",
         "C^otherPerson",
-        "A^person"
+        "A^person",
+        "A^universityCity"
       ]
     },
     {
@@ -325,14 +325,14 @@
       "multi_ops": [],
       "target_var": "C^university",
       "depend_on": [
-        "C^otherPerson",
-        "A^otherPerson",
-        "f^universityCity",
-        "f^person",
         "A^person",
         "T^university",
-        "A^universityCity",
-        "f^otherPerson"
+        "f^person",
+        "C^otherPerson",
+        "f^universityCity",
+        "A^otherPerson",
+        "f^otherPerson",
+        "A^universityCity"
       ]
     },
     {
@@ -344,14 +344,14 @@
       "target_var": "f^university",
       "depend_on": [
         "A^otherPerson",
-        "f^universityCity",
-        "A^person",
-        "f^person",
-        "T^university",
         "A^universityCity",
-        "f^otherPerson",
+        "f^universityCity",
         "C^university",
-        "C^otherPerson"
+        "A^person",
+        "T^university",
+        "C^otherPerson",
+        "f^person",
+        "f^otherPerson"
       ]
     },
     {
@@ -360,33 +360,33 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^universityCity",
-        "f^company",
-        "f^university",
         "f^person",
+        "f^otherPerson",
+        "f^universityCity",
+        "f^university",
+        "f^company",
         "f^locationCity",
-        "f^companyCountry",
-        "f^otherPerson"
+        "f^companyCountry"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^person",
-        "C^otherPerson",
-        "f^universityCity",
-        "f^otherPerson",
-        "T^university",
-        "A^otherPerson",
-        "C^locationCity",
-        "f^university",
-        "f^companyCountry",
-        "f^locationCity",
-        "C^company",
-        "A^person",
         "f^company",
-        "A^companyCountry",
+        "f^companyCountry",
+        "T^university",
         "T^company",
+        "A^companyCountry",
+        "C^company",
         "A^universityCity",
-        "C^university"
+        "C^locationCity",
+        "C^otherPerson",
+        "f^locationCity",
+        "f^otherPerson",
+        "f^person",
+        "f^universityCity",
+        "A^otherPerson",
+        "f^university",
+        "C^university",
+        "A^person"
       ]
     }
   ]

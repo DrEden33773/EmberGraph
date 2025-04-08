@@ -5,11 +5,6 @@
     "person"
   ],
   "vertices": {
-    "person": {
-      "vid": "person",
-      "label": "Person",
-      "attr": null
-    },
     "post": {
       "vid": "post",
       "label": "Post",
@@ -29,21 +24,26 @@
         "value": 1290666911352,
         "type": "int"
       }
+    },
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": null
     }
   },
   "edges": {
-    "b": {
-      "eid": "b",
-      "src_vid": "post",
-      "dst_vid": "person",
-      "label": "hasCreator",
-      "attr": null
-    },
     "a": {
       "eid": "a",
       "src_vid": "comment",
       "dst_vid": "post",
       "label": "replyOf",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "post",
+      "dst_vid": "person",
+      "label": "hasCreator",
       "attr": null
     }
   },
@@ -90,9 +90,9 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "f^comment",
+        "C^post",
         "A^comment",
-        "C^post"
+        "f^comment"
       ]
     },
     {
@@ -105,10 +105,10 @@
       "multi_ops": [],
       "target_var": "A^post",
       "depend_on": [
-        "f^comment",
-        "A^comment",
+        "C^post",
         "f^post",
-        "C^post"
+        "f^comment",
+        "A^comment"
       ]
     },
     {
@@ -119,10 +119,10 @@
       "multi_ops": [],
       "target_var": "C^person",
       "depend_on": [
+        "f^comment",
+        "A^comment",
         "f^post",
         "A^post",
-        "A^comment",
-        "f^comment",
         "C^post"
       ]
     },
@@ -134,12 +134,12 @@
       "multi_ops": [],
       "target_var": "f^person",
       "depend_on": [
+        "A^post",
         "f^post",
-        "A^comment",
         "C^post",
         "C^person",
-        "f^comment",
-        "A^post"
+        "A^comment",
+        "f^comment"
       ]
     },
     {
@@ -148,19 +148,19 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^post",
+        "f^comment",
         "f^person",
-        "f^comment"
+        "f^post"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^comment",
-        "f^person",
-        "A^comment",
-        "f^post",
-        "C^post",
         "A^post",
-        "C^person"
+        "f^post",
+        "f^comment",
+        "C^post",
+        "C^person",
+        "f^person",
+        "A^comment"
       ]
     }
   ]

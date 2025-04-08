@@ -7,12 +7,27 @@
     "person1",
     "person2",
     "person3",
-    "comment",
     "message1",
+    "comment",
     "post2",
     "post1"
   ],
   "vertices": {
+    "person2": {
+      "vid": "person2",
+      "label": "Person",
+      "attr": null
+    },
+    "post1": {
+      "vid": "post1",
+      "label": "Post",
+      "attr": null
+    },
+    "person3": {
+      "vid": "person3",
+      "label": "Person",
+      "attr": null
+    },
     "forum1": {
       "vid": "forum1",
       "label": "Forum",
@@ -23,15 +38,10 @@
         "type": "int"
       }
     },
-    "forum2": {
-      "vid": "forum2",
-      "label": "Forum",
-      "attr": {
-        "attr": "id",
-        "op": "!=",
-        "value": 206158431133,
-        "type": "int"
-      }
+    "person1": {
+      "vid": "person1",
+      "label": "Person",
+      "attr": null
     },
     "message1": {
       "vid": "message1",
@@ -48,26 +58,6 @@
         "type": "int"
       }
     },
-    "person2": {
-      "vid": "person2",
-      "label": "Person",
-      "attr": null
-    },
-    "person1": {
-      "vid": "person1",
-      "label": "Person",
-      "attr": null
-    },
-    "post2": {
-      "vid": "post2",
-      "label": "Post",
-      "attr": null
-    },
-    "post1": {
-      "vid": "post1",
-      "label": "Post",
-      "attr": null
-    },
     "tag": {
       "vid": "tag",
       "label": "Tag",
@@ -78,88 +68,28 @@
         "type": "string"
       }
     },
+    "post2": {
+      "vid": "post2",
+      "label": "Post",
+      "attr": null
+    },
     "comment": {
       "vid": "comment",
       "label": "Comment",
       "attr": null
     },
-    "person3": {
-      "vid": "person3",
-      "label": "Person",
-      "attr": null
+    "forum2": {
+      "vid": "forum2",
+      "label": "Forum",
+      "attr": {
+        "attr": "id",
+        "op": "!=",
+        "value": 206158431133,
+        "type": "int"
+      }
     }
   },
   "edges": {
-    "k": {
-      "eid": "k",
-      "src_vid": "message2",
-      "dst_vid": "person3",
-      "label": "hasCreator",
-      "attr": null
-    },
-    "d": {
-      "eid": "d",
-      "src_vid": "message1",
-      "dst_vid": "person1",
-      "label": "hasCreator",
-      "attr": null
-    },
-    "j": {
-      "eid": "j",
-      "src_vid": "comment",
-      "dst_vid": "message2",
-      "label": "replyOf",
-      "attr": null
-    },
-    "b": {
-      "eid": "b",
-      "src_vid": "message2",
-      "dst_vid": "tag",
-      "label": "hasTag",
-      "attr": null
-    },
-    "e": {
-      "eid": "e",
-      "src_vid": "message1",
-      "dst_vid": "post1",
-      "label": "replyOf",
-      "attr": null
-    },
-    "i": {
-      "eid": "i",
-      "src_vid": "comment",
-      "dst_vid": "person2",
-      "label": "hasCreator",
-      "attr": null
-    },
-    "f": {
-      "eid": "f",
-      "src_vid": "forum1",
-      "dst_vid": "post1",
-      "label": "containerOf",
-      "attr": null
-    },
-    "c": {
-      "eid": "c",
-      "src_vid": "comment",
-      "dst_vid": "tag",
-      "label": "hasTag",
-      "attr": null
-    },
-    "l": {
-      "eid": "l",
-      "src_vid": "message2",
-      "dst_vid": "post2",
-      "label": "replyOf",
-      "attr": null
-    },
-    "g": {
-      "eid": "g",
-      "src_vid": "forum1",
-      "dst_vid": "person2",
-      "label": "hasMember",
-      "attr": null
-    },
     "m": {
       "eid": "m",
       "src_vid": "forum2",
@@ -174,11 +104,81 @@
       "label": "hasMember",
       "attr": null
     },
+    "i": {
+      "eid": "i",
+      "src_vid": "comment",
+      "dst_vid": "person2",
+      "label": "hasCreator",
+      "attr": null
+    },
+    "g": {
+      "eid": "g",
+      "src_vid": "forum1",
+      "dst_vid": "person2",
+      "label": "hasMember",
+      "attr": null
+    },
+    "l": {
+      "eid": "l",
+      "src_vid": "message2",
+      "dst_vid": "post2",
+      "label": "replyOf",
+      "attr": null
+    },
+    "j": {
+      "eid": "j",
+      "src_vid": "comment",
+      "dst_vid": "message2",
+      "label": "replyOf",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "comment",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    },
+    "f": {
+      "eid": "f",
+      "src_vid": "forum1",
+      "dst_vid": "post1",
+      "label": "containerOf",
+      "attr": null
+    },
+    "d": {
+      "eid": "d",
+      "src_vid": "message1",
+      "dst_vid": "person1",
+      "label": "hasCreator",
+      "attr": null
+    },
+    "k": {
+      "eid": "k",
+      "src_vid": "message2",
+      "dst_vid": "person3",
+      "label": "hasCreator",
+      "attr": null
+    },
     "a": {
       "eid": "a",
       "src_vid": "message1",
       "dst_vid": "tag",
       "label": "hasTag",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "message2",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    },
+    "e": {
+      "eid": "e",
+      "src_vid": "message1",
+      "dst_vid": "post1",
+      "label": "replyOf",
       "attr": null
     }
   },
@@ -196,9 +196,9 @@
       "vid": "forum1",
       "type": "get_adj",
       "expand_eid_list": [
-        "f",
         "g",
-        "h"
+        "h",
+        "f"
       ],
       "single_op": "f^forum1",
       "multi_ops": [],
@@ -220,9 +220,9 @@
       "vid": "tag",
       "type": "get_adj",
       "expand_eid_list": [
+        "a",
         "c",
-        "b",
-        "a"
+        "b"
       ],
       "single_op": "f^tag",
       "multi_ops": [],
@@ -252,24 +252,24 @@
       "target_var": "f^message2",
       "depend_on": [
         "A^tag",
-        "f^tag",
-        "C^message2"
+        "C^message2",
+        "f^tag"
       ]
     },
     {
       "vid": "message2",
       "type": "get_adj",
       "expand_eid_list": [
-        "l",
         "j",
+        "l",
         "k"
       ],
       "single_op": "f^message2",
       "multi_ops": [],
       "target_var": "A^message2",
       "depend_on": [
-        "A^tag",
         "C^message2",
+        "A^tag",
         "f^tag",
         "f^message2"
       ]
@@ -338,9 +338,9 @@
       "multi_ops": [],
       "target_var": "f^person2",
       "depend_on": [
-        "A^forum1",
         "C^person2",
-        "f^forum1"
+        "f^forum1",
+        "A^forum1"
       ]
     },
     {
@@ -353,10 +353,10 @@
       "multi_ops": [],
       "target_var": "A^person2",
       "depend_on": [
-        "f^forum1",
         "C^person2",
         "f^person2",
-        "A^forum1"
+        "A^forum1",
+        "f^forum1"
       ]
     },
     {
@@ -365,18 +365,18 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^message2",
-        "A^forum1"
+        "A^forum1",
+        "A^message2"
       ],
       "target_var": "T^person3",
       "depend_on": [
-        "A^message2",
-        "f^forum1",
-        "A^forum1",
-        "C^message2",
+        "A^tag",
         "f^tag",
         "f^message2",
-        "A^tag"
+        "f^forum1",
+        "A^forum1",
+        "A^message2",
+        "C^message2"
       ]
     },
     {
@@ -387,14 +387,14 @@
       "multi_ops": [],
       "target_var": "C^person3",
       "depend_on": [
-        "f^forum1",
-        "A^forum1",
-        "T^person3",
-        "f^tag",
         "f^message2",
-        "A^message2",
+        "f^forum1",
+        "f^tag",
+        "A^tag",
+        "T^person3",
         "C^message2",
-        "A^tag"
+        "A^message2",
+        "A^forum1"
       ]
     },
     {
@@ -405,82 +405,15 @@
       "multi_ops": [],
       "target_var": "f^person3",
       "depend_on": [
-        "A^forum1",
-        "A^tag",
         "T^person3",
         "C^person3",
         "f^message2",
         "f^forum1",
-        "A^message2",
+        "A^tag",
         "C^message2",
+        "A^message2",
+        "A^forum1",
         "f^tag"
-      ]
-    },
-    {
-      "vid": "comment",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": null,
-      "multi_ops": [
-        "A^message2",
-        "A^tag",
-        "A^person2"
-      ],
-      "target_var": "T^comment",
-      "depend_on": [
-        "f^forum1",
-        "C^person2",
-        "C^message2",
-        "f^tag",
-        "A^message2",
-        "f^person2",
-        "A^forum1",
-        "A^tag",
-        "f^message2",
-        "A^person2"
-      ]
-    },
-    {
-      "vid": "comment",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": "T^comment",
-      "multi_ops": [],
-      "target_var": "C^comment",
-      "depend_on": [
-        "A^person2",
-        "C^message2",
-        "f^person2",
-        "A^forum1",
-        "A^tag",
-        "f^message2",
-        "A^message2",
-        "f^tag",
-        "C^person2",
-        "T^comment",
-        "f^forum1"
-      ]
-    },
-    {
-      "vid": "comment",
-      "type": "foreach",
-      "expand_eid_list": [],
-      "single_op": "C^comment",
-      "multi_ops": [],
-      "target_var": "f^comment",
-      "depend_on": [
-        "A^forum1",
-        "C^message2",
-        "A^person2",
-        "A^message2",
-        "f^message2",
-        "T^comment",
-        "f^tag",
-        "A^tag",
-        "C^person2",
-        "f^forum1",
-        "f^person2",
-        "C^comment"
       ]
     },
     {
@@ -494,10 +427,10 @@
       ],
       "target_var": "T^message1",
       "depend_on": [
-        "f^person1",
         "A^tag",
-        "A^person1",
-        "f^tag"
+        "f^person1",
+        "f^tag",
+        "A^person1"
       ]
     },
     {
@@ -509,10 +442,10 @@
       "target_var": "C^message1",
       "depend_on": [
         "f^person1",
-        "T^message1",
         "A^person1",
-        "f^tag",
-        "A^tag"
+        "A^tag",
+        "T^message1",
+        "f^tag"
       ]
     },
     {
@@ -524,11 +457,11 @@
       "target_var": "f^message1",
       "depend_on": [
         "C^message1",
-        "f^person1",
+        "A^tag",
         "T^message1",
-        "A^person1",
         "f^tag",
-        "A^tag"
+        "A^person1",
+        "f^person1"
       ]
     },
     {
@@ -541,13 +474,80 @@
       "multi_ops": [],
       "target_var": "A^message1",
       "depend_on": [
-        "T^message1",
+        "C^message1",
         "A^person1",
         "A^tag",
-        "C^message1",
-        "f^message1",
+        "T^message1",
+        "f^tag",
         "f^person1",
-        "f^tag"
+        "f^message1"
+      ]
+    },
+    {
+      "vid": "comment",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^person2",
+        "A^tag",
+        "A^message2"
+      ],
+      "target_var": "T^comment",
+      "depend_on": [
+        "A^tag",
+        "A^forum1",
+        "f^person2",
+        "C^message2",
+        "f^tag",
+        "f^forum1",
+        "A^message2",
+        "C^person2",
+        "f^message2",
+        "A^person2"
+      ]
+    },
+    {
+      "vid": "comment",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^comment",
+      "multi_ops": [],
+      "target_var": "C^comment",
+      "depend_on": [
+        "A^tag",
+        "C^person2",
+        "A^forum1",
+        "A^message2",
+        "A^person2",
+        "C^message2",
+        "T^comment",
+        "f^forum1",
+        "f^tag",
+        "f^message2",
+        "f^person2"
+      ]
+    },
+    {
+      "vid": "comment",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^comment",
+      "multi_ops": [],
+      "target_var": "f^comment",
+      "depend_on": [
+        "A^message2",
+        "f^forum1",
+        "f^tag",
+        "A^forum1",
+        "C^message2",
+        "C^comment",
+        "f^message2",
+        "f^person2",
+        "T^comment",
+        "A^tag",
+        "A^person2",
+        "C^person2"
       ]
     },
     {
@@ -561,13 +561,13 @@
       ],
       "target_var": "T^post2",
       "depend_on": [
+        "f^forum2",
+        "f^tag",
         "C^message2",
         "A^message2",
-        "A^forum2",
-        "f^tag",
-        "f^message2",
         "A^tag",
-        "f^forum2"
+        "f^message2",
+        "A^forum2"
       ]
     },
     {
@@ -578,14 +578,14 @@
       "multi_ops": [],
       "target_var": "C^post2",
       "depend_on": [
-        "T^post2",
-        "f^tag",
         "f^forum2",
-        "A^message2",
-        "A^forum2",
+        "f^message2",
         "A^tag",
-        "C^message2",
-        "f^message2"
+        "f^tag",
+        "A^message2",
+        "T^post2",
+        "A^forum2",
+        "C^message2"
       ]
     },
     {
@@ -596,15 +596,15 @@
       "multi_ops": [],
       "target_var": "f^post2",
       "depend_on": [
-        "f^forum2",
-        "A^message2",
-        "A^tag",
-        "A^forum2",
         "C^post2",
-        "T^post2",
+        "A^tag",
+        "A^message2",
+        "A^forum2",
         "f^tag",
+        "f^message2",
         "C^message2",
-        "f^message2"
+        "f^forum2",
+        "T^post2"
       ]
     },
     {
@@ -618,16 +618,16 @@
       ],
       "target_var": "T^post1",
       "depend_on": [
-        "C^message1",
-        "A^person1",
-        "f^message1",
-        "f^forum1",
         "f^person1",
+        "f^message1",
         "T^message1",
-        "A^message1",
+        "A^tag",
         "f^tag",
+        "A^person1",
         "A^forum1",
-        "A^tag"
+        "A^message1",
+        "f^forum1",
+        "C^message1"
       ]
     },
     {
@@ -638,17 +638,17 @@
       "multi_ops": [],
       "target_var": "C^post1",
       "depend_on": [
-        "C^message1",
-        "A^forum1",
-        "A^tag",
-        "f^forum1",
+        "f^tag",
         "T^post1",
-        "f^person1",
-        "f^message1",
+        "C^message1",
         "A^person1",
         "T^message1",
+        "A^tag",
+        "f^forum1",
+        "f^person1",
         "A^message1",
-        "f^tag"
+        "A^forum1",
+        "f^message1"
       ]
     },
     {
@@ -659,18 +659,18 @@
       "multi_ops": [],
       "target_var": "f^post1",
       "depend_on": [
-        "f^tag",
+        "A^forum1",
         "C^post1",
-        "T^post1",
+        "f^tag",
+        "f^person1",
+        "T^message1",
         "A^tag",
         "f^forum1",
-        "A^forum1",
+        "T^post1",
         "A^message1",
-        "C^message1",
-        "f^person1",
         "f^message1",
-        "A^person1",
-        "T^message1"
+        "C^message1",
+        "A^person1"
       ]
     },
     {
@@ -679,50 +679,50 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^forum2",
-        "f^forum1",
         "f^person3",
-        "f^tag",
         "f^person2",
+        "f^forum1",
+        "f^tag",
+        "f^forum2",
+        "f^post2",
+        "f^person1",
+        "f^message1",
         "f^comment",
         "f^message2",
-        "f^person1",
-        "f^post2",
-        "f^message1",
         "f^post1"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^person3",
-        "f^comment",
-        "f^person1",
-        "f^forum2",
-        "f^post2",
-        "T^message1",
-        "A^person2",
-        "C^message2",
-        "A^person1",
-        "A^message2",
-        "T^person3",
-        "T^post2",
-        "C^post1",
-        "A^forum1",
-        "f^message1",
-        "A^message1",
-        "T^post1",
-        "f^tag",
-        "f^post1",
+        "A^tag",
+        "f^person2",
+        "T^comment",
         "C^person3",
         "C^post2",
-        "f^person2",
         "f^message2",
-        "C^comment",
+        "f^post1",
+        "f^person3",
         "A^forum2",
-        "C^message1",
-        "T^comment",
+        "T^message1",
+        "f^person1",
+        "f^comment",
+        "C^message2",
+        "f^message1",
+        "C^post1",
         "f^forum1",
-        "A^tag",
-        "C^person2"
+        "f^post2",
+        "C^message1",
+        "A^person1",
+        "A^forum1",
+        "f^forum2",
+        "T^person3",
+        "C^comment",
+        "T^post1",
+        "A^message1",
+        "C^person2",
+        "A^message2",
+        "T^post2",
+        "f^tag",
+        "A^person2"
       ]
     }
   ]

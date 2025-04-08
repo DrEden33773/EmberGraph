@@ -108,7 +108,7 @@ pub async fn bi_14_on_sf_01() -> io::Result<()> {
   exec("ldbc-bi-14.json").await
 }
 
-/// ⚠️  Slow query: `Intersect("A^personB", "A^c1")`, `Intersect("A^c2", "A^forum")`
+/// ☑️
 pub async fn bi_15_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-15' on 'SF0.1' ...\n");
   exec("ldbc-bi-15.json").await

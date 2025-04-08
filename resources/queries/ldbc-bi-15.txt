@@ -1,4 +1,4 @@
-6 6 1 0
+6 6 3 0
 
 personA Person
 personB Person
@@ -15,3 +15,5 @@ e c2 post replyOf
 f forum post containerOf
 
 forum creationDate >=1282431075745
+personA id =4398046511220
+personB id =8796093022320
