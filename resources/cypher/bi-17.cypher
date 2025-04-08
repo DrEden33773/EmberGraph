@@ -46,4 +46,3 @@ RETURN
     l,
     m,
     n
-LIMIT 10
