@@ -60,8 +60,8 @@
       "multi_ops": [],
       "target_var": "C^city",
       "depend_on": [
-        "f^person",
-        "A^person"
+        "A^person",
+        "f^person"
       ]
     },
     {
@@ -88,9 +88,9 @@
       ],
       "target_var": "f",
       "depend_on": [
-        "f^city",
         "C^city",
         "f^person",
+        "f^city",
         "A^person"
       ]
     }

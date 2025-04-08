@@ -124,7 +124,7 @@ impl ABucket {
             let matched_data_es = incremental_match_adj_e(LoadWithCondCtx {
               pattern_vs,
               storage_adapter,
-              curr_matched_dg: &matched_dg,
+              curr_matched_dg: matched_dg.clone(),
               frontier_vid,
               curr_pat_e: pat_e,
               e_label,
@@ -167,7 +167,7 @@ impl ABucket {
             let matched_data_es = incremental_match_adj_e(LoadWithCondCtx {
               pattern_vs,
               storage_adapter,
-              curr_matched_dg: &matched_dg,
+              curr_matched_dg: matched_dg.clone(),
               frontier_vid,
               curr_pat_e: pat_e,
               e_label,
@@ -251,7 +251,7 @@ impl ABucket {
 struct LoadWithCondCtx<'a, S: AdvancedStorageAdapter> {
   pattern_vs: &'a HashMap<String, PatternVertex>,
   storage_adapter: &'a S,
-  curr_matched_dg: &'a DynGraph,
+  curr_matched_dg: Arc<DynGraph>,
   frontier_vid: VidRef<'a>,
   curr_pat_e: &'a PatternEdge,
   e_label: LabelRef<'a>,
@@ -266,7 +266,6 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   ctx: LoadWithCondCtx<'a, S>,
 ) -> Vec<DataEdge> {
   use futures::{StreamExt, stream};
-  use itertools::Itertools;
 
   let next_pat_vid = if ctx.is_src_curr_pat {
     ctx.curr_pat_e.dst_vid()
@@ -300,12 +299,15 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   };
 
   // filter out the edges that are already matched
-  let filtered_edges = potential_edges
-    .into_iter()
-    .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
-    .collect_vec();
+  let filtered_edges = parallel::spawn_blocking(move || {
+    potential_edges
+      .into_par_iter()
+      .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
+      .collect::<Vec<_>>()
+  })
+  .await;
 
-  // process each edge in parallel
+  // process each edge in concurrent tasks
   stream::iter(filtered_edges)
     .map(|e| {
       let next_vid_str = if ctx.is_src_curr_pat {
@@ -373,18 +375,21 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   };
 
   // filter out the edges that are already matched
-  let filtered_edges = potential_edges
-    .into_iter()
-    .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
-    .collect_vec();
+  let filtered_edges = parallel::spawn_blocking(move || {
+    potential_edges
+      .into_par_iter()
+      .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
+      .collect::<Vec<_>>()
+  })
+  .await;
 
-  // split into chunks for parallel processing
+  // split into chunks for concurrent processing
   let chunks = filtered_edges
     .chunks(BATCH_SIZE)
     .map(Vec::from)
     .collect_vec();
 
-  // process each chunk in parallel
+  // process each chunk in concurrent tasks
   let batch_futures = chunks.into_iter().map(|chunk| async move {
     let mut results = Vec::new();
     for e in chunk {

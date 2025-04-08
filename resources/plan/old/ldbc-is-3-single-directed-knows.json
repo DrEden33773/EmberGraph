@@ -77,13 +77,13 @@
       "multi_ops": [],
       "target_var": "f^friend",
       "depend_on": [
-        "A^person",
         "C^friend",
-        "f^person"
+        "f^person",
+        "A^person"
       ]
     },
     {
-      "vid": "friend",
+      "vid": "",
       "type": "report",
       "expand_eid_list": [],
       "single_op": null,
@@ -93,8 +93,8 @@
       ],
       "target_var": "f",
       "depend_on": [
-        "A^person",
         "C^friend",
+        "A^person",
         "f^friend",
         "f^person"
       ]

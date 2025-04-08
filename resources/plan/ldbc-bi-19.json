@@ -1,0 +1,425 @@
+{
+  "matching_order": [
+    "city1",
+    "city2",
+    "person2",
+    "person1",
+    "message",
+    "comment"
+  ],
+  "vertices": {
+    "city1": {
+      "vid": "city1",
+      "label": "City",
+      "attr": {
+        "attr": "id",
+        "op": "=",
+        "value": 1342,
+        "type": "int"
+      }
+    },
+    "city2": {
+      "vid": "city2",
+      "label": "City",
+      "attr": {
+        "attr": "id",
+        "op": "=",
+        "value": 1127,
+        "type": "int"
+      }
+    },
+    "person1": {
+      "vid": "person1",
+      "label": "Person",
+      "attr": null
+    },
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
+      "attr": null
+    },
+    "message": {
+      "vid": "message",
+      "label": "Comment",
+      "attr": null
+    },
+    "person2": {
+      "vid": "person2",
+      "label": "Person",
+      "attr": null
+    }
+  },
+  "edges": {
+    "c": {
+      "eid": "c",
+      "src_vid": "person2",
+      "dst_vid": "city2",
+      "label": "isLocatedIn",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "person1",
+      "dst_vid": "city1",
+      "label": "isLocatedIn",
+      "attr": null
+    },
+    "d": {
+      "eid": "d",
+      "src_vid": "comment",
+      "dst_vid": "person1",
+      "label": "hasCreator",
+      "attr": null
+    },
+    "e": {
+      "eid": "e",
+      "src_vid": "message",
+      "dst_vid": "person2",
+      "label": "hasCreator",
+      "attr": null
+    },
+    "f": {
+      "eid": "f",
+      "src_vid": "comment",
+      "dst_vid": "message",
+      "label": "replyOf",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "person1",
+      "dst_vid": "person2",
+      "label": "knows",
+      "attr": null
+    }
+  },
+  "instructions": [
+    {
+      "vid": "city1",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^city1",
+      "depend_on": []
+    },
+    {
+      "vid": "city1",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "b"
+      ],
+      "single_op": "f^city1",
+      "multi_ops": [],
+      "target_var": "A^city1",
+      "depend_on": [
+        "f^city1"
+      ]
+    },
+    {
+      "vid": "city2",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^city2",
+      "depend_on": []
+    },
+    {
+      "vid": "city2",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "c"
+      ],
+      "single_op": "f^city2",
+      "multi_ops": [],
+      "target_var": "A^city2",
+      "depend_on": [
+        "f^city2"
+      ]
+    },
+    {
+      "vid": "person2",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^city2",
+      "multi_ops": [],
+      "target_var": "C^person2",
+      "depend_on": [
+        "f^city2",
+        "A^city2"
+      ]
+    },
+    {
+      "vid": "person2",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^person2",
+      "multi_ops": [],
+      "target_var": "f^person2",
+      "depend_on": [
+        "f^city2",
+        "A^city2",
+        "C^person2"
+      ]
+    },
+    {
+      "vid": "person2",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "e",
+        "a"
+      ],
+      "single_op": "f^person2",
+      "multi_ops": [],
+      "target_var": "A^person2",
+      "depend_on": [
+        "f^city2",
+        "f^person2",
+        "C^person2",
+        "A^city2"
+      ]
+    },
+    {
+      "vid": "person1",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^city1",
+        "A^person2"
+      ],
+      "target_var": "T^person1",
+      "depend_on": [
+        "A^person2",
+        "f^city1",
+        "f^city2",
+        "f^person2",
+        "C^person2",
+        "A^city1",
+        "A^city2"
+      ]
+    },
+    {
+      "vid": "person1",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^person1",
+      "multi_ops": [],
+      "target_var": "C^person1",
+      "depend_on": [
+        "A^city2",
+        "A^person2",
+        "f^city2",
+        "C^person2",
+        "f^person2",
+        "T^person1",
+        "A^city1",
+        "f^city1"
+      ]
+    },
+    {
+      "vid": "person1",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^person1",
+      "multi_ops": [],
+      "target_var": "f^person1",
+      "depend_on": [
+        "f^city1",
+        "A^city1",
+        "T^person1",
+        "A^city2",
+        "C^person1",
+        "f^city2",
+        "C^person2",
+        "A^person2",
+        "f^person2"
+      ]
+    },
+    {
+      "vid": "person1",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "d"
+      ],
+      "single_op": "f^person1",
+      "multi_ops": [],
+      "target_var": "A^person1",
+      "depend_on": [
+        "A^city1",
+        "T^person1",
+        "C^person2",
+        "A^person2",
+        "f^city2",
+        "f^person2",
+        "A^city2",
+        "f^person1",
+        "f^city1",
+        "C^person1"
+      ]
+    },
+    {
+      "vid": "message",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^person2",
+      "multi_ops": [],
+      "target_var": "C^message",
+      "depend_on": [
+        "A^person2",
+        "f^person2",
+        "C^person2",
+        "f^city2",
+        "A^city2"
+      ]
+    },
+    {
+      "vid": "message",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^message",
+      "multi_ops": [],
+      "target_var": "f^message",
+      "depend_on": [
+        "C^person2",
+        "C^message",
+        "A^person2",
+        "A^city2",
+        "f^person2",
+        "f^city2"
+      ]
+    },
+    {
+      "vid": "message",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "f"
+      ],
+      "single_op": "f^message",
+      "multi_ops": [],
+      "target_var": "A^message",
+      "depend_on": [
+        "C^person2",
+        "A^city2",
+        "f^person2",
+        "f^message",
+        "C^message",
+        "A^person2",
+        "f^city2"
+      ]
+    },
+    {
+      "vid": "comment",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^person1",
+        "A^message"
+      ],
+      "target_var": "T^comment",
+      "depend_on": [
+        "f^city2",
+        "f^message",
+        "A^city1",
+        "A^city2",
+        "T^person1",
+        "A^message",
+        "A^person2",
+        "C^person1",
+        "C^person2",
+        "C^message",
+        "f^person2",
+        "f^city1",
+        "f^person1",
+        "A^person1"
+      ]
+    },
+    {
+      "vid": "comment",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^comment",
+      "multi_ops": [],
+      "target_var": "C^comment",
+      "depend_on": [
+        "C^person1",
+        "A^message",
+        "C^message",
+        "A^city2",
+        "A^person1",
+        "f^person1",
+        "f^city1",
+        "f^message",
+        "T^comment",
+        "f^city2",
+        "A^city1",
+        "A^person2",
+        "C^person2",
+        "f^person2",
+        "T^person1"
+      ]
+    },
+    {
+      "vid": "comment",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^comment",
+      "multi_ops": [],
+      "target_var": "f^comment",
+      "depend_on": [
+        "T^comment",
+        "A^person1",
+        "f^message",
+        "C^person1",
+        "A^person2",
+        "f^city2",
+        "A^message",
+        "C^comment",
+        "C^person2",
+        "A^city2",
+        "T^person1",
+        "f^city1",
+        "f^person1",
+        "A^city1",
+        "f^person2",
+        "C^message"
+      ]
+    },
+    {
+      "vid": "",
+      "type": "report",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "f^person2",
+        "f^person1",
+        "f^message",
+        "f^comment",
+        "f^city1",
+        "f^city2"
+      ],
+      "target_var": "f",
+      "depend_on": [
+        "f^person2",
+        "A^city2",
+        "C^comment",
+        "A^person1",
+        "C^message",
+        "f^message",
+        "f^city1",
+        "f^person1",
+        "C^person2",
+        "C^person1",
+        "A^city1",
+        "f^comment",
+        "f^city2",
+        "A^message",
+        "T^person1",
+        "T^comment",
+        "A^person2"
+      ]
+    }
+  ]
+}

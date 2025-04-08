@@ -14,7 +14,6 @@ async fn to_run() -> io::Result<()> {
 
   // plan_gen().await?;
   run_demo().await?;
-  // run_test_only().await?;
 
   Ok(())
 }
@@ -67,24 +66,30 @@ async fn run_test_only() -> io::Result<()> {
 
 #[allow(dead_code)]
 async fn run_demo() -> io::Result<()> {
-  #[allow(unused_imports)]
-  use ember_graph::demos::{bi_sf01::*, complex_interactive_sf01::*, simple_interactive_sf01::*};
+  use ember_graph::demos::bi_sf01::*;
 
-  bi_2_on_sf_01().await?;
+  // bi_1_on_sf_01().await?;
+  // bi_2_on_sf_01().await?;
   // bi_4_on_sf_01().await?;
+  // bi_5_on_sf_01().await?;
+  // bi_6_on_sf_01().await?;
   // bi_7_on_sf_01().await?;
   // bi_8_on_sf_01().await?;
   // bi_9_on_sf_01().await?;
+  // bi_11_on_sf_01().await?;
   // bi_12_on_sf_01().await?;
   // bi_13_on_sf_01().await?;
   // bi_14_on_sf_01().await?;
+  // bi_16_on_sf_01().await?;
+  // bi_17_on_sf_01().await?;
+  // bi_18_on_sf_01().await?;
+  // bi_19_on_sf_01().await?;
+  // bi_20_on_sf_01().await?;
 
   // bi_3_on_sf_01().await?;
   // bi_10_on_sf_01().await?;
-  // bi_11_on_sf_01().await?;
 
-  // bi_5_on_sf_01().await?;
-  // bi_6_on_sf_01().await?;
+  bi_15_on_sf_01().await?;
 
   Ok(())
 }

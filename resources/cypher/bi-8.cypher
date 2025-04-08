@@ -1,3 +1,4 @@
+PROFILE
 MATCH
     (comment: Comment)-[a: hasTag]->(tag: Tag),
     (comment)-[b: hasCreator]->(person: Person),

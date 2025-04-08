@@ -1,0 +1,13 @@
+4 3 2 0
+
+post Post
+person1 Person
+person2 Person
+tag Tag
+
+a post person1 hasCreator
+b post tag hasTag
+c person1 person2 knows
+
+post creationDate =1268422500645
+tag name ='Best_Thing_I_Never_Had'

@@ -16,6 +16,11 @@
         "type": "string"
       }
     },
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
+    },
     "comment": {
       "vid": "comment",
       "label": "Comment",
@@ -25,21 +30,9 @@
       "vid": "tagClass",
       "label": "Tagclass",
       "attr": null
-    },
-    "post": {
-      "vid": "post",
-      "label": "Post",
-      "attr": null
     }
   },
   "edges": {
-    "b": {
-      "eid": "b",
-      "src_vid": "comment",
-      "dst_vid": "tag",
-      "label": "hasTag",
-      "attr": null
-    },
     "a": {
       "eid": "a",
       "src_vid": "post",
@@ -52,6 +45,13 @@
       "src_vid": "tag",
       "dst_vid": "tagClass",
       "label": "hasType",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "comment",
+      "dst_vid": "tag",
+      "label": "hasTag",
       "attr": null
     }
   },
@@ -69,9 +69,9 @@
       "vid": "tag",
       "type": "get_adj",
       "expand_eid_list": [
-        "c",
         "b",
-        "a"
+        "a",
+        "c"
       ],
       "single_op": "f^tag",
       "multi_ops": [],
@@ -100,8 +100,8 @@
       "multi_ops": [],
       "target_var": "f^tagClass",
       "depend_on": [
-        "C^tagClass",
         "f^tag",
+        "C^tagClass",
         "A^tag"
       ]
     },
@@ -150,9 +150,9 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
+        "f^tag",
         "C^post",
-        "A^tag",
-        "f^tag"
+        "A^tag"
       ]
     },
     {
@@ -168,14 +168,14 @@
       ],
       "target_var": "f",
       "depend_on": [
-        "C^comment",
-        "C^post",
-        "f^tagClass",
-        "f^post",
         "C^tagClass",
-        "f^tag",
+        "C^post",
+        "A^tag",
         "f^comment",
-        "A^tag"
+        "f^tag",
+        "C^comment",
+        "f^tagClass",
+        "f^post"
       ]
     }
   ]

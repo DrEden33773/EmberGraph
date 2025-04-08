@@ -12,13 +12,19 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
   let plan_json_content = fs::read_to_string(path).await?;
 
   let result =
-    ExecEngine::<CachedStorageAdapter<SqliteStorageAdapter>>::build_from_json(&plan_json_content)
+    ExecEngine::<CachedStorageAdapter<Neo4jStorageAdapter>>::build_from_json(&plan_json_content)
       .await
       .exec()
       .await;
 
   println!("✨  Count(result) = {}\n", result.len());
   Ok(())
+}
+
+/// ☑️
+pub async fn bi_1_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-1' on 'SF0.1' ...\n");
+  exec("ldbc-bi-1.json").await
 }
 
 /// ☑️
@@ -40,13 +46,13 @@ pub async fn bi_4_on_sf_01() -> io::Result<()> {
   exec("ldbc-bi-4.json").await
 }
 
-/// ❌  Cannot find a matching pattern
+/// ☑️
 pub async fn bi_5_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-5' on 'SF0.1' ...\n");
   exec("ldbc-bi-5.json").await
 }
 
-/// ❌  Cannot find a matching pattern
+/// ☑️
 pub async fn bi_6_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-6' on 'SF0.1' ...\n");
   exec("ldbc-bi-6.json").await
@@ -78,9 +84,7 @@ pub async fn bi_10_on_sf_01() -> io::Result<()> {
   exec("ldbc-bi-10.json").await
 }
 
-/// ☑️ ⚠️  Slow query: `Intersect("A^b", "A^c")`, `Intersect("A^a", "A^country")`
-/// - Slow on `Neo4jStorageAdapter` and `SqliteStorageAdapter`
-/// - `Neo4jStorageAdapter` could be a little bit faster
+/// ☑️
 pub async fn bi_11_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-11' on 'SF0.1' ...\n");
   exec("ldbc-bi-11.json").await
@@ -102,4 +106,40 @@ pub async fn bi_13_on_sf_01() -> io::Result<()> {
 pub async fn bi_14_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-14' on 'SF0.1' ...\n");
   exec("ldbc-bi-14.json").await
+}
+
+/// ☑️
+pub async fn bi_15_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-15' on 'SF0.1' ...\n");
+  exec("ldbc-bi-15.json").await
+}
+
+/// ☑️
+pub async fn bi_16_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-16' on 'SF0.1' ...\n");
+  exec("ldbc-bi-16.json").await
+}
+
+/// ☑️
+pub async fn bi_17_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-17' on 'SF0.1' ...\n");
+  exec("ldbc-bi-17.json").await
+}
+
+/// ☑️
+pub async fn bi_18_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-18' on 'SF0.1' ...\n");
+  exec("ldbc-bi-18.json").await
+}
+
+/// ☑️
+pub async fn bi_19_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-19' on 'SF0.1' ...\n");
+  exec("ldbc-bi-19.json").await
+}
+
+/// ☑️
+pub async fn bi_20_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-20' on 'SF0.1' ...\n");
+  exec("ldbc-bi-20.json").await
 }

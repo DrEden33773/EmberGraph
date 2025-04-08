@@ -1,0 +1,19 @@
+6 6 3 0
+
+personA Person
+personB Person
+c1 Comment
+c2 Comment
+post Post
+forum Forum
+
+a personA personB knows
+b c1 personA hasCreator
+c c2 personB hasCreator
+d c1 c2 replyOf
+e c2 post replyOf
+f forum post containerOf
+
+forum creationDate >=1282431075745
+personA id =4398046511220
+personB id =8796093022320

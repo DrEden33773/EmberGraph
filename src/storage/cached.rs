@@ -1,15 +1,16 @@
 use super::{AdvancedStorageAdapter, AsyncDefault, StorageAdapter};
 use crate::schemas::{DataEdge, DataVertex, LabelRef, PatternAttr, VidRef};
-use lru::LruCache;
-use parking_lot::Mutex;
+use colored::Colorize;
+use moka::future::Cache;
 use std::{
   hash::{DefaultHasher, Hash, Hasher},
   num::NonZeroUsize,
   sync::Arc,
 };
-use tokio::sync::RwLock;
+use tokio::sync::Semaphore;
 
 const DEFAULT_CACHE_SIZE: usize = 256;
+const MAX_BACKGROUND_WRITE_TASKS: usize = 32;
 
 #[derive(Clone, Eq, PartialEq, Hash)]
 enum CacheKey {
@@ -78,9 +79,11 @@ impl From<&PatternAttr> for CachedPatternAttr {
 }
 
 struct StorageCache {
-  vertex_cache: Mutex<LruCache<CacheKey, Option<DataVertex>>>,
-  vertices_cache: Mutex<LruCache<CacheKey, Vec<DataVertex>>>,
-  edges_cache: Mutex<LruCache<CacheKey, Vec<DataEdge>>>,
+  vertex_cache: Cache<CacheKey, Option<DataVertex>>,
+  vertices_cache: Cache<CacheKey, Vec<DataVertex>>,
+  edges_cache: Cache<CacheKey, Vec<DataEdge>>,
+
+  background_tasks_sem: Arc<Semaphore>,
 }
 
 impl StorageCache {
@@ -89,9 +92,11 @@ impl StorageCache {
       NonZeroUsize::new(cache_size).unwrap_or(NonZeroUsize::new(DEFAULT_CACHE_SIZE).unwrap());
 
     Self {
-      vertex_cache: Mutex::new(LruCache::new(cache_size)),
-      vertices_cache: Mutex::new(LruCache::new(cache_size)),
-      edges_cache: Mutex::new(LruCache::new(cache_size)),
+      vertex_cache: Cache::new(cache_size.get() as u64),
+      vertices_cache: Cache::new(cache_size.get() as u64),
+      edges_cache: Cache::new(cache_size.get() as u64),
+
+      background_tasks_sem: Arc::new(Semaphore::new(MAX_BACKGROUND_WRITE_TASKS)),
     }
   }
 }
@@ -99,21 +104,46 @@ impl StorageCache {
 #[derive(Clone)]
 pub struct CachedStorageAdapter<S: StorageAdapter> {
   inner: S,
-  cache: Arc<RwLock<StorageCache>>,
+  cache: Arc<StorageCache>,
 }
 
 impl<S: StorageAdapter> CachedStorageAdapter<S> {
   pub fn new(inner: S, cache_size: usize) -> Self {
-    let cache = Arc::new(RwLock::new(StorageCache::new(cache_size)));
+    let cache = Arc::new(StorageCache::new(cache_size));
     Self { inner, cache }
   }
 
   /// equivalent to `python.@lru_cache.cache_clear`
   pub async fn cache_clear(&self) {
-    let cache = self.cache.write().await;
-    cache.vertex_cache.lock().clear();
-    cache.vertices_cache.lock().clear();
-    cache.edges_cache.lock().clear();
+    self.cache.vertex_cache.invalidate_all();
+    self.cache.vertices_cache.invalidate_all();
+    self.cache.edges_cache.invalidate_all();
+  }
+
+  fn try_background_update<V: Clone + Send + Sync + 'static>(
+    &self,
+    cache: &Cache<CacheKey, V>,
+    result: &V,
+    key: CacheKey,
+  ) {
+    let cache = cache.clone();
+    let result = result.clone();
+    let sem = self.cache.background_tasks_sem.clone();
+
+    tokio::spawn(async move {
+      match tokio::time::timeout(tokio::time::Duration::from_millis(20), sem.acquire()).await {
+        Ok(Ok(permit)) => {
+          cache.insert(key, result).await;
+          drop(permit);
+        }
+        _ => {
+          eprintln!(
+            "⚠️  {}\n",
+            "Background cache update timed out. Cache not updated.".yellow()
+          );
+        }
+      }
+    });
   }
 }
 
@@ -129,18 +159,15 @@ impl<S: StorageAdapter> StorageAdapter for CachedStorageAdapter<S> {
     let key = CacheKey::Vertex(vid.to_string());
 
     // try to get cache
-    let cache = self.cache.read().await;
-    if let Some(vertex) = { cache.vertex_cache.lock() }.get(&key) {
+    if let Some(vertex) = self.cache.vertex_cache.get(&key).await {
       return vertex.clone();
     }
-    drop(cache); // release read lock
 
     // not found in cache, fetch from inner storage
     let result = self.inner.get_v(vid).await;
 
     // update cache with result
-    let cache = self.cache.write().await;
-    cache.vertex_cache.lock().put(key, result.clone());
+    self.try_background_update(&self.cache.vertex_cache, &result, key);
 
     result
   }
@@ -149,16 +176,13 @@ impl<S: StorageAdapter> StorageAdapter for CachedStorageAdapter<S> {
     let attr_cache = v_attr.map(CachedPatternAttr::from);
     let key = CacheKey::VerticesByLabel(v_label.to_string(), attr_cache);
 
-    let cache = self.cache.read().await;
-    if let Some(result) = { cache.vertices_cache.lock() }.get(&key).cloned() {
+    if let Some(result) = self.cache.vertices_cache.get(&key).await {
       return result;
     }
-    drop(cache);
 
     let result = self.inner.load_v(v_label, v_attr).await;
 
-    let cache = self.cache.write().await;
-    { cache.vertices_cache.lock() }.put(key, result.clone());
+    self.try_background_update(&self.cache.vertices_cache, &result, key);
 
     result
   }
@@ -178,16 +202,13 @@ impl<S: StorageAdapter> StorageAdapter for CachedStorageAdapter<S> {
     let attr_cache = e_attr.map(CachedPatternAttr::from);
     let key = CacheKey::EdgesBySrc(src_vid.to_string(), e_label.to_string(), attr_cache);
 
-    let cache = self.cache.read().await;
-    if let Some(result) = { cache.edges_cache.lock() }.get(&key).cloned() {
+    if let Some(result) = self.cache.edges_cache.get(&key).await {
       return result;
     }
-    drop(cache);
 
     let result = self.inner.load_e_with_src(src_vid, e_label, e_attr).await;
 
-    let cache = self.cache.write().await;
-    { cache.edges_cache.lock() }.put(key, result.clone());
+    self.try_background_update(&self.cache.edges_cache, &result, key);
 
     result
   }
@@ -201,16 +222,13 @@ impl<S: StorageAdapter> StorageAdapter for CachedStorageAdapter<S> {
     let attr_cache = e_attr.map(CachedPatternAttr::from);
     let key = CacheKey::EdgesByDst(dst_vid.to_string(), e_label.to_string(), attr_cache);
 
-    let cache = self.cache.read().await;
-    if let Some(result) = { cache.edges_cache.lock() }.get(&key).cloned() {
+    if let Some(result) = self.cache.edges_cache.get(&key).await {
       return result;
     }
-    drop(cache);
 
     let result = self.inner.load_e_with_dst(dst_vid, e_label, e_attr).await;
 
-    let cache = self.cache.write().await;
-    { cache.edges_cache.lock() }.put(key, result.clone());
+    self.try_background_update(&self.cache.edges_cache, &result, key);
 
     result
   }
@@ -235,19 +253,16 @@ impl<S: AdvancedStorageAdapter> AdvancedStorageAdapter for CachedStorageAdapter<
       dst_v_attr_cache,
     );
 
-    let cache = self.cache.read().await;
-    if let Some(result) = { cache.edges_cache.lock() }.get(&key).cloned() {
+    if let Some(result) = self.cache.edges_cache.get(&key).await {
       return result;
     }
-    drop(cache);
 
     let result = self
       .inner
       .load_e_with_src_and_dst_filter(src_vid, e_label, e_attr, dst_v_label, dst_v_attr)
       .await;
 
-    let cache = self.cache.write().await;
-    { cache.edges_cache.lock() }.put(key, result.clone());
+    self.try_background_update(&self.cache.edges_cache, &result, key);
 
     result
   }
@@ -270,19 +285,16 @@ impl<S: AdvancedStorageAdapter> AdvancedStorageAdapter for CachedStorageAdapter<
       src_v_attr_cache,
     );
 
-    let cache = self.cache.read().await;
-    if let Some(result) = { cache.edges_cache.lock() }.get(&key).cloned() {
+    if let Some(result) = self.cache.edges_cache.get(&key).await {
       return result;
     }
-    drop(cache);
 
     let result = self
       .inner
       .load_e_with_dst_and_src_filter(dst_vid, e_label, e_attr, src_v_label, src_v_attr)
       .await;
 
-    let cache = self.cache.write().await;
-    { cache.edges_cache.lock() }.put(key, result.clone());
+    self.try_background_update(&self.cache.edges_cache, &result, key);
 
     result
   }

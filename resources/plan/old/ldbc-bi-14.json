@@ -1,0 +1,336 @@
+{
+  "matching_order": [
+    "country1",
+    "country2",
+    "person2",
+    "person1",
+    "city2",
+    "city1"
+  ],
+  "vertices": {
+    "person1": {
+      "vid": "person1",
+      "label": "Person",
+      "attr": null
+    },
+    "person2": {
+      "vid": "person2",
+      "label": "Person",
+      "attr": null
+    },
+    "city1": {
+      "vid": "city1",
+      "label": "City",
+      "attr": null
+    },
+    "country1": {
+      "vid": "country1",
+      "label": "Country",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "Afghanistan",
+        "type": "string"
+      }
+    },
+    "city2": {
+      "vid": "city2",
+      "label": "City",
+      "attr": null
+    },
+    "country2": {
+      "vid": "country2",
+      "label": "Country",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "India",
+        "type": "string"
+      }
+    }
+  },
+  "edges": {
+    "a": {
+      "eid": "a",
+      "src_vid": "person1",
+      "dst_vid": "city1",
+      "label": "isLocatedIn",
+      "attr": null
+    },
+    "e": {
+      "eid": "e",
+      "src_vid": "city2",
+      "dst_vid": "country2",
+      "label": "isPartOf",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "person1",
+      "dst_vid": "person2",
+      "label": "knows",
+      "attr": null
+    },
+    "d": {
+      "eid": "d",
+      "src_vid": "city1",
+      "dst_vid": "country1",
+      "label": "isPartOf",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "person2",
+      "dst_vid": "city2",
+      "label": "isLocatedIn",
+      "attr": null
+    }
+  },
+  "instructions": [
+    {
+      "vid": "country1",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^country1",
+      "depend_on": []
+    },
+    {
+      "vid": "country1",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "d"
+      ],
+      "single_op": "f^country1",
+      "multi_ops": [],
+      "target_var": "A^country1",
+      "depend_on": [
+        "f^country1"
+      ]
+    },
+    {
+      "vid": "country2",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^country2",
+      "depend_on": []
+    },
+    {
+      "vid": "country2",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "e"
+      ],
+      "single_op": "f^country2",
+      "multi_ops": [],
+      "target_var": "A^country2",
+      "depend_on": [
+        "f^country2"
+      ]
+    },
+    {
+      "vid": "person2",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^person2",
+      "depend_on": []
+    },
+    {
+      "vid": "person2",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "c",
+        "b"
+      ],
+      "single_op": "f^person2",
+      "multi_ops": [],
+      "target_var": "A^person2",
+      "depend_on": [
+        "f^person2"
+      ]
+    },
+    {
+      "vid": "person1",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^person2",
+      "multi_ops": [],
+      "target_var": "C^person1",
+      "depend_on": [
+        "A^person2",
+        "f^person2"
+      ]
+    },
+    {
+      "vid": "person1",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^person1",
+      "multi_ops": [],
+      "target_var": "f^person1",
+      "depend_on": [
+        "A^person2",
+        "f^person2",
+        "C^person1"
+      ]
+    },
+    {
+      "vid": "person1",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "a"
+      ],
+      "single_op": "f^person1",
+      "multi_ops": [],
+      "target_var": "A^person1",
+      "depend_on": [
+        "f^person1",
+        "f^person2",
+        "C^person1",
+        "A^person2"
+      ]
+    },
+    {
+      "vid": "city2",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^person2",
+        "A^country2"
+      ],
+      "target_var": "T^city2",
+      "depend_on": [
+        "f^person2",
+        "f^country2",
+        "A^country2",
+        "A^person2"
+      ]
+    },
+    {
+      "vid": "city2",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^city2",
+      "multi_ops": [],
+      "target_var": "C^city2",
+      "depend_on": [
+        "T^city2",
+        "A^person2",
+        "f^person2",
+        "f^country2",
+        "A^country2"
+      ]
+    },
+    {
+      "vid": "city2",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^city2",
+      "multi_ops": [],
+      "target_var": "f^city2",
+      "depend_on": [
+        "C^city2",
+        "A^person2",
+        "f^country2",
+        "T^city2",
+        "A^country2",
+        "f^person2"
+      ]
+    },
+    {
+      "vid": "city1",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^country1",
+        "A^person1"
+      ],
+      "target_var": "T^city1",
+      "depend_on": [
+        "A^person1",
+        "C^person1",
+        "A^person2",
+        "A^country1",
+        "f^person1",
+        "f^country1",
+        "f^person2"
+      ]
+    },
+    {
+      "vid": "city1",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^city1",
+      "multi_ops": [],
+      "target_var": "C^city1",
+      "depend_on": [
+        "T^city1",
+        "f^person1",
+        "C^person1",
+        "f^country1",
+        "f^person2",
+        "A^country1",
+        "A^person1",
+        "A^person2"
+      ]
+    },
+    {
+      "vid": "city1",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^city1",
+      "multi_ops": [],
+      "target_var": "f^city1",
+      "depend_on": [
+        "T^city1",
+        "f^person1",
+        "C^city1",
+        "f^person2",
+        "A^person2",
+        "f^country1",
+        "A^country1",
+        "A^person1",
+        "C^person1"
+      ]
+    },
+    {
+      "vid": "",
+      "type": "report",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "f^country1",
+        "f^person2",
+        "f^city2",
+        "f^person1",
+        "f^country2",
+        "f^city1"
+      ],
+      "target_var": "f",
+      "depend_on": [
+        "f^person1",
+        "f^country1",
+        "f^country2",
+        "f^city2",
+        "A^country2",
+        "T^city1",
+        "C^city1",
+        "A^person1",
+        "C^city2",
+        "f^person2",
+        "f^city1",
+        "A^person2",
+        "A^country1",
+        "C^person1",
+        "T^city2"
+      ]
+    }
+  ]
+}

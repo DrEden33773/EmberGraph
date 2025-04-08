@@ -9,12 +9,13 @@ dotenv = "0.15.0"
 futures = "0.3.31"
 hashbrown = { version = "0.15.2", features = ["rayon", "serde"] }
 itertools = "0.14.0"
-lru = "0.13.0"
-mimalloc = "0.1.45"
+mimalloc = "0.1.44"
+moka = { version = "0.12.10", features = ["future"] }
 neo4rs = "0.8.0"
 num_cpus = "1.16.0"
 ordered-float = "5.0.0"
 parking_lot = { version = "0.12.3", features = ["hardware-lock-elision"] }
+polars = { version = "0.46.0", features = ["lazy", "object", "performant", "serde"] }
 project-root = "0.2.2"
 rayon = "1.10.0"
 serde = "1.0.219"
@@ -32,17 +33,20 @@ tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 [features]
 default = [
     "block_spawn_via_rayon",
-    "validate_pattern_uniqueness_before_final_merge",
-    "use_tracing",
+    # "validate_pattern_uniqueness_before_final_merge",
+    # "use_tracing",
     # "batched_incremental_match_adj_e",
     # "single_thread_debug",
     # "trace_all",
 ]
+
 block_spawn_via_rayon = []
 use_tracing = []
 validate_pattern_uniqueness_before_final_merge = []
 batched_incremental_match_adj_e = []
 single_thread_debug = []
+unique_the_final_result = []
+
 trace_all = ["trace_init", "trace_get_adj"]
 trace_init = []
 trace_get_adj = []

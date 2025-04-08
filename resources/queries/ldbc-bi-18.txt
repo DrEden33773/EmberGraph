@@ -1,0 +1,15 @@
+4 4 3 0
+
+person Person
+person1 Person
+person2 Person
+tag Tag
+
+a person person1 knows
+b person person2 knows
+c person1 tag hasInterest
+d person2 tag hasInterest
+
+person1 id =143
+person2 id !=143
+tag name ='Elizabeth_I_of_England'

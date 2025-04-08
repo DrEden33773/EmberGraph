@@ -1,0 +1,32 @@
+11 13 4 0
+
+tag Tag
+message1 Comment
+message2 Comment
+comment Comment
+person1 Person
+person2 Person
+person3 Person
+post1 Post
+post2 Post
+forum1 Forum
+forum2 Forum
+
+a message1 tag hasTag
+b message2 tag hasTag
+c comment tag hasTag
+d message1 person1 hasCreator
+e message1 post1 replyOf
+f forum1 post1 containerOf
+g forum1 person2 hasMember
+h forum1 person3 hasMember
+i comment person2 hasCreator
+j comment message2 replyOf
+k message2 person3 hasCreator
+l message2 post2 replyOf
+m forum2 post2 containerOf
+
+tag name ='Leonardo_DiCaprio'
+message2 creationDate <1289070384400
+forum1 id =206158431133
+forum2 id !=206158431133

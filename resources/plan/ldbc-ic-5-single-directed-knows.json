@@ -6,6 +6,11 @@
     "post"
   ],
   "vertices": {
+    "forum": {
+      "vid": "forum",
+      "label": "Forum",
+      "attr": null
+    },
     "otherPerson": {
       "vid": "otherPerson",
       "label": "Person",
@@ -26,11 +31,6 @@
         "type": "int"
       }
     },
-    "forum": {
-      "vid": "forum",
-      "label": "Forum",
-      "attr": null
-    },
     "post": {
       "vid": "post",
       "label": "Post",
@@ -45,11 +45,11 @@
       "label": "knows",
       "attr": null
     },
-    "d": {
-      "eid": "d",
-      "src_vid": "post",
+    "b": {
+      "eid": "b",
+      "src_vid": "forum",
       "dst_vid": "otherPerson",
-      "label": "hasCreator",
+      "label": "hasMember",
       "attr": null
     },
     "c": {
@@ -59,11 +59,11 @@
       "label": "containerOf",
       "attr": null
     },
-    "b": {
-      "eid": "b",
-      "src_vid": "forum",
+    "d": {
+      "eid": "d",
+      "src_vid": "post",
       "dst_vid": "otherPerson",
-      "label": "hasMember",
+      "label": "hasCreator",
       "attr": null
     }
   },
@@ -110,8 +110,8 @@
       "multi_ops": [],
       "target_var": "f^otherPerson",
       "depend_on": [
-        "C^otherPerson",
         "f^person",
+        "C^otherPerson",
         "A^person"
       ]
     },
@@ -126,10 +126,10 @@
       "multi_ops": [],
       "target_var": "A^otherPerson",
       "depend_on": [
-        "f^otherPerson",
-        "f^person",
         "C^otherPerson",
-        "A^person"
+        "A^person",
+        "f^person",
+        "f^otherPerson"
       ]
     },
     {
@@ -140,11 +140,11 @@
       "multi_ops": [],
       "target_var": "C^forum",
       "depend_on": [
-        "A^otherPerson",
-        "A^person",
         "f^otherPerson",
+        "C^otherPerson",
         "f^person",
-        "C^otherPerson"
+        "A^otherPerson",
+        "A^person"
       ]
     },
     {
@@ -155,12 +155,12 @@
       "multi_ops": [],
       "target_var": "f^forum",
       "depend_on": [
-        "f^person",
-        "C^otherPerson",
-        "A^otherPerson",
         "C^forum",
+        "C^otherPerson",
+        "f^otherPerson",
         "A^person",
-        "f^otherPerson"
+        "f^person",
+        "A^otherPerson"
       ]
     },
     {
@@ -175,11 +175,11 @@
       "depend_on": [
         "C^otherPerson",
         "f^forum",
-        "C^forum",
-        "A^person",
         "f^otherPerson",
+        "A^otherPerson",
         "f^person",
-        "A^otherPerson"
+        "A^person",
+        "C^forum"
       ]
     },
     {
@@ -188,18 +188,18 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^forum",
-        "A^otherPerson"
+        "A^otherPerson",
+        "A^forum"
       ],
       "target_var": "T^post",
       "depend_on": [
         "C^forum",
-        "A^person",
-        "f^otherPerson",
+        "f^forum",
         "C^otherPerson",
         "f^person",
-        "f^forum",
+        "A^person",
         "A^forum",
+        "f^otherPerson",
         "A^otherPerson"
       ]
     },
@@ -211,15 +211,15 @@
       "multi_ops": [],
       "target_var": "C^post",
       "depend_on": [
-        "C^otherPerson",
-        "C^forum",
-        "A^person",
-        "f^otherPerson",
-        "A^forum",
-        "f^person",
-        "A^otherPerson",
         "T^post",
-        "f^forum"
+        "A^forum",
+        "C^forum",
+        "A^otherPerson",
+        "f^forum",
+        "A^person",
+        "f^person",
+        "C^otherPerson",
+        "f^otherPerson"
       ]
     },
     {
@@ -230,16 +230,16 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "A^person",
+        "C^otherPerson",
         "A^forum",
+        "C^forum",
+        "T^post",
         "f^person",
         "C^post",
-        "T^post",
+        "f^otherPerson",
         "A^otherPerson",
-        "C^forum",
         "f^forum",
-        "C^otherPerson",
-        "f^otherPerson"
+        "A^person"
       ]
     },
     {
@@ -248,24 +248,24 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^forum",
-        "f^person",
         "f^post",
-        "f^otherPerson"
+        "f^otherPerson",
+        "f^person",
+        "f^forum"
       ],
       "target_var": "f",
       "depend_on": [
-        "A^otherPerson",
         "T^post",
-        "A^forum",
+        "C^forum",
+        "f^post",
+        "C^post",
+        "A^otherPerson",
         "A^person",
         "f^person",
-        "f^post",
-        "f^forum",
-        "C^otherPerson",
-        "C^post",
         "f^otherPerson",
-        "C^forum"
+        "C^otherPerson",
+        "A^forum",
+        "f^forum"
       ]
     }
   ]

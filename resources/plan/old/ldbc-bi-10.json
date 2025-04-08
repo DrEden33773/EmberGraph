@@ -1,0 +1,498 @@
+{
+  "matching_order": [
+    "startPerson",
+    "tagClass",
+    "country",
+    "expertCandidatePerson",
+    "city",
+    "otherTag",
+    "post",
+    "tag"
+  ],
+  "vertices": {
+    "expertCandidatePerson": {
+      "vid": "expertCandidatePerson",
+      "label": "Person",
+      "attr": null
+    },
+    "otherTag": {
+      "vid": "otherTag",
+      "label": "Tag",
+      "attr": null
+    },
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": null
+    },
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
+    },
+    "tagClass": {
+      "vid": "tagClass",
+      "label": "Tagclass",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "Comedian",
+        "type": "string"
+      }
+    },
+    "startPerson": {
+      "vid": "startPerson",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "=",
+        "value": 6,
+        "type": "int"
+      }
+    },
+    "city": {
+      "vid": "city",
+      "label": "City",
+      "attr": null
+    },
+    "country": {
+      "vid": "country",
+      "label": "Country",
+      "attr": null
+    }
+  },
+  "edges": {
+    "e": {
+      "eid": "e",
+      "src_vid": "startPerson",
+      "dst_vid": "expertCandidatePerson",
+      "label": "knows",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "tag",
+      "dst_vid": "tagClass",
+      "label": "hasType",
+      "attr": null
+    },
+    "g": {
+      "eid": "g",
+      "src_vid": "city",
+      "dst_vid": "country",
+      "label": "isPartOf",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "post",
+      "dst_vid": "otherTag",
+      "label": "hasTag",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "post",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    },
+    "f": {
+      "eid": "f",
+      "src_vid": "expertCandidatePerson",
+      "dst_vid": "city",
+      "label": "isLocatedIn",
+      "attr": null
+    },
+    "d": {
+      "eid": "d",
+      "src_vid": "post",
+      "dst_vid": "expertCandidatePerson",
+      "label": "hasCreator",
+      "attr": null
+    }
+  },
+  "instructions": [
+    {
+      "vid": "startPerson",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^startPerson",
+      "depend_on": []
+    },
+    {
+      "vid": "startPerson",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "e"
+      ],
+      "single_op": "f^startPerson",
+      "multi_ops": [],
+      "target_var": "A^startPerson",
+      "depend_on": [
+        "f^startPerson"
+      ]
+    },
+    {
+      "vid": "tagClass",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^tagClass",
+      "depend_on": []
+    },
+    {
+      "vid": "tagClass",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "b"
+      ],
+      "single_op": "f^tagClass",
+      "multi_ops": [],
+      "target_var": "A^tagClass",
+      "depend_on": [
+        "f^tagClass"
+      ]
+    },
+    {
+      "vid": "country",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^country",
+      "depend_on": []
+    },
+    {
+      "vid": "country",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "g"
+      ],
+      "single_op": "f^country",
+      "multi_ops": [],
+      "target_var": "A^country",
+      "depend_on": [
+        "f^country"
+      ]
+    },
+    {
+      "vid": "expertCandidatePerson",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^startPerson",
+      "multi_ops": [],
+      "target_var": "C^expertCandidatePerson",
+      "depend_on": [
+        "A^startPerson",
+        "f^startPerson"
+      ]
+    },
+    {
+      "vid": "expertCandidatePerson",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^expertCandidatePerson",
+      "multi_ops": [],
+      "target_var": "f^expertCandidatePerson",
+      "depend_on": [
+        "A^startPerson",
+        "C^expertCandidatePerson",
+        "f^startPerson"
+      ]
+    },
+    {
+      "vid": "expertCandidatePerson",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "d",
+        "f"
+      ],
+      "single_op": "f^expertCandidatePerson",
+      "multi_ops": [],
+      "target_var": "A^expertCandidatePerson",
+      "depend_on": [
+        "f^expertCandidatePerson",
+        "f^startPerson",
+        "C^expertCandidatePerson",
+        "A^startPerson"
+      ]
+    },
+    {
+      "vid": "city",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^expertCandidatePerson",
+        "A^country"
+      ],
+      "target_var": "T^city",
+      "depend_on": [
+        "A^expertCandidatePerson",
+        "C^expertCandidatePerson",
+        "A^startPerson",
+        "f^country",
+        "f^startPerson",
+        "A^country",
+        "f^expertCandidatePerson"
+      ]
+    },
+    {
+      "vid": "city",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^city",
+      "multi_ops": [],
+      "target_var": "C^city",
+      "depend_on": [
+        "A^startPerson",
+        "C^expertCandidatePerson",
+        "f^country",
+        "T^city",
+        "A^expertCandidatePerson",
+        "f^startPerson",
+        "A^country",
+        "f^expertCandidatePerson"
+      ]
+    },
+    {
+      "vid": "city",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^city",
+      "multi_ops": [],
+      "target_var": "f^city",
+      "depend_on": [
+        "A^expertCandidatePerson",
+        "C^city",
+        "A^startPerson",
+        "C^expertCandidatePerson",
+        "A^country",
+        "f^startPerson",
+        "T^city",
+        "f^country",
+        "f^expertCandidatePerson"
+      ]
+    },
+    {
+      "vid": "otherTag",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^otherTag",
+      "depend_on": []
+    },
+    {
+      "vid": "otherTag",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "c"
+      ],
+      "single_op": "f^otherTag",
+      "multi_ops": [],
+      "target_var": "A^otherTag",
+      "depend_on": [
+        "f^otherTag"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^otherTag",
+        "A^expertCandidatePerson"
+      ],
+      "target_var": "T^post",
+      "depend_on": [
+        "f^startPerson",
+        "A^startPerson",
+        "A^expertCandidatePerson",
+        "C^expertCandidatePerson",
+        "A^otherTag",
+        "f^expertCandidatePerson",
+        "f^otherTag"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^post",
+      "multi_ops": [],
+      "target_var": "C^post",
+      "depend_on": [
+        "f^expertCandidatePerson",
+        "f^startPerson",
+        "A^startPerson",
+        "A^expertCandidatePerson",
+        "C^expertCandidatePerson",
+        "T^post",
+        "A^otherTag",
+        "f^otherTag"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^post",
+      "multi_ops": [],
+      "target_var": "f^post",
+      "depend_on": [
+        "f^expertCandidatePerson",
+        "C^post",
+        "A^expertCandidatePerson",
+        "A^otherTag",
+        "T^post",
+        "A^startPerson",
+        "f^startPerson",
+        "C^expertCandidatePerson",
+        "f^otherTag"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "a"
+      ],
+      "single_op": "f^post",
+      "multi_ops": [],
+      "target_var": "A^post",
+      "depend_on": [
+        "f^post",
+        "f^startPerson",
+        "f^expertCandidatePerson",
+        "C^post",
+        "A^expertCandidatePerson",
+        "f^otherTag",
+        "A^startPerson",
+        "C^expertCandidatePerson",
+        "A^otherTag",
+        "T^post"
+      ]
+    },
+    {
+      "vid": "tag",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^post",
+        "A^tagClass"
+      ],
+      "target_var": "T^tag",
+      "depend_on": [
+        "A^startPerson",
+        "C^post",
+        "A^tagClass",
+        "A^expertCandidatePerson",
+        "C^expertCandidatePerson",
+        "A^post",
+        "A^otherTag",
+        "T^post",
+        "f^tagClass",
+        "f^expertCandidatePerson",
+        "f^startPerson",
+        "f^otherTag",
+        "f^post"
+      ]
+    },
+    {
+      "vid": "tag",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^tag",
+      "multi_ops": [],
+      "target_var": "C^tag",
+      "depend_on": [
+        "C^expertCandidatePerson",
+        "C^post",
+        "f^startPerson",
+        "A^otherTag",
+        "f^otherTag",
+        "T^post",
+        "f^expertCandidatePerson",
+        "f^post",
+        "A^expertCandidatePerson",
+        "A^tagClass",
+        "A^startPerson",
+        "T^tag",
+        "f^tagClass",
+        "A^post"
+      ]
+    },
+    {
+      "vid": "tag",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^tag",
+      "multi_ops": [],
+      "target_var": "f^tag",
+      "depend_on": [
+        "C^expertCandidatePerson",
+        "f^expertCandidatePerson",
+        "T^post",
+        "f^startPerson",
+        "A^tagClass",
+        "C^post",
+        "A^expertCandidatePerson",
+        "f^tagClass",
+        "f^otherTag",
+        "A^startPerson",
+        "C^tag",
+        "T^tag",
+        "A^otherTag",
+        "f^post",
+        "A^post"
+      ]
+    },
+    {
+      "vid": "",
+      "type": "report",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "f^city",
+        "f^startPerson",
+        "f^post",
+        "f^expertCandidatePerson",
+        "f^tag",
+        "f^otherTag",
+        "f^tagClass",
+        "f^country"
+      ],
+      "target_var": "f",
+      "depend_on": [
+        "f^city",
+        "f^post",
+        "A^startPerson",
+        "A^post",
+        "f^tagClass",
+        "T^tag",
+        "f^startPerson",
+        "f^tag",
+        "f^country",
+        "A^expertCandidatePerson",
+        "A^country",
+        "C^city",
+        "C^tag",
+        "C^expertCandidatePerson",
+        "f^expertCandidatePerson",
+        "T^post",
+        "A^tagClass",
+        "f^otherTag",
+        "C^post",
+        "T^city",
+        "A^otherTag"
+      ]
+    }
+  ]
+}

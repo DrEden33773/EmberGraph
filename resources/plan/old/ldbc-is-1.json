@@ -72,13 +72,13 @@
       "multi_ops": [],
       "target_var": "f^city",
       "depend_on": [
-        "A^person",
         "C^city",
+        "A^person",
         "f^person"
       ]
     },
     {
-      "vid": "city",
+      "vid": "",
       "type": "report",
       "expand_eid_list": [],
       "single_op": null,
@@ -88,9 +88,9 @@
       ],
       "target_var": "f",
       "depend_on": [
-        "A^person",
         "C^city",
         "f^city",
+        "A^person",
         "f^person"
       ]
     }

@@ -8,7 +8,7 @@ use ordered_float::OrderedFloat;
 use project_root::get_project_root;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeMap, fs::File, path::PathBuf, sync::LazyLock};
+use std::{fs::File, path::PathBuf, sync::LazyLock};
 
 static STAT_FILEPATH: LazyLock<PathBuf> = LazyLock::new(|| {
   get_project_root()
@@ -30,9 +30,14 @@ struct Statistics {
 pub struct OrderCalculator {
   statistics: Statistics,
   pattern_graph: DynGraph<PatternVertex, PatternEdge>,
-  cost_2_vids: BTreeMap<usize, Vec<Vid>>,
+  cost_2_vids: HashMap<usize, Vec<Vid>>,
+
   order: Vec<Vid>,
-  override_v_cost: HashMap<Vid, usize>,
+
+  eq_vids: Vec<Vid>,
+  range_vids: Vec<Vid>,
+  ne_vids: Vec<Vid>,
+  plain_vids: Vec<Vid>,
 }
 
 #[derive(Debug, Clone)]
@@ -53,67 +58,74 @@ impl OrderCalculator {
       .into_iter()
       .map(String::from)
       .collect_vec();
+    let max_cap = raw_order.len();
 
     Self {
       statistics,
       pattern_graph,
-      cost_2_vids: BTreeMap::default(),
-      order: raw_order,
-      override_v_cost: HashMap::default(),
+      cost_2_vids: HashMap::with_capacity(max_cap),
+      order: Vec::with_capacity(max_cap),
+      eq_vids: Vec::with_capacity(max_cap),
+      range_vids: Vec::with_capacity(max_cap),
+      ne_vids: Vec::with_capacity(max_cap),
+      plain_vids: Vec::with_capacity(max_cap),
     }
   }
 
-  /// Core logic: Rule-based estimation
-  fn rule_based_estimation(&mut self) {
-    let mut v_scores = HashMap::new();
-
+  fn group_vids_by_attr_op(&mut self) {
     for (vid, v) in self.pattern_graph.v_entities.iter() {
-      let mut score = 0.0;
-
-      // 1. selectivity (only if `attr` is not None)
       if let Some(ref attr) = v.attr {
-        // Eq is tent to select the least number of vertices
-        score += if attr.op == Op::Eq {
-          // don't forget to update `override_v_cost`
-          self.override_v_cost.insert(vid.clone(), 1);
-          100.0
+        match attr.op {
+          Op::Eq => self.eq_vids.push(vid.clone()),
+          Op::Ne => self.ne_vids.push(vid.clone()),
+          _ => self.range_vids.push(vid.clone()),
         }
-        // Ne is tent to select the most number of vertices
-        else if attr.op == Op::Ne {
-          10.0
-        }
-        // Range could also be quite selective
-        else {
-          50.0
-        }
+      } else {
+        self.plain_vids.push(vid.clone());
       }
+    }
+  }
 
-      // 2. edge connectivity
+  /// Core logic: Rule-based optimization
+  fn rule_based_optimization(&mut self) {
+    let mut v_prices = HashMap::new();
+
+    for vid in self.pattern_graph.v_entities.keys() {
+      let mut price = 0.0;
+
+      // 1. edge connectivity
       let in_degree = self.pattern_graph.get_in_degree(vid);
       let out_degree = self.pattern_graph.get_out_degree(vid);
-      // the less the degree is, the faster the query could be
-      score -= (in_degree + out_degree) as f64;
+      // vertex with more edges should be more expensive
+      price += (in_degree + out_degree) as f64;
 
-      // 3. vertex connectivity
+      // 2. vertex connectivity
       let num_of_neighbors = self.pattern_graph.get_adj_vids(vid).len();
-      // the less the number of neighbors is, the faster the query could be
-      //
-      // and this one could be more affective than the `edge connectivity`
-      score -= num_of_neighbors as f64 * 5.0;
+      // vertex with more neighbors should be more expensive
+      // (and should be much more expensive than edge connectivity)
+      price += num_of_neighbors as f64 * 5.0;
 
-      let score = OrderedFloat::from(score);
+      let price = OrderedFloat::from(price);
 
-      v_scores.insert(vid, score);
+      v_prices.insert(vid, price);
     }
 
-    // DESC of `score`
-    self.order.sort_unstable_by_key(|vid| -v_scores[vid]);
+    // for each bucket
+    for bucket in [
+      &mut self.eq_vids,
+      &mut self.range_vids,
+      &mut self.ne_vids,
+      &mut self.plain_vids,
+    ] {
+      // Sort by price (ASC)
+      bucket.sort_unstable_by_key(|vid| v_prices[vid]);
+    }
   }
 
-  /// Core logic: Heuristic-based cost estimation & adjustment
+  /// Core logic: Heuristic cost based optimization
   ///
   /// To keep `worst-case optimal`, we assume that each step is in the worst case.
-  fn cost_based_adjustment(&mut self) {
+  fn cost_based_optimization(&mut self) {
     let vs = self.pattern_graph.view_v_entities();
 
     vs.into_par_iter()
@@ -126,43 +138,38 @@ impl OrderCalculator {
           .copied()
           .unwrap_or(0);
 
-        if let Some(&cost) = self.override_v_cost.get(&v.vid) {
-          v_cost = cost;
-        }
-
-        let grouped_adj_eids = self.pattern_graph.view_adj_es_grouped_by_target_vid(&v.vid);
-        let mut grouped_e_costs = Vec::with_capacity(grouped_adj_eids.len());
+        let dst_grouped_adj_eids = self.pattern_graph.view_adj_es_grouped_by_target_vid(&v.vid);
+        let mut dst_grouped_e_costs = Vec::with_capacity(dst_grouped_adj_eids.len());
 
         // In the worst case, each vertex could match.
-        // Then v_cost should be multiplied by `group count` of `grouped_adj_es`.
+        // Then v_cost should be multiplied by `group count` of `dst_grouped_adj_eids`.
         //
-        // However, we still the original v_cost (before cloned) for further estimation.
+        // However, we still need the original v_cost (before cloned) for further estimation.
         let original_v_cost = v_cost;
-        v_cost *= grouped_adj_eids.len();
+        v_cost *= dst_grouped_adj_eids.len();
 
-        for adj_eids in grouped_adj_eids.into_values() {
+        for adj_eids in dst_grouped_adj_eids.into_values() {
           // We assume that in the original data graph,
           // the patterns of edges between two vertices will never overlap.
           let curr_group_adj_es_costs: usize = adj_eids
             .into_iter()
             .map(|eid| {
-              // est <=> estimation
-              let e_est = self
+              let e_estimation = self
                 .statistics
                 .e_label_cnt
                 .get(&eid.label)
                 .copied()
                 .unwrap_or(0);
               // notice that, e_cost should be the minimum value of `e_est` and `original_v_cost`
-              e_est.min(original_v_cost)
+              e_estimation.min(original_v_cost)
             })
             .sum();
 
-          grouped_e_costs.push(curr_group_adj_es_costs);
+          dst_grouped_e_costs.push(curr_group_adj_es_costs);
         }
 
         // Now we have the cost of `v`
-        let cost = v_cost + grouped_e_costs.into_iter().sum::<usize>();
+        let cost = v_cost + dst_grouped_e_costs.into_iter().sum::<usize>();
 
         (v.vid.clone(), cost)
       })
@@ -175,19 +182,43 @@ impl OrderCalculator {
       });
 
     let mut v_costs = HashMap::with_capacity(self.cost_2_vids.len());
-    while let Some((cost, vids)) = self.cost_2_vids.pop_first() {
+    for (cost, vids) in self.cost_2_vids.drain() {
       for vid in vids {
         v_costs.insert(vid, cost);
       }
     }
 
-    // use `stable_sort` to keep the order of `vids` with the same cost
-    self.order.sort_by_key(|vid| v_costs[vid]);
+    // for each bucket
+    for bucket in [
+      &mut self.eq_vids,
+      &mut self.range_vids,
+      &mut self.ne_vids,
+      &mut self.plain_vids,
+    ] {
+      // Sort by cost (ASC)
+      bucket.sort_unstable_by_key(|vid| v_costs[vid]);
+    }
+  }
+
+  fn concat_final_optimal_order(&mut self) {
+    // 1. eq_vids (=)
+    self.order.append(&mut self.eq_vids);
+
+    // 2. range_vids (<, <=, >, >=)
+    self.order.append(&mut self.range_vids);
+
+    // 3. ne_vids (!=)
+    self.order.append(&mut self.ne_vids);
+
+    // 4. plain_vids (no attr)
+    self.order.append(&mut self.plain_vids);
   }
 
   pub fn compute_optimal_order(mut self) -> PlanGenInput {
-    self.rule_based_estimation();
-    self.cost_based_adjustment();
+    self.group_vids_by_attr_op();
+    self.rule_based_optimization();
+    self.cost_based_optimization();
+    self.concat_final_optimal_order();
 
     PlanGenInput {
       pattern_graph: self.pattern_graph,
