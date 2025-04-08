@@ -1,0 +1,42 @@
+{
+  "matching_order": [
+    "message"
+  ],
+  "vertices": {
+    "message": {
+      "vid": "message",
+      "label": "Post",
+      "attr": {
+        "attr": "creationDate",
+        "op": "<",
+        "value": 1264112720971,
+        "type": "int"
+      }
+    }
+  },
+  "edges": {},
+  "instructions": [
+    {
+      "vid": "message",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^message",
+      "depend_on": []
+    },
+    {
+      "vid": "",
+      "type": "report",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "f^message"
+      ],
+      "target_var": "f",
+      "depend_on": [
+        "f^message"
+      ]
+    }
+  ]
+}

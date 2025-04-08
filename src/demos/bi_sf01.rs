@@ -22,6 +22,12 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
 }
 
 /// ☑️
+pub async fn bi_1_on_sf_01() -> io::Result<()> {
+  println!("Querying 'BI-1' on 'SF0.1' ...\n");
+  exec("ldbc-bi-1.json").await
+}
+
+/// ☑️
 pub async fn bi_2_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-2' on 'SF0.1' ...\n");
   exec("ldbc-bi-2.json").await

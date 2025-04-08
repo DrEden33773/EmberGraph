@@ -15,11 +15,6 @@
         "type": "string"
       }
     },
-    "person": {
-      "vid": "person",
-      "label": "Person",
-      "attr": null
-    },
     "comment": {
       "vid": "comment",
       "label": "Comment",
@@ -29,6 +24,11 @@
         "value": 1290666911352,
         "type": "int"
       }
+    },
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": null
     }
   },
   "edges": {
@@ -90,9 +90,9 @@
       "multi_ops": [],
       "target_var": "f^comment",
       "depend_on": [
-        "A^post",
         "f^post",
-        "C^comment"
+        "C^comment",
+        "A^post"
       ]
     },
     {
@@ -106,9 +106,9 @@
       "target_var": "A^comment",
       "depend_on": [
         "A^post",
-        "f^comment",
         "f^post",
-        "C^comment"
+        "C^comment",
+        "f^comment"
       ]
     },
     {
@@ -119,11 +119,11 @@
       "multi_ops": [],
       "target_var": "C^person",
       "depend_on": [
-        "A^post",
-        "f^comment",
-        "C^comment",
         "A^comment",
-        "f^post"
+        "f^comment",
+        "f^post",
+        "A^post",
+        "C^comment"
       ]
     },
     {
@@ -134,11 +134,11 @@
       "multi_ops": [],
       "target_var": "f^person",
       "depend_on": [
-        "f^comment",
         "C^person",
-        "A^post",
-        "A^comment",
+        "f^comment",
         "f^post",
+        "A^comment",
+        "A^post",
         "C^comment"
       ]
     },
@@ -154,13 +154,13 @@
       ],
       "target_var": "f",
       "depend_on": [
-        "A^comment",
-        "C^comment",
-        "f^comment",
         "A^post",
+        "C^comment",
+        "f^person",
         "C^person",
         "f^post",
-        "f^person"
+        "f^comment",
+        "A^comment"
       ]
     }
   ]

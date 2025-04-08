@@ -6,6 +6,11 @@
     "company"
   ],
   "vertices": {
+    "company": {
+      "vid": "company",
+      "label": "Company",
+      "attr": null
+    },
     "otherPerson": {
       "vid": "otherPerson",
       "label": "Person",
@@ -25,11 +30,6 @@
         "value": "Pakistan",
         "type": "string"
       }
-    },
-    "company": {
-      "vid": "company",
-      "label": "Company",
-      "attr": null
     },
     "person": {
       "vid": "person",
@@ -130,9 +130,9 @@
       "multi_ops": [],
       "target_var": "f^otherPerson",
       "depend_on": [
+        "f^person",
         "C^otherPerson",
-        "A^person",
-        "f^person"
+        "A^person"
       ]
     },
     {
@@ -145,9 +145,9 @@
       "multi_ops": [],
       "target_var": "A^otherPerson",
       "depend_on": [
-        "C^otherPerson",
         "f^person",
         "f^otherPerson",
+        "C^otherPerson",
         "A^person"
       ]
     },
@@ -163,11 +163,11 @@
       "target_var": "T^company",
       "depend_on": [
         "f^person",
+        "A^country",
+        "f^otherPerson",
         "C^otherPerson",
         "f^country",
-        "f^otherPerson",
         "A^person",
-        "A^country",
         "A^otherPerson"
       ]
     },
@@ -179,14 +179,14 @@
       "multi_ops": [],
       "target_var": "C^company",
       "depend_on": [
-        "C^otherPerson",
-        "A^country",
         "f^otherPerson",
         "f^country",
-        "T^company",
         "f^person",
-        "A^otherPerson",
-        "A^person"
+        "T^company",
+        "A^country",
+        "A^person",
+        "C^otherPerson",
+        "A^otherPerson"
       ]
     },
     {
@@ -197,15 +197,15 @@
       "multi_ops": [],
       "target_var": "f^company",
       "depend_on": [
-        "f^otherPerson",
-        "f^country",
-        "A^person",
-        "C^otherPerson",
-        "f^person",
         "A^otherPerson",
-        "A^country",
+        "A^person",
+        "f^otherPerson",
+        "C^company",
+        "f^country",
+        "C^otherPerson",
         "T^company",
-        "C^company"
+        "f^person",
+        "A^country"
       ]
     },
     {
@@ -214,23 +214,23 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^country",
         "f^person",
-        "f^company",
-        "f^otherPerson"
+        "f^country",
+        "f^otherPerson",
+        "f^company"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^country",
         "A^country",
         "f^otherPerson",
-        "T^company",
         "f^person",
-        "f^company",
-        "A^person",
-        "A^otherPerson",
+        "C^company",
         "C^otherPerson",
-        "C^company"
+        "A^person",
+        "f^country",
+        "A^otherPerson",
+        "f^company",
+        "T^company"
       ]
     }
   ]

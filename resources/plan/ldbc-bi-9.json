@@ -15,11 +15,6 @@
         "type": "int"
       }
     },
-    "person": {
-      "vid": "person",
-      "label": "Person",
-      "attr": null
-    },
     "post": {
       "vid": "post",
       "label": "Post",
@@ -29,6 +24,11 @@
         "value": 1290661462488,
         "type": "int"
       }
+    },
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": null
     }
   },
   "edges": {
@@ -78,8 +78,8 @@
       "multi_ops": [],
       "target_var": "C^post",
       "depend_on": [
-        "A^comment",
-        "f^comment"
+        "f^comment",
+        "A^comment"
       ]
     },
     {
@@ -90,8 +90,8 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "C^post",
         "A^comment",
+        "C^post",
         "f^comment"
       ]
     },
@@ -105,10 +105,10 @@
       "multi_ops": [],
       "target_var": "A^post",
       "depend_on": [
-        "C^post",
         "f^post",
         "A^comment",
-        "f^comment"
+        "f^comment",
+        "C^post"
       ]
     },
     {
@@ -119,11 +119,11 @@
       "multi_ops": [],
       "target_var": "C^person",
       "depend_on": [
-        "C^post",
-        "f^post",
         "A^post",
+        "f^post",
         "A^comment",
-        "f^comment"
+        "f^comment",
+        "C^post"
       ]
     },
     {
@@ -134,12 +134,12 @@
       "multi_ops": [],
       "target_var": "f^person",
       "depend_on": [
-        "C^person",
-        "C^post",
-        "A^post",
         "A^comment",
+        "A^post",
+        "C^post",
+        "f^post",
         "f^comment",
-        "f^post"
+        "C^person"
       ]
     },
     {
@@ -149,18 +149,18 @@
       "single_op": null,
       "multi_ops": [
         "f^comment",
-        "f^person",
-        "f^post"
+        "f^post",
+        "f^person"
       ],
       "target_var": "f",
       "depend_on": [
         "f^post",
-        "f^comment",
-        "f^person",
         "A^post",
-        "C^person",
         "A^comment",
-        "C^post"
+        "C^person",
+        "f^comment",
+        "C^post",
+        "f^person"
       ]
     }
   ]

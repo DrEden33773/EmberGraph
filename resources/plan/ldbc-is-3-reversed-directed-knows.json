@@ -78,8 +78,8 @@
       "target_var": "f^friend",
       "depend_on": [
         "C^friend",
-        "f^person",
-        "A^person"
+        "A^person",
+        "f^person"
       ]
     },
     {
@@ -93,10 +93,10 @@
       ],
       "target_var": "f",
       "depend_on": [
-        "A^person",
         "f^person",
         "f^friend",
-        "C^friend"
+        "C^friend",
+        "A^person"
       ]
     }
   ]

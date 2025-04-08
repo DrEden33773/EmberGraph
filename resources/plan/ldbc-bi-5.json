@@ -7,26 +7,6 @@
     "post"
   ],
   "vertices": {
-    "liker": {
-      "vid": "liker",
-      "label": "Person",
-      "attr": null
-    },
-    "person": {
-      "vid": "person",
-      "label": "Person",
-      "attr": null
-    },
-    "post": {
-      "vid": "post",
-      "label": "Post",
-      "attr": null
-    },
-    "comment": {
-      "vid": "comment",
-      "label": "Comment",
-      "attr": null
-    },
     "tag": {
       "vid": "tag",
       "label": "Tag",
@@ -36,23 +16,29 @@
         "value": "Fridtjof_Nansen",
         "type": "string"
       }
+    },
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
+      "attr": null
+    },
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": null
+    },
+    "liker": {
+      "vid": "liker",
+      "label": "Person",
+      "attr": null
+    },
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
     }
   },
   "edges": {
-    "d": {
-      "eid": "d",
-      "src_vid": "comment",
-      "dst_vid": "post",
-      "label": "replyOf",
-      "attr": null
-    },
-    "b": {
-      "eid": "b",
-      "src_vid": "post",
-      "dst_vid": "tag",
-      "label": "hasTag",
-      "attr": null
-    },
     "c": {
       "eid": "c",
       "src_vid": "liker",
@@ -60,11 +46,25 @@
       "label": "likes",
       "attr": null
     },
+    "d": {
+      "eid": "d",
+      "src_vid": "comment",
+      "dst_vid": "post",
+      "label": "replyOf",
+      "attr": null
+    },
     "a": {
       "eid": "a",
       "src_vid": "post",
       "dst_vid": "person",
       "label": "hasCreator",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "post",
+      "dst_vid": "tag",
+      "label": "hasTag",
       "attr": null
     }
   },
@@ -164,20 +164,20 @@
       "single_op": null,
       "multi_ops": [
         "A^tag",
+        "A^person",
         "A^liker",
-        "A^comment",
-        "A^person"
+        "A^comment"
       ],
       "target_var": "T^post",
       "depend_on": [
-        "A^tag",
-        "A^person",
-        "A^comment",
-        "f^tag",
-        "A^liker",
-        "f^person",
+        "f^comment",
         "f^liker",
-        "f^comment"
+        "A^comment",
+        "A^tag",
+        "f^person",
+        "A^person",
+        "f^tag",
+        "A^liker"
       ]
     },
     {
@@ -188,15 +188,15 @@
       "multi_ops": [],
       "target_var": "C^post",
       "depend_on": [
-        "f^tag",
         "f^comment",
-        "A^comment",
+        "f^tag",
+        "A^person",
         "T^post",
         "f^person",
-        "A^person",
-        "A^liker",
+        "f^liker",
+        "A^comment",
         "A^tag",
-        "f^liker"
+        "A^liker"
       ]
     },
     {
@@ -207,15 +207,15 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "A^person",
-        "C^post",
-        "A^tag",
-        "f^person",
-        "A^comment",
-        "f^tag",
-        "f^comment",
-        "A^liker",
         "f^liker",
+        "A^liker",
+        "f^tag",
+        "f^person",
+        "f^comment",
+        "C^post",
+        "A^comment",
+        "A^tag",
+        "A^person",
         "T^post"
       ]
     },
@@ -225,25 +225,25 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
+        "f^post",
         "f^tag",
-        "f^liker",
-        "f^comment",
         "f^person",
-        "f^post"
+        "f^liker",
+        "f^comment"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^person",
-        "f^tag",
-        "f^comment",
-        "A^person",
-        "A^tag",
-        "f^liker",
-        "C^post",
-        "A^comment",
-        "A^liker",
         "T^post",
-        "f^post"
+        "f^comment",
+        "A^liker",
+        "f^post",
+        "f^person",
+        "A^comment",
+        "f^tag",
+        "C^post",
+        "f^liker",
+        "A^tag",
+        "A^person"
       ]
     }
   ]

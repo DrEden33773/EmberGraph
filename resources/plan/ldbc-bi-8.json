@@ -6,11 +6,6 @@
     "person"
   ],
   "vertices": {
-    "person": {
-      "vid": "person",
-      "label": "Person",
-      "attr": null
-    },
     "tag": {
       "vid": "tag",
       "label": "Tag",
@@ -35,14 +30,19 @@
       "vid": "friend",
       "label": "Person",
       "attr": null
+    },
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": null
     }
   },
   "edges": {
-    "c": {
-      "eid": "c",
+    "d": {
+      "eid": "d",
       "src_vid": "person",
-      "dst_vid": "tag",
-      "label": "hasInterest",
+      "dst_vid": "friend",
+      "label": "knows",
       "attr": null
     },
     "b": {
@@ -59,11 +59,11 @@
       "label": "hasTag",
       "attr": null
     },
-    "d": {
-      "eid": "d",
+    "c": {
+      "eid": "c",
       "src_vid": "person",
-      "dst_vid": "friend",
-      "label": "knows",
+      "dst_vid": "tag",
+      "label": "hasInterest",
       "attr": null
     }
   },
@@ -99,8 +99,8 @@
       "multi_ops": [],
       "target_var": "C^comment",
       "depend_on": [
-        "f^tag",
-        "A^tag"
+        "A^tag",
+        "f^tag"
       ]
     },
     {
@@ -112,8 +112,8 @@
       "target_var": "f^comment",
       "depend_on": [
         "C^comment",
-        "f^tag",
-        "A^tag"
+        "A^tag",
+        "f^tag"
       ]
     },
     {
@@ -126,9 +126,9 @@
       "multi_ops": [],
       "target_var": "A^comment",
       "depend_on": [
+        "f^comment",
         "A^tag",
         "C^comment",
-        "f^comment",
         "f^tag"
       ]
     },
@@ -160,19 +160,19 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
+        "A^comment",
         "A^friend",
-        "A^tag",
-        "A^comment"
+        "A^tag"
       ],
       "target_var": "T^person",
       "depend_on": [
-        "C^comment",
-        "A^tag",
         "A^friend",
-        "f^tag",
-        "f^comment",
+        "A^tag",
         "A^comment",
-        "f^friend"
+        "f^tag",
+        "C^comment",
+        "f^friend",
+        "f^comment"
       ]
     },
     {
@@ -183,14 +183,14 @@
       "multi_ops": [],
       "target_var": "C^person",
       "depend_on": [
+        "A^friend",
         "A^comment",
         "f^tag",
         "T^person",
-        "C^comment",
-        "A^friend",
-        "A^tag",
         "f^comment",
-        "f^friend"
+        "A^tag",
+        "f^friend",
+        "C^comment"
       ]
     },
     {
@@ -201,15 +201,15 @@
       "multi_ops": [],
       "target_var": "f^person",
       "depend_on": [
-        "f^tag",
-        "T^person",
-        "f^comment",
         "A^tag",
-        "C^comment",
+        "f^comment",
+        "f^tag",
         "A^comment",
-        "f^friend",
+        "T^person",
         "A^friend",
-        "C^person"
+        "C^person",
+        "C^comment",
+        "f^friend"
       ]
     },
     {
@@ -218,23 +218,23 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^friend",
+        "f^person",
         "f^tag",
         "f^comment",
-        "f^person"
+        "f^friend"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^comment",
-        "f^tag",
-        "C^person",
         "A^tag",
-        "T^person",
-        "A^comment",
-        "A^friend",
+        "C^person",
         "C^comment",
+        "f^comment",
         "f^friend",
-        "f^person"
+        "A^friend",
+        "f^person",
+        "f^tag",
+        "A^comment",
+        "T^person"
       ]
     }
   ]
