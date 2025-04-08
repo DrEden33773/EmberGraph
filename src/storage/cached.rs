@@ -10,7 +10,7 @@ use std::{
 use tokio::sync::Semaphore;
 
 const DEFAULT_CACHE_SIZE: usize = 256;
-const MAX_WRITE_TASKS: usize = 32;
+const MAX_BACKGROUND_WRITE_TASKS: usize = 32;
 
 #[derive(Clone, Eq, PartialEq, Hash)]
 enum CacheKey {
@@ -96,7 +96,7 @@ impl StorageCache {
       vertices_cache: Cache::new(cache_size.get() as u64),
       edges_cache: Cache::new(cache_size.get() as u64),
 
-      background_tasks_sem: Arc::new(Semaphore::new(MAX_WRITE_TASKS)),
+      background_tasks_sem: Arc::new(Semaphore::new(MAX_BACKGROUND_WRITE_TASKS)),
     }
   }
 }
