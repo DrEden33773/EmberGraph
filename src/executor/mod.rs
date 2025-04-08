@@ -15,7 +15,7 @@ pub mod instr_ops;
 
 #[derive(Clone)]
 pub struct ExecEngine<S: AdvancedStorageAdapter> {
-  pub(crate) plan_data: PlanData,
+  pub(crate) plan_data: Arc<PlanData>,
   pub(crate) storage_adapter: Arc<S>,
   pub(crate) matching_ctx: Arc<Mutex<MatchingCtx>>,
 }
@@ -23,8 +23,9 @@ pub struct ExecEngine<S: AdvancedStorageAdapter> {
 impl<S: TestOnlyStorageAdapter> ExecEngine<S> {
   pub async fn build_test_only_from_json(plan_json_content: &str) -> Self {
     let plan_data: PlanData = serde_json::from_str(plan_json_content).unwrap();
+    let plan_data = Arc::new(plan_data);
     let storage_adapter = Arc::new(S::async_init_test_only().await);
-    let matching_ctx = Arc::new(Mutex::new(MatchingCtx::new(&plan_data)));
+    let matching_ctx = Arc::new(Mutex::new(MatchingCtx::new(plan_data.clone())));
     Self {
       plan_data,
       storage_adapter,
@@ -36,8 +37,9 @@ impl<S: TestOnlyStorageAdapter> ExecEngine<S> {
 impl<S: AdvancedStorageAdapter> ExecEngine<S> {
   pub async fn build_from_json(plan_json_content: &str) -> Self {
     let plan_data: PlanData = serde_json::from_str(plan_json_content).unwrap();
+    let plan_data = Arc::new(plan_data);
     let storage_adapter = Arc::new(S::async_default().await);
-    let matching_ctx = Arc::new(Mutex::new(MatchingCtx::new(&plan_data)));
+    let matching_ctx = Arc::new(Mutex::new(MatchingCtx::new(plan_data.clone())));
     Self {
       plan_data,
       storage_adapter,

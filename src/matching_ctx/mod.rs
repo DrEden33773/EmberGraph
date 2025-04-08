@@ -1,3 +1,5 @@
+use std::{ops::BitOr, sync::Arc};
+
 use crate::{
   schemas::{PatternEdge, PatternVertex, PlanData, STR_TUPLE_SPLITTER, Vid, VidRef},
   utils::{dyn_graph::DynGraph, expand_graph::ExpandGraph},
@@ -15,7 +17,7 @@ fn resolve_var_name(target_var: &str) -> &str {
 
 #[derive(Debug, Clone, Default)]
 pub struct MatchingCtx {
-  pub(crate) plan_data: PlanData,
+  pub(crate) plan_data: Arc<PlanData>,
 
   pub(crate) f_block: HashMap<Vid, FBucket>,
   pub(crate) a_block: HashMap<Vid, ABucket>,
@@ -25,8 +27,26 @@ pub struct MatchingCtx {
   pub(crate) grouped_partial_matches: Vec<Vec<DynGraph>>,
 }
 
+impl BitOr for MatchingCtx {
+  type Output = Self;
+
+  fn bitor(self, rhs: Self) -> Self::Output {
+    let mut merged = self;
+
+    merged.f_block.extend(rhs.f_block);
+    merged.a_block.extend(rhs.a_block);
+    merged.c_block.extend(rhs.c_block);
+    merged.t_block.extend(rhs.t_block);
+
+    // Note that `grouped_partial_matches` is not merged here,
+    // because it will be only modified in the last `Report` step.
+
+    merged
+  }
+}
+
 impl MatchingCtx {
-  pub fn new(plan_data: &PlanData) -> Self {
+  pub fn new(plan_data: Arc<PlanData>) -> Self {
     Self {
       plan_data: plan_data.clone(),
       ..Default::default()
