@@ -149,7 +149,15 @@ impl<S: AdvancedStorageAdapter> ExecEngine<S> {
     })
     .await;
 
-    // don't forget to unique the result
-    result.into_iter().unique().collect()
+    #[cfg(feature = "unique_the_final_result")]
+    {
+      // don't forget to unique the result
+      result.into_iter().unique().collect()
+    }
+
+    #[cfg(not(feature = "unique_the_final_result"))]
+    {
+      result
+    }
   }
 }

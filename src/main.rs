@@ -70,7 +70,7 @@ async fn run_demo() -> io::Result<()> {
   #[allow(unused_imports)]
   use ember_graph::demos::{bi_sf01::*, complex_interactive_sf01::*, simple_interactive_sf01::*};
 
-  // bi_2_on_sf_01().await?;
+  bi_2_on_sf_01().await?;
   // bi_4_on_sf_01().await?;
   // bi_7_on_sf_01().await?;
   // bi_8_on_sf_01().await?;
@@ -78,7 +78,7 @@ async fn run_demo() -> io::Result<()> {
   // bi_11_on_sf_01().await?;
   // bi_12_on_sf_01().await?;
   // bi_13_on_sf_01().await?;
-  bi_14_on_sf_01().await?;
+  // bi_14_on_sf_01().await?;
   // bi_17_on_sf_01().await?;
 
   // bi_3_on_sf_01().await?;

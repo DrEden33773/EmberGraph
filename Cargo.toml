@@ -38,11 +38,14 @@ default = [
     # "single_thread_debug",
     # "trace_all",
 ]
+
 block_spawn_via_rayon = []
 use_tracing = []
 validate_pattern_uniqueness_before_final_merge = []
 batched_incremental_match_adj_e = []
 single_thread_debug = []
+unique_the_final_result = []
+
 trace_all = ["trace_init", "trace_get_adj"]
 trace_init = []
 trace_get_adj = []
