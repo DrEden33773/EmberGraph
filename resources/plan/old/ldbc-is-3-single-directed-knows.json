@@ -1,7 +1,7 @@
 {
   "matching_order": [
     "person",
-    "city"
+    "friend"
   ],
   "vertices": {
     "person": {
@@ -14,18 +14,23 @@
         "type": "int"
       }
     },
-    "city": {
-      "vid": "city",
-      "label": "City",
-      "attr": null
+    "friend": {
+      "vid": "friend",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "!=",
+        "value": 6597069766660,
+        "type": "int"
+      }
     }
   },
   "edges": {
     "a": {
       "eid": "a",
       "src_vid": "person",
-      "dst_vid": "city",
-      "label": "isLocatedIn",
+      "dst_vid": "friend",
+      "label": "knows",
       "attr": null
     }
   },
@@ -53,27 +58,27 @@
       ]
     },
     {
-      "vid": "city",
+      "vid": "friend",
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": "A^person",
       "multi_ops": [],
-      "target_var": "C^city",
+      "target_var": "C^friend",
       "depend_on": [
-        "f^person",
-        "A^person"
+        "A^person",
+        "f^person"
       ]
     },
     {
-      "vid": "city",
+      "vid": "friend",
       "type": "foreach",
       "expand_eid_list": [],
-      "single_op": "C^city",
+      "single_op": "C^friend",
       "multi_ops": [],
-      "target_var": "f^city",
+      "target_var": "f^friend",
       "depend_on": [
+        "C^friend",
         "f^person",
-        "C^city",
         "A^person"
       ]
     },
@@ -83,15 +88,15 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^person",
-        "f^city"
+        "f^friend",
+        "f^person"
       ],
       "target_var": "f",
       "depend_on": [
+        "C^friend",
         "A^person",
-        "f^person",
-        "C^city",
-        "f^city"
+        "f^friend",
+        "f^person"
       ]
     }
   ]
