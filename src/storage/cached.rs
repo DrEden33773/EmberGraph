@@ -1,13 +1,16 @@
 use super::{AdvancedStorageAdapter, AsyncDefault, StorageAdapter};
 use crate::schemas::{DataEdge, DataVertex, LabelRef, PatternAttr, VidRef};
+use colored::Colorize;
 use moka::future::Cache;
 use std::{
   hash::{DefaultHasher, Hash, Hasher},
   num::NonZeroUsize,
   sync::Arc,
 };
+use tokio::sync::Semaphore;
 
 const DEFAULT_CACHE_SIZE: usize = 256;
+const MAX_WRITE_TASKS: usize = 32;
 
 #[derive(Clone, Eq, PartialEq, Hash)]
 enum CacheKey {
@@ -79,6 +82,8 @@ struct StorageCache {
   vertex_cache: Cache<CacheKey, Option<DataVertex>>,
   vertices_cache: Cache<CacheKey, Vec<DataVertex>>,
   edges_cache: Cache<CacheKey, Vec<DataEdge>>,
+
+  background_tasks_sem: Arc<Semaphore>,
 }
 
 impl StorageCache {
@@ -90,6 +95,8 @@ impl StorageCache {
       vertex_cache: Cache::new(cache_size.get() as u64),
       vertices_cache: Cache::new(cache_size.get() as u64),
       edges_cache: Cache::new(cache_size.get() as u64),
+
+      background_tasks_sem: Arc::new(Semaphore::new(MAX_WRITE_TASKS)),
     }
   }
 }
@@ -111,6 +118,32 @@ impl<S: StorageAdapter> CachedStorageAdapter<S> {
     self.cache.vertex_cache.invalidate_all();
     self.cache.vertices_cache.invalidate_all();
     self.cache.edges_cache.invalidate_all();
+  }
+
+  fn try_background_update<V: Clone + Send + Sync + 'static>(
+    &self,
+    cache: &Cache<CacheKey, V>,
+    result: &V,
+    key: CacheKey,
+  ) {
+    let cache = cache.clone();
+    let result = result.clone();
+    let sem = self.cache.background_tasks_sem.clone();
+
+    tokio::spawn(async move {
+      match tokio::time::timeout(tokio::time::Duration::from_millis(20), sem.acquire()).await {
+        Ok(Ok(permit)) => {
+          cache.insert(key, result).await;
+          drop(permit);
+        }
+        _ => {
+          eprintln!(
+            "⚠️  {}\n",
+            "Background cache update timed out. Cache not updated.".yellow()
+          );
+        }
+      }
+    });
   }
 }
 
@@ -134,7 +167,7 @@ impl<S: StorageAdapter> StorageAdapter for CachedStorageAdapter<S> {
     let result = self.inner.get_v(vid).await;
 
     // update cache with result
-    self.cache.vertex_cache.insert(key, result.clone()).await;
+    self.try_background_update(&self.cache.vertex_cache, &result, key);
 
     result
   }
@@ -149,7 +182,7 @@ impl<S: StorageAdapter> StorageAdapter for CachedStorageAdapter<S> {
 
     let result = self.inner.load_v(v_label, v_attr).await;
 
-    self.cache.vertices_cache.insert(key, result.clone()).await;
+    self.try_background_update(&self.cache.vertices_cache, &result, key);
 
     result
   }
@@ -175,7 +208,7 @@ impl<S: StorageAdapter> StorageAdapter for CachedStorageAdapter<S> {
 
     let result = self.inner.load_e_with_src(src_vid, e_label, e_attr).await;
 
-    self.cache.edges_cache.insert(key, result.clone()).await;
+    self.try_background_update(&self.cache.edges_cache, &result, key);
 
     result
   }
@@ -195,7 +228,7 @@ impl<S: StorageAdapter> StorageAdapter for CachedStorageAdapter<S> {
 
     let result = self.inner.load_e_with_dst(dst_vid, e_label, e_attr).await;
 
-    self.cache.edges_cache.insert(key, result.clone()).await;
+    self.try_background_update(&self.cache.edges_cache, &result, key);
 
     result
   }
@@ -229,7 +262,7 @@ impl<S: AdvancedStorageAdapter> AdvancedStorageAdapter for CachedStorageAdapter<
       .load_e_with_src_and_dst_filter(src_vid, e_label, e_attr, dst_v_label, dst_v_attr)
       .await;
 
-    self.cache.edges_cache.insert(key, result.clone()).await;
+    self.try_background_update(&self.cache.edges_cache, &result, key);
 
     result
   }
@@ -261,7 +294,7 @@ impl<S: AdvancedStorageAdapter> AdvancedStorageAdapter for CachedStorageAdapter<
       .load_e_with_dst_and_src_filter(dst_vid, e_label, e_attr, src_v_label, src_v_attr)
       .await;
 
-    self.cache.edges_cache.insert(key, result.clone()).await;
+    self.try_background_update(&self.cache.edges_cache, &result, key);
 
     result
   }
