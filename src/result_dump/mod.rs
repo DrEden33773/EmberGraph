@@ -1,4 +1,5 @@
 use crate::{schemas::PlanData, utils::dyn_graph::DynGraph};
+use hashbrown::HashMap;
 use itertools::Itertools;
 use polars::prelude::*;
 use std::collections::BTreeMap;
@@ -12,7 +13,7 @@ impl<'plan> EmptyResultDumper<'plan> {
     Self { plan_data }
   }
 
-  pub fn dump_patterns_to_polars_df(self) -> DataFrame {
+  pub fn to_df(self) -> DataFrame {
     let patterns = self
       .plan_data
       .pattern_vs
@@ -36,32 +37,53 @@ impl ResultDumper {
     Self { results }
   }
 
-  pub fn dump_to_polars_df(self) -> Option<DataFrame> {
+  pub fn to_detailed_df(self) -> Option<DataFrame> {
     if self.results.is_empty() {
       return None;
     }
 
-    unsafe { std::env::set_var("POLARS_FMT_STR_LEN", "10000") };
-
-    let all_pre_dumped = self.results.into_iter().map(|g| g.pre_dump()).collect_vec();
-    let mut ordered_columns = BTreeMap::new();
-
-    for pre_dump in all_pre_dumped {
-      for (pattern, repr) in pre_dump {
-        ordered_columns
-          .entry(pattern)
-          .or_insert_with(Vec::new)
-          .extend(repr);
-      }
-    }
-
-    let columns = ordered_columns
+    let all_pre_dumped = self
+      .results
       .into_iter()
-      .map(|(pattern, repr)| Column::new(pattern.as_str().into(), repr))
+      .map(|g| g.pre_dump_detailed())
       .collect_vec();
 
-    let df = DataFrame::new(columns).unwrap();
-
-    Some(df)
+    to_df(all_pre_dumped)
   }
+
+  pub fn to_simplified_df(self) -> Option<DataFrame> {
+    if self.results.is_empty() {
+      return None;
+    }
+
+    let all_pre_dumped = self
+      .results
+      .into_iter()
+      .map(|g| g.pre_dump_simplified())
+      .collect_vec();
+
+    to_df(all_pre_dumped)
+  }
+}
+
+fn to_df(all_pre_dumped: Vec<HashMap<String, Vec<String>>>) -> Option<DataFrame> {
+  let mut ordered_columns = BTreeMap::new();
+
+  for pre_dump in all_pre_dumped {
+    for (pattern, repr) in pre_dump {
+      ordered_columns
+        .entry(pattern)
+        .or_insert_with(Vec::new)
+        .extend(repr);
+    }
+  }
+
+  let columns = ordered_columns
+    .into_iter()
+    .map(|(pattern, repr)| Column::new(pattern.as_str().into(), repr))
+    .collect_vec();
+
+  let df = DataFrame::new(columns).unwrap();
+
+  Some(df)
 }

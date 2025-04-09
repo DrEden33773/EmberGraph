@@ -1,7 +1,15 @@
 use dotenv::dotenv;
+#[cfg(windows)]
 use mimalloc::MiMalloc;
+#[cfg(unix)]
+use tikv_jemallocator::Jemalloc;
 use tokio::{io, runtime};
 
+#[cfg(unix)]
+#[global_allocator]
+static GLOBAL: Jemalloc = Jemalloc;
+
+#[cfg(windows)]
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 
@@ -68,11 +76,11 @@ async fn run_test_only() -> io::Result<()> {
 async fn run_demo() -> io::Result<()> {
   use ember_graph::demos::bi_sf01::*;
 
-  bi_1_on_sf_01().await?;
+  // bi_1_on_sf_01().await?;
   // bi_2_on_sf_01().await?;
   // bi_4_on_sf_01().await?;
   // bi_5_on_sf_01().await?;
-  // bi_6_on_sf_01().await?;
+  bi_6_on_sf_01().await?;
   // bi_7_on_sf_01().await?;
   // bi_8_on_sf_01().await?;
   // bi_9_on_sf_01().await?;

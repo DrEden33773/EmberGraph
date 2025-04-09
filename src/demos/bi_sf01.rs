@@ -17,10 +17,10 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
       .exec()
       .await;
 
-  println!("✨  Count(result) = {}\n", result.len());
+  println!("✨  Count(result) = {}", result.len());
 
-  if let Some(df) = ResultDumper::new(result).dump_to_polars_df() {
-    println!("✨  Result DataFrame:\n{}", df);
+  if let Some(df) = ResultDumper::new(result).to_simplified_df() {
+    println!("{}", df);
   }
 
   Ok(())

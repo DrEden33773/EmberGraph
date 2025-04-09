@@ -5,11 +5,12 @@ use hashbrown::HashMap;
 use itertools::Itertools;
 
 pub trait PrettyDump {
-  fn pretty_dump(&self) -> String;
+  fn pretty_dump_detailed(&self) -> String;
+  fn pretty_dump_simplified(&self) -> String;
 }
 
 impl PrettyDump for DataVertex {
-  fn pretty_dump(&self) -> String {
+  fn pretty_dump_detailed(&self) -> String {
     let label = format!(":{}", self.label()).red();
 
     let sorted_kv_pairs = self
@@ -42,10 +43,17 @@ impl PrettyDump for DataVertex {
       format!("({})", label)
     }
   }
+
+  fn pretty_dump_simplified(&self) -> String {
+    let label = format!(":{}", self.label()).red();
+    let vid = self.vid().to_string().cyan();
+
+    format!("({} {})", label, vid)
+  }
 }
 
 impl PrettyDump for DataEdge {
-  fn pretty_dump(&self) -> String {
+  fn pretty_dump_detailed(&self) -> String {
     let label = format!(":{}", self.label()).red();
 
     let sorted_kv_pairs = self
@@ -78,10 +86,17 @@ impl PrettyDump for DataEdge {
       format!("[{}]", label)
     }
   }
+
+  fn pretty_dump_simplified(&self) -> String {
+    let label = format!(":{}", self.label()).red();
+    // let eid = self.eid().to_string().purple();
+
+    format!("[{}]", label)
+  }
 }
 
 impl<VType: VBase + PrettyDump, EType: EBase + PrettyDump> DynGraph<VType, EType> {
-  pub fn pre_dump(&self) -> HashMap<String, Vec<String>> {
+  pub fn pre_dump_detailed(&self) -> HashMap<String, Vec<String>> {
     self
       .pattern_2_eids
       .iter()
@@ -90,9 +105,28 @@ impl<VType: VBase + PrettyDump, EType: EBase + PrettyDump> DynGraph<VType, EType
         let mut result = Vec::with_capacity(ids.len());
         for id in ids {
           if let Some(vertex) = self.v_entities.get(id) {
-            result.push(vertex.pretty_dump());
+            result.push(vertex.pretty_dump_detailed());
           } else if let Some(edge) = self.e_entities.get(id) {
-            result.push(edge.pretty_dump());
+            result.push(edge.pretty_dump_detailed());
+          }
+        }
+        (pattern.clone(), result)
+      })
+      .collect()
+  }
+
+  pub fn pre_dump_simplified(&self) -> HashMap<String, Vec<String>> {
+    self
+      .pattern_2_eids
+      .iter()
+      .chain(self.pattern_2_vids.iter())
+      .map(|(pattern, ids)| {
+        let mut result = Vec::with_capacity(ids.len());
+        for id in ids {
+          if let Some(vertex) = self.v_entities.get(id) {
+            result.push(vertex.pretty_dump_simplified());
+          } else if let Some(edge) = self.e_entities.get(id) {
+            result.push(edge.pretty_dump_simplified());
           }
         }
         (pattern.clone(), result)

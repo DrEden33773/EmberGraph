@@ -8,10 +8,13 @@
         "colorama",
         "cpus",
         "dashmap",
+        "DATAFRAME",
         "eids",
         "itemset",
         "itemsets",
         "Itertools",
+        "Jemalloc",
+        "jemallocator",
         "ldbc",
         "mimalloc",
         "moka",
@@ -20,6 +23,7 @@
         "sqlmodel",
         "textwrap",
         "thiserror",
+        "tikv",
         "titlecase"
     ],
     "[rust]": {
