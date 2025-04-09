@@ -4,6 +4,7 @@ pub mod apriori;
 pub mod dyn_graph;
 pub mod expand_graph;
 pub mod parallel;
+pub mod pretty_dump;
 
 pub async fn time_async<F: Future<Output = O>, O>(future: F) -> (O, f64) {
   let start = Instant::now();

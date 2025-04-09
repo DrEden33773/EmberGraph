@@ -18,6 +18,7 @@
         "oneshot",
         "pyproject",
         "sqlmodel",
+        "textwrap",
         "thiserror",
         "titlecase"
     ],
