@@ -1,3 +1,3 @@
 # EmberGraph
 
-To query a `multi directed graph` with filtering `label + attribute` efficiently
+To query a pattern on `multi directed graph` with `label / attribute filtering` efficiently, support `Neo4j` and `SQLite3` as the storage layer.
