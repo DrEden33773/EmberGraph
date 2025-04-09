@@ -80,7 +80,7 @@ async fn run_demo() -> io::Result<()> {
   // bi_2_on_sf_01().await?;
   // bi_4_on_sf_01().await?;
   // bi_5_on_sf_01().await?;
-  bi_6_on_sf_01().await?;
+  // bi_6_on_sf_01().await?;
   // bi_7_on_sf_01().await?;
   // bi_8_on_sf_01().await?;
   // bi_9_on_sf_01().await?;
@@ -90,7 +90,7 @@ async fn run_demo() -> io::Result<()> {
   // bi_14_on_sf_01().await?;
   // bi_15_on_sf_01().await?;
   // bi_16_on_sf_01().await?;
-  // bi_17_on_sf_01().await?;
+  bi_17_on_sf_01().await?;
   // bi_18_on_sf_01().await?;
   // bi_19_on_sf_01().await?;
   // bi_20_on_sf_01().await?;
