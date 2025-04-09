@@ -68,7 +68,7 @@ async fn run_test_only() -> io::Result<()> {
 async fn run_demo() -> io::Result<()> {
   use ember_graph::demos::bi_sf01::*;
 
-  // bi_1_on_sf_01().await?;
+  bi_1_on_sf_01().await?;
   // bi_2_on_sf_01().await?;
   // bi_4_on_sf_01().await?;
   // bi_5_on_sf_01().await?;
@@ -80,6 +80,7 @@ async fn run_demo() -> io::Result<()> {
   // bi_12_on_sf_01().await?;
   // bi_13_on_sf_01().await?;
   // bi_14_on_sf_01().await?;
+  // bi_15_on_sf_01().await?;
   // bi_16_on_sf_01().await?;
   // bi_17_on_sf_01().await?;
   // bi_18_on_sf_01().await?;
@@ -88,8 +89,6 @@ async fn run_demo() -> io::Result<()> {
 
   // bi_3_on_sf_01().await?;
   // bi_10_on_sf_01().await?;
-
-  bi_15_on_sf_01().await?;
 
   Ok(())
 }

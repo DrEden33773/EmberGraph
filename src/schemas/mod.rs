@@ -16,7 +16,7 @@ pub struct PlanData {
   #[serde(rename = "vertices")]
   pub(crate) pattern_vs: HashMap<Vid, PatternVertex>,
   #[serde(rename = "edges")]
-  pub(crate) pattern_es: HashMap<Vid, PatternEdge>,
+  pub(crate) pattern_es: HashMap<Eid, PatternEdge>,
   pub(crate) instructions: Vec<Instruction>,
 }
 

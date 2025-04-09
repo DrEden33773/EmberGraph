@@ -1,4 +1,4 @@
-use crate::{executor::ExecEngine, storage::*};
+use crate::{executor::ExecEngine, result_dump::ResultDumper, storage::*};
 use project_root::get_project_root;
 use std::{path::PathBuf, sync::LazyLock};
 use tokio::{fs, io};
@@ -12,12 +12,17 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
   let plan_json_content = fs::read_to_string(path).await?;
 
   let result =
-    ExecEngine::<CachedStorageAdapter<Neo4jStorageAdapter>>::build_from_json(&plan_json_content)
+    ExecEngine::<CachedStorageAdapter<SqliteStorageAdapter>>::build_from_json(&plan_json_content)
       .await
       .exec()
       .await;
 
   println!("✨  Count(result) = {}\n", result.len());
+
+  if let Some(df) = ResultDumper::new(result).dump_to_polars_df() {
+    println!("✨  Result DataFrame:\n{}", df);
+  }
+
   Ok(())
 }
 

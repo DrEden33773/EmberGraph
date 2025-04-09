@@ -135,7 +135,7 @@ impl<S: AdvancedStorageAdapter> ExecEngine<S> {
       .multi_cartesian_product()
       .collect_vec();
 
-    let result = parallel::spawn_blocking(move || {
+    parallel::spawn_blocking(move || {
       combinations
         .into_par_iter()
         .map(|combination| {
@@ -149,17 +149,6 @@ impl<S: AdvancedStorageAdapter> ExecEngine<S> {
         })
         .collect::<Vec<_>>()
     })
-    .await;
-
-    #[cfg(feature = "unique_the_final_result")]
-    {
-      // don't forget to unique the result
-      result.into_iter().unique().collect()
-    }
-
-    #[cfg(not(feature = "unique_the_final_result"))]
-    {
-      result
-    }
+    .await
   }
 }

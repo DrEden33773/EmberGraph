@@ -54,15 +54,6 @@ pub struct DynGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
   pub(crate) pattern_2_eids: HashMap<String, HashSet<Eid>>,
 }
 
-impl<VType: VBase, EType: EBase> Hash for DynGraph<VType, EType> {
-  fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-    for (vid, v_node) in &self.adj_table {
-      vid.hash(state);
-      v_node.hash(state);
-    }
-  }
-}
-
 impl<VType: VBase, EType: EBase> AsRef<Self> for DynGraph<VType, EType> {
   fn as_ref(&self) -> &Self {
     self
