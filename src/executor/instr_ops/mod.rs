@@ -34,7 +34,7 @@ pub enum InstrOperator<S: AdvancedStorageAdapter> {
   Report(ReportOperator),
 }
 
-impl<S: AdvancedStorageAdapter> InstrOperator<S> {
+impl<S: AdvancedStorageAdapter + 'static> InstrOperator<S> {
   pub async fn execute(&mut self, instr: &Instruction) {
     match self {
       InstrOperator::Init(operator) => operator.execute(instr).await,

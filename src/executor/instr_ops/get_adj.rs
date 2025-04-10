@@ -13,7 +13,7 @@ pub struct GetAdjOperator<S: AdvancedStorageAdapter> {
   pub(crate) ctx: Arc<Mutex<MatchingCtx>>,
 }
 
-impl<S: AdvancedStorageAdapter> GetAdjOperator<S> {
+impl<S: AdvancedStorageAdapter + 'static> GetAdjOperator<S> {
   pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
     println!("{instr:#?}\n");
 
@@ -31,8 +31,8 @@ impl<S: AdvancedStorageAdapter> GetAdjOperator<S> {
     };
 
     // core logic: incremental load new edges
-    let _connected_data_vids = a_bucket
-      .incremental_load_new_edges(pattern_es, &pattern_vs, self.storage_adapter.as_ref())
+    a_bucket
+      .incremental_load_new_edges(pattern_es, pattern_vs, self.storage_adapter.clone())
       .await;
 
     // update the `block` and `extended data vid set`

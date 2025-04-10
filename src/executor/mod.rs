@@ -34,7 +34,7 @@ impl<S: TestOnlyStorageAdapter> ExecEngine<S> {
   }
 }
 
-impl<S: AdvancedStorageAdapter> ExecEngine<S> {
+impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
   pub async fn build_from_json(plan_json_content: &str) -> Self {
     let plan_data: PlanData = serde_json::from_str(plan_json_content).unwrap();
     let plan_data = Arc::new(plan_data);
