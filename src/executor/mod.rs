@@ -62,12 +62,12 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
       operator.execute(instr).await;
     }
 
-    self
-      .matching_ctx
-      .lock()
-      .grouped_partial_matches
-      .drain(0..)
-      .collect()
+    let mut matching_ctx = self.matching_ctx.lock();
+
+    let mut result = Vec::with_capacity(matching_ctx.grouped_partial_matches.len());
+    result.append(&mut matching_ctx.grouped_partial_matches);
+
+    result
   }
 
   fn is_equivalent_to_pattern(

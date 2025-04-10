@@ -34,33 +34,19 @@ fn main() -> io::Result<()> {
     .build_global()
     .unwrap();
 
-  // tokio config (multi_threaded)
-  #[cfg(not(feature = "single_thread_debug"))]
-  {
-    use std::sync::atomic::{AtomicUsize, Ordering};
-
-    runtime::Builder::new_multi_thread()
-      .enable_all()
-      .worker_threads(num_cpus::get() / 2)
-      .thread_name_fn(|| {
-        static ATOMIC_ID: AtomicUsize = AtomicUsize::new(0);
-        let id = ATOMIC_ID.fetch_add(1, Ordering::SeqCst);
-        format!("tokio-{}", id)
-      })
-      .build()
-      .unwrap()
-      .block_on(to_run())
-  }
-
-  // tokio config (single_threaded)
-  #[cfg(feature = "single_thread_debug")]
-  {
-    runtime::Builder::new_current_thread()
-      .enable_all()
-      .build()
-      .unwrap()
-      .block_on(to_run())
-  }
+  // tokio config
+  runtime::Builder::new_multi_thread()
+    .enable_all()
+    .worker_threads(num_cpus::get() / 2)
+    .thread_name_fn(|| {
+      use std::sync::atomic::{AtomicUsize, Ordering};
+      static ATOMIC_ID: AtomicUsize = AtomicUsize::new(0);
+      let id = ATOMIC_ID.fetch_add(1, Ordering::SeqCst);
+      format!("tokio-{}", id)
+    })
+    .build()
+    .unwrap()
+    .block_on(to_run())
 }
 
 #[allow(dead_code)]
@@ -96,8 +82,8 @@ async fn run_demo() -> io::Result<()> {
   // bi_19_on_sf_01().await?;
   // bi_20_on_sf_01().await?;
 
-  bi_3_on_sf_01().await?;
-  // bi_10_on_sf_01().await?;
+  // bi_3_on_sf_01().await?;
+  bi_10_on_sf_01().await?;
 
   Ok(())
 }
