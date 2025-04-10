@@ -20,10 +20,10 @@ def validate_nodes_relationships_dir(
     relationships_dir = relationships_dir or RELATIONSHIPS
 
     if not nodes_dir.exists():
-        raise FileNotFoundError(f"⚠️  Nodes directory '{nodes_dir}' doesn't exist.")
+        raise FileNotFoundError(f"❌  Nodes directory '{nodes_dir}' doesn't exist.")
     if not relationships_dir.exists():
         raise FileNotFoundError(
-            f"⚠️  Relationships directory '{relationships_dir}' doesn't exist."
+            f"❌  Relationships directory '{relationships_dir}' doesn't exist."
         )
     if not nodes_dir.is_dir():
         print(

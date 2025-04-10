@@ -3,45 +3,19 @@ use crate::{
   schemas::{
     DataEdge, DataVertex, EBase, LabelRef, PatternAttr, PatternEdge, PatternVertex, Vid, VidRef,
   },
-  storage::{AdvancedStorageAdapter, StorageAdapter},
+  storage::AdvancedStorageAdapter,
   utils::{
     dyn_graph::DynGraph,
     expand_graph::{ExpandGraph, union_then_intersect_on_connective_v},
     parallel,
   },
 };
-use hashbrown::{HashMap, HashSet};
+use colored::Colorize;
+use hashbrown::HashMap;
 use rayon::iter::{
   IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator, ParallelIterator,
 };
 use std::sync::Arc;
-
-async fn does_data_v_satisfy_pattern(
-  dg_vid: VidRef<'_>,
-  pat_vid: VidRef<'_>,
-  pat_v_entities: &HashMap<Vid, PatternVertex>,
-  storage_adapter: &impl StorageAdapter,
-) -> bool {
-  let pat_v = pat_v_entities.get(pat_vid).unwrap();
-  let data_v = storage_adapter.get_v(dg_vid).await.unwrap();
-
-  if pat_v.label != data_v.label {
-    return false;
-  }
-
-  if pat_v.attr.is_none() {
-    true
-  } else if data_v.attrs.is_empty() {
-    false
-  } else {
-    let pat_attr = pat_v.attr.as_ref().unwrap();
-    if !data_v.attrs.contains_key(&pat_attr.key) {
-      return false;
-    }
-    let data_value = data_v.attrs.get(&pat_attr.key).unwrap();
-    pat_attr.op.operate_on(data_value, &pat_attr.value)
-  }
-}
 
 impl FBucket {
   pub async fn from_c_bucket(c_bucket: CBucket) -> Self {
@@ -76,184 +50,214 @@ impl ABucket {
     }
   }
 
-  // TODO: parallelize this function
   pub async fn incremental_load_new_edges(
     &mut self,
     pattern_es: Vec<PatternEdge>,
-    pattern_vs: &HashMap<Vid, PatternVertex>,
-    storage_adapter: &impl AdvancedStorageAdapter,
-  ) -> HashSet<String> {
-    let mut connected_data_vids = HashSet::new();
+    pattern_vs: HashMap<Vid, PatternVertex>,
+    storage_adapter: Arc<impl AdvancedStorageAdapter + 'static>,
+  ) {
+    let mut matched_graph_handles = Vec::with_capacity(self.matched_with_frontiers.len());
+    let curr_pat_vid: Arc<str> = self.curr_pat_vid.as_str().into();
+    let pattern_es = Arc::new(pattern_es);
+    let pattern_vs = Arc::new(pattern_vs);
+
+    // channel
+    let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel();
 
     // iter: `matched` data_graphs
     for (idx, frontiers) in self.matched_with_frontiers.drain() {
       let matched_dg = Arc::new(self.all_matched[idx].take().unwrap());
+      let curr_pat_vid = curr_pat_vid.clone();
+      let pattern_es = pattern_es.clone();
+      let pattern_vs = pattern_vs.clone();
+      let storage_adapter = storage_adapter.clone();
 
-      // iter: `frontier_vid` on current data_graph
-      for frontier_vid in frontiers.iter() {
-        #[cfg(feature = "trace_get_adj")]
-        use colored::Colorize;
+      let sender = tx.clone();
 
-        #[cfg(feature = "trace_get_adj")]
-        println!(
-          "🧩  Current frontier vid: {}",
-          frontier_vid.to_string().green()
-        );
-
-        let mut is_frontier_formalized = false;
-
-        // iter: `pattern_edges`
-        for pat_e in pattern_es.iter() {
+      let matched_graph_handle = tokio::spawn(async move {
+        // iter: `frontier_vid` on current data_graph
+        for frontier_vid in frontiers.iter() {
           #[cfg(feature = "trace_get_adj")]
           println!(
-            "  🔗  Current pattern edge: {}",
-            pat_e.eid().to_string().purple()
+            "🧩  Current frontier vid: {}",
+            frontier_vid.to_string().green()
           );
 
-          let e_label = pat_e.label();
-          let e_attr = pat_e.attr.as_ref();
-          let mut next_vid_grouped_conn_es = HashMap::new();
-          let mut next_vid_grouped_conn_pat_strs = HashMap::new();
-          let next_pat_vid;
+          let mut is_frontier_formalized = false;
 
-          let is_matched_data_es_empty = if self.curr_pat_vid == pat_e.src_vid() {
-            next_pat_vid = pat_e.dst_vid();
-            let next_v_label = pattern_vs.get(next_pat_vid).unwrap().label.as_str();
-            let next_v_attr = pattern_vs.get(next_pat_vid).unwrap().attr.as_ref();
-
-            let matched_data_es = incremental_match_adj_e(LoadWithCondCtx {
-              pattern_vs,
-              storage_adapter,
-              curr_matched_dg: matched_dg.clone(),
-              frontier_vid,
-              curr_pat_e: pat_e,
-              e_label,
-              e_attr,
-              next_v_label,
-              next_v_attr,
-              is_src_curr_pat: true,
-            })
-            .await;
-
+          // iter: `pattern_edges`
+          for pat_e in pattern_es.iter() {
             #[cfg(feature = "trace_get_adj")]
             println!(
-              "    ✨  Found {} edges that match: ({}: {})-[{}]->({})",
-              matched_data_es.len().to_string().yellow(),
-              frontier_vid.to_string().green(),
-              self.curr_pat_vid.as_str().cyan(),
-              pat_e.eid().purple(),
-              next_pat_vid.cyan()
+              "  🔗  Current pattern edge: {}",
+              pat_e.eid().to_string().purple()
             );
 
-            let is_matched_data_es_empty = matched_data_es.is_empty();
+            let e_label = pat_e.label();
+            let e_attr = pat_e.attr.as_ref();
+            let mut next_vid_grouped_conn_es = HashMap::new();
+            let mut next_vid_grouped_conn_pat_strs = HashMap::new();
 
-            // group by: next data_vertex
-            for e in matched_data_es {
-              next_vid_grouped_conn_pat_strs
-                .entry(e.dst_vid().to_string())
-                .or_insert_with(Vec::new)
-                .push(pat_e.eid().to_string());
-              next_vid_grouped_conn_es
-                .entry(e.dst_vid().to_string())
-                .or_insert_with(Vec::new)
-                .push(e);
+            let (next_pat_vid, is_matched_data_es_empty) =
+              if curr_pat_vid.as_ref() == pat_e.src_vid() {
+                let next_pat_vid = pat_e.dst_vid();
+                let next_v_label = pattern_vs.get(next_pat_vid).unwrap().label.as_str();
+                let next_v_attr = pattern_vs.get(next_pat_vid).unwrap().attr.as_ref();
+
+                let matched_data_es = incremental_match_adj_e(LoadWithCondCtx {
+                  storage_adapter: storage_adapter.clone(),
+                  curr_matched_dg: matched_dg.clone(),
+                  frontier_vid: frontier_vid.as_str(),
+                  e_label,
+                  e_attr,
+                  next_v_label,
+                  next_v_attr,
+                  is_src_curr_pat: true,
+                })
+                .await;
+
+                #[cfg(feature = "trace_get_adj")]
+                println!(
+                  "    ✨  Found {} edges that match: ({}: {})-[{}]->({})",
+                  matched_data_es.len().to_string().yellow(),
+                  frontier_vid.to_string().green(),
+                  curr_pat_vid.as_ref().cyan(),
+                  pat_e.eid().purple(),
+                  next_pat_vid.cyan()
+                );
+
+                let is_matched_data_es_empty = matched_data_es.is_empty();
+
+                // group by: next data_vertex
+                for e in matched_data_es {
+                  next_vid_grouped_conn_pat_strs
+                    .entry(e.dst_vid().to_string())
+                    .or_insert_with(Vec::new)
+                    .push(pat_e.eid().to_string());
+                  next_vid_grouped_conn_es
+                    .entry(e.dst_vid().to_string())
+                    .or_insert_with(Vec::new)
+                    .push(e);
+                }
+
+                (next_pat_vid, is_matched_data_es_empty)
+              } else {
+                let next_pat_vid = pat_e.src_vid();
+                let next_v_label = pattern_vs.get(next_pat_vid).unwrap().label.as_str();
+                let next_v_attr = pattern_vs.get(next_pat_vid).unwrap().attr.as_ref();
+
+                let matched_data_es = incremental_match_adj_e(LoadWithCondCtx {
+                  storage_adapter: storage_adapter.clone(),
+                  curr_matched_dg: matched_dg.clone(),
+                  frontier_vid: frontier_vid.as_str(),
+                  e_label,
+                  e_attr,
+                  next_v_label,
+                  next_v_attr,
+                  is_src_curr_pat: false,
+                })
+                .await;
+
+                #[cfg(feature = "trace_get_adj")]
+                println!(
+                  "    ✨  Found {} edges that match: ({}: {})<-[{}]-({})",
+                  matched_data_es.len().to_string().yellow(),
+                  frontier_vid.to_string().green(),
+                  curr_pat_vid.as_ref().cyan(),
+                  pat_e.eid().purple(),
+                  next_pat_vid.cyan()
+                );
+
+                let is_matched_data_es_empty = matched_data_es.is_empty();
+
+                // group by: next data_vertex
+                for e in matched_data_es {
+                  next_vid_grouped_conn_pat_strs
+                    .entry(e.src_vid().to_string())
+                    .or_insert_with(Vec::new)
+                    .push(pat_e.eid().to_string());
+                  next_vid_grouped_conn_es
+                    .entry(e.src_vid().to_string())
+                    .or_insert_with(Vec::new)
+                    .push(e);
+                }
+
+                (next_pat_vid, is_matched_data_es_empty)
+              };
+
+            if is_matched_data_es_empty {
+              // no matched_data_es, just skip current `frontier_vid`
+              break;
             }
-            is_matched_data_es_empty
-          } else {
-            next_pat_vid = pat_e.src_vid();
-            let next_v_label = pattern_vs.get(next_pat_vid).unwrap().label.as_str();
-            let next_v_attr = pattern_vs.get(next_pat_vid).unwrap().attr.as_ref();
 
-            let matched_data_es = incremental_match_adj_e(LoadWithCondCtx {
-              pattern_vs,
-              storage_adapter,
-              curr_matched_dg: matched_dg.clone(),
-              frontier_vid,
-              curr_pat_e: pat_e,
-              e_label,
-              e_attr,
-              next_v_label,
-              next_v_attr,
-              is_src_curr_pat: false,
-            })
-            .await;
+            is_frontier_formalized = true;
 
-            #[cfg(feature = "trace_get_adj")]
-            println!(
-              "    ✨  Found {} edges that match: ({}: {})<-[{}]-({})",
-              matched_data_es.len().to_string().yellow(),
-              frontier_vid.to_string().green(),
-              self.curr_pat_vid.as_str().cyan(),
-              pat_e.eid().purple(),
-              next_pat_vid.cyan()
-            );
+            // build `expanding_graph`
+            // note that each `next_data_vertex` holds a `expanding_graph`
+            for (next_vid, edges) in next_vid_grouped_conn_es {
+              let mut expanding_graph = ExpandGraph::from(matched_dg.clone());
+              let pat_strs = next_vid_grouped_conn_pat_strs
+                .remove(&next_vid)
+                .unwrap_or_default();
 
-            let is_matched_data_es_empty = matched_data_es.is_empty();
+              expanding_graph
+                .update_valid_dangling_edges(edges.iter().zip(pat_strs.iter().map(String::as_str)));
 
-            // group by: next data_vertex
-            for e in matched_data_es {
-              next_vid_grouped_conn_pat_strs
-                .entry(e.src_vid().to_string())
-                .or_insert_with(Vec::new)
-                .push(pat_e.eid().to_string());
-              next_vid_grouped_conn_es
-                .entry(e.src_vid().to_string())
-                .or_insert_with(Vec::new)
-                .push(e);
+              let sender = sender.clone();
+
+              sender
+                .send((next_pat_vid.to_string(), expanding_graph))
+                .unwrap_or_else(|_| {
+                  panic!(
+                    "❌  Failed to send {} to channel",
+                    format!("({}, <expanding_graph>)", next_pat_vid).yellow()
+                  );
+                });
             }
-            is_matched_data_es_empty
-          };
+          }
 
-          if is_matched_data_es_empty {
-            // no matched_data_es, just skip current `frontier_vid`
+          #[cfg(feature = "trace_get_adj")]
+          println!();
+
+          if !is_frontier_formalized {
+            // if no edges are connected, this frontier is invalid, current matched_dg is invalid,
+            // so we just skip the matched_dg
             break;
           }
-
-          is_frontier_formalized = true;
-
-          // build `expanding_graph`
-          // note that each `next_data_vertex` holds a `expanding_graph`
-          for (next_vid, edges) in next_vid_grouped_conn_es {
-            let mut expanding_graph = ExpandGraph::from(matched_dg.clone());
-            let pat_strs = next_vid_grouped_conn_pat_strs
-              .remove(&next_vid)
-              .unwrap_or_default();
-
-            expanding_graph
-              .update_valid_dangling_edges(edges.iter().zip(pat_strs.iter().map(String::as_str)));
-            self
-              .next_pat_grouped_expanding
-              .entry(next_pat_vid.to_string())
-              .or_default()
-              .push(expanding_graph);
-          }
         }
+      });
 
-        #[cfg(feature = "trace_get_adj")]
-        println!();
+      matched_graph_handles.push(matched_graph_handle);
+    }
 
-        if is_frontier_formalized {
-          connected_data_vids.insert(frontier_vid.to_string());
-        } else {
-          // if no edges are connected, this frontier is invalid, current matched_dg is invalid,
-          // so we just skip the matched_dg
-          break;
-        }
+    // don't forget to close the channel
+    drop(tx);
+
+    // receive the (<next_pat_vid>, <expanding_graph>) pairs
+    while let Some((next_pat_vid, expanding_graph)) = rx.recv().await {
+      // update the `next_pat_grouped_expanding` with the new expanding_graph
+      self
+        .next_pat_grouped_expanding
+        .entry(next_pat_vid)
+        .or_default()
+        .push(expanding_graph);
+    }
+
+    // wait for all tasks to complete
+    for handle in matched_graph_handles {
+      if let Err(e) = handle.await {
+        eprintln!("❌  Task failed: {}", e);
       }
     }
 
     self.all_matched.clear();
-
-    connected_data_vids
   }
 }
 
 struct LoadWithCondCtx<'a, S: AdvancedStorageAdapter> {
-  pattern_vs: &'a HashMap<String, PatternVertex>,
-  storage_adapter: &'a S,
+  storage_adapter: Arc<S>,
   curr_matched_dg: Arc<DynGraph>,
   frontier_vid: VidRef<'a>,
-  curr_pat_e: &'a PatternEdge,
   e_label: LabelRef<'a>,
   e_attr: Option<&'a PatternAttr>,
   next_v_label: LabelRef<'a>,
@@ -261,103 +265,20 @@ struct LoadWithCondCtx<'a, S: AdvancedStorageAdapter> {
   is_src_curr_pat: bool,
 }
 
-#[cfg(not(feature = "batched_incremental_match_adj_e"))]
 async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   ctx: LoadWithCondCtx<'a, S>,
 ) -> Vec<DataEdge> {
-  use futures::{StreamExt, stream};
-
-  let next_pat_vid = if ctx.is_src_curr_pat {
-    ctx.curr_pat_e.dst_vid()
-  } else {
-    ctx.curr_pat_e.src_vid()
-  };
-
-  // load all edges first
-  let potential_edges = if ctx.is_src_curr_pat {
-    ctx
-      .storage_adapter
-      .load_e_with_src_and_dst_filter(
-        ctx.frontier_vid,
-        ctx.e_label,
-        ctx.e_attr,
-        ctx.next_v_label,
-        ctx.next_v_attr,
-      )
-      .await
-  } else {
-    ctx
-      .storage_adapter
-      .load_e_with_dst_and_src_filter(
-        ctx.frontier_vid,
-        ctx.e_label,
-        ctx.e_attr,
-        ctx.next_v_label,
-        ctx.next_v_attr,
-      )
-      .await
-  };
-
-  // filter out the edges that are already matched
-  let filtered_edges = parallel::spawn_blocking(move || {
-    potential_edges
-      .into_par_iter()
-      .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
-      .collect::<Vec<_>>()
-  })
-  .await;
-
-  // process each edge in concurrent tasks
-  stream::iter(filtered_edges)
-    .map(|e| {
-      let next_vid_str = if ctx.is_src_curr_pat {
-        e.dst_vid()
-      } else {
-        e.src_vid()
-      }
-      .to_string();
-
-      async move {
-        let satisfies = does_data_v_satisfy_pattern(
-          &next_vid_str,
-          next_pat_vid,
-          ctx.pattern_vs,
-          ctx.storage_adapter,
-        )
-        .await;
-        if satisfies { Some(e) } else { None }
-      }
-    })
-    .buffer_unordered(num_cpus::get() / 2)
-    .filter_map(|r| async move { r })
-    .collect::<Vec<_>>()
-    .await
-}
-
-#[cfg(feature = "batched_incremental_match_adj_e")]
-async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
-  ctx: LoadWithCondCtx<'a, S>,
-) -> Vec<DataEdge> {
-  use futures::future;
   use itertools::Itertools;
 
-  const BATCH_SIZE: usize = 32;
-
-  let next_pat_vid = if ctx.is_src_curr_pat {
-    ctx.curr_pat_e.dst_vid()
-  } else {
-    ctx.curr_pat_e.src_vid()
-  };
-
   // load all edges first
-  let potential_edges = if ctx.is_src_curr_pat {
+  let loaded_edges = if ctx.is_src_curr_pat {
     ctx
       .storage_adapter
       .load_e_with_src_and_dst_filter(
-        ctx.frontier_vid,
-        ctx.e_label,
+        ctx.frontier_vid.as_ref(),
+        ctx.e_label.as_ref(),
         ctx.e_attr,
-        ctx.next_v_label,
+        ctx.next_v_label.as_ref(),
         ctx.next_v_attr,
       )
       .await
@@ -365,55 +286,20 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
     ctx
       .storage_adapter
       .load_e_with_dst_and_src_filter(
-        ctx.frontier_vid,
-        ctx.e_label,
+        ctx.frontier_vid.as_ref(),
+        ctx.e_label.as_ref(),
         ctx.e_attr,
-        ctx.next_v_label,
+        ctx.next_v_label.as_ref(),
         ctx.next_v_attr,
       )
       .await
   };
 
   // filter out the edges that are already matched
-  let filtered_edges = parallel::spawn_blocking(move || {
-    potential_edges
-      .into_par_iter()
-      .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
-      .collect::<Vec<_>>()
-  })
-  .await;
-
-  // split into chunks for concurrent processing
-  let chunks = filtered_edges
-    .chunks(BATCH_SIZE)
-    .map(Vec::from)
-    .collect_vec();
-
-  // process each chunk in concurrent tasks
-  let batch_futures = chunks.into_iter().map(|chunk| async move {
-    let mut results = Vec::new();
-    for e in chunk {
-      let check_vid = if ctx.is_src_curr_pat {
-        e.dst_vid()
-      } else {
-        e.src_vid()
-      };
-      let satisfies =
-        does_data_v_satisfy_pattern(check_vid, next_pat_vid, ctx.pattern_vs, ctx.storage_adapter)
-          .await;
-
-      if satisfies {
-        results.push(e);
-      }
-    }
-    results
-  });
-
-  // wait for all futures to complete
-  let batch_results = future::join_all(batch_futures).await;
-
-  // flatten the results into a single vector
-  batch_results.into_iter().flatten().collect_vec()
+  loaded_edges
+    .into_iter()
+    .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
+    .collect_vec()
 }
 
 impl CBucket {

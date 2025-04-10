@@ -28,7 +28,9 @@ serde_json = "1.0.140"
 sqlx = { version = "0.8.3", features = ["runtime-tokio", "sqlite"] }
 strum = "0.27.1"
 strum_macros = "0.27.1"
-tikv-jemallocator = { version = "0.6.0", features = ["unprefixed_malloc_on_supported_platforms"] }
+tikv-jemallocator = { version = "0.6.0", features = [
+    "unprefixed_malloc_on_supported_platforms",
+] }
 tokio = { version = "1.44.2", features = ["full"] }
 tracing = { version = "0.1.41", features = ["async-await"] }
 tracing-appender = "0.2.3"
@@ -40,15 +42,14 @@ default = [
     "block_spawn_via_rayon",
     # "validate_pattern_uniqueness_before_final_merge",
     # "use_tracing",
-    # "batched_incremental_match_adj_e",
     # "single_thread_debug",
     # "trace_all",
+    # "unique_the_final_result",
 ]
 
 block_spawn_via_rayon = []
 use_tracing = []
 validate_pattern_uniqueness_before_final_merge = []
-batched_incremental_match_adj_e = []
 single_thread_debug = []
 unique_the_final_result = []
 
