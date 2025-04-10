@@ -110,38 +110,33 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
 
   /// Check if the edge is a valid dangling edge
   fn is_valid_dangling_edge(&self, e: &EType) -> bool {
-    self.dyn_graph.is_e_connective(e)
+    !self.dyn_graph.has_eid(e.eid())
       && !self.dyn_graph.is_e_full_connective(e)
-      && !self.dyn_graph.has_eid(e.eid())
+      && self.dyn_graph.is_e_connective(e)
   }
 
   /// Update valid dangling edges and return them
   pub fn update_valid_dangling_edges<'a>(
     &'a mut self,
-    dangling_edges: impl IntoIterator<Item = (&'a EType, &'a str)>,
-  ) -> HashSet<String> {
-    let mut legal_eids = HashSet::new();
-
-    for (e, pattern) in dangling_edges {
-      if !self.is_valid_dangling_edge(e) {
+    dangling_edge_pattern_pairs: impl IntoIterator<Item = (&'a EType, &'a str)>,
+  ) {
+    for (edge, pattern) in dangling_edge_pattern_pairs {
+      if !self.is_valid_dangling_edge(edge) {
         continue;
       }
-      legal_eids.insert(e.eid().to_string());
       self
         .dangling_e_patterns
-        .insert(e.eid().to_string(), pattern.to_string());
+        .insert(edge.eid().to_string(), pattern.to_string());
       self
         .dangling_e_entities
-        .insert(e.eid().to_string(), e.clone());
+        .insert(edge.eid().to_string(), edge.clone());
     }
-
-    legal_eids
   }
 
   /// Check if the vertex is a valid target vertex
   fn is_valid_target(&self, v: &VType) -> bool {
-    for e in self.dangling_e_entities.values() {
-      if e.contains(v.vid()) && !self.dyn_graph.has_vid(v.vid()) {
+    for dangling_edge in self.dangling_e_entities.values() {
+      if dangling_edge.contains(v.vid()) && !self.dyn_graph.has_vid(v.vid()) {
         return true;
       }
     }
@@ -153,20 +148,20 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
   /// - Vertices of any `dangling_edge` could be added to `target_v_adj_table`
   pub fn update_valid_target_vertices(
     &mut self,
-    target_vertices: impl AsRef<Vec<(VType, String)>>,
+    target_vertex_pattern_pairs: impl AsRef<Vec<(VType, String)>>,
   ) -> HashSet<String> {
     let mut legal_vids = HashSet::new();
-    for (v, pattern) in target_vertices.as_ref().iter() {
-      if !self.is_valid_target(v) {
+    for (vertex, pattern) in target_vertex_pattern_pairs.as_ref().iter() {
+      if !self.is_valid_target(vertex) {
         continue;
       }
-      legal_vids.insert(v.vid().to_string());
+      legal_vids.insert(vertex.vid().to_string());
       self
         .target_v_patterns
-        .insert(v.vid().to_string(), pattern.to_string());
+        .insert(vertex.vid().to_string(), pattern.to_string());
       self
         .target_v_entities
-        .insert(v.vid().to_string(), v.clone());
+        .insert(vertex.vid().to_string(), vertex.clone());
     }
 
     for dangling_e in self.dangling_e_entities.keys() {
@@ -188,10 +183,12 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
           .insert(e.eid().to_string());
       }
     }
+
     legal_vids
   }
 }
 
+// TODO: Parallelize this function
 /// 1. Take two expand_graphs' `vertices` and `non-dangling-edges` into a new graph
 /// 2. Iterate through the `dangling_edges` of both, select those connective ones
 pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
@@ -217,6 +214,7 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
         return vec![];
       }
     }
+
     for common_e_pat in l_graph.view_common_e_patterns(&r_graph) {
       let l_es = l_graph.pattern_2_eids.get(common_e_pat).unwrap();
       let r_es = r_graph.pattern_2_eids.get(common_e_pat).unwrap();
