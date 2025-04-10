@@ -152,7 +152,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
 
             // pick `e_out` / `e_in` by the direction of the edge
             if dangling_edge.src_vid() == vertex.vid() {
-              // [vertex] -> [dangling_edge]
+              // (vertex)-[dangling_edge]->...
               self
                 .target_v_adj_table
                 .entry(vertex.vid().to_string())
@@ -160,7 +160,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
                 .e_out
                 .insert(dangling_edge.eid().to_string());
             } else if dangling_edge.dst_vid() == vertex.vid() {
-              // [vertex] <- [dangling_edge]
+              // (vertex)<-[dangling_edge]-...
               self
                 .target_v_adj_table
                 .entry(vertex.vid().to_string())
