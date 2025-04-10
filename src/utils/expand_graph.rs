@@ -102,17 +102,19 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
 
       match self.dyn_graph.pick_e_connective_vid(edge) {
         (Some(_), Some(_)) | (None, None) => continue,
-        (Some(src_vid), None) => {
+        (Some(_src_vid), None) => {
+          // `src_vid` is connected, `dst_vid` is pending
           self
             .pending_v_grouped_dangling_eids
-            .entry(src_vid.to_string())
+            .entry(edge.dst_vid().to_string())
             .or_default()
             .push(edge.eid().to_string());
         }
-        (None, Some(dst_vid)) => {
+        (None, Some(_dst_vid)) => {
+          // `dst_vid` is connected, `src_vid` is pending
           self
             .pending_v_grouped_dangling_eids
-            .entry(dst_vid.to_string())
+            .entry(edge.src_vid().to_string())
             .or_default()
             .push(edge.eid().to_string());
         }
@@ -150,6 +152,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
 
             // pick `e_out` / `e_in` by the direction of the edge
             if dangling_edge.src_vid() == vertex.vid() {
+              // [vertex] -> [dangling_edge]
               self
                 .target_v_adj_table
                 .entry(vertex.vid().to_string())
@@ -157,6 +160,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
                 .e_out
                 .insert(dangling_edge.eid().to_string());
             } else if dangling_edge.dst_vid() == vertex.vid() {
+              // [vertex] <- [dangling_edge]
               self
                 .target_v_adj_table
                 .entry(vertex.vid().to_string())
@@ -234,14 +238,14 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
 
   let mut result = vec![];
 
-  let (mut shorter, mut longer) = if grouped_l.len() <= grouped_r.len() {
+  let (shorter, longer) = if grouped_l.len() <= grouped_r.len() {
     (grouped_l, grouped_r)
   } else {
     (grouped_r, grouped_l)
   };
 
-  for (pending_vid, l_dangling_eids) in shorter.drain() {
-    if let Some(r_dangling_eids) = longer.remove(&pending_vid) {
+  for (pending_vid, l_dangling_eids) in shorter {
+    if let Some(r_dangling_eids) = longer.get(&pending_vid) {
       let mut expanding_dg: ExpandGraph<VType, EType> = new_graph.clone().into();
 
       expanding_dg.update_valid_dangling_edges(l_dangling_eids.iter().map(|eid| {
