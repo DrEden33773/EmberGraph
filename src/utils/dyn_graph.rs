@@ -381,7 +381,7 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   ) -> (Option<VidRef<'a>>, Option<VidRef<'a>>) {
     let src_vid = edge.src_vid();
     let dst_vid = edge.dst_vid();
-    if self.has_all_eids(&[src_vid, dst_vid]) {
+    if self.has_all_vids(&[src_vid, dst_vid]) {
       (Some(src_vid), Some(dst_vid))
     } else if self.has_vid(src_vid) {
       (Some(src_vid), None)
