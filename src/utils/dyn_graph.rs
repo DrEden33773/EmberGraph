@@ -374,6 +374,23 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   pub fn is_e_full_connective(&self, edge: &EType) -> bool {
     self.has_all_vids(&[edge.src_vid(), edge.dst_vid()])
   }
+  #[inline]
+  pub fn pick_e_connective_vid<'a>(
+    &'a self,
+    edge: &'a EType,
+  ) -> (Option<VidRef<'a>>, Option<VidRef<'a>>) {
+    let src_vid = edge.src_vid();
+    let dst_vid = edge.dst_vid();
+    if self.has_all_eids(&[src_vid, dst_vid]) {
+      (Some(src_vid), Some(dst_vid))
+    } else if self.has_vid(src_vid) {
+      (Some(src_vid), None)
+    } else if self.has_vid(dst_vid) {
+      (None, Some(dst_vid))
+    } else {
+      (None, None)
+    }
+  }
 }
 
 impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {

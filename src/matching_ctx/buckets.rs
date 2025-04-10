@@ -7,6 +7,7 @@ use hashbrown::HashMap;
 #[derive(Debug, Clone, Default)]
 pub struct FBucket {
   pub(crate) all_matched: Vec<DynGraph>,
+  /// IndexOf(`matched` in `all_matched`) -> frontiers
   pub(crate) matched_with_frontiers: HashMap<usize, Vec<Vid>>,
 }
 
@@ -14,9 +15,11 @@ pub struct FBucket {
 pub struct ABucket {
   pub(crate) curr_pat_vid: Vid,
   pub(crate) all_matched: Vec<Option<DynGraph>>,
+  /// IndexOf(`matched` in `all_matched`) -> frontiers
   pub(crate) matched_with_frontiers: HashMap<usize, Vec<Vid>>,
   pub(crate) next_pat_grouped_expanding: HashMap<Vid, Vec<ExpandGraph>>,
 }
+
 impl ABucket {
   pub fn new(curr_pat_vid: Vid) -> Self {
     Self {
@@ -31,6 +34,7 @@ impl ABucket {
 #[derive(Debug, Clone, Default)]
 pub struct CBucket {
   pub(crate) all_expanded: Vec<ExpandGraph>,
+  /// IndexOf(`expanded` in `all_expanded`) -> frontiers
   pub(crate) expanded_with_frontiers: HashMap<usize, Vec<Vid>>,
 }
 
