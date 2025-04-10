@@ -7,6 +7,8 @@ use hashbrown::{HashMap, HashSet};
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ExpandGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
   pub(crate) dyn_graph: Arc<DynGraph<VType, EType>>,
+
+  pub(crate) target_v_grouped_dangling_eids: HashMap<Vid, Vec<Eid>>,
   pub(crate) target_v_adj_table: HashMap<Vid, VNode>,
 
   pub(crate) dangling_e_entities: HashMap<Eid, EType>,
@@ -20,6 +22,7 @@ impl<VType: VBase, EType: EBase> Default for ExpandGraph<VType, EType> {
   fn default() -> Self {
     Self {
       dyn_graph: Default::default(),
+      target_v_grouped_dangling_eids: Default::default(),
       target_v_adj_table: Default::default(),
       dangling_e_entities: Default::default(),
       target_v_entities: Default::default(),
