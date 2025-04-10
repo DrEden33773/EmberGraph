@@ -58,15 +58,15 @@ impl PlanGenerator {
 
     // other vertices
     for vid in self.optimal_order.iter().skip(1).cloned() {
-      let mut operands = f_set.clone();
-      operands.retain(|v| self.pattern_graph.get_adj_vids(&vid).contains(v));
+      let mut adj_precursors = f_set.clone();
+      adj_precursors.retain(|v| self.pattern_graph.get_adj_vids(&vid).contains(v));
 
       let mut adj_eids = self.pattern_graph.get_adj_eids(&vid);
       // only pick those edges that are not expanded
       adj_eids.retain(|eid| !expanded_es.contains(eid));
 
       // Init -> fx
-      if operands.is_empty() {
+      if adj_precursors.is_empty() {
         instructions.push(
           InstructionBuilder::new(&vid, InstructionType::Init)
             .target_var(VarPrefix::EnumerateTarget.with(&vid))
@@ -74,8 +74,8 @@ impl PlanGenerator {
         );
       }
       // Intersect(Ax, V) -> Cx
-      else if operands.len() == 1 {
-        let f = operands.iter().next().cloned().unwrap();
+      else if adj_precursors.len() == 1 {
+        let f = adj_precursors.iter().next().cloned().unwrap();
         instructions.push(
           InstructionBuilder::new(&vid, InstructionType::Intersect)
             .single_op(VarPrefix::DbQueryTarget.with(f))
@@ -86,7 +86,7 @@ impl PlanGenerator {
       // Intersect(Aw, Ax, ..., Ay, Az) -> Tx
       // Intersect(Tx, V) -> Cx
       else {
-        let multi_ops = operands
+        let multi_ops = adj_precursors
           .iter()
           .map(|vid| VarPrefix::DbQueryTarget.with(vid))
           .collect_vec();
@@ -107,7 +107,7 @@ impl PlanGenerator {
       }
 
       // Foreach(Cx) -> fx (only need if operands is not empty)
-      if !operands.is_empty() {
+      if !adj_precursors.is_empty() {
         instructions.push(
           InstructionBuilder::new(&vid, InstructionType::Foreach)
             .single_op(VarPrefix::IntersectCandidate.with(&vid))
