@@ -128,10 +128,10 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
     }
   }
 
-  /// Intersect on `valid target vertices` and return them
+  /// Update `valid target vertices` and return them
   ///
   /// - Vertices of any `dangling_edge` could be added to `target_v_adj_table`
-  pub fn intersect_on_valid_target_vertices(
+  pub fn update_valid_target_vertices(
     &mut self,
     target_vertex_pattern_pairs: impl AsRef<Vec<(VType, String)>>,
   ) -> HashSet<String> {

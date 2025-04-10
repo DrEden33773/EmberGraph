@@ -15,8 +15,7 @@ impl CBucket {
         .into_par_iter()
         .enumerate()
         .map(|(idx, mut expanding)| {
-          let valid_targets =
-            expanding.intersect_on_valid_target_vertices(loaded_v_pat_pairs.as_ref());
+          let valid_targets = expanding.update_valid_target_vertices(loaded_v_pat_pairs.as_ref());
           (expanding, idx, valid_targets)
         })
         .collect_vec_list()
@@ -52,8 +51,7 @@ impl CBucket {
         .into_par_iter()
         .enumerate()
         .map(|(idx, mut expanding)| {
-          let valid_targets =
-            expanding.intersect_on_valid_target_vertices(loaded_v_pat_pairs.as_ref());
+          let valid_targets = expanding.update_valid_target_vertices(loaded_v_pat_pairs.as_ref());
           (expanding, idx, valid_targets)
         })
         .collect_vec_list()
