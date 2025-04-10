@@ -147,6 +147,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
           // If the vertex is a valid target, we need to add it to the target_v_adj_table
           for dangling_eid in dangling_eids {
             let dangling_edge = &self.dangling_e_entities[dangling_eid];
+
             // pick `e_out` / `e_in` by the direction of the edge
             if dangling_edge.src_vid() == vertex.vid() {
               self
