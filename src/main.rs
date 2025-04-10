@@ -64,10 +64,10 @@ async fn run_demo() -> io::Result<()> {
   use ember_graph::demos::bi_sf01::*;
 
   // bi_1_on_sf_01().await?;
-  // bi_2_on_sf_01().await?;
+  bi_2_on_sf_01().await?;
   // bi_4_on_sf_01().await?;
   // bi_5_on_sf_01().await?;
-  bi_6_on_sf_01().await?;
+  // bi_6_on_sf_01().await?;
   // bi_7_on_sf_01().await?;
   // bi_8_on_sf_01().await?;
   // bi_9_on_sf_01().await?;

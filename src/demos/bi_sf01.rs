@@ -34,7 +34,7 @@ pub async fn bi_1_on_sf_01() -> io::Result<()> {
 /// ☑️
 pub async fn bi_2_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-2' on 'SF0.1' ...\n");
-  exec::<Neo4jStorageAdapter>("ldbc-bi-2.json").await
+  exec::<SqliteStorageAdapter>("ldbc-bi-2.json").await
 }
 
 /// ☑️ ⚠️ (Not that fast)
@@ -97,7 +97,7 @@ pub async fn bi_11_on_sf_01() -> io::Result<()> {
 /// ☑️
 pub async fn bi_12_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-12' on 'SF0.1' ...\n");
-  exec::<Neo4jStorageAdapter>("ldbc-bi-12.json").await
+  exec::<SqliteStorageAdapter>("ldbc-bi-12.json").await
 }
 
 /// ☑️
