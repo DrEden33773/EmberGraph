@@ -128,9 +128,9 @@ def collect_attribute_stats(df: pl.DataFrame, label: str) -> Dict[str, Attribute
         col_stats.count = df[col].count()
         col_stats.null_count = total_rows - col_stats.count
 
-        if df[col].dtype in [pl.Int64, pl.Float64]:
+        if isinstance(df[col].dtype, (pl.Int64, pl.Float64)):
             col_stats.type = (
-                AttrType.Int if df[col].dtype == pl.Int64 else AttrType.Float
+                AttrType.Int if isinstance(df[col].dtype, pl.Int64) else AttrType.Float
             )
 
             non_null = df.filter(pl.col(col).is_not_null())
