@@ -104,6 +104,7 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
 
     fn preview_scale(unmerged: &[Vec<DynGraph>]) {
       let len_vec = unmerged.iter().map(|v| v.len()).collect_vec();
+      println!();
       println!("✨  Scale(unmerged_results) = {len_vec:?}\n");
     }
 

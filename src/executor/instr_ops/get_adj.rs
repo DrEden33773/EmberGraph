@@ -14,7 +14,7 @@ pub struct GetAdjOperator<S: AdvancedStorageAdapter> {
 
 impl<S: AdvancedStorageAdapter + 'static> GetAdjOperator<S> {
   pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
-    println!("{instr:#?}\n");
+    println!("{instr}");
 
     // to resolve current `pattern_vid`
     let (_, curr_pat_vid) = resolve_var(instr.single_op.as_ref().unwrap());

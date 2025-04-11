@@ -16,6 +16,8 @@ static GLOBAL: MiMalloc = MiMalloc;
 async fn to_run() -> io::Result<()> {
   dotenv().ok();
 
+  println!();
+
   #[cfg(feature = "use_tracing")]
   #[allow(unused_variables)]
   let guard = ember_graph::init_log::init_log().await?;
@@ -82,8 +84,8 @@ async fn run_demo() -> io::Result<()> {
   // bi_19_on_sf_01().await?;
   // bi_20_on_sf_01().await?;
 
-  bi_3_on_sf_01().await?;
-  // bi_10_on_sf_01().await?;
+  // bi_3_on_sf_01().await?;
+  bi_10_on_sf_01().await?;
 
   Ok(())
 }

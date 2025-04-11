@@ -59,7 +59,7 @@ impl ReportOperator {
   }
 
   pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
-    println!("{instr:#?}\n");
+    println!("{instr}");
 
     let (plan_v_pat_cnt, plan_e_pat_cnt) = {
       let plan_v_pat_cnt = self

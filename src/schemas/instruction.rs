@@ -1,22 +1,28 @@
-use std::fmt::Debug;
-
 use super::{VidRef, base::Vid};
+use colored::Colorize;
 use serde::{Deserialize, Serialize};
+use std::fmt::{Debug, Display};
 
-#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, strum_macros::Display)]
 #[repr(u8)]
 pub enum InstructionType {
   #[serde(rename = "init")]
+  #[strum(serialize = "Init")]
   Init = 0,
   #[serde(rename = "get_adj")]
+  #[strum(serialize = "GetAdj")]
   GetAdj = 1,
   #[serde(rename = "intersect")]
+  #[strum(serialize = "Intersect")]
   Intersect = 2,
   #[serde(rename = "foreach")]
+  #[strum(serialize = "Foreach")]
   Foreach = 3,
   #[serde(rename = "t_cache")]
+  #[strum(serialize = "TCache")]
   TCache = 4,
   #[serde(rename = "report")]
+  #[strum(serialize = "Report")]
   Report = 5,
 }
 
@@ -50,6 +56,72 @@ impl Debug for Instruction {
       .field("target_var", &self.target_var)
       // .field("depend_on", &self.depend_on)
       .finish()
+  }
+}
+
+impl Display for Instruction {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    match self.type_ {
+      InstructionType::Init => write!(
+        f,
+        "{} {}{}{} -> {}",
+        self.type_.to_string().purple().bold(),
+        "(".purple(),
+        self.vid.to_string().yellow(),
+        ")".purple(),
+        self.target_var.green()
+      ),
+      InstructionType::GetAdj => write!(
+        f,
+        "{} {}{}{}~~{:?} -> {}",
+        self.type_.to_string().purple().bold(),
+        "(".purple(),
+        self.single_op.as_ref().unwrap_or(&"".to_string()).yellow(),
+        ")".purple(),
+        self.expand_eids,
+        self.target_var.green()
+      ),
+      InstructionType::Intersect => match self.single_op {
+        Some(ref single_op) => write!(
+          f,
+          "{} {}{}{}{}{} -> {}",
+          self.type_.to_string().purple().bold(),
+          "(".purple(),
+          self.vid.yellow(),
+          ", ".purple(),
+          single_op.cyan(),
+          ")".purple(),
+          self.target_var.green()
+        ),
+        None => write!(
+          f,
+          "{} {}{}{}{}{} -> {}",
+          self.type_.to_string().purple().bold(),
+          "(".purple(),
+          self.vid.yellow(),
+          ", ".purple(),
+          format!("{:?}", self.multi_ops).cyan(),
+          ")".purple(),
+          self.target_var.green()
+        ),
+      },
+      InstructionType::Foreach => write!(
+        f,
+        "{} {}{}{} -> {}",
+        self.type_.to_string().purple().bold(),
+        "(".purple(),
+        self.single_op.as_ref().unwrap_or(&"".to_string()).yellow(),
+        ")".purple(),
+        self.target_var.green()
+      ),
+      InstructionType::Report => write!(
+        f,
+        "{} {}",
+        self.type_.to_string().purple().bold(),
+        format!("{:?}", self.multi_ops).yellow()
+      ),
+      InstructionType::TCache => unimplemented!(),
+    }
   }
 }
 
