@@ -25,7 +25,7 @@ fn windows_setup() {
     .unwrap_or(false);
 
   if !uv_exists {
-    println!("cargo:warning=🌐  Installing uv package manager on Windows...");
+    println!("cargo:warning=🌐  Installing uv package manager on Windows...\n");
 
     // install the `uv` package manager (via Powershell)
     let install_status = Command::new("powershell")
@@ -48,7 +48,7 @@ fn windows_setup() {
   }
 
   // sync Python dependencies
-  println!("cargo:warning=🌐  Syncing Python dependencies on Windows...");
+  println!("cargo:warning=🌐  Syncing Python dependencies on Windows...\n");
 
   // Windows requires specific handling for paths
   let current_dir = env::current_dir().expect("❌  Failed to get current directory");
@@ -83,7 +83,7 @@ fn unix_setup() {
     .unwrap_or(false);
 
   if !uv_exists {
-    println!("cargo:warning=🌐  Installing uv package manager on Unix...");
+    println!("cargo:warning=🌐  Installing uv package manager on Unix...\n");
 
     // install the `uv` package manager (via sh)
     let install_status = Command::new("sh")
@@ -104,7 +104,7 @@ fn unix_setup() {
   }
 
   // sync Python dependencies
-  println!("cargo:warning=🌐  Syncing Python dependencies on Unix...");
+  println!("cargo:warning=🌐  Syncing Python dependencies on Unix...\n");
   let sync_status = Command::new("sh")
     .arg("-c")
     .arg("cd ember-graph-import && uv sync && cd ..")

@@ -18,7 +18,7 @@ pub struct IntersectOperator<S: StorageAdapter> {
 
 impl<S: StorageAdapter> IntersectOperator<S> {
   pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
-    println!("{instr}");
+    println!("\t{instr}");
 
     if instr.is_single_op() {
       let (var_prefix, _) = resolve_var(instr.single_op.as_ref().unwrap());

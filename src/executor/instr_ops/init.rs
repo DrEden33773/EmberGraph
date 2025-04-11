@@ -15,7 +15,7 @@ pub struct InitOperator<S: StorageAdapter> {
 
 impl<S: StorageAdapter> InitOperator<S> {
   pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
-    println!("{instr}");
+    println!("\t{instr}");
 
     let pattern_v = self.ctx.get_pattern_v(&instr.vid)?.clone();
 

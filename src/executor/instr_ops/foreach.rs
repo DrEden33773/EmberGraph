@@ -11,7 +11,7 @@ pub struct ForeachOperator {
 
 impl ForeachOperator {
   pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
-    println!("{instr}");
+    println!("\t{instr}");
 
     let c_bucket = self
       .ctx

@@ -13,7 +13,7 @@ async fn exec<S: AdvancedStorageAdapter + 'static>(plan_filename: &str) -> io::R
 
   let result = ExecEngine::<CachedStorageAdapter<S>>::build_from_json(&plan_json_content)
     .await
-    .exec()
+    .parallel_exec()
     .await;
 
   println!("✨  Count(result) = {}", result.len());
