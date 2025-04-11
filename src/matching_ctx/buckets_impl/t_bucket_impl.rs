@@ -29,21 +29,25 @@ impl TBucket {
     right_group: Vec<ExpandGraph>,
   ) -> Vec<ExpandGraph> {
     if left_group.is_empty() || right_group.is_empty() {
-      return Vec::new();
+      return vec![];
     }
 
-    parallel::spawn_blocking(move || {
-      let right_group = Arc::new(right_group);
+    let (shorter, longer) = if left_group.len() < right_group.len() {
+      (left_group, right_group)
+    } else {
+      (right_group, left_group)
+    };
 
-      left_group
-        .into_par_iter()
+    parallel::spawn_blocking(move || {
+      let shorter = Arc::new(shorter);
+
+      longer
+        .par_iter()
         .flat_map(|left| {
-          right_group
+          shorter
             .clone()
             .par_iter()
-            .flat_map(move |right| {
-              union_then_intersect_on_connective_v(left.clone(), right.clone())
-            })
+            .flat_map(|right| union_then_intersect_on_connective_v(left, right))
             .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>()

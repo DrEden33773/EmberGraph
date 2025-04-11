@@ -190,18 +190,30 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
   }
 }
 
-// TODO: Parallelize this function
 /// 1. Take two expand_graphs' `vertices` and `non-dangling-edges` into a new graph
 /// 2. Iterate through the `dangling_edges` of both, select those connective ones
 pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
-  l_expand_graph: ExpandGraph<VType, EType>,
-  r_expand_graph: ExpandGraph<VType, EType>,
+  l_expand_graph: &ExpandGraph<VType, EType>,
+  r_expand_graph: &ExpandGraph<VType, EType>,
 ) -> Vec<ExpandGraph<VType, EType>> {
-  let grouped_l = l_expand_graph.pending_v_grouped_dangling_eids;
-  let grouped_r = r_expand_graph.pending_v_grouped_dangling_eids;
+  let grouped_l = &l_expand_graph.pending_v_grouped_dangling_eids;
+  let grouped_r = &r_expand_graph.pending_v_grouped_dangling_eids;
 
-  let l_graph = l_expand_graph.dyn_graph;
-  let r_graph = r_expand_graph.dyn_graph;
+  if grouped_l.is_empty() || grouped_r.is_empty() {
+    return vec![];
+  }
+
+  let mut common_pending_vids = HashSet::with_capacity(grouped_l.len().min(grouped_r.len()));
+
+  for pending_vid in grouped_l.keys() {
+    if grouped_r.contains_key(pending_vid) {
+      common_pending_vids.insert(pending_vid.clone());
+    }
+  }
+
+  if common_pending_vids.is_empty() {
+    return vec![];
+  }
 
   #[cfg(feature = "validate_pattern_uniqueness_before_final_merge")]
   {
@@ -226,44 +238,32 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
     }
   }
 
-  let l_v_pat_pairs = l_graph.get_v_pattern_pairs_cloned();
-  let r_v_pat_pairs = r_graph.get_v_pattern_pairs_cloned();
-  let l_e_pat_pairs = l_graph.get_e_pattern_pairs_cloned();
-  let r_e_pat_pairs = r_graph.get_e_pattern_pairs_cloned();
-
-  let mut new_graph = DynGraph::<VType, EType>::default();
-  new_graph.update_v_batch(l_v_pat_pairs.into_iter().chain(r_v_pat_pairs));
-  new_graph.update_e_batch(l_e_pat_pairs.into_iter().chain(r_e_pat_pairs));
+  let new_graph = (*l_expand_graph.dyn_graph).clone() | (*r_expand_graph.dyn_graph).clone();
   let new_graph = Arc::new(new_graph);
 
-  let mut result = vec![];
+  let mut result = Vec::with_capacity(common_pending_vids.len());
 
-  let (shorter, longer) = if grouped_l.len() <= grouped_r.len() {
-    (grouped_l, grouped_r)
-  } else {
-    (grouped_r, grouped_l)
-  };
+  for pending_vid in common_pending_vids.iter() {
+    let l_dangling_eids = grouped_l.get(pending_vid).unwrap();
+    let r_dangling_eids = grouped_r.get(pending_vid).unwrap();
 
-  for (pending_vid, l_dangling_eids) in shorter {
-    if let Some(r_dangling_eids) = longer.get(&pending_vid) {
-      let mut expanding_dg: ExpandGraph<VType, EType> = new_graph.clone().into();
+    let mut expanding_dg: ExpandGraph<VType, EType> = new_graph.clone().into();
 
-      expanding_dg.update_valid_dangling_edges(l_dangling_eids.iter().map(|eid| {
-        (
-          &l_expand_graph.dangling_e_entities[eid],
-          l_expand_graph.dangling_e_patterns[eid].as_str(),
-        )
-      }));
+    expanding_dg.update_valid_dangling_edges(l_dangling_eids.iter().map(|eid| {
+      (
+        &l_expand_graph.dangling_e_entities[eid],
+        l_expand_graph.dangling_e_patterns[eid].as_str(),
+      )
+    }));
 
-      expanding_dg.update_valid_dangling_edges(r_dangling_eids.iter().map(|eid| {
-        (
-          &r_expand_graph.dangling_e_entities[eid],
-          r_expand_graph.dangling_e_patterns[eid].as_str(),
-        )
-      }));
+    expanding_dg.update_valid_dangling_edges(r_dangling_eids.iter().map(|eid| {
+      (
+        &r_expand_graph.dangling_e_entities[eid],
+        r_expand_graph.dangling_e_patterns[eid].as_str(),
+      )
+    }));
 
-      result.push(expanding_dg);
-    }
+    result.push(expanding_dg);
   }
 
   result
