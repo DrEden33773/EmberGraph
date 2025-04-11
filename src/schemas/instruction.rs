@@ -32,7 +32,7 @@ impl InstructionType {
   }
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Instruction {
   pub(crate) vid: Vid,
   #[serde(rename = "type")]
@@ -43,20 +43,6 @@ pub struct Instruction {
   pub(crate) multi_ops: Vec<String>,
   pub(crate) target_var: String,
   pub(crate) depend_on: Vec<String>,
-}
-
-impl Debug for Instruction {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("Instruction")
-      .field("vid", &self.vid)
-      .field("type", &self.type_)
-      .field("expand_eid_list", &self.expand_eids)
-      .field("single_op", &self.single_op)
-      .field("multi_ops", &self.multi_ops)
-      .field("target_var", &self.target_var)
-      // .field("depend_on", &self.depend_on)
-      .finish()
-  }
 }
 
 impl Display for Instruction {
