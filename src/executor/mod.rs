@@ -7,7 +7,6 @@ use crate::{
 use hashbrown::HashMap;
 use instr_ops::InstrOperatorFactory;
 use itertools::Itertools;
-use parking_lot::Mutex;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::sync::Arc;
 
@@ -17,7 +16,7 @@ pub mod instr_ops;
 pub struct ExecEngine<S: AdvancedStorageAdapter> {
   pub(crate) plan_data: Arc<PlanData>,
   pub(crate) storage_adapter: Arc<S>,
-  pub(crate) matching_ctx: Arc<Mutex<MatchingCtx>>,
+  pub(crate) matching_ctx: Arc<MatchingCtx>,
 }
 
 impl<S: TestOnlyStorageAdapter> ExecEngine<S> {
@@ -25,7 +24,7 @@ impl<S: TestOnlyStorageAdapter> ExecEngine<S> {
     let plan_data: PlanData = serde_json::from_str(plan_json_content).unwrap();
     let plan_data = Arc::new(plan_data);
     let storage_adapter = Arc::new(S::async_init_test_only().await);
-    let matching_ctx = Arc::new(Mutex::new(MatchingCtx::new(plan_data.clone())));
+    let matching_ctx = Arc::new(MatchingCtx::new(plan_data.clone()));
     Self {
       plan_data,
       storage_adapter,
@@ -39,7 +38,7 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
     let plan_data: PlanData = serde_json::from_str(plan_json_content).unwrap();
     let plan_data = Arc::new(plan_data);
     let storage_adapter = Arc::new(S::async_default().await);
-    let matching_ctx = Arc::new(Mutex::new(MatchingCtx::new(plan_data.clone())));
+    let matching_ctx = Arc::new(MatchingCtx::new(plan_data.clone()));
     Self {
       plan_data,
       storage_adapter,
@@ -62,10 +61,10 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
       operator.execute(instr).await;
     }
 
-    let mut matching_ctx = self.matching_ctx.lock();
-
-    let mut result = Vec::with_capacity(matching_ctx.grouped_partial_matches.len());
-    result.append(&mut matching_ctx.grouped_partial_matches);
+    let mut result = Vec::with_capacity(self.matching_ctx.grouped_partial_matches.len());
+    while let Some(matched_graphs) = self.matching_ctx.grouped_partial_matches.pop() {
+      result.push(matched_graphs);
+    }
 
     result
   }

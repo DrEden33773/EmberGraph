@@ -4,21 +4,20 @@ use crate::{
   storage::StorageAdapter,
   utils::{dyn_graph::DynGraph, parallel},
 };
-use parking_lot::Mutex;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct InitOperator<S: StorageAdapter> {
   pub(crate) storage_adapter: Arc<S>,
-  pub(crate) ctx: Arc<Mutex<MatchingCtx>>,
+  pub(crate) ctx: Arc<MatchingCtx>,
 }
 
 impl<S: StorageAdapter> InitOperator<S> {
   pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
     println!("{instr:#?}\n");
 
-    let pattern_v = { self.ctx.lock() }.get_pattern_v(&instr.vid)?.clone();
+    let pattern_v = self.ctx.get_pattern_v(&instr.vid)?.clone();
 
     let label = pattern_v.label.as_str();
     let attr = pattern_v.attr.as_ref();
@@ -56,11 +55,10 @@ impl<S: StorageAdapter> InitOperator<S> {
     .await;
 
     // update f_block
-    {
-      let mut ctx = self.ctx.lock();
-      for (target_var, matched_dg, frontier_vid) in pre.into_iter().flatten() {
-        ctx.append_to_f_block(target_var, matched_dg, &frontier_vid);
-      }
+    for (target_var, matched_dg, frontier_vid) in pre.into_iter().flatten() {
+      self
+        .ctx
+        .append_to_f_block(target_var, matched_dg, &frontier_vid);
     }
 
     Some(())

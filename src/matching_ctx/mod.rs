@@ -5,6 +5,8 @@ use crate::{
   utils::{dyn_graph::DynGraph, expand_graph::ExpandGraph},
 };
 use buckets::{ABucket, CBucket, FBucket, TBucket};
+use crossbeam_queue::SegQueue;
+use dashmap::DashMap;
 use hashbrown::HashMap;
 
 pub mod buckets;
@@ -15,16 +17,29 @@ fn resolve_var_name(target_var: &str) -> &str {
   target_var.split(STR_TUPLE_SPLITTER).nth(1).unwrap()
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Default)]
 pub struct MatchingCtx {
   pub(crate) plan_data: Arc<PlanData>,
 
-  pub(crate) f_block: HashMap<Vid, FBucket>,
-  pub(crate) a_block: HashMap<Vid, ABucket>,
-  pub(crate) c_block: HashMap<Vid, CBucket>,
-  pub(crate) t_block: HashMap<Vid, TBucket>,
+  pub(crate) f_block: DashMap<Vid, FBucket>,
+  pub(crate) a_block: DashMap<Vid, ABucket>,
+  pub(crate) c_block: DashMap<Vid, CBucket>,
+  pub(crate) t_block: DashMap<Vid, TBucket>,
 
-  pub(crate) grouped_partial_matches: Vec<Vec<DynGraph>>,
+  pub(crate) grouped_partial_matches: SegQueue<Vec<DynGraph>>,
+}
+
+impl Clone for MatchingCtx {
+  fn clone(&self) -> Self {
+    Self {
+      plan_data: self.plan_data.clone(),
+      f_block: self.f_block.clone(),
+      a_block: self.a_block.clone(),
+      c_block: self.c_block.clone(),
+      t_block: self.t_block.clone(),
+      grouped_partial_matches: SegQueue::new(),
+    }
+  }
 }
 
 impl BitOr for MatchingCtx {
@@ -103,7 +118,7 @@ impl MatchingCtx {
 impl MatchingCtx {
   /// `Init`: Update `f_block` with matched_graph and frontier_vid
   pub fn append_to_f_block(
-    &mut self,
+    &self,
     target_var: impl AsRef<str>,
     matched_graph: DynGraph,
     frontier_vid: VidRef,
@@ -113,8 +128,8 @@ impl MatchingCtx {
     // try to init f_block if key doesn't exist
     self.f_block.entry(key.to_string()).or_default();
 
-    let next_idx = self.f_block[key].all_matched.len();
-    let f_bucket = self.f_block.get_mut(key).unwrap();
+    let next_idx = self.f_block.get(key).unwrap().all_matched.len();
+    let mut f_bucket = self.f_block.get_mut(key).unwrap();
 
     f_bucket.all_matched.push(matched_graph);
     f_bucket
@@ -125,21 +140,21 @@ impl MatchingCtx {
   }
 
   /// `Foreach`: Update `f_block` with `f_bucket`
-  pub fn update_f_block(&mut self, target_var: &str, f_bucket: FBucket) {
+  pub fn update_f_block(&self, target_var: &str, f_bucket: FBucket) {
     let key = resolve_var_name(target_var);
     self.f_block.insert(key.to_string(), f_bucket);
   }
 
   /// `GetAdj`: Get `f_block` with `target_var` (pop it out)
-  pub fn pop_from_f_block(&mut self, single_op: &str) -> Option<FBucket> {
+  pub fn pop_from_f_block(&self, single_op: &str) -> Option<FBucket> {
     let key = resolve_var_name(single_op);
-    self.f_block.remove(key)
+    self.f_block.remove(key).map(|f| f.1)
   }
 }
 
 impl MatchingCtx {
   /// `GetAdj`: Update `a_block` with `a_bucket`
-  pub fn update_a_block(&mut self, target_var: &str, a_bucket: ABucket) {
+  pub fn update_a_block(&self, target_var: &str, a_bucket: ABucket) {
     let key = resolve_var_name(target_var);
     self.a_block.insert(key.to_string(), a_bucket);
   }
@@ -148,7 +163,7 @@ impl MatchingCtx {
   ///
   /// (pop it out)
   pub fn pop_group_by_pat_from_a_block(
-    &mut self,
+    &self,
     single_op: &str,
     curr_pat_str: &str,
   ) -> Option<Vec<ExpandGraph>> {
@@ -163,28 +178,28 @@ impl MatchingCtx {
 
 impl MatchingCtx {
   /// `Intersect`: Update `c_block` with `c_bucket`
-  pub fn update_c_block(&mut self, target_var: &str, c_bucket: CBucket) {
+  pub fn update_c_block(&self, target_var: &str, c_bucket: CBucket) {
     let key = resolve_var_name(target_var);
     self.c_block.insert(key.to_string(), c_bucket);
   }
 
   /// `Foreach`: Get `c_block` with `single_op` (pop it out)
-  pub fn pop_from_c_block(&mut self, single_op: &str) -> Option<CBucket> {
+  pub fn pop_from_c_block(&self, single_op: &str) -> Option<CBucket> {
     let key = resolve_var_name(single_op);
-    self.c_block.remove(key)
+    self.c_block.remove(key).map(|c| c.1)
   }
 }
 
 impl MatchingCtx {
   /// `Intersect`: Update `t_block` with `t_bucket`
-  pub fn update_t_block(&mut self, target_var: &str, t_bucket: TBucket) {
+  pub fn update_t_block(&self, target_var: &str, t_bucket: TBucket) {
     let key = resolve_var_name(target_var);
     self.t_block.insert(key.to_string(), t_bucket);
   }
 
   /// `Intersect(Tx)`: Get `t_block` with `single_op` (pop it out)
-  pub fn pop_from_t_block(&mut self, single_op: &str) -> Option<TBucket> {
+  pub fn pop_from_t_block(&self, single_op: &str) -> Option<TBucket> {
     let key = resolve_var_name(single_op);
-    self.t_block.remove(key)
+    self.t_block.remove(key).map(|t| t.1)
   }
 }
