@@ -20,6 +20,7 @@
         "moka",
         "oneshot",
         "pyproject",
+        "rustflags",
         "sqlmodel",
         "textwrap",
         "thiserror",
