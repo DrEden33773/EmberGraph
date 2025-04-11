@@ -5,13 +5,12 @@ use crate::{
 };
 use hashbrown::HashMap;
 use itertools::Itertools;
-use parking_lot::Mutex;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct ReportOperator {
-  pub(crate) ctx: Arc<Mutex<MatchingCtx>>,
+  pub(crate) ctx: Arc<MatchingCtx>,
 }
 
 impl ReportOperator {
@@ -63,14 +62,15 @@ impl ReportOperator {
     println!("{instr:#?}\n");
 
     let (plan_v_pat_cnt, plan_e_pat_cnt) = {
-      let ctx = self.ctx.lock();
-      let plan_v_pat_cnt = ctx
+      let plan_v_pat_cnt = self
+        .ctx
         .plan_data
         .pattern_vs()
         .keys()
         .map(|v_pat| (v_pat.clone(), 1))
         .collect::<HashMap<_, usize>>();
-      let plan_e_pat_cnt = ctx
+      let plan_e_pat_cnt = self
+        .ctx
         .plan_data
         .pattern_es()
         .keys()
@@ -79,7 +79,7 @@ impl ReportOperator {
       (Arc::new(plan_v_pat_cnt), Arc::new(plan_e_pat_cnt))
     };
 
-    let f_buckets: Vec<_> = { self.ctx.lock() }.f_block.drain().collect();
+    let f_buckets = self.ctx.f_block.iter().map(|a| a.clone()).collect_vec();
 
     let mut filtered_groups = Vec::new();
 
@@ -87,7 +87,7 @@ impl ReportOperator {
     // They will be merged in later `merge` step.
     //
     // So, we can filter out the graph that is real-superset of pattern graph.
-    for (_, f_bucket) in f_buckets {
+    for f_bucket in f_buckets {
       let curr_group = f_bucket.all_matched.into_iter().collect_vec();
 
       let plan_v_pat_cnt = plan_v_pat_cnt.clone();
@@ -105,11 +105,8 @@ impl ReportOperator {
     }
 
     // Now, we can update the `grouped_partial_matches` in ctx.
-    {
-      let mut ctx = self.ctx.lock();
-      for curr_group in filtered_groups {
-        ctx.grouped_partial_matches.push(curr_group);
-      }
+    for curr_group in filtered_groups {
+      self.ctx.grouped_partial_matches.push(curr_group);
     }
 
     Some(())

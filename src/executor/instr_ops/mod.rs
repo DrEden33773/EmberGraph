@@ -8,7 +8,6 @@ use get_adj::GetAdjOperator;
 use init::InitOperator;
 use intersect::IntersectOperator;
 use itertools::Itertools;
-use parking_lot::Mutex;
 use report::ReportOperator;
 use std::{str::FromStr, sync::Arc};
 
@@ -52,7 +51,7 @@ impl InstrOperatorFactory {
   pub fn create<S: AdvancedStorageAdapter>(
     instr: &Instruction,
     storage_adapter: Arc<S>,
-    ctx: Arc<Mutex<MatchingCtx>>,
+    ctx: Arc<MatchingCtx>,
   ) -> InstrOperator<S> {
     match instr.type_ {
       Init => InstrOperator::Init(InitOperator {
