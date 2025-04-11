@@ -41,7 +41,7 @@ async def transform_relationship_csv(file_path: Path):
 
     if updated:
         df.write_csv(file_path, separator="|")
-        print(f"☑️   Updated '{Fore.GREEN + file_path.stem + Style.RESET_ALL}'.")
+        print(f"✅  Updated '{Fore.GREEN + file_path.stem + Style.RESET_ALL}'.")
     else:
         print(f"👌  Skipped updated '{Fore.GREEN + file_path.stem + Style.RESET_ALL}'.")
 
@@ -81,7 +81,7 @@ async def transform_node_csv(file_path: Path):
 
     if updated:
         df.write_csv(file_path, separator="|")
-        print(f"☑️   Updated '{Fore.GREEN + file_path.stem + Style.RESET_ALL}'.")
+        print(f"✅  Updated '{Fore.GREEN + file_path.stem + Style.RESET_ALL}'.")
     else:
         print(f"👌  Skipped updated '{Fore.GREEN + file_path.stem + Style.RESET_ALL}'.")
 

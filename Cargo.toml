@@ -42,7 +42,6 @@ default = [
     "block_spawn_via_rayon",
     # "validate_pattern_uniqueness_before_final_merge",
     # "use_tracing",
-    # "single_thread_debug",
     # "trace_all",
     # "unique_the_final_result",
 ]
@@ -50,7 +49,6 @@ default = [
 block_spawn_via_rayon = []
 use_tracing = []
 validate_pattern_uniqueness_before_final_merge = []
-single_thread_debug = []
 unique_the_final_result = []
 
 trace_all = ["trace_init", "trace_get_adj"]

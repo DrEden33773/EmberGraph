@@ -21,25 +21,25 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
   Ok(())
 }
 
-/// ☑️
+/// ✅
 pub async fn is_1_on_sf_01() -> io::Result<()> {
   println!("Querying 'IS-1' on 'SF0.1' ...\n");
   exec("ldbc-is-1.json").await
 }
 
-/// ☑️
+/// ✅
 pub async fn is_3_on_sf_01() -> io::Result<()> {
   println!("Querying 'IS-3' on 'SF0.1' ...\n");
   exec("ldbc-is-3-single-directed-knows.json").await
 }
 
-/// ☑️
+/// ✅
 pub async fn is_3_double_directed_knows_on_sf_01() -> io::Result<()> {
   println!("Querying 'IS-3' on 'SF0.1' ...\n");
   exec("ldbc-is-3-double-directed-knows.json").await
 }
 
-/// ☑️
+/// ✅
 pub async fn is_3_reversed_directed_knows_on_sf_01() -> io::Result<()> {
   println!("Querying 'IS-3' on 'SF0.1' ...\n");
   exec("ldbc-is-3-reversed-directed-knows.json").await
