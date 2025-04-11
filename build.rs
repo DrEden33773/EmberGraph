@@ -40,10 +40,10 @@ fn windows_setup() {
       panic!("❌  Failed to install uv package manager on Windows");
     }
 
-    println!("cargo:warning=☑️   uv package manager installed successfully on Windows");
+    println!("cargo:warning=✅  uv package manager installed successfully on Windows");
   } else {
     println!(
-      "cargo:warning=☑️   uv package manager already installed on Windows, skipping installation"
+      "cargo:warning=✅  uv package manager already installed on Windows, skipping installation"
     );
   }
 
@@ -68,7 +68,7 @@ fn windows_setup() {
     panic!("❌  Failed to sync Python dependencies on Windows");
   }
 
-  println!("cargo:warning=☑️   Python dependencies synced successfully on Windows");
+  println!("cargo:warning=✅  Python dependencies synced successfully on Windows");
 }
 
 fn unix_setup() {
@@ -96,10 +96,10 @@ fn unix_setup() {
       panic!("❌  Failed to install uv package manager on Unix");
     }
 
-    println!("cargo:warning=☑️   uv package manager installed successfully on Unix");
+    println!("cargo:warning=✅  uv package manager installed successfully on Unix");
   } else {
     println!(
-      "cargo:warning=☑️   uv package manager already installed on Unix, skipping installation"
+      "cargo:warning=✅  uv package manager already installed on Unix, skipping installation"
     );
   }
 
@@ -115,5 +115,5 @@ fn unix_setup() {
     panic!("❌  Failed to sync Python dependencies on Unix");
   }
 
-  println!("cargo:warning=☑️   Python dependencies synced successfully on Unix");
+  println!("cargo:warning=✅  Python dependencies synced successfully on Unix");
 }

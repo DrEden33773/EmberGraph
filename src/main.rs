@@ -134,7 +134,7 @@ async fn plan_gen() -> io::Result<()> {
         .expect("❌  Failed to write plan file");
 
       println!(
-        "☑️   Plan file generated: '{}'",
+        "✅  Plan file generated: '{}'",
         filepath.to_str().unwrap().green()
       );
     });

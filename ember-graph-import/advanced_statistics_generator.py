@@ -272,7 +272,7 @@ async def visit_node_csv(file_path: Path):
             statistics.v_attr_stats[label_str].update(attr_stats)
 
         print(f"""\
-☑️   '{Fore.GREEN + file_path.stem + Style.RESET_ALL}' \
+✅  '{Fore.GREEN + file_path.stem + Style.RESET_ALL}' \
 => {Fore.YELLOW + str(v_label_cnt) + Style.RESET_ALL}\
         """)
 
@@ -314,7 +314,7 @@ async def visit_relationship_csv(file_path: Path):
             statistics.e_attr_stats[label_str].update(attr_stats)
 
         print(f"""\
-☑️   '{Fore.GREEN + file_path.stem + Style.RESET_ALL}' \
+✅  '{Fore.GREEN + file_path.stem + Style.RESET_ALL}' \
 => {Fore.YELLOW + str(e_label_cnt) + Style.RESET_ALL}\
         """)
 
@@ -352,7 +352,7 @@ def dump():
     with open(path, "w", encoding="utf-8") as f:
         json.dump(statistics, f, cls=StatisticsEncoder, indent=2, ensure_ascii=False)
 
-    print(f"☑️   Statistics saved to {Fore.GREEN + str(path) + Style.RESET_ALL}")
+    print(f"✅  Statistics saved to {Fore.GREEN + str(path) + Style.RESET_ALL}")
 
 
 if __name__ == "__main__":
