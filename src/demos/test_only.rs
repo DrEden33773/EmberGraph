@@ -13,7 +13,7 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
 
   let result = ExecEngine::<SqliteStorageAdapter>::build_test_only_from_json(&plan_json_content)
     .await
-    .exec()
+    .parallel_exec()
     .await;
 
   println!("✨  Count(result) = {}\n", result.len());

@@ -14,7 +14,7 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
   let result =
     ExecEngine::<CachedStorageAdapter<Neo4jStorageAdapter>>::build_from_json(&plan_json_content)
       .await
-      .exec()
+      .parallel_exec()
       .await;
 
   println!("✨  Count(result) = {}\n", result.len());
