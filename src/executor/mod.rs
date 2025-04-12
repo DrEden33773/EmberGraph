@@ -1,15 +1,22 @@
 use crate::{
   matching_ctx::MatchingCtx,
+  result_dump::ResultDumper,
   schemas::*,
-  storage::{AdvancedStorageAdapter, TestOnlyStorageAdapter},
+  storage::{AdvancedStorageAdapter, CachedStorageAdapter, TestOnlyStorageAdapter},
   utils::{dyn_graph::DynGraph, parallel},
 };
 use colored::Colorize;
 use hashbrown::HashMap;
 use instr_ops::InstrOperatorFactory;
 use itertools::Itertools;
+use project_root::get_project_root;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
-use std::{collections::VecDeque, sync::Arc};
+use std::{
+  collections::VecDeque,
+  path::PathBuf,
+  sync::{Arc, LazyLock},
+};
+use tokio::{fs, io};
 
 pub mod instr_ops;
 
@@ -291,4 +298,26 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
 
     Some(layers)
   }
+}
+
+static PLAN_ROOT: LazyLock<PathBuf> =
+  LazyLock::new(|| get_project_root().unwrap().join("resources").join("plan"));
+
+pub async fn query<S: AdvancedStorageAdapter + 'static>(plan_filename: &str) -> io::Result<()> {
+  let mut path = PLAN_ROOT.clone();
+  path.push(plan_filename);
+  let plan_json_content = fs::read_to_string(path).await?;
+
+  let result = ExecEngine::<CachedStorageAdapter<S>>::build_from_json(&plan_json_content)
+    .await
+    .parallel_exec()
+    .await;
+
+  println!("✨  Count(result) = {}", result.len());
+
+  if let Some(df) = ResultDumper::new(result).to_simplified_df() {
+    println!("{}", df);
+  }
+
+  Ok(())
 }

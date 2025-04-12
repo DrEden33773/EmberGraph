@@ -1,9 +1,11 @@
+use colored::Colorize;
 use dotenv::dotenv;
+use ember_graph::utils::parallel;
 #[cfg(windows)]
 use mimalloc::MiMalloc;
 #[cfg(unix)]
 use tikv_jemallocator::Jemalloc;
-use tokio::{io, runtime};
+use tokio::io;
 
 #[cfg(unix)]
 #[global_allocator]
@@ -23,71 +25,18 @@ async fn to_run() -> io::Result<()> {
   let guard = ember_graph::init_log::init_log().await?;
 
   // plan_gen().await?;
-  run_demo().await?;
+
+  println!(
+    "⚠️  If you want to query `{}` example, use `{}` instead.\n",
+    "bi_x".yellow(),
+    "cargo run --example bi_x".yellow()
+  );
 
   Ok(())
 }
 
 fn main() -> io::Result<()> {
-  // rayon config
-  rayon::ThreadPoolBuilder::new()
-    .num_threads(num_cpus::get() / 2)
-    .thread_name(|i| format!("rayon-{}", i))
-    .build_global()
-    .unwrap();
-
-  // tokio config
-  runtime::Builder::new_multi_thread()
-    .enable_all()
-    .worker_threads(num_cpus::get() / 2)
-    .thread_name_fn(|| {
-      use std::sync::atomic::{AtomicUsize, Ordering};
-      static ATOMIC_ID: AtomicUsize = AtomicUsize::new(0);
-      let id = ATOMIC_ID.fetch_add(1, Ordering::SeqCst);
-      format!("tokio-{}", id)
-    })
-    .build()
-    .unwrap()
-    .block_on(to_run())
-}
-
-#[allow(dead_code)]
-async fn run_test_only() -> io::Result<()> {
-  use ember_graph::demos::test_only::*;
-
-  bi_6_minimized().await?;
-
-  Ok(())
-}
-
-#[allow(dead_code)]
-async fn run_demo() -> io::Result<()> {
-  #[allow(unused_imports)]
-  use ember_graph::demos::bi_sf01::*;
-
-  // bi_1_on_sf_01().await?;
-  // bi_2_on_sf_01().await?;
-  // bi_4_on_sf_01().await?;
-  // bi_5_on_sf_01().await?;
-  bi_6_on_sf_01().await?;
-  // bi_7_on_sf_01().await?;
-  // bi_8_on_sf_01().await?;
-  // bi_9_on_sf_01().await?;
-  // bi_11_on_sf_01().await?;
-  // bi_12_on_sf_01().await?;
-  // bi_13_on_sf_01().await?;
-  // bi_14_on_sf_01().await?;
-  // bi_15_on_sf_01().await?;
-  // bi_16_on_sf_01().await?;
-  // bi_17_on_sf_01().await?;
-  // bi_18_on_sf_01().await?;
-  // bi_19_on_sf_01().await?;
-  // bi_20_on_sf_01().await?;
-
-  // bi_3_on_sf_01().await?;
-  // bi_10_on_sf_01().await?;
-
-  Ok(())
+  parallel::config_before_run(to_run())
 }
 
 #[allow(dead_code)]
@@ -150,6 +99,8 @@ async fn plan_gen() -> io::Result<()> {
       eprintln!("❌  Task failed: {}", e);
     }
   }
+
+  println!("✅  All plans generated\n");
 
   Ok(())
 }
