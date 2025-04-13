@@ -18,7 +18,7 @@ async fn query<S: AdvancedStorageAdapter + 'static>(plan_filename: &str) -> io::
 
   println!("✨  Count(result) = {}", result.len());
 
-  if let Some(df) = ResultDumper::new(result).to_simplified_df() {
+  if let Some(df) = ResultDumper::new(result).to_simplified_df(false) {
     println!("{}", df);
   }
 

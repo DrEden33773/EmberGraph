@@ -72,3 +72,10 @@ rustflags = ["-C", "target-cpu=native"]
 
 [profile.release.package."*"]
 opt-level = 3
+strip = true
+debug = false
+
+[profile.release.package.polars]
+opt-level = 2
+strip = true
+debug = false

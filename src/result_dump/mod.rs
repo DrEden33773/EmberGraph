@@ -37,7 +37,7 @@ impl ResultDumper {
     Self { results }
   }
 
-  pub fn to_detailed_df(self) -> Option<DataFrame> {
+  pub fn to_detailed_df(self, colored: bool) -> Option<DataFrame> {
     if self.results.is_empty() {
       return None;
     }
@@ -45,13 +45,13 @@ impl ResultDumper {
     let all_pre_dumped = self
       .results
       .into_iter()
-      .map(|g| g.pre_dump_detailed())
+      .map(|g| g.pre_dump_detailed(colored))
       .collect_vec();
 
     to_df(all_pre_dumped)
   }
 
-  pub fn to_simplified_df(self) -> Option<DataFrame> {
+  pub fn to_simplified_df(self, colored: bool) -> Option<DataFrame> {
     if self.results.is_empty() {
       return None;
     }
@@ -59,7 +59,7 @@ impl ResultDumper {
     let all_pre_dumped = self
       .results
       .into_iter()
-      .map(|g| g.pre_dump_simplified())
+      .map(|g| g.pre_dump_simplified(colored))
       .collect_vec();
 
     to_df(all_pre_dumped)

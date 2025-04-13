@@ -5,12 +5,12 @@ use hashbrown::HashMap;
 use itertools::Itertools;
 
 pub trait PrettyDump {
-  fn pretty_dump_detailed(&self) -> String;
-  fn pretty_dump_simplified(&self) -> String;
+  fn pretty_dump_detailed(&self, colored: bool) -> String;
+  fn pretty_dump_simplified(&self, colored: bool) -> String;
 }
 
 impl PrettyDump for DataVertex {
-  fn pretty_dump_detailed(&self) -> String {
+  fn pretty_dump_detailed(&self, colored: bool) -> String {
     let label = format!(":{}", self.label()).red();
 
     let sorted_kv_pairs = self
@@ -24,10 +24,19 @@ impl PrettyDump for DataVertex {
     let mut attrs = "{".to_string();
     for (i, (key, value)) in sorted_kv_pairs.into_iter().enumerate() {
       attrs.push_str(&format!("{}: ", key));
-      let value = match value {
-        AttrValue::Int(v) => v.to_string().purple(),
-        AttrValue::Float(v) => v.to_string().yellow(),
-        AttrValue::String(v) => format!(r#""{v}""#).green(),
+      let value = if colored {
+        match value {
+          AttrValue::Int(v) => v.to_string().purple(),
+          AttrValue::Float(v) => v.to_string().yellow(),
+          AttrValue::String(v) => format!(r#""{v}""#).green(),
+        }
+        .to_string()
+      } else {
+        match value {
+          AttrValue::Int(v) => v.to_string(),
+          AttrValue::Float(v) => v.to_string(),
+          AttrValue::String(v) => format!(r#""{v}""#),
+        }
       };
       // remember to use `to_string` or the color will not be applied
       attrs.push_str(&value.to_string());
@@ -44,16 +53,24 @@ impl PrettyDump for DataVertex {
     }
   }
 
-  fn pretty_dump_simplified(&self) -> String {
-    let label = format!(":{}", self.label()).red();
-    let vid = self.vid().to_string().cyan();
+  fn pretty_dump_simplified(&self, colored: bool) -> String {
+    let label = if colored {
+      format!(":{}", self.label()).red().to_string()
+    } else {
+      format!(":{}", self.label())
+    };
+    let vid = if colored {
+      self.vid().to_string().cyan().to_string()
+    } else {
+      self.vid().to_string()
+    };
 
     format!("({} {})", label, vid)
   }
 }
 
 impl PrettyDump for DataEdge {
-  fn pretty_dump_detailed(&self) -> String {
+  fn pretty_dump_detailed(&self, colored: bool) -> String {
     let label = format!(":{}", self.label()).red();
 
     let sorted_kv_pairs = self
@@ -67,10 +84,19 @@ impl PrettyDump for DataEdge {
     let mut attrs = "{".to_string();
     for (i, (key, value)) in sorted_kv_pairs.into_iter().enumerate() {
       attrs.push_str(&format!("{}: ", key));
-      let value = match value {
-        AttrValue::Int(v) => v.to_string().purple(),
-        AttrValue::Float(v) => v.to_string().yellow(),
-        AttrValue::String(v) => format!(r#""{v}""#).green(),
+      let value = if colored {
+        match value {
+          AttrValue::Int(v) => v.to_string().purple(),
+          AttrValue::Float(v) => v.to_string().yellow(),
+          AttrValue::String(v) => format!(r#""{v}""#).green(),
+        }
+        .to_string()
+      } else {
+        match value {
+          AttrValue::Int(v) => v.to_string(),
+          AttrValue::Float(v) => v.to_string(),
+          AttrValue::String(v) => format!(r#""{v}""#),
+        }
       };
       // remember to use `to_string` or the color will not be applied
       attrs.push_str(&value.to_string());
@@ -87,16 +113,19 @@ impl PrettyDump for DataEdge {
     }
   }
 
-  fn pretty_dump_simplified(&self) -> String {
-    let label = format!(":{}", self.label()).red();
-    // let eid = self.eid().to_string().purple();
+  fn pretty_dump_simplified(&self, colored: bool) -> String {
+    let label = if colored {
+      format!(":{}", self.label()).red().to_string()
+    } else {
+      format!(":{}", self.label())
+    };
 
     format!("[{}]", label)
   }
 }
 
 impl<VType: VBase + PrettyDump, EType: EBase + PrettyDump> DynGraph<VType, EType> {
-  pub fn pre_dump_detailed(&self) -> HashMap<String, Vec<String>> {
+  pub fn pre_dump_detailed(&self, colored: bool) -> HashMap<String, Vec<String>> {
     self
       .pattern_2_eids
       .iter()
@@ -105,9 +134,9 @@ impl<VType: VBase + PrettyDump, EType: EBase + PrettyDump> DynGraph<VType, EType
         let mut result = Vec::with_capacity(ids.len());
         for id in ids {
           if let Some(vertex) = self.v_entities.get(id) {
-            result.push(vertex.pretty_dump_detailed());
+            result.push(vertex.pretty_dump_detailed(colored));
           } else if let Some(edge) = self.e_entities.get(id) {
-            result.push(edge.pretty_dump_detailed());
+            result.push(edge.pretty_dump_detailed(colored));
           }
         }
         (pattern.clone(), result)
@@ -115,7 +144,7 @@ impl<VType: VBase + PrettyDump, EType: EBase + PrettyDump> DynGraph<VType, EType
       .collect()
   }
 
-  pub fn pre_dump_simplified(&self) -> HashMap<String, Vec<String>> {
+  pub fn pre_dump_simplified(&self, colored: bool) -> HashMap<String, Vec<String>> {
     self
       .pattern_2_eids
       .iter()
@@ -124,9 +153,9 @@ impl<VType: VBase + PrettyDump, EType: EBase + PrettyDump> DynGraph<VType, EType
         let mut result = Vec::with_capacity(ids.len());
         for id in ids {
           if let Some(vertex) = self.v_entities.get(id) {
-            result.push(vertex.pretty_dump_simplified());
+            result.push(vertex.pretty_dump_simplified(colored));
           } else if let Some(edge) = self.e_entities.get(id) {
-            result.push(edge.pretty_dump_simplified());
+            result.push(edge.pretty_dump_simplified(colored));
           }
         }
         (pattern.clone(), result)

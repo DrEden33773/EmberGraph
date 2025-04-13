@@ -1,22 +1,16 @@
 use crate::{
   matching_ctx::MatchingCtx,
-  result_dump::ResultDumper,
   schemas::*,
-  storage::{AdvancedStorageAdapter, CachedStorageAdapter, TestOnlyStorageAdapter},
+  storage::{AdvancedStorageAdapter, TestOnlyStorageAdapter},
   utils::{dyn_graph::DynGraph, parallel},
 };
 use colored::Colorize;
 use hashbrown::HashMap;
 use instr_ops::InstrOperatorFactory;
 use itertools::Itertools;
-use project_root::get_project_root;
+use polars::{frame::DataFrame, prelude::Column, series::Series};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
-use std::{
-  collections::VecDeque,
-  path::PathBuf,
-  sync::{Arc, LazyLock},
-};
-use tokio::{fs, io};
+use std::{collections::VecDeque, sync::Arc};
 
 pub mod instr_ops;
 
@@ -31,7 +25,7 @@ impl<S: TestOnlyStorageAdapter> ExecEngine<S> {
   pub async fn build_test_only_from_json(plan_json_content: &str) -> Self {
     let plan_data: PlanData = serde_json::from_str(plan_json_content).unwrap();
     let plan_data = Arc::new(plan_data);
-    let storage_adapter = Arc::new(S::async_init_test_only().await);
+    let storage_adapter = Arc::new(S::async_default().await);
     let matching_ctx = Arc::new(MatchingCtx::new(plan_data.clone()));
     Self {
       plan_data,
@@ -47,11 +41,38 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
     let plan_data = Arc::new(plan_data);
     let storage_adapter = Arc::new(S::async_default().await);
     let matching_ctx = Arc::new(MatchingCtx::new(plan_data.clone()));
-    Self {
+
+    let res = Self {
       plan_data,
       storage_adapter,
       matching_ctx,
-    }
+    };
+    res.profile_instructions();
+    res
+  }
+
+  fn profile_instructions(&self) {
+    let instructions = self
+      .plan_data
+      .instructions
+      .iter()
+      .cloned()
+      .map(|instr| instr.to_string_uncolored())
+      .collect_vec();
+    let height = instructions.len();
+    let indices = (0..height).collect_vec();
+
+    let df = DataFrame::new(vec![
+      Column::new(
+        "ID".into(),
+        Series::from_iter(indices.into_iter().map(|x| x as i64)),
+      ),
+      Column::new("Instructions".into(), Series::from_iter(instructions)),
+    ])
+    .unwrap();
+
+    println!("🔍  Profile(Instructions)");
+    println!("{}\n", df);
   }
 
   pub async fn exec_without_final_merge(&mut self) -> Vec<Vec<DynGraph>> {
@@ -298,26 +319,4 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
 
     Some(layers)
   }
-}
-
-static PLAN_ROOT: LazyLock<PathBuf> =
-  LazyLock::new(|| get_project_root().unwrap().join("resources").join("plan"));
-
-pub async fn query<S: AdvancedStorageAdapter + 'static>(plan_filename: &str) -> io::Result<()> {
-  let mut path = PLAN_ROOT.clone();
-  path.push(plan_filename);
-  let plan_json_content = fs::read_to_string(path).await?;
-
-  let result = ExecEngine::<CachedStorageAdapter<S>>::build_from_json(&plan_json_content)
-    .await
-    .parallel_exec()
-    .await;
-
-  println!("✨  Count(result) = {}", result.len());
-
-  if let Some(df) = ResultDumper::new(result).to_simplified_df() {
-    println!("{}", df);
-  }
-
-  Ok(())
 }

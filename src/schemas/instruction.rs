@@ -45,6 +45,39 @@ pub struct Instruction {
   pub(crate) depend_on: Vec<String>,
 }
 
+impl Instruction {
+  pub fn to_string_uncolored(&self) -> String {
+    match self.type_ {
+      InstructionType::Init => format!("{} ({}) -> {}", self.type_, self.vid, self.target_var),
+      InstructionType::GetAdj => format!(
+        "{} ({})~~{:?} -> {}",
+        self.type_,
+        self.single_op.as_ref().unwrap_or(&"".to_string()),
+        self.expand_eids,
+        self.target_var
+      ),
+      InstructionType::Intersect => match self.single_op {
+        Some(ref single_op) => format!(
+          "{} ({}, {}) -> {}",
+          self.type_, self.vid, single_op, self.target_var,
+        ),
+        None => format!(
+          "{} ({}, {:?}) -> {}",
+          self.type_, self.vid, self.multi_ops, self.target_var
+        ),
+      },
+      InstructionType::Foreach => format!(
+        "{} ({}) -> {}",
+        self.type_,
+        self.single_op.as_ref().unwrap_or(&"".to_string()),
+        self.target_var
+      ),
+      InstructionType::Report => format!("{} {:?}", self.type_, self.multi_ops),
+      InstructionType::TCache => unimplemented!(),
+    }
+  }
+}
+
 impl Display for Instruction {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match self.type_ {
