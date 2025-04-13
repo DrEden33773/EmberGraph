@@ -27,7 +27,7 @@ async fn to_run() -> io::Result<()> {
   // plan_gen().await?;
 
   println!(
-    "⚠️  If you want to query `{}` example, use `{}` instead.\n",
+    "⚠️  If you want to query `{}`, use `{}` instead.\n",
     "bi_x".yellow(),
     "cargo run --example bi_x".yellow()
   );

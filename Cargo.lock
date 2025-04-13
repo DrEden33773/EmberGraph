@@ -188,15 +188,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "89e25b6adfb930f02d1981565a6e5d9c547ac15a96606256d3b59040e5cd4ca3"
 
 [[package]]
-name = "bincode"
-version = "1.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1f45e9417d87227c7a56d22e471c6206462cba514c7590c09aff4cf6d1ddcad"
-dependencies = [
- "serde",
-]
-
-[[package]]
 name = "bitflags"
 version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -426,15 +417,6 @@ name = "crc-catalog"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19d374276b40fb8bbdee95aef7c7fa6b5316ec764510eb64b8dd0e2ed0d7e7f5"
-
-[[package]]
-name = "crc32fast"
-version = "1.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a97769d94ddab943e4510d138150169a2758b5ef3eb191a9ee688de3e23ef7b3"
-dependencies = [
- "cfg-if",
-]
 
 [[package]]
 name = "crossbeam-channel"
@@ -743,16 +725,6 @@ name = "fastrand"
 version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
-
-[[package]]
-name = "flate2"
-version = "1.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ced92e76e966ca2fd84c8f7aa01a4aea65b0eb6648d72f7c8f3e2764a67fece"
-dependencies = [
- "crc32fast",
- "miniz_oxide",
-]
 
 [[package]]
 name = "flume"
@@ -1774,7 +1746,6 @@ dependencies = [
  "polars-lazy",
  "polars-ops",
  "polars-parquet",
- "polars-plan",
  "polars-sql",
  "polars-time",
  "polars-utils",
@@ -1805,7 +1776,6 @@ dependencies = [
  "polars-error",
  "polars-schema",
  "polars-utils",
- "serde",
  "simdutf8",
  "streaming-iterator",
  "strength_reduce",
@@ -1874,8 +1844,6 @@ dependencies = [
  "rand_distr",
  "rayon",
  "regex",
- "serde",
- "serde_json",
  "strum_macros 0.26.4",
  "thiserror 2.0.12",
  "version_check",
@@ -1950,7 +1918,6 @@ dependencies = [
  "rayon",
  "regex",
  "ryu",
- "serde",
  "simdutf8",
  "tokio",
  "tokio-util",
@@ -2029,7 +1996,6 @@ dependencies = [
  "rayon",
  "regex",
  "regex-syntax 0.8.5",
- "serde",
  "strum_macros 0.26.4",
  "unicode-normalization",
  "unicode-reverse",
@@ -2055,7 +2021,6 @@ dependencies = [
  "polars-error",
  "polars-parquet-format",
  "polars-utils",
- "serde",
  "simdutf8",
  "streaming-decompression",
 ]
@@ -2124,7 +2089,6 @@ dependencies = [
  "rayon",
  "recursive",
  "regex",
- "serde",
  "strum_macros 0.26.4",
  "version_check",
 ]
@@ -2152,7 +2116,6 @@ dependencies = [
  "indexmap",
  "polars-error",
  "polars-utils",
- "serde",
  "version_check",
 ]
 
@@ -2227,7 +2190,6 @@ dependencies = [
  "polars-utils",
  "rayon",
  "regex",
- "serde",
  "strum_macros 0.26.4",
 ]
 
@@ -2238,11 +2200,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a8f6c8166a4a7fbc15b87c81645ed9e1f0651ff2e8c96cafc40ac5bf43441a10"
 dependencies = [
  "ahash",
- "bincode",
  "bytemuck",
  "bytes",
  "compact_str",
- "flate2",
  "hashbrown 0.15.2",
  "indexmap",
  "libc",
@@ -2253,8 +2213,6 @@ dependencies = [
  "rand",
  "raw-cpuid",
  "rayon",
- "serde",
- "serde_json",
  "stacker",
  "sysinfo",
  "version_check",

@@ -10,6 +10,7 @@ use instr_ops::InstrOperatorFactory;
 use itertools::Itertools;
 use polars::{frame::DataFrame, prelude::Column, series::Series};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use rayon::prelude::*;
 use std::{collections::VecDeque, sync::Arc};
 
 pub mod instr_ops;
@@ -151,21 +152,27 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
     let plan_v_pat_cnt = Arc::new(plan_v_pat_cnt);
     let plan_e_pat_cnt = Arc::new(plan_e_pat_cnt);
 
-    // get all combinations of unmerged results
-    let combinations = unmerged_results
-      .into_iter()
-      .multi_cartesian_product()
-      .collect_vec();
-
     parallel::spawn_blocking(move || {
-      combinations
+      let mut results = vec![];
+
+      for graphs in unmerged_results {
+        if results.is_empty() {
+          results = graphs;
+        } else {
+          results = results
+            .into_par_iter()
+            .flat_map(|a| {
+              graphs
+                .par_iter()
+                .map(|b| a.clone() | b.clone())
+                .collect::<Vec<_>>()
+            })
+            .collect();
+        }
+      }
+
+      results
         .into_par_iter()
-        .map(|combination| {
-          combination
-            .into_iter()
-            .reduce(|acc, curr| acc | curr)
-            .unwrap()
-        })
         .filter(|graph| {
           Self::is_equivalent_to_pattern(graph, plan_v_pat_cnt.clone(), plan_e_pat_cnt.clone())
         })
