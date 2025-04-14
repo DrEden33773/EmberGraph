@@ -2,7 +2,7 @@
 
 To query a pattern on `multi directed graph` with `label / attribute filtering` efficiently, support `Neo4j` and `SQLite3` as the storage layer.
 
-> ## ❤️ Please give me a `Star` / `Follow` if you like this project! ❤️
+> ## ❤️ Please give a `Star` / `Follow` if you like this project
 
 ## To begin with
 
@@ -41,7 +41,47 @@ uv run <SCRIPT-NAME>
 Right now, if you want to, you could run commands:
 
 ```bash
-cargo run --release --example bi_<x> # (where x in `[1..=20]`)
+cargo run --example bi_<x> # (where x in [1..=20])
 ```
 
 To check the query result of `bi_1` to `bi_20`.
+
+## Something important for `release` mode building
+
+Yes, you might have guessed -- It's totally possible to get the highest performance to build under the `release` mode.
+
+However, I have to mind you that could be `TOO SLOW`.
+
+So, if you really don't mind, here're several better options:
+
+- Linux:
+  
+```bash
+cargo build --release --all-target -j $(nproc)
+```
+
+- Mac:
+
+```bash
+cargo build --release --all-target -j $(sysctl -n hw.ncpu)
+```
+
+- Windows(Powershell):
+
+```powershell
+cargo build --release --all-target -j $env:NUMBER_OF_PROCESSORS
+```
+
+- Windows(CMD):
+
+```cmd
+cargo build --release --all-target -j %NUMBER_OF_PROCESSORS%
+```
+
+After all, that's a short-term pain for long-term gain😂.
+
+Then, you could run the command below to check the query result of `bi_1` to `bi_20`:
+
+```bash
+cargo run --release --example bi_<x> # (where x in [1..=20])
+```

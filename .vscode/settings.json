@@ -1,67 +1,68 @@
 {
-    "cSpell.words": [
-        "ahash",
-        "aiosqlite",
-        "appender",
-        "apriori",
-        "AUTOINCREMENT",
-        "colorama",
-        "cpus",
-        "dashmap",
-        "DATAFRAME",
-        "eids",
-        "itemset",
-        "itemsets",
-        "Itertools",
-        "Jemalloc",
-        "jemallocator",
-        "ldbc",
-        "mimalloc",
-        "moka",
-        "oneshot",
-        "pyproject",
-        "rustflags",
-        "sqlmodel",
-        "textwrap",
-        "thiserror",
-        "tikv",
-        "titlecase",
-        "venv"
-    ],
-    "[rust]": {
-        "editor.defaultFormatter": "rust-lang.rust-analyzer",
-        "editor.formatOnSave": true,
-        "editor.codeActionsOnSave": {
-            "source.organizeImports": "always",
-            "source.fixAll": "always"
-        },
-        "editor.tabSize": 2
+  "cSpell.words": [
+    "ahash",
+    "aiosqlite",
+    "appender",
+    "apriori",
+    "AUTOINCREMENT",
+    "colorama",
+    "cpus",
+    "dashmap",
+    "DATAFRAME",
+    "eids",
+    "itemset",
+    "itemsets",
+    "Itertools",
+    "Jemalloc",
+    "jemallocator",
+    "ldbc",
+    "mimalloc",
+    "moka",
+    "ncpu",
+    "oneshot",
+    "pyproject",
+    "rustflags",
+    "sqlmodel",
+    "textwrap",
+    "thiserror",
+    "tikv",
+    "titlecase",
+    "venv"
+  ],
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "always",
+      "source.fixAll": "always"
     },
-    "python.analysis.autoImportCompletions": true,
-    "python.analysis.typeCheckingMode": "strict",
-    "cSpell.ignorePaths": [
-        "package-lock.json",
-        "node_modules",
-        "vscode-extension",
-        ".git/{info,lfs,logs,refs,objects}/**",
-        ".git/{index,*refs,*HEAD}",
-        ".vscode",
-        ".vscode-insiders",
-        "data/**",
-        "resources/**",
-    ],
-    "sqltools.connections": [
-        {
-            "previewLimit": 50,
-            "driver": "SQLite",
-            "database": "${workspaceFolder:ember-sgm}/ldbc_sn_interactive_sf01.db",
-            "name": "ldbc_sn_interactive_sf01"
-        },
-        {
-            "previewLimit": 50,
-            "driver": "SQLite",
-            "database": "${workspaceFolder:ember-sgm}/simple_test_data_graph.db",
-            "name": "simple_test_data_graph"
-        }
-    ],
+    "editor.tabSize": 2
+  },
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.typeCheckingMode": "strict",
+  "cSpell.ignorePaths": [
+    "package-lock.json",
+    "node_modules",
+    "vscode-extension",
+    ".git/{info,lfs,logs,refs,objects}/**",
+    ".git/{index,*refs,*HEAD}",
+    ".vscode",
+    ".vscode-insiders",
+    "data/**",
+    "resources/**"
+  ],
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "driver": "SQLite",
+      "database": "${workspaceFolder:ember-sgm}/ldbc_sn_interactive_sf01.db",
+      "name": "ldbc_sn_interactive_sf01"
+    },
+    {
+      "previewLimit": 50,
+      "driver": "SQLite",
+      "database": "${workspaceFolder:ember-sgm}/simple_test_data_graph.db",
+      "name": "simple_test_data_graph"
+    }
+  ]
 }
