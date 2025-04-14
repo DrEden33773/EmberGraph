@@ -12,9 +12,7 @@ use crate::{
 };
 use colored::Colorize;
 use hashbrown::HashMap;
-use rayon::iter::{
-  IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator, ParallelIterator,
-};
+use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 use std::sync::Arc;
 
 mod a_bucket_impl;

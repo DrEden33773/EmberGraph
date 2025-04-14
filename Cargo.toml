@@ -62,6 +62,7 @@ default = [
     # "use_tracing",
     # "trace_all",
     # "unique_the_final_result",
+    # "monitor_intersect_expanding_graphs",
 ]
 
 block_spawn_via_rayon = []
@@ -72,6 +73,8 @@ unique_the_final_result = []
 trace_all = ["trace_init", "trace_get_adj"]
 trace_init = []
 trace_get_adj = []
+
+monitor_intersect_expanding_graphs = []
 
 [profile.release]
 opt-level = 3

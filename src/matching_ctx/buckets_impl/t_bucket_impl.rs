@@ -1,4 +1,14 @@
 use super::*;
+use rayon::iter::ParallelIterator;
+use rayon::prelude::*;
+use rayon::slice::ParallelSlice;
+
+/// the min chunk size
+const MIN_CHUNK_SIZE: usize = 100;
+/// the max number of threads
+const MAX_THREADS: usize = 32;
+/// the threshold of the small dataset
+const THRESHOLD_SMALL: usize = 1000;
 
 impl TBucket {
   pub async fn build_from_a_a(
@@ -59,26 +69,111 @@ impl TBucket {
       return vec![];
     }
 
+    #[cfg(feature = "monitor_intersect_expanding_graphs")]
+    let start_time = std::time::Instant::now();
+
     let (shorter, longer) = if left_group.len() < right_group.len() {
       (left_group, right_group)
     } else {
       (right_group, left_group)
     };
 
-    parallel::spawn_blocking(move || {
+    let num_threads = Self::calculate_optimal_threads(longer.len());
+    let chunk_size = Self::calculate_chunk_size(longer.len(), num_threads);
+
+    let total_elements = longer.len() * shorter.len();
+    #[cfg(feature = "monitor_intersect_expanding_graphs")]
+    println!(
+      "Processing {} elements with {} threads, chunk size: {}",
+      total_elements, num_threads, chunk_size
+    );
+
+    let result = parallel::spawn_blocking(move || {
       let shorter = Arc::new(shorter);
 
+      if total_elements < THRESHOLD_SMALL {
+        // small dataset: simple parallel strategy
+        Self::process_small_dataset(&longer, &shorter)
+      } else {
+        // large dataset: chunk parallel strategy
+        Self::process_large_dataset(&longer, &shorter, chunk_size)
+      }
+    })
+    .await;
+
+    #[cfg(feature = "monitor_intersect_expanding_graphs")]
+    {
+      let duration = start_time.elapsed();
+      println!("Processed {} elements in {:?}", total_elements, duration);
+    }
+
+    result
+  }
+
+  fn calculate_optimal_threads(data_size: usize) -> usize {
+    let available_threads = num_cpus::get();
+    let optimal_threads = data_size.div_ceil(MIN_CHUNK_SIZE);
+    // restrict the max number of threads
+    optimal_threads.min(available_threads).min(MAX_THREADS)
+  }
+
+  fn calculate_chunk_size(data_size: usize, num_threads: usize) -> usize {
+    let base_chunk_size = data_size.div_ceil(num_threads);
+    // ensure the chunk size is not less than the min chunk size
+    base_chunk_size.max(MIN_CHUNK_SIZE)
+  }
+
+  fn process_small_dataset(
+    longer: &[ExpandGraph],
+    shorter: &Arc<Vec<ExpandGraph>>,
+  ) -> Vec<ExpandGraph> {
+    // use Rayon's thread pool configuration
+    let pool = rayon::ThreadPoolBuilder::new()
+      .num_threads(Self::calculate_optimal_threads(longer.len()))
+      .build()
+      .unwrap();
+
+    pool.install(|| {
       longer
         .par_iter()
         .flat_map(|left| {
+          // inner use normal iterator, avoid thread nesting
           shorter
-            .clone()
-            .par_iter()
+            .iter()
             .flat_map(|right| union_then_intersect_on_connective_v(left, right))
             .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>()
     })
-    .await
+  }
+
+  fn process_large_dataset(
+    longer: &[ExpandGraph],
+    shorter: &Arc<Vec<ExpandGraph>>,
+    chunk_size: usize,
+  ) -> Vec<ExpandGraph> {
+    // use Rayon's thread pool configuration
+    let pool = rayon::ThreadPoolBuilder::new()
+      .num_threads(Self::calculate_optimal_threads(longer.len()))
+      .build()
+      .unwrap();
+
+    pool.install(|| {
+      longer
+        .par_chunks(chunk_size)
+        .flat_map(|chunk| {
+          // inner use normal iterator, avoid thread nesting
+          chunk
+            .iter()
+            .flat_map(|left| {
+              shorter
+                .iter()
+                .flat_map(|right| union_then_intersect_on_connective_v(left, right))
+                .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>()
+    })
   }
 }

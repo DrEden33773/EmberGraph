@@ -84,7 +84,9 @@ impl<VType: VBase, EType: EBase> BitOr for DynGraph<VType, EType> {
     let mut res = DynGraph {
       v_entities,
       e_entities,
-      ..Default::default()
+      adj_table: HashMap::with_capacity(self.adj_table.len() + rhs.adj_table.len()),
+      pattern_2_vids: HashMap::with_capacity(self.pattern_2_vids.len() + rhs.pattern_2_vids.len()),
+      pattern_2_eids: HashMap::with_capacity(self.pattern_2_eids.len() + rhs.pattern_2_eids.len()),
     };
 
     // deal with `adj_table`
@@ -258,6 +260,7 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
     self.e_entities.get(eid)
   }
 
+  #[inline]
   pub fn get_first_connective_vid_for_e(&self, edge: &EType) -> Option<Vid> {
     let src_vid = edge.src_vid();
     let dst_vid = edge.dst_vid();
@@ -417,6 +420,7 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
     res
   }
 
+  #[inline]
   pub fn get_adj_eids(&self, vid: VidRef) -> HashSet<Eid> {
     if let Some(v_node) = self.adj_table.get(vid) {
       v_node.e_in.union(&v_node.e_out).cloned().collect()
@@ -425,6 +429,7 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
     }
   }
 
+  #[inline]
   pub fn get_adj_vids(&self, vid: VidRef) -> HashSet<Vid> {
     if let Some(v_node) = self.adj_table.get(vid) {
       v_node
@@ -444,6 +449,7 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
     }
   }
 
+  #[inline]
   pub fn get_out_degree(&self, vid: VidRef) -> usize {
     if let Some(v_node) = self.adj_table.get(vid) {
       v_node.e_out.len()
@@ -452,6 +458,7 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
     }
   }
 
+  #[inline]
   pub fn get_in_degree(&self, vid: VidRef) -> usize {
     if let Some(v_node) = self.adj_table.get(vid) {
       v_node.e_in.len()
@@ -460,6 +467,7 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
     }
   }
 
+  #[inline]
   pub fn view_common_v_patterns<'g>(
     &'g self,
     other: &'g Self,
@@ -470,6 +478,7 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
       .filter(|p| other.pattern_2_vids.contains_key(*p))
   }
 
+  #[inline]
   pub fn view_common_e_patterns<'g>(
     &'g self,
     other: &'g Self,
