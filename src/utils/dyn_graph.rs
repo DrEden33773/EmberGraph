@@ -135,14 +135,17 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
     true
   }
 
+  #[inline]
   pub fn is_superset_of(&self, other: &Self) -> bool {
     other.is_subset_of(self)
   }
 
+  #[inline]
   pub fn v_entities(&self) -> &HashMap<Vid, VType> {
     &self.v_entities
   }
 
+  #[inline]
   pub fn e_entities(&self) -> &HashMap<Eid, EType> {
     &self.e_entities
   }

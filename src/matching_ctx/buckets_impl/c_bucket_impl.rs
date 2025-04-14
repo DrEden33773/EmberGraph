@@ -22,12 +22,12 @@ impl CBucket {
     })
     .await;
 
-    for (expanding, idx, valid_targets) in pre.into_iter().flatten() {
+    for (expanding, idx, mut valid_targets) in pre.into_iter().flatten() {
       all_expanded.push(expanding);
       expanded_with_frontiers
         .entry(idx)
         .or_insert_with(Vec::new)
-        .extend(valid_targets);
+        .append(&mut valid_targets);
     }
 
     Self {
@@ -58,12 +58,12 @@ impl CBucket {
     })
     .await;
 
-    for (expanding, idx, valid_targets) in pre.into_iter().flatten() {
+    for (expanding, idx, mut valid_targets) in pre.into_iter().flatten() {
       all_expanded.push(expanding);
       expanded_with_frontiers
         .entry(idx)
         .or_insert_with(Vec::new)
-        .extend(valid_targets);
+        .append(&mut valid_targets);
     }
 
     Self {
