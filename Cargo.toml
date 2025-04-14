@@ -4,6 +4,20 @@ cargo-features = ["profile-rustflags"]
 name = "ember-graph"
 version = "0.1.0"
 edition = "2024"
+authors = ["Eden Wang <edwardwang33773@gmail.com>"]
+readme = "README.md"
+license = "MIT"
+description = "To query a pattern on multi-directed-graph with label / attribute filtering efficiently."
+repository = "https://github.com/DrEden33773/EmberGraph"
+homepage = "https://github.com/DrEden33773/EmberGraph"
+keywords = [
+    "sub graph matching",
+    "attribute graph",
+    "multi directed graph",
+    "pattern matching",
+    "graph database",
+]
+categories = ["database", "concurrency"]
 
 [dependencies]
 colored = "3.0.0"
