@@ -4,11 +4,11 @@ use rayon::prelude::*;
 use rayon::slice::ParallelSlice;
 
 /// the min chunk size
-const MIN_CHUNK_SIZE: usize = 100;
+const MIN_CHUNK_SIZE: usize = 128;
 /// the max number of threads
 const MAX_THREADS: usize = 32;
 /// the threshold of the small dataset
-const THRESHOLD_SMALL: usize = 1000;
+const THRESHOLD_SMALL: usize = 1024;
 
 impl TBucket {
   pub async fn build_from_a_a(
