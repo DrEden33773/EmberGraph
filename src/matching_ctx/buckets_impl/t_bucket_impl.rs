@@ -127,24 +127,16 @@ impl TBucket {
     longer: &[ExpandGraph],
     shorter: &Arc<Vec<ExpandGraph>>,
   ) -> Vec<ExpandGraph> {
-    // use Rayon's thread pool configuration
-    let pool = rayon::ThreadPoolBuilder::new()
-      .num_threads(Self::calculate_optimal_threads(longer.len()))
-      .build()
-      .unwrap();
-
-    pool.install(|| {
-      longer
-        .par_iter()
-        .flat_map(|left| {
-          // inner use normal iterator, avoid thread nesting
-          shorter
-            .iter()
-            .flat_map(|right| union_then_intersect_on_connective_v(left, right))
-            .collect::<Vec<_>>()
-        })
-        .collect::<Vec<_>>()
-    })
+    longer
+      .par_iter()
+      .flat_map(|left| {
+        // inner use normal iterator, avoid thread nesting
+        shorter
+          .iter()
+          .flat_map(|right| union_then_intersect_on_connective_v(left, right))
+          .collect::<Vec<_>>()
+      })
+      .collect::<Vec<_>>()
   }
 
   fn process_large_dataset(
@@ -152,28 +144,20 @@ impl TBucket {
     shorter: &Arc<Vec<ExpandGraph>>,
     chunk_size: usize,
   ) -> Vec<ExpandGraph> {
-    // use Rayon's thread pool configuration
-    let pool = rayon::ThreadPoolBuilder::new()
-      .num_threads(Self::calculate_optimal_threads(longer.len()))
-      .build()
-      .unwrap();
-
-    pool.install(|| {
-      longer
-        .par_chunks(chunk_size)
-        .flat_map(|chunk| {
-          // inner use normal iterator, avoid thread nesting
-          chunk
-            .iter()
-            .flat_map(|left| {
-              shorter
-                .iter()
-                .flat_map(|right| union_then_intersect_on_connective_v(left, right))
-                .collect::<Vec<_>>()
-            })
-            .collect::<Vec<_>>()
-        })
-        .collect::<Vec<_>>()
-    })
+    longer
+      .par_chunks(chunk_size)
+      .flat_map(|chunk| {
+        // inner use normal iterator, avoid thread nesting
+        chunk
+          .iter()
+          .flat_map(|left| {
+            shorter
+              .iter()
+              .flat_map(|right| union_then_intersect_on_connective_v(left, right))
+              .collect::<Vec<_>>()
+          })
+          .collect::<Vec<_>>()
+      })
+      .collect::<Vec<_>>()
   }
 }
