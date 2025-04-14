@@ -25,7 +25,8 @@
         "textwrap",
         "thiserror",
         "tikv",
-        "titlecase"
+        "titlecase",
+        "venv"
     ],
     "[rust]": {
         "editor.defaultFormatter": "rust-lang.rust-analyzer",
