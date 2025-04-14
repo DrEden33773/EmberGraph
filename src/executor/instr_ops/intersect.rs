@@ -8,7 +8,7 @@ use crate::{
   storage::StorageAdapter,
 };
 use itertools::Itertools;
-use std::{collections::VecDeque, sync::Arc};
+use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct IntersectOperator<S: StorageAdapter> {
@@ -47,30 +47,58 @@ impl<S: StorageAdapter> IntersectOperator<S> {
     Some(())
   }
 
-  /// `A(T)_{i}` ∩ `A_{i+1}` -> `Tx`
+  /// `Ai / Ti` ∩ `Aj / Tj` -> `Tx`
   async fn with_multi_adj_set(&mut self, instr: &Instruction) -> Option<()> {
-    let mut a_groups: VecDeque<_> = instr
-      .multi_ops
-      .iter()
-      .filter_map(|op| self.ctx.pop_group_by_pat_from_a_block(op, &instr.vid))
-      .collect();
+    #[cfg(debug_assertions)]
+    // Assume that `flatten` has been applied
+    assert_eq!(instr.multi_ops.len(), 2);
 
-    if a_groups.len() < 2 {
-      return None;
-    }
+    let (lhs_pref, _) = resolve_var(instr.multi_ops[0].as_str());
+    let (rhs_pref, _) = resolve_var(instr.multi_ops[1].as_str());
 
-    let a1 = a_groups.pop_front().unwrap();
-    let a2 = a_groups.pop_front().unwrap();
-    let mut t_bucket = TBucket::build_from_a_a(a1, a2, &instr.vid).await;
-
-    if !a_groups.is_empty() {
-      let mut prev_t = t_bucket;
-      while let Some(a_group) = a_groups.pop_front() {
-        t_bucket = TBucket::build_from_t_a(prev_t, a_group).await;
-        prev_t = t_bucket;
+    let t_bucket = match lhs_pref {
+      DbQueryTarget => {
+        // `Ai` ∩ `Aj / Tj` -> `Tx`
+        let lhs_a_group = self
+          .ctx
+          .pop_group_by_pat_from_a_block(instr.multi_ops[0].as_str(), &instr.vid)?;
+        match rhs_pref {
+          DbQueryTarget => {
+            // `Ai` ∩ `Aj` -> `Tx`
+            let rhs_a_group = self
+              .ctx
+              .pop_group_by_pat_from_a_block(instr.multi_ops[1].as_str(), &instr.vid)?;
+            TBucket::build_from_a_a(lhs_a_group, rhs_a_group, &instr.vid).await
+          }
+          IntersectTarget => {
+            // `Ai` ∩ `Tj` -> `Tx`
+            let rhs_t_group = self.ctx.pop_from_t_block(instr.multi_ops[1].as_str())?;
+            TBucket::build_from_a_t(lhs_a_group, rhs_t_group).await
+          }
+          _ => panic!("❌  Invalid var_prefix: {rhs_pref}"),
+        }
       }
-      t_bucket = prev_t;
-    }
+      IntersectTarget => {
+        // `Ti` ∩ `Aj / Tj` -> `Tx`
+        let lhs_t_group = self.ctx.pop_from_t_block(instr.multi_ops[0].as_str())?;
+        match rhs_pref {
+          DbQueryTarget => {
+            // `Ti` ∩ `Aj` -> `Tx`
+            let rhs_a_group = self
+              .ctx
+              .pop_group_by_pat_from_a_block(instr.multi_ops[1].as_str(), &instr.vid)?;
+            TBucket::build_from_t_a(lhs_t_group, rhs_a_group).await
+          }
+          IntersectTarget => {
+            // `Ti` ∩ `Tj` -> `Tx`
+            let rhs_t_group = self.ctx.pop_from_t_block(instr.multi_ops[1].as_str())?;
+            TBucket::build_from_t_t(lhs_t_group, rhs_t_group).await
+          }
+          _ => panic!("❌  Invalid var_prefix: {rhs_pref}"),
+        }
+      }
+      _ => panic!("❌  Invalid var_prefix: {lhs_pref}"),
+    };
 
     self.ctx.update_t_block(&instr.target_var, t_bucket);
 

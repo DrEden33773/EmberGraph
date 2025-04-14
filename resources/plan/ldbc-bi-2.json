@@ -6,6 +6,21 @@
     "post"
   ],
   "vertices": {
+    "tagClass": {
+      "vid": "tagClass",
+      "label": "Tagclass",
+      "attr": null
+    },
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
+      "attr": null
+    },
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
+    },
     "tag": {
       "vid": "tag",
       "label": "Tag",
@@ -15,24 +30,16 @@
         "value": "Patrick_Vieira",
         "type": "string"
       }
-    },
-    "post": {
-      "vid": "post",
-      "label": "Post",
-      "attr": null
-    },
-    "comment": {
-      "vid": "comment",
-      "label": "Comment",
-      "attr": null
-    },
-    "tagClass": {
-      "vid": "tagClass",
-      "label": "Tagclass",
-      "attr": null
     }
   },
   "edges": {
+    "b": {
+      "eid": "b",
+      "src_vid": "comment",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    },
     "a": {
       "eid": "a",
       "src_vid": "post",
@@ -45,13 +52,6 @@
       "src_vid": "tag",
       "dst_vid": "tagClass",
       "label": "hasType",
-      "attr": null
-    },
-    "b": {
-      "eid": "b",
-      "src_vid": "comment",
-      "dst_vid": "tag",
-      "label": "hasTag",
       "attr": null
     }
   },
@@ -69,8 +69,8 @@
       "vid": "tag",
       "type": "get_adj",
       "expand_eid_list": [
-        "b",
         "a",
+        "b",
         "c"
       ],
       "single_op": "f^tag",
@@ -100,8 +100,8 @@
       "multi_ops": [],
       "target_var": "f^tagClass",
       "depend_on": [
-        "f^tag",
         "C^tagClass",
+        "f^tag",
         "A^tag"
       ]
     },
@@ -125,8 +125,8 @@
       "multi_ops": [],
       "target_var": "f^comment",
       "depend_on": [
-        "f^tag",
         "C^comment",
+        "f^tag",
         "A^tag"
       ]
     },
@@ -150,8 +150,8 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "f^tag",
         "C^post",
+        "f^tag",
         "A^tag"
       ]
     },
@@ -161,21 +161,21 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
+        "f^tagClass",
         "f^tag",
         "f^post",
-        "f^tagClass",
         "f^comment"
       ],
       "target_var": "f",
       "depend_on": [
-        "C^tagClass",
-        "C^post",
-        "A^tag",
-        "f^comment",
         "f^tag",
         "C^comment",
+        "f^post",
+        "C^post",
         "f^tagClass",
-        "f^post"
+        "f^comment",
+        "A^tag",
+        "C^tagClass"
       ]
     }
   ]

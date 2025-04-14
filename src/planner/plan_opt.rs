@@ -9,6 +9,33 @@ use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 use std::collections::{BTreeSet, VecDeque};
 
+fn compute_instr_dependencies(instructions: &mut [Instruction]) {
+  let mut depend_record: HashMap<Vid, HashSet<Vid>> = HashMap::new();
+
+  for instr in instructions {
+    let mut depend_set = HashSet::new();
+
+    if let Some(op) = &instr.single_op {
+      if op != VarPrefix::DataVertexSet.as_ref() {
+        depend_set.insert(op.clone());
+      }
+      if let Some(depend) = depend_record.get(op) {
+        depend_set.extend(depend.clone());
+      }
+    } else {
+      depend_set.extend(instr.multi_ops.iter().cloned());
+      for op in instr.multi_ops.iter() {
+        if let Some(depend) = depend_record.get(op) {
+          depend_set.extend(depend.clone());
+        }
+      }
+    }
+
+    depend_record.insert(instr.target_var.clone(), depend_set.clone());
+    instr.depend_on = depend_set.into_iter().collect();
+  }
+}
+
 pub struct PlanOptimizer {
   pub(crate) pattern_graph: DynGraph<PatternVertex, PatternEdge>,
   pub(crate) exec_instructions: Vec<Instruction>,
@@ -35,8 +62,11 @@ impl PlanOptimizer {
     }
 
     self.eliminate_cse();
-    // self.flatten_multi_ops();
+    self.flatten_multi_ops();
     self.reorder();
+
+    // `compute dependencies` should be done after all optimizations
+    compute_instr_dependencies(&mut self.exec_instructions);
   }
 
   fn reorder(&mut self) {
@@ -80,11 +110,6 @@ impl PlanOptimizer {
   }
 
   /// Flatten multi-ops (at most 2 operands)
-  #[deprecated(
-    since = "0.1.0",
-    note = "ExecEngine supports `Intersect(A1 ... An)`, flatten may break the parallelism."
-  )]
-  #[allow(dead_code)]
   fn flatten_multi_ops(&mut self) {
     let mut instr_idx = Vec::with_capacity(self.exec_instructions.len());
     let mut defined_vars = Vec::with_capacity(self.exec_instructions.len());

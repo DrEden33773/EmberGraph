@@ -13,6 +13,18 @@ impl TBucket {
     }
   }
 
+  pub async fn build_from_a_t(a_group: Vec<ExpandGraph>, t_bucket: TBucket) -> Self {
+    let left_group = a_group;
+    let right_group = t_bucket.expanding_graphs;
+
+    let expanding_graphs = Self::expand_edges_of_two(left_group, right_group).await;
+
+    Self {
+      target_pat_vid: t_bucket.target_pat_vid,
+      expanding_graphs,
+    }
+  }
+
   pub async fn build_from_t_a(t_bucket: TBucket, a_group: Vec<ExpandGraph>) -> Self {
     let left_group = t_bucket.expanding_graphs;
     let right_group = a_group;
@@ -20,6 +32,21 @@ impl TBucket {
     let expanding_graphs = Self::expand_edges_of_two(left_group, right_group).await;
     Self {
       target_pat_vid: t_bucket.target_pat_vid,
+      expanding_graphs,
+    }
+  }
+
+  pub async fn build_from_t_t(t_bucket_1: TBucket, t_bucket_2: TBucket) -> Self {
+    let left_group = t_bucket_1.expanding_graphs;
+    let right_group = t_bucket_2.expanding_graphs;
+
+    let expanding_graphs = Self::expand_edges_of_two(left_group, right_group).await;
+
+    #[cfg(debug_assertions)]
+    assert_eq!(t_bucket_1.target_pat_vid, t_bucket_2.target_pat_vid);
+
+    Self {
+      target_pat_vid: t_bucket_1.target_pat_vid,
       expanding_graphs,
     }
   }

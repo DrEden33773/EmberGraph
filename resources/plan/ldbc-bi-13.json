@@ -17,6 +17,16 @@
         "type": "string"
       }
     },
+    "zombie": {
+      "vid": "zombie",
+      "label": "Person",
+      "attr": {
+        "attr": "creationDate",
+        "op": "<",
+        "value": 1262778975430,
+        "type": "int"
+      }
+    },
     "post": {
       "vid": "post",
       "label": "Post",
@@ -37,16 +47,6 @@
         "type": "int"
       }
     },
-    "zombie": {
-      "vid": "zombie",
-      "label": "Person",
-      "attr": {
-        "attr": "creationDate",
-        "op": "<",
-        "value": 1262778975430,
-        "type": "int"
-      }
-    },
     "city": {
       "vid": "city",
       "label": "City",
@@ -61,11 +61,11 @@
       "label": "isPartOf",
       "attr": null
     },
-    "a": {
-      "eid": "a",
-      "src_vid": "post",
-      "dst_vid": "zombie",
-      "label": "hasCreator",
+    "b": {
+      "eid": "b",
+      "src_vid": "zombie",
+      "dst_vid": "city",
+      "label": "isLocatedIn",
       "attr": null
     },
     "d": {
@@ -75,11 +75,11 @@
       "label": "likes",
       "attr": null
     },
-    "b": {
-      "eid": "b",
-      "src_vid": "zombie",
-      "dst_vid": "city",
-      "label": "isLocatedIn",
+    "a": {
+      "eid": "a",
+      "src_vid": "post",
+      "dst_vid": "zombie",
+      "label": "hasCreator",
       "attr": null
     }
   },
@@ -141,8 +141,8 @@
       "vid": "zombie",
       "type": "get_adj",
       "expand_eid_list": [
-        "b",
-        "a"
+        "a",
+        "b"
       ],
       "single_op": "f^zombie",
       "multi_ops": [],
@@ -162,10 +162,10 @@
       ],
       "target_var": "T^post",
       "depend_on": [
-        "f^likerPerson",
         "A^likerPerson",
+        "A^zombie",
         "f^zombie",
-        "A^zombie"
+        "f^likerPerson"
       ]
     },
     {
@@ -176,11 +176,11 @@
       "multi_ops": [],
       "target_var": "C^post",
       "depend_on": [
-        "A^zombie",
-        "A^likerPerson",
-        "f^zombie",
         "T^post",
-        "f^likerPerson"
+        "A^likerPerson",
+        "A^zombie",
+        "f^likerPerson",
+        "f^zombie"
       ]
     },
     {
@@ -191,12 +191,12 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "C^post",
-        "A^zombie",
         "T^post",
         "f^likerPerson",
         "A^likerPerson",
-        "f^zombie"
+        "f^zombie",
+        "C^post",
+        "A^zombie"
       ]
     },
     {
@@ -210,10 +210,10 @@
       ],
       "target_var": "T^city",
       "depend_on": [
-        "f^country",
-        "A^zombie",
+        "A^country",
         "f^zombie",
-        "A^country"
+        "A^zombie",
+        "f^country"
       ]
     },
     {
@@ -225,9 +225,9 @@
       "target_var": "C^city",
       "depend_on": [
         "A^zombie",
-        "T^city",
-        "f^country",
         "f^zombie",
+        "f^country",
+        "T^city",
         "A^country"
       ]
     },
@@ -239,12 +239,12 @@
       "multi_ops": [],
       "target_var": "f^city",
       "depend_on": [
-        "A^zombie",
-        "T^city",
-        "C^city",
-        "f^country",
         "f^zombie",
-        "A^country"
+        "T^city",
+        "A^country",
+        "C^city",
+        "A^zombie",
+        "f^country"
       ]
     },
     {
@@ -254,25 +254,25 @@
       "single_op": null,
       "multi_ops": [
         "f^zombie",
-        "f^post",
-        "f^city",
         "f^country",
-        "f^likerPerson"
+        "f^likerPerson",
+        "f^city",
+        "f^post"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^country",
-        "f^likerPerson",
         "f^zombie",
+        "f^country",
         "f^post",
+        "A^country",
+        "C^city",
         "A^zombie",
+        "f^city",
         "T^post",
         "A^likerPerson",
-        "f^city",
         "C^post",
         "T^city",
-        "A^country",
-        "C^city"
+        "f^likerPerson"
       ]
     }
   ]

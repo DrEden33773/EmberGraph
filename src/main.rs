@@ -24,7 +24,7 @@ async fn to_run() -> io::Result<()> {
   #[allow(unused_variables)]
   let guard = ember_graph::init_log::init_log().await?;
 
-  // plan_gen().await?;
+  plan_gen().await?;
 
   println!(
     "⚠️  If you want to query `{}`, use `{}` instead.\n",

@@ -37,8 +37,7 @@ pub async fn bi_2_on_sf_01() -> io::Result<()> {
   query::<Neo4jStorageAdapter>("ldbc-bi-2.json").await
 }
 
-/// ✅ ⚠️ (Not that fast)
-/// - `SqliteAdapter` is faster
+/// ✅
 pub async fn bi_3_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-3' on 'SF0.1' ...\n");
   query::<SqliteStorageAdapter>("ldbc-bi-3.json").await
@@ -53,7 +52,7 @@ pub async fn bi_4_on_sf_01() -> io::Result<()> {
 /// ✅
 pub async fn bi_5_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-5' on 'SF0.1' ...\n");
-  query::<Neo4jStorageAdapter>("ldbc-bi-5.json").await
+  query::<SqliteStorageAdapter>("ldbc-bi-5.json").await
 }
 
 /// ✅
@@ -65,7 +64,7 @@ pub async fn bi_6_on_sf_01() -> io::Result<()> {
 /// ✅
 pub async fn bi_7_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-7' on 'SF0.1' ...\n");
-  query::<Neo4jStorageAdapter>("ldbc-bi-7.json").await
+  query::<SqliteStorageAdapter>("ldbc-bi-7.json").await
 }
 
 /// ✅

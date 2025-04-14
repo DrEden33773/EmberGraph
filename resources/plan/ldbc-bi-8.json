@@ -11,16 +11,6 @@
       "label": "Person",
       "attr": null
     },
-    "comment": {
-      "vid": "comment",
-      "label": "Comment",
-      "attr": {
-        "attr": "creationDate",
-        "op": ">",
-        "value": 1289146646222,
-        "type": "int"
-      }
-    },
     "tag": {
       "vid": "tag",
       "label": "Tag",
@@ -31,6 +21,16 @@
         "type": "string"
       }
     },
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
+      "attr": {
+        "attr": "creationDate",
+        "op": ">",
+        "value": 1289146646222,
+        "type": "int"
+      }
+    },
     "person": {
       "vid": "person",
       "label": "Person",
@@ -38,13 +38,6 @@
     }
   },
   "edges": {
-    "a": {
-      "eid": "a",
-      "src_vid": "comment",
-      "dst_vid": "tag",
-      "label": "hasTag",
-      "attr": null
-    },
     "b": {
       "eid": "b",
       "src_vid": "comment",
@@ -52,11 +45,11 @@
       "label": "hasCreator",
       "attr": null
     },
-    "d": {
-      "eid": "d",
-      "src_vid": "person",
-      "dst_vid": "friend",
-      "label": "knows",
+    "a": {
+      "eid": "a",
+      "src_vid": "comment",
+      "dst_vid": "tag",
+      "label": "hasTag",
       "attr": null
     },
     "c": {
@@ -64,6 +57,13 @@
       "src_vid": "person",
       "dst_vid": "tag",
       "label": "hasInterest",
+      "attr": null
+    },
+    "d": {
+      "eid": "d",
+      "src_vid": "person",
+      "dst_vid": "friend",
+      "label": "knows",
       "attr": null
     }
   },
@@ -111,9 +111,9 @@
       "multi_ops": [],
       "target_var": "f^comment",
       "depend_on": [
-        "A^tag",
         "C^comment",
-        "f^tag"
+        "f^tag",
+        "A^tag"
       ]
     },
     {
@@ -126,10 +126,10 @@
       "multi_ops": [],
       "target_var": "A^comment",
       "depend_on": [
-        "C^comment",
-        "A^tag",
+        "f^tag",
         "f^comment",
-        "f^tag"
+        "A^tag",
+        "C^comment"
       ]
     },
     {
@@ -160,18 +160,35 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^comment",
+        "A^tag",
+        "A^friend"
+      ],
+      "target_var": "T^@1",
+      "depend_on": [
         "A^friend",
+        "f^friend",
+        "f^tag",
         "A^tag"
+      ]
+    },
+    {
+      "vid": "person",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "T^@1",
+        "A^comment"
       ],
       "target_var": "T^person",
       "depend_on": [
+        "f^comment",
+        "f^tag",
+        "T^@1",
+        "A^friend",
         "C^comment",
         "f^friend",
         "A^tag",
-        "A^friend",
-        "f^comment",
-        "f^tag",
         "A^comment"
       ]
     },
@@ -183,14 +200,15 @@
       "multi_ops": [],
       "target_var": "C^person",
       "depend_on": [
+        "f^friend",
+        "T^@1",
         "f^comment",
+        "f^tag",
+        "A^friend",
         "T^person",
         "C^comment",
         "A^tag",
-        "A^friend",
-        "A^comment",
-        "f^friend",
-        "f^tag"
+        "A^comment"
       ]
     },
     {
@@ -201,15 +219,16 @@
       "multi_ops": [],
       "target_var": "f^person",
       "depend_on": [
-        "f^comment",
-        "A^comment",
-        "f^tag",
-        "C^person",
-        "C^comment",
         "A^tag",
+        "C^comment",
+        "A^comment",
+        "f^comment",
         "f^friend",
-        "A^friend",
-        "T^person"
+        "C^person",
+        "T^person",
+        "T^@1",
+        "f^tag",
+        "A^friend"
       ]
     },
     {
@@ -218,22 +237,23 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^friend",
         "f^tag",
+        "f^comment",
         "f^person",
-        "f^comment"
+        "f^friend"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^tag",
-        "A^comment",
-        "A^friend",
         "T^person",
-        "f^person",
-        "f^comment",
-        "C^comment",
         "C^person",
         "A^tag",
+        "f^tag",
+        "C^comment",
+        "T^@1",
+        "A^comment",
+        "A^friend",
+        "f^person",
+        "f^comment",
         "f^friend"
       ]
     }

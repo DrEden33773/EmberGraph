@@ -5,7 +5,7 @@ use crate::{
   },
   utils::dyn_graph::DynGraph,
 };
-use hashbrown::{HashMap, HashSet};
+use hashbrown::HashSet;
 use itertools::Itertools;
 
 #[derive(Debug, Clone)]
@@ -142,57 +142,26 @@ impl PlanGenerator {
         .build(),
     );
 
-    Self::compute_instr_dependencies(&mut instructions);
-
-    self.exec_instructions = Self::remove_unused_dbq(instructions);
+    self.exec_instructions = remove_unused_dbq(instructions);
   }
 }
 
-impl PlanGenerator {
-  fn compute_instr_dependencies(instructions: &mut [Instruction]) {
-    let mut depend_record: HashMap<Vid, HashSet<Vid>> = HashMap::new();
-
-    for instr in instructions {
-      let mut depend_set = HashSet::new();
-
-      if let Some(op) = &instr.single_op {
-        if op != VarPrefix::DataVertexSet.as_ref() {
-          depend_set.insert(op.clone());
-        }
-        if let Some(depend) = depend_record.get(op) {
-          depend_set.extend(depend.clone());
-        }
-      } else {
-        depend_set.extend(instr.multi_ops.iter().cloned());
-        for op in instr.multi_ops.iter() {
-          if let Some(depend) = depend_record.get(op) {
-            depend_set.extend(depend.clone());
-          }
-        }
+fn remove_unused_dbq(instructions: Vec<Instruction>) -> Vec<Instruction> {
+  let mut depend_set = HashSet::new();
+  for instr in instructions.iter() {
+    if let Some(op) = &instr.single_op {
+      if op != VarPrefix::DataVertexSet.as_ref() {
+        depend_set.insert(op.clone());
       }
-
-      depend_record.insert(instr.target_var.clone(), depend_set.clone());
-      instr.depend_on = depend_set.into_iter().collect();
+    } else {
+      depend_set.extend(instr.multi_ops.iter().cloned());
     }
   }
 
-  fn remove_unused_dbq(instructions: Vec<Instruction>) -> Vec<Instruction> {
-    let mut depend_set = HashSet::new();
-    for instr in instructions.iter() {
-      if let Some(op) = &instr.single_op {
-        if op != VarPrefix::DataVertexSet.as_ref() {
-          depend_set.insert(op.clone());
-        }
-      } else {
-        depend_set.extend(instr.multi_ops.iter().cloned());
-      }
-    }
-
-    instructions
-      .into_iter()
-      .filter(|instr| {
-        instr.type_ != InstructionType::GetAdj || depend_set.contains(&instr.target_var)
-      })
-      .collect()
-  }
+  instructions
+    .into_iter()
+    .filter(|instr| {
+      instr.type_ != InstructionType::GetAdj || depend_set.contains(&instr.target_var)
+    })
+    .collect()
 }

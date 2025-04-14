@@ -125,9 +125,9 @@
       "multi_ops": [],
       "target_var": "f^comment",
       "depend_on": [
-        "C^comment",
         "A^relatedTag",
-        "f^relatedTag"
+        "f^relatedTag",
+        "C^comment"
       ]
     },
     {
@@ -140,8 +140,8 @@
       "multi_ops": [],
       "target_var": "A^comment",
       "depend_on": [
-        "C^comment",
         "f^comment",
+        "C^comment",
         "f^relatedTag",
         "A^relatedTag"
       ]
@@ -152,18 +152,18 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^comment",
-        "A^tag"
+        "A^tag",
+        "A^comment"
       ],
       "target_var": "T^post",
       "depend_on": [
         "A^relatedTag",
         "A^tag",
+        "f^comment",
         "C^comment",
         "f^relatedTag",
         "f^tag",
-        "A^comment",
-        "f^comment"
+        "A^comment"
       ]
     },
     {
@@ -174,14 +174,14 @@
       "multi_ops": [],
       "target_var": "C^post",
       "depend_on": [
-        "T^post",
+        "f^tag",
+        "A^tag",
+        "f^relatedTag",
         "f^comment",
-        "A^comment",
+        "T^post",
         "A^relatedTag",
         "C^comment",
-        "f^relatedTag",
-        "A^tag",
-        "f^tag"
+        "A^comment"
       ]
     },
     {
@@ -192,15 +192,15 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "f^comment",
         "A^comment",
+        "T^post",
+        "C^comment",
+        "A^relatedTag",
+        "f^tag",
         "C^post",
         "A^tag",
-        "C^comment",
         "f^relatedTag",
-        "T^post",
-        "A^relatedTag",
-        "f^tag"
+        "f^comment"
       ]
     },
     {
@@ -210,22 +210,22 @@
       "single_op": null,
       "multi_ops": [
         "f^tag",
-        "f^post",
         "f^comment",
+        "f^post",
         "f^relatedTag"
       ],
       "target_var": "f",
       "depend_on": [
-        "A^comment",
-        "f^tag",
-        "f^comment",
-        "f^relatedTag",
-        "A^tag",
-        "C^comment",
-        "f^post",
         "A^relatedTag",
-        "C^post",
-        "T^post"
+        "C^comment",
+        "f^comment",
+        "T^post",
+        "A^tag",
+        "f^tag",
+        "f^post",
+        "A^comment",
+        "f^relatedTag",
+        "C^post"
       ]
     }
   ]

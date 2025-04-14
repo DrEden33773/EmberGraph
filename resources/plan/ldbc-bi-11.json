@@ -1,14 +1,24 @@
 {
   "matching_order": [
     "country",
-    "a",
-    "b",
     "c",
+    "b",
+    "a",
+    "city_b",
     "city_c",
-    "city_a",
-    "city_b"
+    "city_a"
   ],
   "vertices": {
+    "b": {
+      "vid": "b",
+      "label": "Person",
+      "attr": null
+    },
+    "a": {
+      "vid": "a",
+      "label": "Person",
+      "attr": null
+    },
     "country": {
       "vid": "country",
       "label": "Country",
@@ -19,19 +29,9 @@
         "type": "string"
       }
     },
-    "b": {
-      "vid": "b",
-      "label": "Person",
-      "attr": null
-    },
     "city_a": {
       "vid": "city_a",
       "label": "City",
-      "attr": null
-    },
-    "c": {
-      "vid": "c",
-      "label": "Person",
       "attr": null
     },
     "city_b": {
@@ -39,14 +39,14 @@
       "label": "City",
       "attr": null
     },
-    "a": {
-      "vid": "a",
-      "label": "Person",
-      "attr": null
-    },
     "city_c": {
       "vid": "city_c",
       "label": "City",
+      "attr": null
+    },
+    "c": {
+      "vid": "c",
+      "label": "Person",
       "attr": null
     }
   },
@@ -56,39 +56,6 @@
       "src_vid": "b",
       "dst_vid": "city_b",
       "label": "isLocatedIn",
-      "attr": null
-    },
-    "_d": {
-      "eid": "_d",
-      "src_vid": "a",
-      "dst_vid": "b",
-      "label": "knows",
-      "attr": {
-        "attr": "creationDate",
-        "op": ">=",
-        "value": 1281681940915,
-        "type": "int"
-      }
-    },
-    "_i": {
-      "eid": "_i",
-      "src_vid": "city_c",
-      "dst_vid": "country",
-      "label": "isPartOf",
-      "attr": null
-    },
-    "_b": {
-      "eid": "_b",
-      "src_vid": "c",
-      "dst_vid": "city_c",
-      "label": "isLocatedIn",
-      "attr": null
-    },
-    "_h": {
-      "eid": "_h",
-      "src_vid": "city_b",
-      "dst_vid": "country",
-      "label": "isPartOf",
       "attr": null
     },
     "_c": {
@@ -115,6 +82,25 @@
         "type": "int"
       }
     },
+    "_e": {
+      "eid": "_e",
+      "src_vid": "a",
+      "dst_vid": "city_a",
+      "label": "isLocatedIn",
+      "attr": null
+    },
+    "_d": {
+      "eid": "_d",
+      "src_vid": "a",
+      "dst_vid": "b",
+      "label": "knows",
+      "attr": {
+        "attr": "creationDate",
+        "op": ">=",
+        "value": 1281681940915,
+        "type": "int"
+      }
+    },
     "_g": {
       "eid": "_g",
       "src_vid": "city_a",
@@ -122,11 +108,25 @@
       "label": "isPartOf",
       "attr": null
     },
-    "_e": {
-      "eid": "_e",
-      "src_vid": "a",
-      "dst_vid": "city_a",
+    "_i": {
+      "eid": "_i",
+      "src_vid": "city_c",
+      "dst_vid": "country",
+      "label": "isPartOf",
+      "attr": null
+    },
+    "_b": {
+      "eid": "_b",
+      "src_vid": "c",
+      "dst_vid": "city_c",
       "label": "isLocatedIn",
+      "attr": null
+    },
+    "_h": {
+      "eid": "_h",
+      "src_vid": "city_b",
+      "dst_vid": "country",
+      "label": "isPartOf",
       "attr": null
     }
   },
@@ -144,9 +144,9 @@
       "vid": "country",
       "type": "get_adj",
       "expand_eid_list": [
-        "_i",
         "_h",
-        "_g"
+        "_g",
+        "_i"
       ],
       "single_op": "f^country",
       "multi_ops": [],
@@ -156,39 +156,39 @@
       ]
     },
     {
-      "vid": "a",
+      "vid": "c",
       "type": "init",
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [],
-      "target_var": "f^a",
+      "target_var": "f^c",
       "depend_on": []
     },
     {
-      "vid": "a",
+      "vid": "c",
       "type": "get_adj",
       "expand_eid_list": [
-        "_d",
-        "_a",
-        "_e"
+        "_b",
+        "_c",
+        "_a"
       ],
-      "single_op": "f^a",
+      "single_op": "f^c",
       "multi_ops": [],
-      "target_var": "A^a",
+      "target_var": "A^c",
       "depend_on": [
-        "f^a"
+        "f^c"
       ]
     },
     {
       "vid": "b",
       "type": "intersect",
       "expand_eid_list": [],
-      "single_op": "A^a",
+      "single_op": "A^c",
       "multi_ops": [],
       "target_var": "C^b",
       "depend_on": [
-        "A^a",
-        "f^a"
+        "f^c",
+        "A^c"
       ]
     },
     {
@@ -199,214 +199,97 @@
       "multi_ops": [],
       "target_var": "f^b",
       "depend_on": [
-        "A^a",
-        "f^a",
-        "C^b"
+        "C^b",
+        "f^c",
+        "A^c"
       ]
     },
     {
       "vid": "b",
       "type": "get_adj",
       "expand_eid_list": [
-        "_c",
-        "_f"
+        "_f",
+        "_d"
       ],
       "single_op": "f^b",
       "multi_ops": [],
       "target_var": "A^b",
       "depend_on": [
         "f^b",
-        "A^a",
         "C^b",
-        "f^a"
+        "f^c",
+        "A^c"
       ]
     },
     {
-      "vid": "c",
+      "vid": "a",
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^a",
+        "A^c",
         "A^b"
       ],
-      "target_var": "T^c",
+      "target_var": "T^a",
       "depend_on": [
-        "f^a",
-        "C^b",
-        "A^a",
         "f^b",
+        "A^c",
+        "C^b",
+        "A^b",
+        "f^c"
+      ]
+    },
+    {
+      "vid": "a",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^a",
+      "multi_ops": [],
+      "target_var": "C^a",
+      "depend_on": [
+        "f^c",
+        "T^a",
+        "f^b",
+        "C^b",
+        "A^c",
         "A^b"
       ]
     },
     {
-      "vid": "c",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": "T^c",
-      "multi_ops": [],
-      "target_var": "C^c",
-      "depend_on": [
-        "A^a",
-        "A^b",
-        "T^c",
-        "C^b",
-        "f^a",
-        "f^b"
-      ]
-    },
-    {
-      "vid": "c",
+      "vid": "a",
       "type": "foreach",
       "expand_eid_list": [],
-      "single_op": "C^c",
+      "single_op": "C^a",
       "multi_ops": [],
-      "target_var": "f^c",
+      "target_var": "f^a",
       "depend_on": [
-        "C^b",
-        "T^c",
-        "C^c",
         "f^b",
+        "f^c",
         "A^b",
-        "f^a",
-        "A^a"
+        "C^b",
+        "C^a",
+        "A^c",
+        "T^a"
       ]
     },
     {
-      "vid": "c",
+      "vid": "a",
       "type": "get_adj",
       "expand_eid_list": [
-        "_b"
+        "_e"
       ],
-      "single_op": "f^c",
+      "single_op": "f^a",
       "multi_ops": [],
-      "target_var": "A^c",
+      "target_var": "A^a",
       "depend_on": [
-        "f^c",
-        "C^b",
-        "A^a",
-        "T^c",
-        "C^c",
+        "f^a",
+        "C^a",
         "A^b",
-        "f^a",
-        "f^b"
-      ]
-    },
-    {
-      "vid": "city_c",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": null,
-      "multi_ops": [
-        "A^c",
-        "A^country"
-      ],
-      "target_var": "T^city_c",
-      "depend_on": [
-        "C^b",
-        "f^a",
-        "C^c",
-        "f^b",
-        "f^country",
-        "f^c",
-        "A^b",
-        "T^c",
-        "A^c",
-        "A^country",
-        "A^a"
-      ]
-    },
-    {
-      "vid": "city_c",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": "T^city_c",
-      "multi_ops": [],
-      "target_var": "C^city_c",
-      "depend_on": [
-        "A^country",
-        "A^a",
-        "C^b",
-        "T^city_c",
-        "T^c",
         "A^c",
         "f^c",
-        "C^c",
-        "f^country",
-        "f^a",
+        "T^a",
         "f^b",
-        "A^b"
-      ]
-    },
-    {
-      "vid": "city_c",
-      "type": "foreach",
-      "expand_eid_list": [],
-      "single_op": "C^city_c",
-      "multi_ops": [],
-      "target_var": "f^city_c",
-      "depend_on": [
-        "C^c",
-        "A^country",
-        "f^a",
-        "C^b",
-        "A^a",
-        "A^c",
-        "f^b",
-        "T^c",
-        "T^city_c",
-        "C^city_c",
-        "f^c",
-        "A^b",
-        "f^country"
-      ]
-    },
-    {
-      "vid": "city_a",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": null,
-      "multi_ops": [
-        "A^a",
-        "A^country"
-      ],
-      "target_var": "T^city_a",
-      "depend_on": [
-        "A^country",
-        "f^a",
-        "f^country",
-        "A^a"
-      ]
-    },
-    {
-      "vid": "city_a",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": "T^city_a",
-      "multi_ops": [],
-      "target_var": "C^city_a",
-      "depend_on": [
-        "A^country",
-        "T^city_a",
-        "f^country",
-        "f^a",
-        "A^a"
-      ]
-    },
-    {
-      "vid": "city_a",
-      "type": "foreach",
-      "expand_eid_list": [],
-      "single_op": "C^city_a",
-      "multi_ops": [],
-      "target_var": "f^city_a",
-      "depend_on": [
-        "f^a",
-        "A^a",
-        "A^country",
-        "T^city_a",
-        "C^city_a",
-        "f^country"
+        "C^b"
       ]
     },
     {
@@ -415,18 +298,18 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^b",
-        "A^country"
+        "A^country",
+        "A^b"
       ],
       "target_var": "T^city_b",
       "depend_on": [
-        "A^a",
+        "A^b",
+        "A^c",
+        "A^country",
+        "f^country",
         "f^b",
         "C^b",
-        "f^a",
-        "A^b",
-        "A^country",
-        "f^country"
+        "f^c"
       ]
     },
     {
@@ -438,13 +321,13 @@
       "target_var": "C^city_b",
       "depend_on": [
         "T^city_b",
-        "f^a",
-        "f^b",
-        "A^a",
-        "A^b",
-        "A^country",
         "C^b",
-        "f^country"
+        "f^c",
+        "f^country",
+        "f^b",
+        "A^b",
+        "A^c",
+        "A^country"
       ]
     },
     {
@@ -455,15 +338,132 @@
       "multi_ops": [],
       "target_var": "f^city_b",
       "depend_on": [
-        "A^a",
-        "T^city_b",
-        "A^b",
-        "f^country",
-        "C^b",
         "C^city_b",
-        "f^a",
+        "f^c",
+        "f^b",
+        "A^b",
+        "T^city_b",
+        "C^b",
+        "A^c",
         "A^country",
+        "f^country"
+      ]
+    },
+    {
+      "vid": "city_c",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^country",
+        "A^c"
+      ],
+      "target_var": "T^city_c",
+      "depend_on": [
+        "A^c",
+        "f^country",
+        "A^country",
+        "f^c"
+      ]
+    },
+    {
+      "vid": "city_c",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^city_c",
+      "multi_ops": [],
+      "target_var": "C^city_c",
+      "depend_on": [
+        "A^c",
+        "f^c",
+        "f^country",
+        "T^city_c",
+        "A^country"
+      ]
+    },
+    {
+      "vid": "city_c",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^city_c",
+      "multi_ops": [],
+      "target_var": "f^city_c",
+      "depend_on": [
+        "A^country",
+        "T^city_c",
+        "C^city_c",
+        "A^c",
+        "f^c",
+        "f^country"
+      ]
+    },
+    {
+      "vid": "city_a",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^country",
+        "A^a"
+      ],
+      "target_var": "T^city_a",
+      "depend_on": [
+        "T^a",
+        "C^b",
+        "f^a",
+        "A^a",
+        "f^b",
+        "A^c",
+        "A^country",
+        "C^a",
+        "f^country",
+        "A^b",
+        "f^c"
+      ]
+    },
+    {
+      "vid": "city_a",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^city_a",
+      "multi_ops": [],
+      "target_var": "C^city_a",
+      "depend_on": [
+        "A^country",
+        "A^c",
+        "C^a",
+        "T^a",
+        "f^country",
+        "f^c",
+        "A^b",
+        "C^b",
+        "f^a",
+        "A^a",
+        "T^city_a",
         "f^b"
+      ]
+    },
+    {
+      "vid": "city_a",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^city_a",
+      "multi_ops": [],
+      "target_var": "f^city_a",
+      "depend_on": [
+        "f^b",
+        "A^b",
+        "f^c",
+        "C^a",
+        "C^city_a",
+        "C^b",
+        "A^c",
+        "f^a",
+        "T^a",
+        "A^a",
+        "T^city_a",
+        "A^country",
+        "f^country"
       ]
     },
     {
@@ -472,36 +472,36 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
+        "f^city_c",
         "f^city_a",
-        "f^a",
+        "f^city_b",
+        "f^country",
         "f^c",
         "f^b",
-        "f^city_c",
-        "f^city_b",
-        "f^country"
+        "f^a"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^city_b",
-        "C^c",
-        "C^city_c",
-        "T^city_a",
-        "f^a",
-        "A^a",
-        "f^c",
-        "f^country",
-        "C^b",
-        "f^b",
-        "T^city_c",
-        "f^city_a",
-        "A^country",
         "f^city_c",
-        "C^city_a",
-        "T^c",
-        "A^b",
-        "T^city_b",
+        "T^city_a",
+        "A^country",
+        "C^city_c",
+        "f^c",
+        "f^a",
+        "T^city_c",
+        "f^city_b",
+        "C^b",
+        "T^a",
+        "C^city_b",
         "A^c",
-        "C^city_b"
+        "f^b",
+        "A^b",
+        "C^a",
+        "C^city_a",
+        "A^a",
+        "T^city_b",
+        "f^city_a",
+        "f^country"
       ]
     }
   ]
