@@ -11,11 +11,11 @@ description = "To query a pattern on multi-directed-graph with label / attribute
 repository = "https://github.com/DrEden33773/EmberGraph"
 homepage = "https://github.com/DrEden33773/EmberGraph"
 keywords = [
-    "sub graph matching",
-    "attribute graph",
-    "multi directed graph",
-    "pattern matching",
-    "graph database",
+    "sub-graph-matching",
+    "attribute-graph",
+    "multi-directed-graph",
+    "pattern-matching",
+    "graph-database",
 ]
 categories = ["database", "concurrency"]
 
