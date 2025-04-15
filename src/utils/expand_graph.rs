@@ -215,29 +215,6 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
     return vec![];
   }
 
-  #[cfg(feature = "validate_pattern_uniqueness_before_final_merge")]
-  {
-    // For each pair of common_v/e_pats, they should lead to the same vs/es in both graphs.
-    // If not, we should not consider them as a match.
-    // We could also discard those patterns who lead to `multi` vs/es in either graph.
-
-    for common_v_pat in l_graph.view_common_v_patterns(&r_graph) {
-      let l_vs = l_graph.pattern_2_vids.get(common_v_pat).unwrap();
-      let r_vs = r_graph.pattern_2_vids.get(common_v_pat).unwrap();
-      if l_vs.len() > 1 || r_vs.len() > 1 || l_vs != r_vs {
-        return vec![];
-      }
-    }
-
-    for common_e_pat in l_graph.view_common_e_patterns(&r_graph) {
-      let l_es = l_graph.pattern_2_eids.get(common_e_pat).unwrap();
-      let r_es = r_graph.pattern_2_eids.get(common_e_pat).unwrap();
-      if l_es.len() > 1 || r_es.len() > 1 || l_es != r_es {
-        return vec![];
-      }
-    }
-  }
-
   let new_graph = (*l_expand_graph.dyn_graph).clone() | (*r_expand_graph.dyn_graph).clone();
   let new_graph = Arc::new(new_graph);
 
