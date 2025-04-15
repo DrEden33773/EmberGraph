@@ -4,7 +4,6 @@ use super::dyn_graph::{DynGraph, VNode};
 use crate::schemas::*;
 use hashbrown::{HashMap, HashSet};
 
-// TODO: use `DashMap` for further parallelization of `update_valid_dangling_edges` and `update_valid_target_vertices`
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ExpandGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
   pub(crate) dyn_graph: Arc<DynGraph<VType, EType>>,
@@ -136,7 +135,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
   /// - Vertices of any `dangling_edge` could be added to `target_v_adj_table`
   pub fn update_valid_target_vertices(
     &mut self,
-    target_vertex_pattern_pairs: impl AsRef<Vec<(VType, String)>>,
+    target_vertex_pattern_pairs: &[(VType, String)],
   ) -> Vec<String> {
     let mut legal_vids = Vec::with_capacity(target_vertex_pattern_pairs.as_ref().len());
 
