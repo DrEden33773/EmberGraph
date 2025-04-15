@@ -116,35 +116,10 @@ impl<VType: VBase, EType: EBase> BitOr for DynGraph<VType, EType> {
 }
 
 impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
-  pub fn is_subset_of(&self, other: &Self) -> bool {
-    // adj_table
-    for (vid, v_node) in self.adj_table.iter() {
-      // vertex
-      if !other.adj_table.contains_key(vid) {
-        return false;
-      }
-      // in_edge
-      if !v_node.e_in.is_subset(&other.adj_table[vid].e_in) {
-        return false;
-      }
-      // out_edge
-      if !v_node.e_out.is_subset(&other.adj_table[vid].e_out) {
-        return false;
-      }
-    }
-    true
-  }
-
-  #[inline]
-  pub fn is_superset_of(&self, other: &Self) -> bool {
-    other.is_subset_of(self)
-  }
-
   #[inline]
   pub fn v_entities(&self) -> &HashMap<Vid, VType> {
     &self.v_entities
   }
-
   #[inline]
   pub fn e_entities(&self) -> &HashMap<Eid, EType> {
     &self.e_entities
@@ -223,31 +198,6 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   ) -> &mut Self {
     for (edge, pattern) in e_pattern_pairs {
       self.update_e(edge, pattern);
-    }
-    self
-  }
-
-  pub fn remove_e(&mut self, eid: EidRef) -> &mut Self {
-    if !self.has_eid(eid) {
-      return self;
-    }
-
-    for v in self.adj_table.values_mut() {
-      v.e_in.remove(eid);
-      v.e_out.remove(eid);
-    }
-    self.e_entities.remove(eid);
-
-    for eids in self.pattern_2_eids.values_mut() {
-      eids.remove(eid);
-    }
-
-    self
-  }
-
-  pub fn remove_e_batch(&mut self, eids: &[EidRef]) -> &mut Self {
-    for eid in eids {
-      self.remove_e(eid);
     }
     self
   }
@@ -431,7 +381,6 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
       HashSet::new()
     }
   }
-
   #[inline]
   pub fn get_adj_vids(&self, vid: VidRef) -> HashSet<Vid> {
     if let Some(v_node) = self.adj_table.get(vid) {
@@ -460,7 +409,6 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
       0
     }
   }
-
   #[inline]
   pub fn get_in_degree(&self, vid: VidRef) -> usize {
     if let Some(v_node) = self.adj_table.get(vid) {
@@ -468,27 +416,5 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
     } else {
       0
     }
-  }
-
-  #[inline]
-  pub fn view_common_v_patterns<'g>(
-    &'g self,
-    other: &'g Self,
-  ) -> impl IntoIterator<Item = &'g String> {
-    self
-      .pattern_2_vids
-      .keys()
-      .filter(|p| other.pattern_2_vids.contains_key(*p))
-  }
-
-  #[inline]
-  pub fn view_common_e_patterns<'g>(
-    &'g self,
-    other: &'g Self,
-  ) -> impl IntoIterator<Item = &'g String> {
-    self
-      .pattern_2_eids
-      .keys()
-      .filter(|p| other.pattern_2_eids.contains_key(*p))
   }
 }
