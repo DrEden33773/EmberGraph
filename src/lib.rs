@@ -1,5 +1,12 @@
 #![feature(duration_millis_float)]
 
+use crate::planner::generate_optimal_plan;
+use colored::Colorize;
+use hashbrown::HashMap;
+use planner::generate_plan_with_given_order;
+use std::{path::PathBuf, sync::LazyLock};
+use tokio::io;
+
 pub mod demos;
 pub mod executor;
 pub mod matching_ctx;
@@ -36,4 +43,182 @@ pub mod init_log {
 
     Ok(guard)
   }
+}
+
+static QUERIES: LazyLock<PathBuf> = LazyLock::new(|| {
+  let res = project_root::get_project_root()
+    .unwrap()
+    .join("resources")
+    .join("queries");
+
+  if !res.exists() {
+    std::fs::create_dir_all(&res).unwrap();
+    println!(
+      "⚠️  Directory '{}' does not exist, created it.",
+      res.to_str().unwrap().yellow()
+    );
+  }
+
+  res
+});
+
+static PLANS: LazyLock<PathBuf> = LazyLock::new(|| {
+  let res = project_root::get_project_root()
+    .unwrap()
+    .join("resources")
+    .join("plan");
+
+  if !res.exists() {
+    std::fs::create_dir_all(&res).unwrap();
+    println!(
+      "⚠️  Directory '{}' does not exist, created it.",
+      res.to_str().unwrap().yellow()
+    );
+  }
+
+  res
+});
+
+pub async fn plan_gen_with_given_orders() -> io::Result<()> {
+  let queries = QUERIES.clone();
+  let plans = PLANS.clone().join("neo4j_ordered");
+  if !plans.exists() {
+    std::fs::create_dir_all(&plans).unwrap();
+    println!(
+      "⚠️  Directory '{}' does not exist, created it.",
+      plans.to_str().unwrap().yellow()
+    );
+  }
+
+  let query_2_given_order: HashMap<&str, Vec<&str>> = HashMap::from_iter([(
+    "ldbc-bi-3",
+    vec![
+      "country", "city", "person", "forum", "post", "comment", "tag", "tagClass",
+    ],
+  )]);
+
+  let mut handles = vec![];
+
+  // iterate over all files in the directory
+  for entry in std::fs::read_dir(queries)? {
+    let entry = entry?;
+
+    let path = entry.path();
+    if !path.is_file() {
+      eprintln!(
+        "⚠️  (Skipped) Not a file: '{}'",
+        path.to_str().unwrap().yellow()
+      );
+      continue;
+    }
+    if let Some(ext) = path.extension() {
+      if ext != "txt" {
+        continue;
+      }
+    }
+
+    let filename = path.file_stem().unwrap().to_str().unwrap().to_string();
+    if !query_2_given_order.contains_key(filename.as_str()) {
+      continue;
+    }
+
+    let plans = plans.clone();
+    let given_order = query_2_given_order[filename.as_str()].clone();
+
+    println!(
+      "🪄  Generating plan for query '{}' with given order {}",
+      path.to_str().unwrap().green(),
+      format!("{:?}", given_order).yellow()
+    );
+
+    let handle = tokio::spawn(async move {
+      let plan_data = generate_plan_with_given_order(&path, &given_order);
+      let plan_json = serde_json::to_string_pretty(&plan_data).unwrap();
+      let filepath = plans.join(format!("{}.json", filename));
+
+      tokio::fs::write(filepath.clone(), plan_json)
+        .await
+        .expect("❌  Failed to write plan file");
+
+      println!(
+        "✅  Plan file generated: '{}'",
+        filepath.to_str().unwrap().green()
+      );
+    });
+
+    handles.push(handle);
+  }
+
+  // wait for all tasks to complete
+  for handle in handles {
+    if let Err(e) = handle.await {
+      eprintln!("❌  Task failed: {}", e);
+    }
+  }
+
+  println!("✅  All plans generated\n");
+
+  Ok(())
+}
+
+pub async fn plan_gen() -> io::Result<()> {
+  let queries = QUERIES.clone();
+  let plans = PLANS.clone();
+
+  let mut handles = vec![];
+
+  // iterate over all files in the directory
+  for entry in std::fs::read_dir(queries)? {
+    let entry = entry?;
+
+    let path = entry.path();
+    if !path.is_file() {
+      eprintln!(
+        "⚠️  (Skipped) Not a file: '{}'",
+        path.to_str().unwrap().yellow()
+      );
+      continue;
+    }
+    if let Some(ext) = path.extension() {
+      if ext != "txt" {
+        continue;
+      }
+    }
+
+    let filename = path.file_stem().unwrap().to_str().unwrap().to_string();
+    let plans = plans.clone();
+
+    println!(
+      "🪄  Generating plan for query: '{}'",
+      path.to_str().unwrap().green()
+    );
+
+    let handle = tokio::spawn(async move {
+      let plan_data = generate_optimal_plan(&path);
+      let plan_json = serde_json::to_string_pretty(&plan_data).unwrap();
+      let filepath = plans.join(format!("{}.json", filename));
+
+      tokio::fs::write(filepath.clone(), plan_json)
+        .await
+        .expect("❌  Failed to write plan file");
+
+      println!(
+        "✅  Plan file generated: '{}'",
+        filepath.to_str().unwrap().green()
+      );
+    });
+
+    handles.push(handle);
+  }
+
+  // wait for all tasks to complete
+  for handle in handles {
+    if let Err(e) = handle.await {
+      eprintln!("❌  Task failed: {}", e);
+    }
+  }
+
+  println!("✅  All plans generated\n");
+
+  Ok(())
 }
