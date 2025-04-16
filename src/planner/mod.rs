@@ -46,8 +46,8 @@ pub fn generate_plan_with_given_order(query_path: &Path, given_order: &[&str]) -
 
   #[cfg(debug_assertions)]
   assert!(
-    pattern_graph.has_all_vids(given_order),
-    "❌  The `given order` contains vertices not in the `pattern graph`."
+    pattern_graph.has_all_vids(given_order) && pattern_graph.get_v_count() == given_order.len(),
+    "❌  The `given order` != `pattern graph vertices`."
   );
 
   let given_order = given_order.iter().map(|s| s.to_string()).collect_vec();

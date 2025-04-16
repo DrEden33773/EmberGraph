@@ -90,12 +90,26 @@ pub async fn plan_gen_with_given_orders() -> io::Result<()> {
     );
   }
 
-  let query_2_given_order: HashMap<&str, Vec<&str>> = HashMap::from_iter([(
-    "ldbc-bi-3",
-    vec![
-      "country", "city", "person", "forum", "post", "comment", "tag", "tagClass",
-    ],
-  )]);
+  let query_2_given_order: HashMap<&str, Vec<&str>> = HashMap::from_iter([
+    (
+      "ldbc-bi-3",
+      vec![
+        "country", "city", "person", "forum", "post", "comment", "tag", "tagClass",
+      ],
+    ),
+    (
+      "ldbc-bi-11",
+      vec!["country", "city_c", "c", "b", "city_b", "a", "city_a"],
+    ),
+    (
+      "ldbc-bi-17",
+      vec![
+        "forum1", "person2", "comment", "person3", "message2", "post2", "tag", "message1",
+        "person1", "post1", "forum2",
+      ],
+    ),
+    ("ldbc-bi-7", vec!["comment", "post", "tag", "relatedTag"]),
+  ]);
 
   let mut handles = vec![];
 
