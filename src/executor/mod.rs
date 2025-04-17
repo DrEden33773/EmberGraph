@@ -10,7 +10,6 @@ use instr_ops::InstrOperatorFactory;
 use itertools::Itertools;
 use polars::{frame::DataFrame, prelude::Column, series::Series};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
-use rayon::prelude::*;
 use std::{collections::VecDeque, sync::Arc};
 
 pub mod instr_ops;
@@ -100,31 +99,6 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
     result
   }
 
-  fn is_equivalent_to_pattern(
-    graph: &DynGraph,
-    plan_v_pat_cnt: Arc<HashMap<String, usize>>,
-    plan_e_pat_cnt: Arc<HashMap<String, usize>>,
-  ) -> bool {
-    let graph_v_pat_cnt = graph
-      .pattern_2_vids
-      .iter()
-      .map(|(v_pat, vids)| {
-        let cnt = vids.len();
-        (v_pat.clone(), cnt)
-      })
-      .collect::<HashMap<_, usize>>();
-    let graph_e_pat_cnt = graph
-      .pattern_2_eids
-      .iter()
-      .map(|(e_pat, eids)| {
-        let cnt = eids.len();
-        (e_pat.clone(), cnt)
-      })
-      .collect::<HashMap<_, usize>>();
-
-    graph_v_pat_cnt == *plan_v_pat_cnt && graph_e_pat_cnt == *plan_e_pat_cnt
-  }
-
   async fn exec_helper(&mut self, unmerged_results: Vec<Vec<DynGraph>>) -> Vec<DynGraph> {
     #[cfg(not(feature = "benchmark"))]
     {
@@ -142,21 +116,6 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
       return vec![];
     }
 
-    let plan_v_pat_cnt = self
-      .plan_data
-      .pattern_vs()
-      .keys()
-      .map(|v_pat| (v_pat.clone(), 1))
-      .collect::<HashMap<_, usize>>();
-    let plan_e_pat_cnt = self
-      .plan_data
-      .pattern_es()
-      .keys()
-      .map(|e_pat| (e_pat.clone(), 1))
-      .collect::<HashMap<_, usize>>();
-    let plan_v_pat_cnt = Arc::new(plan_v_pat_cnt);
-    let plan_e_pat_cnt = Arc::new(plan_e_pat_cnt);
-
     parallel::spawn_blocking(move || {
       let mut results = vec![];
 
@@ -168,7 +127,28 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
             .into_par_iter()
             .flat_map(|a| {
               graphs
-                .par_iter()
+                .iter()
+                .filter(|b| {
+                  let mut detected_one_pattern_2_multi_vs = false;
+                  let a = &a;
+                  let b = *b;
+                  let (shorter, longer) = if a.pattern_2_vids.len() < b.pattern_2_vids.len() {
+                    (a, b)
+                  } else {
+                    (b, a)
+                  };
+
+                  for (v_pat, vids) in &shorter.pattern_2_vids {
+                    if let Some(longer_vids) = longer.pattern_2_vids.get(v_pat) {
+                      if vids != longer_vids || vids.len() > 1 {
+                        detected_one_pattern_2_multi_vs = true;
+                        break;
+                      }
+                    }
+                  }
+
+                  !detected_one_pattern_2_multi_vs
+                })
                 .map(|b| a.clone() | b.clone())
                 .collect::<Vec<_>>()
             })
@@ -177,11 +157,6 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
       }
 
       results
-        .into_par_iter()
-        .filter(|graph| {
-          Self::is_equivalent_to_pattern(graph, plan_v_pat_cnt.clone(), plan_e_pat_cnt.clone())
-        })
-        .collect::<Vec<_>>()
     })
     .await
   }
