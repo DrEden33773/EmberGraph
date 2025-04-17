@@ -162,6 +162,12 @@ impl SqliteStorageAdapter {
       add_attr_filter(attr, &mut query_str, &mut params);
     }
 
+    // add ORDER BY at the end
+    query_str.push_str(
+      r#"
+      ORDER BY e.eid ASC"#,
+    );
+
     // execute query
     let mut query = sqlx::query(&query_str);
     for param in params {
@@ -196,6 +202,12 @@ impl SqliteStorageAdapter {
       params.push(attr.key.clone());
       add_attr_filter(attr, &mut query_str, &mut params);
     }
+
+    // add ORDER BY at the end
+    query_str.push_str(
+      r#"
+      ORDER BY v.vid ASC"#,
+    );
 
     // execute query
     let mut query = sqlx::query(&query_str);
@@ -483,6 +495,12 @@ impl SqliteStorageAdapter {
       params.push(v_attr.key.clone());
       add_attr_filter(v_attr, &mut query_str, &mut params);
     }
+
+    // add ORDER BY at the end
+    query_str.push_str(
+      r#"
+      ORDER BY e.eid ASC"#,
+    );
 
     // execute query
     let mut query = sqlx::query(&query_str);
