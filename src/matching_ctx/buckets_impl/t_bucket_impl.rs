@@ -132,6 +132,8 @@ impl TBucket {
         // inner use normal iterator, avoid thread nesting
         shorter
           .iter()
+          // this `filter` will lead to a HUGE performance improvement
+          .filter(|right| left.has_common_pending_v(right))
           .flat_map(|right| union_then_intersect_on_connective_v(left, right))
           .collect::<Vec<_>>()
       })
@@ -153,6 +155,8 @@ impl TBucket {
           .flat_map(|left| {
             shorter
               .iter()
+              // this `filter` will lead to a HUGE performance improvement
+              .filter(|right| left.has_common_pending_v(right))
               .flat_map(|right| union_then_intersect_on_connective_v(left, right))
               .collect::<Vec<_>>()
           })

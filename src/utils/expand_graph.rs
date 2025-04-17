@@ -1,4 +1,4 @@
-use super::dyn_graph::{DynGraph, VNode};
+use super::dyn_graph::DynGraph;
 use crate::schemas::*;
 use hashbrown::HashMap;
 use indexmap::IndexMap;
@@ -9,7 +9,7 @@ pub struct ExpandGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
   pub(crate) dyn_graph: Arc<DynGraph<VType, EType>>,
 
   pub(crate) pending_v_grouped_dangling_eids: IndexMap<Vid, Vec<Eid>>,
-  pub(crate) target_v_adj_table: HashMap<Vid, VNode>,
+  pub(crate) target_vs: Vec<Vid>,
 
   pub(crate) dangling_e_entities: HashMap<Eid, EType>,
   pub(crate) target_v_entities: HashMap<Vid, VType>,
@@ -23,7 +23,7 @@ impl<VType: VBase, EType: EBase> Default for ExpandGraph<VType, EType> {
     Self {
       dyn_graph: Default::default(),
       pending_v_grouped_dangling_eids: Default::default(),
-      target_v_adj_table: Default::default(),
+      target_vs: Default::default(),
       dangling_e_entities: Default::default(),
       target_v_entities: Default::default(),
       dangling_e_patterns: Default::default(),
@@ -50,13 +50,12 @@ impl<VType: VBase, EType: EBase> From<ExpandGraph<VType, EType>> for DynGraph<VT
       (v, pattern)
     }));
 
-    for target_v in val.target_v_adj_table.keys() {
-      let mut dangling_eids = val.target_v_adj_table[target_v].e_out.clone();
-      dangling_eids.extend(val.target_v_adj_table[target_v].e_in.clone());
+    for target_v in val.target_vs {
+      let dangling_eids = val.pending_v_grouped_dangling_eids.get(&target_v).unwrap();
 
       let dangling_e_pattern_pairs = dangling_eids
-        .into_iter()
-        .filter_map(|eid| val.dangling_e_entities.remove(&eid))
+        .iter()
+        .filter_map(|eid| val.dangling_e_entities.remove(eid))
         .map(|e| {
           let pattern = val.dangling_e_patterns.remove(e.eid()).unwrap();
           (e, pattern)
@@ -134,6 +133,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
     // Use index-based approach instead of iterators for better debug mode performance
     let pending_len = self.pending_v_grouped_dangling_eids.len();
     let vertex_len = asc_target_vertex_pattern_pairs.len();
+    self.target_vs.reserve(pending_len.min(vertex_len));
 
     let mut legal_vids = Vec::with_capacity(vertex_len.min(pending_len));
 
@@ -143,7 +143,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
     // Continue until one of the collections is exhausted
     while pending_idx < pending_len && vertex_idx < vertex_len {
       // Get current elements by index
-      let (pending_vid, dangling_eids) = pending_v_grouped_dangling_eids
+      let (pending_vid, _) = pending_v_grouped_dangling_eids
         .get_index(pending_idx)
         .unwrap();
       let (vertex, pattern) = &asc_target_vertex_pattern_pairs[vertex_idx];
@@ -157,29 +157,8 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
       // Compare the pending_vid and vertex.vid()
       match pending_vid.as_str().cmp(vertex.vid()) {
         Ordering::Equal => {
-          // Found a match, process the vertex
-          // Add to adjacency table based on edge direction
-          for dangling_eid in dangling_eids {
-            let dangling_edge = &self.dangling_e_entities[dangling_eid];
-
-            if dangling_edge.src_vid() == vertex.vid() {
-              // (vertex)-[dangling_edge]->...
-              self
-                .target_v_adj_table
-                .entry(vertex.vid().to_string())
-                .or_default()
-                .e_out
-                .insert(dangling_edge.eid().to_string());
-            } else if dangling_edge.dst_vid() == vertex.vid() {
-              // (vertex)<-[dangling_edge]-...
-              self
-                .target_v_adj_table
-                .entry(vertex.vid().to_string())
-                .or_default()
-                .e_in
-                .insert(dangling_edge.eid().to_string());
-            }
-          }
+          // Found a match, add the vertex to the `target_vs`
+          self.target_vs.push(vertex.vid().to_string());
 
           // Update other information
           legal_vids.push(vertex.vid().to_string());
@@ -209,6 +188,23 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
     }
 
     legal_vids
+  }
+}
+
+impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
+  #[inline]
+  pub fn has_common_pending_v(&self, other: &Self) -> bool {
+    let (shorter, longer) =
+      if self.pending_v_grouped_dangling_eids.len() < other.pending_v_grouped_dangling_eids.len() {
+        (self, other)
+      } else {
+        (other, self)
+      };
+
+    shorter
+      .pending_v_grouped_dangling_eids
+      .iter()
+      .any(|(vid, _)| longer.pending_v_grouped_dangling_eids.contains_key(vid))
   }
 }
 
