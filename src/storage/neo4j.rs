@@ -84,7 +84,6 @@ impl StorageAdapter for Neo4jStorageAdapter {
       query_str += &format!("\t\tWHERE {constraint}\n");
     }
     query_str += "
-      ORDER BY elementId(v) ASC
       RETURN
         properties(v) as props,
         elementId(v) as vid"
@@ -114,7 +113,6 @@ impl StorageAdapter for Neo4jStorageAdapter {
       query_str += &format!("\t\tWHERE {constraint}\n");
     }
     query_str += "
-      ORDER BY elementId(e) ASC
       RETURN
         elementId(e) AS eid,
         properties(e) AS props,
@@ -148,7 +146,6 @@ impl StorageAdapter for Neo4jStorageAdapter {
       query_str += &format!("\t\tAND {constraint}\n");
     }
     query_str += "
-      ORDER BY elementId(e) ASC
       RETURN
         elementId(e) AS eid,
         properties(e) AS props,
@@ -182,7 +179,6 @@ impl StorageAdapter for Neo4jStorageAdapter {
       query_str += &format!("\t\tAND {constraint}\n");
     }
     query_str += "
-      ORDER BY elementId(e) ASC
       RETURN
         elementId(e) AS eid,
         properties(e) AS props,
@@ -224,7 +220,6 @@ impl AdvancedStorageAdapter for Neo4jStorageAdapter {
       query_str += &format!("\t\tAND {constraint}\n");
     }
     query_str += "
-      ORDER BY elementId(e) ASC
       RETURN
         elementId(e) AS eid,
         properties(e) AS props,
@@ -263,7 +258,6 @@ impl AdvancedStorageAdapter for Neo4jStorageAdapter {
       query_str += &format!("\t\tAND {constraint}\n");
     }
     query_str += "
-      ORDER BY elementId(e) ASC
       RETURN
         elementId(e) AS eid,
         properties(e) AS props,

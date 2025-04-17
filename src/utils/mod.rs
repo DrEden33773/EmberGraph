@@ -3,7 +3,6 @@ use tokio::time::Instant;
 pub mod apriori;
 pub mod dyn_graph;
 pub mod expand_graph;
-pub mod kv_pair;
 pub mod parallel;
 pub mod pretty_dump;
 

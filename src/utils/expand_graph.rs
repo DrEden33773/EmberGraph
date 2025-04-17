@@ -1,14 +1,14 @@
-use std::sync::Arc;
-
 use super::dyn_graph::{DynGraph, VNode};
 use crate::schemas::*;
-use hashbrown::{HashMap, HashSet};
+use hashbrown::HashMap;
+use indexmap::IndexMap;
+use std::{cmp::Ordering, sync::Arc};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct ExpandGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
   pub(crate) dyn_graph: Arc<DynGraph<VType, EType>>,
 
-  pub(crate) pending_v_grouped_dangling_eids: HashMap<Vid, Vec<Eid>>,
+  pub(crate) pending_v_grouped_dangling_eids: IndexMap<Vid, Vec<Eid>>,
   pub(crate) target_v_adj_table: HashMap<Vid, VNode>,
 
   pub(crate) dangling_e_entities: HashMap<Eid, EType>,
@@ -69,27 +69,6 @@ impl<VType: VBase, EType: EBase> From<ExpandGraph<VType, EType>> for DynGraph<VT
 }
 
 impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
-  pub fn get_vids(&self) -> Vec<VidRef<'_>> {
-    self.dyn_graph.view_vids()
-  }
-  pub fn get_eids(&self) -> Vec<EidRef<'_>> {
-    self.dyn_graph.view_eids()
-  }
-  pub fn get_v_count(&self) -> usize {
-    self.dyn_graph.get_v_count()
-  }
-  pub fn get_e_count(&self) -> usize {
-    self.dyn_graph.get_e_count()
-  }
-  pub fn dangling_e_patterns(&self) -> &HashMap<Eid, String> {
-    &self.dangling_e_patterns
-  }
-  pub fn target_v_patterns(&self) -> &HashMap<Vid, String> {
-    &self.target_v_patterns
-  }
-}
-
-impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
   /// Update valid dangling edges and return them
   pub fn update_valid_dangling_edges<'a>(
     &'a mut self,
@@ -130,27 +109,56 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
     }
   }
 
+  /// Sort the pending_v_grouped_dangling_eids by the key
+  ///
+  /// - Note that this function should only be called after `update_valid_target_vertices`
+  pub fn sort_key_after_update_valid_target_vertices(&mut self) {
+    self.pending_v_grouped_dangling_eids.sort_unstable_keys();
+  }
+
   /// Update `valid target vertices` and return them
   ///
   /// - Vertices of any `dangling_edge` could be added to `target_v_adj_table`
   pub fn update_valid_target_vertices(
     &mut self,
-    target_vertex_pattern_pairs: &[(VType, String)],
+    asc_target_vertex_pattern_pairs: &[(VType, String)],
   ) -> Vec<String> {
-    let mut legal_vids = Vec::with_capacity(target_vertex_pattern_pairs.as_ref().len());
+    // Skip if either collection is empty
+    if asc_target_vertex_pattern_pairs.is_empty() || self.pending_v_grouped_dangling_eids.is_empty()
+    {
+      return vec![];
+    }
 
-    for (vertex, pattern) in target_vertex_pattern_pairs.as_ref().iter() {
+    let mut legal_vids = vec![];
+
+    // Pure two-pointer approach
+    let mut pending_key_iter = self.pending_v_grouped_dangling_eids.keys();
+    let mut pending_value_iter = self.pending_v_grouped_dangling_eids.values();
+    let mut vertex_iter = asc_target_vertex_pattern_pairs.iter();
+
+    // Initialize the current elements
+    let mut curr_pending_key = pending_key_iter.next();
+    let mut curr_pending_value = pending_value_iter.next();
+    let mut curr_vertex_pair = vertex_iter.next();
+
+    // Continue until one of the iterators is exhausted
+    while let (Some(pending_vid), Some((vertex, pattern))) = (curr_pending_key, curr_vertex_pair) {
+      // Skip if the vertex is already in the graph
       if self.dyn_graph.has_vid(vertex.vid()) {
+        curr_vertex_pair = vertex_iter.next();
         continue;
       }
 
-      match self.pending_v_grouped_dangling_eids.get(vertex.vid()) {
-        Some(dangling_eids) => {
-          // If the vertex is a valid target, we need to add it to the target_v_adj_table
+      // Compare the pending_vid and vertex.vid()
+      match pending_vid.as_str().cmp(vertex.vid()) {
+        Ordering::Equal => {
+          // Found a match, process the vertex
+          let dangling_eids = curr_pending_value.unwrap();
+
+          // Add to adjacency table based on edge direction
           for dangling_eid in dangling_eids {
             let dangling_edge = &self.dangling_e_entities[dangling_eid];
 
-            // pick `e_out` / `e_in` by the direction of the edge
             if dangling_edge.src_vid() == vertex.vid() {
               // (vertex)-[dangling_edge]->...
               self
@@ -169,21 +177,34 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
                 .insert(dangling_edge.eid().to_string());
             }
           }
+
+          // Update other information
+          legal_vids.push(vertex.vid().to_string());
+
+          self
+            .target_v_patterns
+            .insert(vertex.vid().to_string(), pattern.clone());
+
+          self
+            .target_v_entities
+            .insert(vertex.vid().to_string(), vertex.clone());
+
+          // Move both pointers
+          curr_pending_key = pending_key_iter.next();
+          curr_pending_value = pending_value_iter.next();
+          curr_vertex_pair = vertex_iter.next();
         }
-        None => continue,
+        Ordering::Less => {
+          // pending_vid < vertex.vid(), move pending pointer
+          curr_pending_key = pending_key_iter.next();
+          curr_pending_value = pending_value_iter.next();
+        }
+        Ordering::Greater => {
+          // pending_vid > vertex.vid(), current vertex is not found in pending,
+          // move to next vertex
+          curr_vertex_pair = vertex_iter.next();
+        }
       }
-
-      // Don't forget to update other information
-
-      legal_vids.push(vertex.vid().to_string());
-
-      self
-        .target_v_patterns
-        .insert(vertex.vid().to_string(), pattern.clone());
-
-      self
-        .target_v_entities
-        .insert(vertex.vid().to_string(), vertex.clone());
     }
 
     legal_vids
@@ -203,44 +224,65 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
     return vec![];
   }
 
-  let mut common_pending_vids = HashSet::with_capacity(grouped_l.len().min(grouped_r.len()));
-
-  for pending_vid in grouped_l.keys() {
-    if grouped_r.contains_key(pending_vid) {
-      common_pending_vids.insert(pending_vid.clone());
-    }
-  }
-
-  if common_pending_vids.is_empty() {
-    return vec![];
-  }
-
+  // Create the basic graph structure (only create once)
   let new_graph = (*l_expand_graph.dyn_graph).clone() | (*r_expand_graph.dyn_graph).clone();
   let new_graph = Arc::new(new_graph);
 
-  let mut result = Vec::with_capacity(common_pending_vids.len());
+  let mut result = vec![];
 
-  for pending_vid in common_pending_vids.iter() {
-    let l_dangling_eids = grouped_l.get(pending_vid).unwrap();
-    let r_dangling_eids = grouped_r.get(pending_vid).unwrap();
+  // Iterate through two sorted maps using two pointers
+  let mut l_key_iter = grouped_l.keys();
+  let mut r_key_iter = grouped_r.keys();
+  let mut l_value_iter = grouped_l.values();
+  let mut r_value_iter = grouped_r.values();
 
-    let mut expanding_dg: ExpandGraph<VType, EType> = new_graph.clone().into();
+  let mut l_key_current = l_key_iter.next();
+  let mut r_key_current = r_key_iter.next();
+  let mut l_value_current = l_value_iter.next();
+  let mut r_value_current = r_value_iter.next();
 
-    expanding_dg.update_valid_dangling_edges(l_dangling_eids.iter().map(|eid| {
-      (
-        &l_expand_graph.dangling_e_entities[eid],
-        l_expand_graph.dangling_e_patterns[eid].as_str(),
-      )
-    }));
+  // Continue iterating as long as both iterators have elements
+  while let (Some(l_vid), Some(r_vid)) = (l_key_current, r_key_current) {
+    match l_vid.cmp(r_vid) {
+      Ordering::Equal => {
+        // Found a common vertex, process it directly
+        let l_dangling_eids = l_value_current.unwrap();
+        let r_dangling_eids = r_value_current.unwrap();
+        let mut expanding_dg: ExpandGraph<VType, EType> = new_graph.clone().into();
 
-    expanding_dg.update_valid_dangling_edges(r_dangling_eids.iter().map(|eid| {
-      (
-        &r_expand_graph.dangling_e_entities[eid],
-        r_expand_graph.dangling_e_patterns[eid].as_str(),
-      )
-    }));
+        expanding_dg.update_valid_dangling_edges(l_dangling_eids.iter().map(|eid| {
+          (
+            &l_expand_graph.dangling_e_entities[eid],
+            l_expand_graph.dangling_e_patterns[eid].as_str(),
+          )
+        }));
+        expanding_dg.update_valid_dangling_edges(r_dangling_eids.iter().map(|eid| {
+          (
+            &r_expand_graph.dangling_e_entities[eid],
+            r_expand_graph.dangling_e_patterns[eid].as_str(),
+          )
+        }));
+        expanding_dg.sort_key_after_update_valid_target_vertices();
 
-    result.push(expanding_dg);
+        result.push(expanding_dg);
+
+        // Move both pointers
+        l_key_current = l_key_iter.next();
+        r_key_current = r_key_iter.next();
+        l_value_current = l_value_iter.next();
+        r_value_current = r_value_iter.next();
+      }
+      Ordering::Less => {
+        // l_vid < r_vid, move the left pointer
+        l_key_current = l_key_iter.next();
+        l_value_current = l_value_iter.next();
+      }
+      Ordering::Greater => {
+        // l_vid > r_vid, move the right pointer
+        r_key_current = r_key_iter.next();
+        r_value_current = r_value_iter.next();
+      }
+    }
   }
 
   result

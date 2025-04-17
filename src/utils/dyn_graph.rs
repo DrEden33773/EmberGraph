@@ -1,21 +1,11 @@
 use crate::schemas::*;
 use hashbrown::{HashMap, HashSet};
-use std::{
-  hash::Hash,
-  ops::{BitOr, BitOrAssign},
-};
+use std::ops::{BitOr, BitOrAssign};
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct VNode {
   pub(crate) e_in: HashSet<Eid>,
   pub(crate) e_out: HashSet<Eid>,
-}
-
-impl Hash for VNode {
-  fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-    self.e_in.iter().for_each(|eid| eid.hash(state));
-    self.e_out.iter().for_each(|eid| eid.hash(state));
-  }
 }
 
 impl BitOrAssign for VNode {
@@ -25,19 +15,7 @@ impl BitOrAssign for VNode {
   }
 }
 
-impl BitOr for VNode {
-  type Output = VNode;
-
-  fn bitor(self, rhs: Self) -> Self::Output {
-    let mut e_in = self.e_in;
-    let mut e_out = self.e_out;
-    e_in.extend(rhs.e_in);
-    e_out.extend(rhs.e_out);
-    VNode { e_in, e_out }
-  }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct DynGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
   /// vid -> v_entity
   pub(crate) v_entities: HashMap<Vid, VType>,
