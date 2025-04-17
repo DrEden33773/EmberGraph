@@ -2,7 +2,7 @@ cargo-features = ["profile-rustflags"]
 
 [package]
 name = "ember-graph"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2024"
 authors = ["Eden Wang <edwardwang33773@gmail.com>"]
 readme = "README.md"
