@@ -11,6 +11,7 @@ pub struct ForeachOperator {
 
 impl ForeachOperator {
   pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
+    #[cfg(not(feature = "benchmark"))]
     println!("\t{instr}");
 
     let c_bucket = self

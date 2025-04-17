@@ -129,23 +129,27 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
       return vec![];
     }
 
-    let mut legal_vids = vec![];
+    // Use index-based approach instead of iterators for better debug mode performance
+    let pending_len = self.pending_v_grouped_dangling_eids.len();
+    let vertex_len = asc_target_vertex_pattern_pairs.len();
 
-    // Pure two-pointer approach
-    let mut pending_key_iter = self.pending_v_grouped_dangling_eids.keys();
-    let mut pending_value_iter = self.pending_v_grouped_dangling_eids.values();
-    let mut vertex_iter = asc_target_vertex_pattern_pairs.iter();
+    let mut legal_vids = Vec::with_capacity(vertex_len.min(pending_len));
 
-    // Initialize the current elements
-    let mut curr_pending_key = pending_key_iter.next();
-    let mut curr_pending_value = pending_value_iter.next();
-    let mut curr_vertex_pair = vertex_iter.next();
+    let mut pending_idx = 0;
+    let mut vertex_idx = 0;
 
-    // Continue until one of the iterators is exhausted
-    while let (Some(pending_vid), Some((vertex, pattern))) = (curr_pending_key, curr_vertex_pair) {
+    // Continue until one of the collections is exhausted
+    while pending_idx < pending_len && vertex_idx < vertex_len {
+      // Get current elements by index
+      let (pending_vid, dangling_eids) = self
+        .pending_v_grouped_dangling_eids
+        .get_index(pending_idx)
+        .unwrap();
+      let (vertex, pattern) = &asc_target_vertex_pattern_pairs[vertex_idx];
+
       // Skip if the vertex is already in the graph
       if self.dyn_graph.has_vid(vertex.vid()) {
-        curr_vertex_pair = vertex_iter.next();
+        vertex_idx += 1;
         continue;
       }
 
@@ -153,8 +157,6 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
       match pending_vid.as_str().cmp(vertex.vid()) {
         Ordering::Equal => {
           // Found a match, process the vertex
-          let dangling_eids = curr_pending_value.unwrap();
-
           // Add to adjacency table based on edge direction
           for dangling_eid in dangling_eids {
             let dangling_edge = &self.dangling_e_entities[dangling_eid];
@@ -189,20 +191,18 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
             .target_v_entities
             .insert(vertex.vid().to_string(), vertex.clone());
 
-          // Move both pointers
-          curr_pending_key = pending_key_iter.next();
-          curr_pending_value = pending_value_iter.next();
-          curr_vertex_pair = vertex_iter.next();
+          // Move both indices
+          pending_idx += 1;
+          vertex_idx += 1;
         }
         Ordering::Less => {
-          // pending_vid < vertex.vid(), move pending pointer
-          curr_pending_key = pending_key_iter.next();
-          curr_pending_value = pending_value_iter.next();
+          // pending_vid < vertex.vid(), move pending index
+          pending_idx += 1;
         }
         Ordering::Greater => {
           // pending_vid > vertex.vid(), current vertex is not found in pending,
           // move to next vertex
-          curr_vertex_pair = vertex_iter.next();
+          vertex_idx += 1;
         }
       }
     }
@@ -228,26 +228,24 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
   let new_graph = (*l_expand_graph.dyn_graph).clone() | (*r_expand_graph.dyn_graph).clone();
   let new_graph = Arc::new(new_graph);
 
-  let mut result = vec![];
+  // Use index-based approach instead of iterators for better debug mode performance
+  let l_len = grouped_l.len();
+  let r_len = grouped_r.len();
 
-  // Iterate through two sorted maps using two pointers
-  let mut l_key_iter = grouped_l.keys();
-  let mut r_key_iter = grouped_r.keys();
-  let mut l_value_iter = grouped_l.values();
-  let mut r_value_iter = grouped_r.values();
+  let mut result = Vec::with_capacity(l_len.min(r_len));
 
-  let mut l_key_current = l_key_iter.next();
-  let mut r_key_current = r_key_iter.next();
-  let mut l_value_current = l_value_iter.next();
-  let mut r_value_current = r_value_iter.next();
+  let mut l_idx = 0;
+  let mut r_idx = 0;
 
-  // Continue iterating as long as both iterators have elements
-  while let (Some(l_vid), Some(r_vid)) = (l_key_current, r_key_current) {
+  // Continue iterating as long as both collections have unprocessed elements
+  while l_idx < l_len && r_idx < r_len {
+    // Get current elements by index
+    let (l_vid, l_dangling_eids) = grouped_l.get_index(l_idx).unwrap();
+    let (r_vid, r_dangling_eids) = grouped_r.get_index(r_idx).unwrap();
+
     match l_vid.cmp(r_vid) {
       Ordering::Equal => {
         // Found a common vertex, process it directly
-        let l_dangling_eids = l_value_current.unwrap();
-        let r_dangling_eids = r_value_current.unwrap();
         let mut expanding_dg: ExpandGraph<VType, EType> = new_graph.clone().into();
 
         expanding_dg.update_valid_dangling_edges(l_dangling_eids.iter().map(|eid| {
@@ -266,21 +264,17 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
 
         result.push(expanding_dg);
 
-        // Move both pointers
-        l_key_current = l_key_iter.next();
-        r_key_current = r_key_iter.next();
-        l_value_current = l_value_iter.next();
-        r_value_current = r_value_iter.next();
+        // Move both indices
+        l_idx += 1;
+        r_idx += 1;
       }
       Ordering::Less => {
-        // l_vid < r_vid, move the left pointer
-        l_key_current = l_key_iter.next();
-        l_value_current = l_value_iter.next();
+        // l_vid < r_vid, move the left index
+        l_idx += 1;
       }
       Ordering::Greater => {
-        // l_vid > r_vid, move the right pointer
-        r_key_current = r_key_iter.next();
-        r_value_current = r_value_iter.next();
+        // l_vid > r_vid, move the right index
+        r_idx += 1;
       }
     }
   }

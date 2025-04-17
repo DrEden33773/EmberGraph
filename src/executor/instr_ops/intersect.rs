@@ -20,6 +20,7 @@ pub struct IntersectOperator<S: StorageAdapter> {
 
 impl<S: StorageAdapter> IntersectOperator<S> {
   pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
+    #[cfg(not(feature = "benchmark"))]
     println!("\t{instr}");
 
     if instr.is_single_op() {

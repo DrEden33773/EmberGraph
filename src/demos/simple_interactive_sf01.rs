@@ -1,4 +1,5 @@
-use crate::{executor::ExecEngine, storage::*};
+use crate::{executor::ExecEngine, result_dump::ResultDumper, storage::*, utils::time_async};
+use colored::Colorize;
 use project_root::get_project_root;
 use std::{path::PathBuf, sync::LazyLock};
 use tokio::{fs, io};
@@ -11,13 +12,23 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
   path.push(plan_filename);
   let plan_json_content = fs::read_to_string(path).await?;
 
-  let result =
+  let (result, elapsed) = time_async(
     ExecEngine::<CachedStorageAdapter<SqliteStorageAdapter>>::build_from_json(&plan_json_content)
       .await
-      .parallel_exec()
-      .await;
+      .parallel_exec(),
+  )
+  .await;
 
-  println!("✨  Count(result) = {}\n", result.len());
+  println!(
+    "✨  Get {} results in {} ms",
+    result.len().to_string().green(),
+    format!("{elapsed:.2}").yellow()
+  );
+
+  if let Some(df) = ResultDumper::new(result).to_simplified_df(false) {
+    println!("{}", df);
+  }
+
   Ok(())
 }
 

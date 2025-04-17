@@ -1,19 +1,15 @@
 use colored::Colorize;
 use dotenv::dotenv;
 use ember_graph::utils::parallel;
-#[cfg(windows)]
-use mimalloc::MiMalloc;
-#[cfg(unix)]
-use tikv_jemallocator::Jemalloc;
 use tokio::io;
 
 #[cfg(unix)]
 #[global_allocator]
-static GLOBAL: Jemalloc = Jemalloc;
+static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
 #[cfg(windows)]
 #[global_allocator]
-static GLOBAL: MiMalloc = MiMalloc;
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 async fn to_run() -> io::Result<()> {
   dotenv().ok();
@@ -24,12 +20,12 @@ async fn to_run() -> io::Result<()> {
   #[allow(unused_variables)]
   let guard = ember_graph::init_log::init_log().await?;
 
-  // ember_graph::plan_gen().await?;
+  ember_graph::plan_gen().await?;
   ember_graph::plan_gen_with_given_orders().await?;
 
   println!(
     "⚠️  If you want to query `{}`, use `{}` instead.\n",
-    "bi_x".yellow(),
+    "bi_x".purple(),
     "cargo run --example bi_x".yellow()
   );
 
