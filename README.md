@@ -14,6 +14,10 @@ The test dataset is `LDBC-SNB-SF0.1`, and the example used for testing all come 
 
 > To **optimize** the `matching order generation algorithm` (most likely to be `iterative dynamic programming` just like what `Neo4j` has done since it's `2.2` version)
 
+## What's the most impressive?
+
+Even though we're still working on the one-last-step to use the **better** `matching-order seeking strategy`, the performance of this `pre-published version` is approximately **equivalent** to that of `Neo4j`. (Oh, even **faster** in some cases!)
+
 ## How to build
 
 You should have installed `git-lfs` first, to correctly clone this project:

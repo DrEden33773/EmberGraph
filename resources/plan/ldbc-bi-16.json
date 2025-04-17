@@ -6,21 +6,6 @@
     "person1"
   ],
   "vertices": {
-    "tag": {
-      "vid": "tag",
-      "label": "Tag",
-      "attr": {
-        "attr": "name",
-        "op": "=",
-        "value": "Best_Thing_I_Never_Had",
-        "type": "string"
-      }
-    },
-    "person2": {
-      "vid": "person2",
-      "label": "Person",
-      "attr": null
-    },
     "post": {
       "vid": "post",
       "label": "Post",
@@ -29,6 +14,21 @@
         "op": "=",
         "value": 1268422500645,
         "type": "int"
+      }
+    },
+    "person2": {
+      "vid": "person2",
+      "label": "Person",
+      "attr": null
+    },
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "Best_Thing_I_Never_Had",
+        "type": "string"
       }
     },
     "person1": {
@@ -45,18 +45,18 @@
       "label": "hasCreator",
       "attr": null
     },
-    "b": {
-      "eid": "b",
-      "src_vid": "post",
-      "dst_vid": "tag",
-      "label": "hasTag",
-      "attr": null
-    },
     "c": {
       "eid": "c",
       "src_vid": "person1",
       "dst_vid": "person2",
       "label": "knows",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "post",
+      "dst_vid": "tag",
+      "label": "hasTag",
       "attr": null
     }
   },
@@ -91,8 +91,8 @@
       "multi_ops": [],
       "target_var": "C^post",
       "depend_on": [
-        "A^tag",
-        "f^tag"
+        "f^tag",
+        "A^tag"
       ]
     },
     {
@@ -119,9 +119,9 @@
       "target_var": "A^post",
       "depend_on": [
         "f^tag",
+        "f^post",
         "C^post",
-        "A^tag",
-        "f^post"
+        "A^tag"
       ]
     },
     {
@@ -152,18 +152,18 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^post",
-        "A^person2"
+        "A^person2",
+        "A^post"
       ],
       "target_var": "T^person1",
       "depend_on": [
-        "f^person2",
-        "A^person2",
         "C^post",
+        "A^tag",
+        "f^person2",
         "f^post",
+        "A^person2",
         "A^post",
-        "f^tag",
-        "A^tag"
+        "f^tag"
       ]
     },
     {
@@ -175,13 +175,13 @@
       "target_var": "C^person1",
       "depend_on": [
         "C^post",
-        "A^person2",
+        "A^post",
         "f^tag",
-        "A^tag",
+        "f^post",
+        "A^person2",
         "f^person2",
         "T^person1",
-        "f^post",
-        "A^post"
+        "A^tag"
       ]
     },
     {
@@ -192,15 +192,15 @@
       "multi_ops": [],
       "target_var": "f^person1",
       "depend_on": [
-        "C^person1",
-        "A^post",
-        "A^person2",
-        "f^post",
+        "A^tag",
         "C^post",
         "f^person2",
-        "A^tag",
+        "C^person1",
         "T^person1",
-        "f^tag"
+        "A^post",
+        "f^post",
+        "f^tag",
+        "A^person2"
       ]
     },
     {
@@ -209,23 +209,23 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^tag",
-        "f^post",
+        "f^person2",
         "f^person1",
-        "f^person2"
+        "f^tag",
+        "f^post"
       ],
       "target_var": "f",
       "depend_on": [
-        "T^person1",
-        "C^person1",
+        "f^tag",
+        "A^post",
+        "C^post",
         "f^person2",
-        "A^tag",
+        "T^person1",
         "f^post",
         "f^person1",
-        "C^post",
-        "A^post",
-        "f^tag",
-        "A^person2"
+        "A^person2",
+        "A^tag",
+        "C^person1"
       ]
     }
   ]

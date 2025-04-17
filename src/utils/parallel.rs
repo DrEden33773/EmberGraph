@@ -5,12 +5,12 @@ where
 {
   #[cfg(feature = "block_spawn_via_rayon")]
   {
-    let (send, recv) = tokio::sync::oneshot::channel();
+    let (tx, rx) = tokio::sync::oneshot::channel();
     rayon::spawn(move || {
       let result = f();
-      let _ = send.send(result);
+      let _ = tx.send(result);
     });
-    recv.await.unwrap()
+    rx.await.unwrap()
   }
   #[cfg(not(feature = "block_spawn_via_rayon"))]
   {

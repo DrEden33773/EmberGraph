@@ -10,6 +10,7 @@
     "dashmap",
     "DATAFRAME",
     "eids",
+    "indexmap",
     "itemset",
     "itemsets",
     "Itertools",

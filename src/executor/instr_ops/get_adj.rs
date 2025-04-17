@@ -14,6 +14,7 @@ pub struct GetAdjOperator<S: AdvancedStorageAdapter> {
 
 impl<S: AdvancedStorageAdapter + 'static> GetAdjOperator<S> {
   pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
+    #[cfg(not(feature = "benchmark"))]
     println!("\t{instr}");
 
     // to resolve current `pattern_vid`

@@ -2,36 +2,49 @@
   "matching_order": [
     "comment",
     "post",
-    "person"
+    "tag",
+    "relatedTag"
   ],
   "vertices": {
     "comment": {
       "vid": "comment",
       "label": "Comment",
+      "attr": null
+    },
+    "relatedTag": {
+      "vid": "relatedTag",
+      "label": "Tag",
       "attr": {
-        "attr": "creationDate",
-        "op": ">=",
-        "value": 1290666911352,
-        "type": "int"
+        "attr": "name",
+        "op": "!=",
+        "value": "50_Cent",
+        "type": "string"
       }
     },
     "post": {
       "vid": "post",
       "label": "Post",
-      "attr": {
-        "attr": "creationDate",
-        "op": ">=",
-        "value": 1290661462488,
-        "type": "int"
-      }
-    },
-    "person": {
-      "vid": "person",
-      "label": "Person",
       "attr": null
+    },
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "50_Cent",
+        "type": "string"
+      }
     }
   },
   "edges": {
+    "c": {
+      "eid": "c",
+      "src_vid": "comment",
+      "dst_vid": "relatedTag",
+      "label": "hasTag",
+      "attr": null
+    },
     "a": {
       "eid": "a",
       "src_vid": "comment",
@@ -42,8 +55,8 @@
     "b": {
       "eid": "b",
       "src_vid": "post",
-      "dst_vid": "person",
-      "label": "hasCreator",
+      "dst_vid": "tag",
+      "label": "hasTag",
       "attr": null
     }
   },
@@ -61,7 +74,8 @@
       "vid": "comment",
       "type": "get_adj",
       "expand_eid_list": [
-        "a"
+        "a",
+        "c"
       ],
       "single_op": "f^comment",
       "multi_ops": [],
@@ -90,9 +104,9 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "f^comment",
         "A^comment",
-        "C^post"
+        "C^post",
+        "f^comment"
       ]
     },
     {
@@ -105,41 +119,66 @@
       "multi_ops": [],
       "target_var": "A^post",
       "depend_on": [
-        "C^post",
-        "f^comment",
         "f^post",
-        "A^comment"
+        "A^comment",
+        "f^comment",
+        "C^post"
       ]
     },
     {
-      "vid": "person",
+      "vid": "tag",
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": "A^post",
       "multi_ops": [],
-      "target_var": "C^person",
+      "target_var": "C^tag",
       "depend_on": [
         "f^post",
+        "A^post",
         "A^comment",
-        "f^comment",
         "C^post",
-        "A^post"
+        "f^comment"
       ]
     },
     {
-      "vid": "person",
+      "vid": "tag",
       "type": "foreach",
       "expand_eid_list": [],
-      "single_op": "C^person",
+      "single_op": "C^tag",
       "multi_ops": [],
-      "target_var": "f^person",
+      "target_var": "f^tag",
       "depend_on": [
-        "C^person",
-        "C^post",
-        "f^post",
         "A^comment",
+        "f^post",
+        "C^tag",
         "A^post",
+        "C^post",
         "f^comment"
+      ]
+    },
+    {
+      "vid": "relatedTag",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^comment",
+      "multi_ops": [],
+      "target_var": "C^relatedTag",
+      "depend_on": [
+        "f^comment",
+        "A^comment"
+      ]
+    },
+    {
+      "vid": "relatedTag",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^relatedTag",
+      "multi_ops": [],
+      "target_var": "f^relatedTag",
+      "depend_on": [
+        "A^comment",
+        "f^comment",
+        "C^relatedTag"
       ]
     },
     {
@@ -149,18 +188,21 @@
       "single_op": null,
       "multi_ops": [
         "f^comment",
+        "f^relatedTag",
         "f^post",
-        "f^person"
+        "f^tag"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^person",
-        "f^post",
-        "C^post",
+        "A^post",
+        "f^tag",
         "f^comment",
+        "f^relatedTag",
+        "C^tag",
         "A^comment",
-        "C^person",
-        "A^post"
+        "C^post",
+        "C^relatedTag",
+        "f^post"
       ]
     }
   ]

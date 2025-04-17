@@ -48,6 +48,7 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
       storage_adapter,
       matching_ctx,
     };
+    #[cfg(not(feature = "benchmark"))]
     res.profile_instructions();
     res
   }
@@ -65,7 +66,7 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
 
     let df = DataFrame::new(vec![
       Column::new(
-        "ID".into(),
+        "Id".into(),
         Series::from_iter(indices.into_iter().map(|x| x as i64)),
       ),
       Column::new("Instructions".into(), Series::from_iter(instructions)),
@@ -125,13 +126,17 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
   }
 
   async fn exec_helper(&mut self, unmerged_results: Vec<Vec<DynGraph>>) -> Vec<DynGraph> {
-    fn preview_scale(unmerged: &[Vec<DynGraph>]) {
-      let len_vec = unmerged.iter().map(|v| v.len()).collect_vec();
-      println!();
-      println!("✨  Scale(unmerged_results) = {len_vec:?}\n");
-    }
+    #[cfg(not(feature = "benchmark"))]
+    {
+      #[inline]
+      fn preview_scale(unmerged: &[Vec<DynGraph>]) {
+        let len_vec = unmerged.iter().map(|v| v.len()).collect_vec();
+        println!();
+        println!("✨  Scale(unmerged_results) = {len_vec:?}\n");
+      }
 
-    preview_scale(&unmerged_results);
+      preview_scale(&unmerged_results);
+    }
 
     if unmerged_results.is_empty() {
       return vec![];
@@ -164,6 +169,8 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
             .flat_map(|a| {
               graphs
                 .par_iter()
+                // this `filter` could lead to a HUGE performance improvement
+                .filter(|b| a.has_common_v(b))
                 .map(|b| a.clone() | b.clone())
                 .collect::<Vec<_>>()
             })
@@ -216,16 +223,19 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
 
     // execute the instructions in parallel (by layer)
     for (layer_idx, layer) in layers.iter().enumerate() {
-      if layer_idx != 0 {
-        println!();
-      }
+      #[cfg(not(feature = "benchmark"))]
+      {
+        if layer_idx != 0 {
+          println!();
+        }
 
-      println!(
-        "🚀  Executing {}-{}: {}",
-        "layer".yellow(),
-        layer_idx.to_string().yellow(),
-        format!("{:?}", layer).blue()
-      );
+        println!(
+          "🚀  Executing {}-{}: {}",
+          "layer".yellow(),
+          layer_idx.to_string().yellow(),
+          format!("{:?}", layer).blue()
+        );
+      }
 
       let mut handles = Vec::with_capacity(layer.len());
 

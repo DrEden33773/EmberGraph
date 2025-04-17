@@ -1,4 +1,5 @@
-use crate::{executor::ExecEngine, result_dump::ResultDumper, storage::*};
+use crate::{executor::ExecEngine, result_dump::ResultDumper, storage::*, utils::time_async};
+use colored::Colorize;
 use project_root::get_project_root;
 use std::{path::PathBuf, sync::LazyLock};
 use tokio::{fs, io};
@@ -11,16 +12,24 @@ async fn query<S: AdvancedStorageAdapter + 'static>(plan_filename: &str) -> io::
   path.push(plan_filename);
   let plan_json_content = fs::read_to_string(path).await?;
 
-  let result = ExecEngine::<CachedStorageAdapter<S>>::build_from_json(&plan_json_content)
-    .await
-    .parallel_exec()
-    .await;
+  let (result, elapsed) = time_async(
+    ExecEngine::<CachedStorageAdapter<S>>::build_from_json(&plan_json_content)
+      .await
+      .parallel_exec(),
+  )
+  .await;
 
-  println!("✨  Count(result) = {}", result.len());
+  let len = result.len();
 
   if let Some(df) = ResultDumper::new(result).to_simplified_df(false) {
     println!("{}", df);
   }
+
+  println!(
+    "✨  Get {} results in {} ms",
+    len.to_string().green(),
+    format!("{elapsed:.2}").yellow()
+  );
 
   Ok(())
 }
@@ -79,9 +88,7 @@ pub async fn bi_9_on_sf_01() -> io::Result<()> {
   query::<Neo4jStorageAdapter>("ldbc-bi-9.json").await
 }
 
-/// ✅ ⚠️  Slow query: `GetAdj("f^otherTag")`
-/// - Memory usage is normal, computation process is too slow
-/// - `Neo4jStorageAdapter` is `slower` than `SqliteStorageAdapter`
+/// ✅
 pub async fn bi_10_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-10' on 'SF0.1' ...\n");
   query::<SqliteStorageAdapter>("ldbc-bi-10.json").await

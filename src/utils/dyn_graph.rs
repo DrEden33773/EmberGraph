@@ -1,21 +1,11 @@
 use crate::schemas::*;
 use hashbrown::{HashMap, HashSet};
-use std::{
-  hash::Hash,
-  ops::{BitOr, BitOrAssign},
-};
+use std::ops::{BitOr, BitOrAssign};
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct VNode {
   pub(crate) e_in: HashSet<Eid>,
   pub(crate) e_out: HashSet<Eid>,
-}
-
-impl Hash for VNode {
-  fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-    self.e_in.iter().for_each(|eid| eid.hash(state));
-    self.e_out.iter().for_each(|eid| eid.hash(state));
-  }
 }
 
 impl BitOrAssign for VNode {
@@ -25,19 +15,7 @@ impl BitOrAssign for VNode {
   }
 }
 
-impl BitOr for VNode {
-  type Output = VNode;
-
-  fn bitor(self, rhs: Self) -> Self::Output {
-    let mut e_in = self.e_in;
-    let mut e_out = self.e_out;
-    e_in.extend(rhs.e_in);
-    e_out.extend(rhs.e_out);
-    VNode { e_in, e_out }
-  }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct DynGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
   /// vid -> v_entity
   pub(crate) v_entities: HashMap<Vid, VType>,
@@ -116,35 +94,26 @@ impl<VType: VBase, EType: EBase> BitOr for DynGraph<VType, EType> {
 }
 
 impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
-  pub fn is_subset_of(&self, other: &Self) -> bool {
-    // adj_table
-    for (vid, v_node) in self.adj_table.iter() {
-      // vertex
-      if !other.adj_table.contains_key(vid) {
-        return false;
-      }
-      // in_edge
-      if !v_node.e_in.is_subset(&other.adj_table[vid].e_in) {
-        return false;
-      }
-      // out_edge
-      if !v_node.e_out.is_subset(&other.adj_table[vid].e_out) {
-        return false;
-      }
-    }
-    true
-  }
-
   #[inline]
-  pub fn is_superset_of(&self, other: &Self) -> bool {
-    other.is_subset_of(self)
-  }
+  pub fn has_common_v(&self, other: &Self) -> bool {
+    let (shorter, longer) = if self.v_entities.len() < other.v_entities.len() {
+      (self, other)
+    } else {
+      (other, self)
+    };
 
+    shorter
+      .v_entities
+      .keys()
+      .any(|vid| longer.v_entities.contains_key(vid))
+  }
+}
+
+impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   #[inline]
   pub fn v_entities(&self) -> &HashMap<Vid, VType> {
     &self.v_entities
   }
-
   #[inline]
   pub fn e_entities(&self) -> &HashMap<Eid, EType> {
     &self.e_entities
@@ -223,31 +192,6 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   ) -> &mut Self {
     for (edge, pattern) in e_pattern_pairs {
       self.update_e(edge, pattern);
-    }
-    self
-  }
-
-  pub fn remove_e(&mut self, eid: EidRef) -> &mut Self {
-    if !self.has_eid(eid) {
-      return self;
-    }
-
-    for v in self.adj_table.values_mut() {
-      v.e_in.remove(eid);
-      v.e_out.remove(eid);
-    }
-    self.e_entities.remove(eid);
-
-    for eids in self.pattern_2_eids.values_mut() {
-      eids.remove(eid);
-    }
-
-    self
-  }
-
-  pub fn remove_e_batch(&mut self, eids: &[EidRef]) -> &mut Self {
-    for eid in eids {
-      self.remove_e(eid);
     }
     self
   }
@@ -431,7 +375,6 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
       HashSet::new()
     }
   }
-
   #[inline]
   pub fn get_adj_vids(&self, vid: VidRef) -> HashSet<Vid> {
     if let Some(v_node) = self.adj_table.get(vid) {
@@ -460,7 +403,6 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
       0
     }
   }
-
   #[inline]
   pub fn get_in_degree(&self, vid: VidRef) -> usize {
     if let Some(v_node) = self.adj_table.get(vid) {
@@ -468,27 +410,5 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
     } else {
       0
     }
-  }
-
-  #[inline]
-  pub fn view_common_v_patterns<'g>(
-    &'g self,
-    other: &'g Self,
-  ) -> impl IntoIterator<Item = &'g String> {
-    self
-      .pattern_2_vids
-      .keys()
-      .filter(|p| other.pattern_2_vids.contains_key(*p))
-  }
-
-  #[inline]
-  pub fn view_common_e_patterns<'g>(
-    &'g self,
-    other: &'g Self,
-  ) -> impl IntoIterator<Item = &'g String> {
-    self
-      .pattern_2_eids
-      .keys()
-      .filter(|p| other.pattern_2_eids.contains_key(*p))
   }
 }

@@ -39,7 +39,7 @@ impl ABucket {
         for frontier_vid in frontiers.iter() {
           #[cfg(feature = "trace_get_adj")]
           println!(
-            "🧩  Current frontier vid: {}",
+            "\t\t🧩  Current frontier vid: {}",
             frontier_vid.to_string().green()
           );
 
@@ -49,7 +49,7 @@ impl ABucket {
           for pat_e in pattern_es.iter() {
             #[cfg(feature = "trace_get_adj")]
             println!(
-              "  🔗  Current pattern edge: {}",
+              "\t\t  🔗  Current pattern edge: {}",
               pat_e.eid().to_string().purple()
             );
 
@@ -78,7 +78,7 @@ impl ABucket {
 
                 #[cfg(feature = "trace_get_adj")]
                 println!(
-                  "    ✨  Found {} edges that match: ({}: {})-[{}]->({})",
+                  "\t\t    ✨  Found {} edges that match: ({}: {})-[{}]->({})",
                   matched_data_es.len().to_string().yellow(),
                   frontier_vid.to_string().green(),
                   curr_pat_vid.as_ref().cyan(),
@@ -120,7 +120,7 @@ impl ABucket {
 
                 #[cfg(feature = "trace_get_adj")]
                 println!(
-                  "    ✨  Found {} edges that match: ({}: {})<-[{}]-({})",
+                  "\t\t    ✨  Found {} edges that match: ({}: {})<-[{}]-({})",
                   matched_data_es.len().to_string().yellow(),
                   frontier_vid.to_string().green(),
                   curr_pat_vid.as_ref().cyan(),
@@ -162,6 +162,7 @@ impl ABucket {
 
               expanding_graph
                 .update_valid_dangling_edges(edges.iter().zip(pat_strs.iter().map(String::as_str)));
+              expanding_graph.sort_key_after_update_valid_target_vertices();
 
               let sender = sender.clone();
 
@@ -175,9 +176,6 @@ impl ABucket {
                 });
             }
           }
-
-          #[cfg(feature = "trace_get_adj")]
-          println!();
 
           if !is_frontier_formalized {
             // if no edges are connected, this frontier is invalid, current matched_dg is invalid,

@@ -4,10 +4,12 @@ use crate::{
     MatchingCtx,
     buckets::{CBucket, TBucket},
   },
-  schemas::{DataVertex, Instruction, VarPrefix::*},
+  schemas::{DataVertex, Instruction, VBase, VarPrefix::*},
   storage::StorageAdapter,
+  utils::parallel,
 };
 use itertools::Itertools;
+use rayon::slice::ParallelSliceMut;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
@@ -18,6 +20,7 @@ pub struct IntersectOperator<S: StorageAdapter> {
 
 impl<S: StorageAdapter> IntersectOperator<S> {
   pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
+    #[cfg(not(feature = "benchmark"))]
     println!("\t{instr}");
 
     if instr.is_single_op() {
@@ -34,13 +37,13 @@ impl<S: StorageAdapter> IntersectOperator<S> {
 
   /// `Vi` ∩ `Ax` -> `Cy`
   async fn with_adj_set(&mut self, instr: &Instruction) -> Option<()> {
-    let loaded_v_pat_pairs = self.load_vertices(instr).await?;
+    let loaded_v_pat_pairs_asc = self.load_vertices_asc(instr).await?;
 
     let a_group = self
       .ctx
       .pop_group_by_pat_from_a_block(instr.single_op.as_ref().unwrap(), &instr.vid)?;
 
-    let c_bucket = CBucket::build_from_a_group(a_group, loaded_v_pat_pairs).await;
+    let c_bucket = CBucket::build_from_a_group(a_group, loaded_v_pat_pairs_asc).await;
 
     self.ctx.update_c_block(&instr.target_var, c_bucket);
 
@@ -107,30 +110,38 @@ impl<S: StorageAdapter> IntersectOperator<S> {
 
   /// `Vi` ∩ `Tx` -> `Cy`
   async fn with_temp_intersected(&mut self, instr: &Instruction) -> Option<()> {
-    let loaded_v_pat_pairs = self.load_vertices(instr).await?;
+    let loaded_v_pat_pairs_asc = self.load_vertices_asc(instr).await?;
 
     let t_bucket = self
       .ctx
       .pop_from_t_block(instr.single_op.as_ref().unwrap())?;
 
-    let c_bucket = CBucket::build_from_t(t_bucket, loaded_v_pat_pairs).await;
+    let c_bucket = CBucket::build_from_t(t_bucket, loaded_v_pat_pairs_asc).await;
 
     self.ctx.update_c_block(&instr.target_var, c_bucket);
 
     Some(())
   }
 
-  async fn load_vertices(&self, instr: &Instruction) -> Option<Vec<(DataVertex, String)>> {
+  async fn load_vertices_asc(&self, instr: &Instruction) -> Option<Vec<(DataVertex, String)>> {
     let pattern_v = self.ctx.get_pattern_v(&instr.vid)?.clone();
+    let pattern_vid = pattern_v.vid.clone();
 
     let label = pattern_v.label.as_str();
     let attr = pattern_v.attr.as_ref();
     let matched_vs = self.storage_adapter.load_v(label, attr).await;
 
-    matched_vs
+    let mut raw = matched_vs
       .into_iter()
-      .map(|v| (v, pattern_v.vid.clone()))
-      .collect_vec()
-      .into()
+      .map(|v| (v, pattern_vid.clone()))
+      .collect_vec();
+
+    let sorted = parallel::spawn_blocking(move || {
+      raw.par_sort_unstable_by(|(v1, _), (v2, _)| v1.vid().cmp(v2.vid()));
+      raw
+    })
+    .await;
+
+    sorted.into()
   }
 }

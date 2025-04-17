@@ -1,15 +1,15 @@
-use std::sync::Arc;
-
-use super::dyn_graph::{DynGraph, VNode};
+use super::dyn_graph::DynGraph;
 use crate::schemas::*;
-use hashbrown::{HashMap, HashSet};
+use hashbrown::HashMap;
+use indexmap::IndexMap;
+use std::{cmp::Ordering, sync::Arc};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct ExpandGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
   pub(crate) dyn_graph: Arc<DynGraph<VType, EType>>,
 
-  pub(crate) pending_v_grouped_dangling_eids: HashMap<Vid, Vec<Eid>>,
-  pub(crate) target_v_adj_table: HashMap<Vid, VNode>,
+  pub(crate) pending_v_grouped_dangling_eids: IndexMap<Vid, Vec<Eid>>,
+  pub(crate) target_vs: Vec<Vid>,
 
   pub(crate) dangling_e_entities: HashMap<Eid, EType>,
   pub(crate) target_v_entities: HashMap<Vid, VType>,
@@ -23,7 +23,7 @@ impl<VType: VBase, EType: EBase> Default for ExpandGraph<VType, EType> {
     Self {
       dyn_graph: Default::default(),
       pending_v_grouped_dangling_eids: Default::default(),
-      target_v_adj_table: Default::default(),
+      target_vs: Default::default(),
       dangling_e_entities: Default::default(),
       target_v_entities: Default::default(),
       dangling_e_patterns: Default::default(),
@@ -50,13 +50,12 @@ impl<VType: VBase, EType: EBase> From<ExpandGraph<VType, EType>> for DynGraph<VT
       (v, pattern)
     }));
 
-    for target_v in val.target_v_adj_table.keys() {
-      let mut dangling_eids = val.target_v_adj_table[target_v].e_out.clone();
-      dangling_eids.extend(val.target_v_adj_table[target_v].e_in.clone());
+    for target_v in val.target_vs {
+      let dangling_eids = val.pending_v_grouped_dangling_eids.get(&target_v).unwrap();
 
       let dangling_e_pattern_pairs = dangling_eids
-        .into_iter()
-        .filter_map(|eid| val.dangling_e_entities.remove(&eid))
+        .iter()
+        .filter_map(|eid| val.dangling_e_entities.remove(eid))
         .map(|e| {
           let pattern = val.dangling_e_patterns.remove(e.eid()).unwrap();
           (e, pattern)
@@ -65,27 +64,6 @@ impl<VType: VBase, EType: EBase> From<ExpandGraph<VType, EType>> for DynGraph<VT
     }
 
     graph
-  }
-}
-
-impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
-  pub fn get_vids(&self) -> Vec<VidRef<'_>> {
-    self.dyn_graph.view_vids()
-  }
-  pub fn get_eids(&self) -> Vec<EidRef<'_>> {
-    self.dyn_graph.view_eids()
-  }
-  pub fn get_v_count(&self) -> usize {
-    self.dyn_graph.get_v_count()
-  }
-  pub fn get_e_count(&self) -> usize {
-    self.dyn_graph.get_e_count()
-  }
-  pub fn dangling_e_patterns(&self) -> &HashMap<Eid, String> {
-    &self.dangling_e_patterns
-  }
-  pub fn target_v_patterns(&self) -> &HashMap<Vid, String> {
-    &self.target_v_patterns
   }
 }
 
@@ -130,63 +108,103 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
     }
   }
 
+  /// Sort the pending_v_grouped_dangling_eids by the key
+  ///
+  /// - Note that this function should only be called after `update_valid_target_vertices`
+  pub fn sort_key_after_update_valid_target_vertices(&mut self) {
+    self.pending_v_grouped_dangling_eids.sort_unstable_keys();
+  }
+
   /// Update `valid target vertices` and return them
   ///
   /// - Vertices of any `dangling_edge` could be added to `target_v_adj_table`
   pub fn update_valid_target_vertices(
     &mut self,
-    target_vertex_pattern_pairs: &[(VType, String)],
+    asc_target_vertex_pattern_pairs: &[(VType, String)],
   ) -> Vec<String> {
-    let mut legal_vids = Vec::with_capacity(target_vertex_pattern_pairs.as_ref().len());
+    // Skip if either collection is empty
+    if asc_target_vertex_pattern_pairs.is_empty() || self.pending_v_grouped_dangling_eids.is_empty()
+    {
+      return vec![];
+    }
 
-    for (vertex, pattern) in target_vertex_pattern_pairs.as_ref().iter() {
+    let pending_v_grouped_dangling_eids = self.pending_v_grouped_dangling_eids.as_slice();
+
+    // Use index-based approach instead of iterators for better debug mode performance
+    let pending_len = self.pending_v_grouped_dangling_eids.len();
+    let vertex_len = asc_target_vertex_pattern_pairs.len();
+    self.target_vs.reserve(pending_len.min(vertex_len));
+
+    let mut legal_vids = Vec::with_capacity(vertex_len.min(pending_len));
+
+    let mut pending_idx = 0;
+    let mut vertex_idx = 0;
+
+    // Continue until one of the collections is exhausted
+    while pending_idx < pending_len && vertex_idx < vertex_len {
+      // Get current elements by index
+      let (pending_vid, _) = pending_v_grouped_dangling_eids
+        .get_index(pending_idx)
+        .unwrap();
+      let (vertex, pattern) = &asc_target_vertex_pattern_pairs[vertex_idx];
+
+      // Skip if the vertex is already in the graph
       if self.dyn_graph.has_vid(vertex.vid()) {
+        vertex_idx += 1;
         continue;
       }
 
-      match self.pending_v_grouped_dangling_eids.get(vertex.vid()) {
-        Some(dangling_eids) => {
-          // If the vertex is a valid target, we need to add it to the target_v_adj_table
-          for dangling_eid in dangling_eids {
-            let dangling_edge = &self.dangling_e_entities[dangling_eid];
+      // Compare the pending_vid and vertex.vid()
+      match pending_vid.as_str().cmp(vertex.vid()) {
+        Ordering::Equal => {
+          // Found a match, add the vertex to the `target_vs`
+          self.target_vs.push(vertex.vid().to_string());
 
-            // pick `e_out` / `e_in` by the direction of the edge
-            if dangling_edge.src_vid() == vertex.vid() {
-              // (vertex)-[dangling_edge]->...
-              self
-                .target_v_adj_table
-                .entry(vertex.vid().to_string())
-                .or_default()
-                .e_out
-                .insert(dangling_edge.eid().to_string());
-            } else if dangling_edge.dst_vid() == vertex.vid() {
-              // (vertex)<-[dangling_edge]-...
-              self
-                .target_v_adj_table
-                .entry(vertex.vid().to_string())
-                .or_default()
-                .e_in
-                .insert(dangling_edge.eid().to_string());
-            }
-          }
+          // Update other information
+          legal_vids.push(vertex.vid().to_string());
+
+          self
+            .target_v_patterns
+            .insert(vertex.vid().to_string(), pattern.clone());
+
+          self
+            .target_v_entities
+            .insert(vertex.vid().to_string(), vertex.clone());
+
+          // Move both indices
+          pending_idx += 1;
+          vertex_idx += 1;
         }
-        None => continue,
+        Ordering::Less => {
+          // pending_vid < vertex.vid(), move pending index
+          pending_idx += 1;
+        }
+        Ordering::Greater => {
+          // pending_vid > vertex.vid(), current vertex is not found in pending,
+          // move to next vertex
+          vertex_idx += 1;
+        }
       }
-
-      // Don't forget to update other information
-
-      legal_vids.push(vertex.vid().to_string());
-
-      self
-        .target_v_patterns
-        .insert(vertex.vid().to_string(), pattern.clone());
-
-      self
-        .target_v_entities
-        .insert(vertex.vid().to_string(), vertex.clone());
     }
 
     legal_vids
+  }
+}
+
+impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
+  #[inline]
+  pub fn has_common_pending_v(&self, other: &Self) -> bool {
+    let (shorter, longer) =
+      if self.pending_v_grouped_dangling_eids.len() < other.pending_v_grouped_dangling_eids.len() {
+        (self, other)
+      } else {
+        (other, self)
+      };
+
+    shorter
+      .pending_v_grouped_dangling_eids
+      .iter()
+      .any(|(vid, _)| longer.pending_v_grouped_dangling_eids.contains_key(vid))
   }
 }
 
@@ -196,74 +214,66 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
   l_expand_graph: &ExpandGraph<VType, EType>,
   r_expand_graph: &ExpandGraph<VType, EType>,
 ) -> Vec<ExpandGraph<VType, EType>> {
-  let grouped_l = &l_expand_graph.pending_v_grouped_dangling_eids;
-  let grouped_r = &r_expand_graph.pending_v_grouped_dangling_eids;
+  let grouped_l = l_expand_graph.pending_v_grouped_dangling_eids.as_slice();
+  let grouped_r = r_expand_graph.pending_v_grouped_dangling_eids.as_slice();
 
   if grouped_l.is_empty() || grouped_r.is_empty() {
     return vec![];
   }
 
-  let mut common_pending_vids = HashSet::with_capacity(grouped_l.len().min(grouped_r.len()));
-
-  for pending_vid in grouped_l.keys() {
-    if grouped_r.contains_key(pending_vid) {
-      common_pending_vids.insert(pending_vid.clone());
-    }
-  }
-
-  if common_pending_vids.is_empty() {
-    return vec![];
-  }
-
-  #[cfg(feature = "validate_pattern_uniqueness_before_final_merge")]
-  {
-    // For each pair of common_v/e_pats, they should lead to the same vs/es in both graphs.
-    // If not, we should not consider them as a match.
-    // We could also discard those patterns who lead to `multi` vs/es in either graph.
-
-    for common_v_pat in l_graph.view_common_v_patterns(&r_graph) {
-      let l_vs = l_graph.pattern_2_vids.get(common_v_pat).unwrap();
-      let r_vs = r_graph.pattern_2_vids.get(common_v_pat).unwrap();
-      if l_vs.len() > 1 || r_vs.len() > 1 || l_vs != r_vs {
-        return vec![];
-      }
-    }
-
-    for common_e_pat in l_graph.view_common_e_patterns(&r_graph) {
-      let l_es = l_graph.pattern_2_eids.get(common_e_pat).unwrap();
-      let r_es = r_graph.pattern_2_eids.get(common_e_pat).unwrap();
-      if l_es.len() > 1 || r_es.len() > 1 || l_es != r_es {
-        return vec![];
-      }
-    }
-  }
-
+  // Create the basic graph structure (only create once)
   let new_graph = (*l_expand_graph.dyn_graph).clone() | (*r_expand_graph.dyn_graph).clone();
   let new_graph = Arc::new(new_graph);
 
-  let mut result = Vec::with_capacity(common_pending_vids.len());
+  // Use index-based approach instead of iterators for better debug mode performance
+  let l_len = grouped_l.len();
+  let r_len = grouped_r.len();
 
-  for pending_vid in common_pending_vids.iter() {
-    let l_dangling_eids = grouped_l.get(pending_vid).unwrap();
-    let r_dangling_eids = grouped_r.get(pending_vid).unwrap();
+  let mut result = Vec::with_capacity(l_len.min(r_len));
 
-    let mut expanding_dg: ExpandGraph<VType, EType> = new_graph.clone().into();
+  let mut l_idx = 0;
+  let mut r_idx = 0;
 
-    expanding_dg.update_valid_dangling_edges(l_dangling_eids.iter().map(|eid| {
-      (
-        &l_expand_graph.dangling_e_entities[eid],
-        l_expand_graph.dangling_e_patterns[eid].as_str(),
-      )
-    }));
+  // Continue iterating as long as both collections have unprocessed elements
+  while l_idx < l_len && r_idx < r_len {
+    // Get current elements by index
+    let (l_vid, l_dangling_eids) = grouped_l.get_index(l_idx).unwrap();
+    let (r_vid, r_dangling_eids) = grouped_r.get_index(r_idx).unwrap();
 
-    expanding_dg.update_valid_dangling_edges(r_dangling_eids.iter().map(|eid| {
-      (
-        &r_expand_graph.dangling_e_entities[eid],
-        r_expand_graph.dangling_e_patterns[eid].as_str(),
-      )
-    }));
+    match l_vid.cmp(r_vid) {
+      Ordering::Equal => {
+        // Found a common vertex, process it directly
+        let mut expanding_dg: ExpandGraph<VType, EType> = new_graph.clone().into();
 
-    result.push(expanding_dg);
+        expanding_dg.update_valid_dangling_edges(l_dangling_eids.iter().map(|eid| {
+          (
+            &l_expand_graph.dangling_e_entities[eid],
+            l_expand_graph.dangling_e_patterns[eid].as_str(),
+          )
+        }));
+        expanding_dg.update_valid_dangling_edges(r_dangling_eids.iter().map(|eid| {
+          (
+            &r_expand_graph.dangling_e_entities[eid],
+            r_expand_graph.dangling_e_patterns[eid].as_str(),
+          )
+        }));
+        expanding_dg.sort_key_after_update_valid_target_vertices();
+
+        result.push(expanding_dg);
+
+        // Move both indices
+        l_idx += 1;
+        r_idx += 1;
+      }
+      Ordering::Less => {
+        // l_vid < r_vid, move the left index
+        l_idx += 1;
+      }
+      Ordering::Greater => {
+        // l_vid > r_vid, move the right index
+        r_idx += 1;
+      }
+    }
   }
 
   result
