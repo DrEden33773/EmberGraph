@@ -52,18 +52,19 @@ tracing-futures = "0.2.5"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 
 [features]
-default = ["block_spawn_via_rayon"]
-bench = ["block_spawn_via_rayon", "benchmark"]
+default = ["block_spawn_via_rayon", "cache_force_background_update", "intersection_force_element_paralleled"]
+bench = ["default", "benchmark"]
 
 block_spawn_via_rayon = []
-use_tracing = []
+cache_force_background_update = []
+intersection_force_element_paralleled = []
 benchmark = []
 
 trace_all = ["trace_init", "trace_get_adj"]
 trace_init = []
 trace_get_adj = []
 
-monitor_intersect_expanding_graphs = []
+enable_log = []
 
 [profile.release]
 opt-level = 3

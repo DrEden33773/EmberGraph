@@ -17,7 +17,7 @@ pub mod schemas;
 pub mod storage;
 pub mod utils;
 
-#[cfg(feature = "use_tracing")]
+#[cfg(feature = "enable_log")]
 pub mod init_log {
   use project_root::get_project_root;
   use tokio::io::{self};
@@ -98,6 +98,15 @@ pub async fn plan_gen_with_given_orders() -> io::Result<()> {
       ],
     ),
     (
+      "ldbc-bi-5",
+      vec!["liker", "post", "tag", "comment", "person"],
+    ),
+    (
+      "ldbc-bi-6",
+      vec!["person2", "post1", "tag", "person1", "post2", "person3"],
+    ),
+    ("ldbc-bi-7", vec!["comment", "post", "tag", "relatedTag"]),
+    (
       "ldbc-bi-11",
       vec!["country", "city_c", "c", "b", "city_b", "a", "city_a"],
     ),
@@ -108,7 +117,6 @@ pub async fn plan_gen_with_given_orders() -> io::Result<()> {
         "person1", "post1", "forum2",
       ],
     ),
-    ("ldbc-bi-7", vec!["comment", "post", "tag", "relatedTag"]),
   ]);
 
   let mut handles = vec![];

@@ -1,12 +1,16 @@
 use super::*;
 use rayon::iter::ParallelIterator;
 use rayon::prelude::*;
+#[cfg(not(feature = "intersection_force_element_paralleled"))]
 use rayon::slice::ParallelSlice;
 
+#[cfg(not(feature = "intersection_force_element_paralleled"))]
 /// the min chunk size
 const MIN_CHUNK_SIZE: usize = 128;
+#[cfg(not(feature = "intersection_force_element_paralleled"))]
 /// the max number of threads
 const MAX_THREADS: usize = 32;
+#[cfg(not(feature = "intersection_force_element_paralleled"))]
 /// the threshold of the small dataset
 const THRESHOLD_SMALL: usize = 1024;
 
@@ -16,7 +20,7 @@ impl TBucket {
     right: Vec<ExpandGraph>,
     target_pat_vid: VidRef<'_>,
   ) -> Self {
-    let expanding_graphs = Self::expand_edges_of_two(left, right).await;
+    let expanding_graphs = Self::intersect_two_expanding_graphs(left, right).await;
     Self {
       target_pat_vid: target_pat_vid.to_owned(),
       expanding_graphs,
@@ -27,7 +31,7 @@ impl TBucket {
     let left_group = a_group;
     let right_group = t_bucket.expanding_graphs;
 
-    let expanding_graphs = Self::expand_edges_of_two(left_group, right_group).await;
+    let expanding_graphs = Self::intersect_two_expanding_graphs(left_group, right_group).await;
 
     Self {
       target_pat_vid: t_bucket.target_pat_vid,
@@ -39,7 +43,7 @@ impl TBucket {
     let left_group = t_bucket.expanding_graphs;
     let right_group = a_group;
 
-    let expanding_graphs = Self::expand_edges_of_two(left_group, right_group).await;
+    let expanding_graphs = Self::intersect_two_expanding_graphs(left_group, right_group).await;
     Self {
       target_pat_vid: t_bucket.target_pat_vid,
       expanding_graphs,
@@ -50,7 +54,7 @@ impl TBucket {
     let left_group = t_bucket_1.expanding_graphs;
     let right_group = t_bucket_2.expanding_graphs;
 
-    let expanding_graphs = Self::expand_edges_of_two(left_group, right_group).await;
+    let expanding_graphs = Self::intersect_two_expanding_graphs(left_group, right_group).await;
 
     #[cfg(debug_assertions)]
     assert_eq!(t_bucket_1.target_pat_vid, t_bucket_2.target_pat_vid);
@@ -61,7 +65,7 @@ impl TBucket {
     }
   }
 
-  async fn expand_edges_of_two(
+  async fn intersect_two_expanding_graphs(
     left_group: Vec<ExpandGraph>,
     right_group: Vec<ExpandGraph>,
   ) -> Vec<ExpandGraph> {
@@ -69,47 +73,40 @@ impl TBucket {
       return vec![];
     }
 
-    #[cfg(feature = "monitor_intersect_expanding_graphs")]
-    let start_time = std::time::Instant::now();
-
     let (shorter, longer) = if left_group.len() < right_group.len() {
       (left_group, right_group)
     } else {
       (right_group, left_group)
     };
 
-    let num_threads = Self::calculate_optimal_threads(longer.len());
-    let chunk_size = Self::calculate_chunk_size(longer.len(), num_threads);
-
-    let total_elements = longer.len() * shorter.len();
-    #[cfg(feature = "monitor_intersect_expanding_graphs")]
-    println!(
-      "Processing {} elements with {} threads, chunk size: {}",
-      total_elements, num_threads, chunk_size
-    );
-
-    let result = parallel::spawn_blocking(move || {
-      let shorter = Arc::new(shorter);
-
-      if total_elements < THRESHOLD_SMALL {
-        // small dataset: simple parallel strategy
-        Self::process_small_dataset(&longer, &shorter)
-      } else {
-        // large dataset: chunk parallel strategy
-        Self::process_large_dataset(&longer, &shorter, chunk_size)
-      }
-    })
-    .await;
-
-    #[cfg(feature = "monitor_intersect_expanding_graphs")]
+    #[cfg(not(feature = "intersection_force_element_paralleled"))]
     {
-      let duration = start_time.elapsed();
-      println!("Processed {} elements in {:?}", total_elements, duration);
-    }
+      let num_threads = Self::calculate_optimal_threads(longer.len());
+      let chunk_size = Self::calculate_chunk_size(longer.len(), num_threads);
+      let total_elements = longer.len() * shorter.len();
 
-    result
+      parallel::spawn_blocking(move || {
+        let shorter = Arc::new(shorter);
+
+        if total_elements < THRESHOLD_SMALL {
+          // small dataset: simple parallel strategy
+          Self::process_element_paralleled(&longer, &shorter)
+        } else {
+          // large dataset: chunk parallel strategy
+          Self::process_chunk_paralleled(&longer, &shorter, chunk_size)
+        }
+      })
+      .await
+    }
+    #[cfg(feature = "intersection_force_element_paralleled")]
+    {
+      let shorter = Arc::new(shorter);
+      Self::process_element_paralleled(&longer, &shorter)
+    }
   }
 
+  #[cfg(not(feature = "intersection_force_element_paralleled"))]
+  #[inline]
   fn calculate_optimal_threads(data_size: usize) -> usize {
     let available_threads = num_cpus::get();
     let optimal_threads = data_size.div_ceil(MIN_CHUNK_SIZE);
@@ -117,13 +114,15 @@ impl TBucket {
     optimal_threads.min(available_threads).min(MAX_THREADS)
   }
 
+  #[cfg(not(feature = "intersection_force_element_paralleled"))]
+  #[inline]
   fn calculate_chunk_size(data_size: usize, num_threads: usize) -> usize {
     let base_chunk_size = data_size.div_ceil(num_threads);
     // ensure the chunk size is not less than the min chunk size
     base_chunk_size.max(MIN_CHUNK_SIZE)
   }
 
-  fn process_small_dataset(
+  fn process_element_paralleled(
     longer: &[ExpandGraph],
     shorter: &Arc<Vec<ExpandGraph>>,
   ) -> Vec<ExpandGraph> {
@@ -139,7 +138,8 @@ impl TBucket {
       .collect::<Vec<_>>()
   }
 
-  fn process_large_dataset(
+  #[cfg(not(feature = "intersection_force_element_paralleled"))]
+  fn process_chunk_paralleled(
     longer: &[ExpandGraph],
     shorter: &Arc<Vec<ExpandGraph>>,
     chunk_size: usize,

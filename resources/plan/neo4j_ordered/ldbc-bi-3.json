@@ -10,6 +10,11 @@
     "tagClass"
   ],
   "vertices": {
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
+    },
     "tagClass": {
       "vid": "tagClass",
       "label": "Tagclass",
@@ -20,14 +25,24 @@
         "type": "string"
       }
     },
+    "city": {
+      "vid": "city",
+      "label": "City",
+      "attr": null
+    },
+    "forum": {
+      "vid": "forum",
+      "label": "Forum",
+      "attr": null
+    },
     "tag": {
       "vid": "tag",
       "label": "Tag",
       "attr": null
     },
-    "city": {
-      "vid": "city",
-      "label": "City",
+    "person": {
+      "vid": "person",
+      "label": "Person",
       "attr": null
     },
     "country": {
@@ -40,33 +55,25 @@
         "type": "string"
       }
     },
-    "post": {
-      "vid": "post",
-      "label": "Post",
-      "attr": null
-    },
-    "forum": {
-      "vid": "forum",
-      "label": "Forum",
-      "attr": null
-    },
     "comment": {
       "vid": "comment",
       "label": "Comment",
       "attr": null
-    },
-    "person": {
-      "vid": "person",
-      "label": "Person",
-      "attr": null
     }
   },
   "edges": {
-    "f": {
-      "eid": "f",
+    "a": {
+      "eid": "a",
+      "src_vid": "city",
+      "dst_vid": "country",
+      "label": "isPartOf",
+      "attr": null
+    },
+    "e": {
+      "eid": "e",
       "src_vid": "comment",
-      "dst_vid": "tag",
-      "label": "hasTag",
+      "dst_vid": "post",
+      "label": "replyOf",
       "attr": null
     },
     "d": {
@@ -76,20 +83,6 @@
       "label": "containerOf",
       "attr": null
     },
-    "b": {
-      "eid": "b",
-      "src_vid": "person",
-      "dst_vid": "city",
-      "label": "isLocatedIn",
-      "attr": null
-    },
-    "a": {
-      "eid": "a",
-      "src_vid": "city",
-      "dst_vid": "country",
-      "label": "isPartOf",
-      "attr": null
-    },
     "c": {
       "eid": "c",
       "src_vid": "forum",
@@ -97,11 +90,18 @@
       "label": "hasModerator",
       "attr": null
     },
-    "e": {
-      "eid": "e",
+    "b": {
+      "eid": "b",
+      "src_vid": "person",
+      "dst_vid": "city",
+      "label": "isLocatedIn",
+      "attr": null
+    },
+    "f": {
+      "eid": "f",
       "src_vid": "comment",
-      "dst_vid": "post",
-      "label": "replyOf",
+      "dst_vid": "tag",
+      "label": "hasTag",
       "attr": null
     },
     "g": {
@@ -155,8 +155,8 @@
       "multi_ops": [],
       "target_var": "f^city",
       "depend_on": [
-        "A^country",
         "C^city",
+        "A^country",
         "f^country"
       ]
     },
@@ -170,10 +170,10 @@
       "multi_ops": [],
       "target_var": "A^city",
       "depend_on": [
-        "C^city",
         "f^country",
         "f^city",
-        "A^country"
+        "A^country",
+        "C^city"
       ]
     },
     {
@@ -185,10 +185,10 @@
       "target_var": "C^person",
       "depend_on": [
         "f^city",
-        "f^country",
-        "A^city",
         "A^country",
-        "C^city"
+        "C^city",
+        "A^city",
+        "f^country"
       ]
     },
     {
@@ -199,11 +199,11 @@
       "multi_ops": [],
       "target_var": "f^person",
       "depend_on": [
-        "C^city",
         "f^country",
-        "f^city",
-        "A^country",
         "C^person",
+        "A^country",
+        "C^city",
+        "f^city",
         "A^city"
       ]
     },
@@ -217,12 +217,12 @@
       "multi_ops": [],
       "target_var": "A^person",
       "depend_on": [
-        "f^city",
-        "f^country",
-        "C^city",
-        "A^country",
-        "C^person",
         "f^person",
+        "f^country",
+        "C^person",
+        "A^country",
+        "C^city",
+        "f^city",
         "A^city"
       ]
     },
@@ -234,14 +234,14 @@
       "multi_ops": [],
       "target_var": "C^forum",
       "depend_on": [
-        "f^city",
-        "A^country",
-        "C^city",
-        "C^person",
-        "A^person",
-        "f^person",
         "A^city",
-        "f^country"
+        "A^person",
+        "C^city",
+        "f^person",
+        "f^city",
+        "f^country",
+        "A^country",
+        "C^person"
       ]
     },
     {
@@ -252,15 +252,15 @@
       "multi_ops": [],
       "target_var": "f^forum",
       "depend_on": [
-        "C^forum",
+        "A^country",
+        "C^city",
+        "f^city",
         "C^person",
-        "f^country",
         "A^person",
         "A^city",
-        "f^city",
         "f^person",
-        "A^country",
-        "C^city"
+        "C^forum",
+        "f^country"
       ]
     },
     {
@@ -273,15 +273,15 @@
       "multi_ops": [],
       "target_var": "A^forum",
       "depend_on": [
-        "f^country",
-        "A^person",
-        "C^forum",
         "C^city",
         "A^city",
-        "C^person",
-        "f^person",
+        "C^forum",
         "f^city",
         "f^forum",
+        "A^person",
+        "f^person",
+        "f^country",
+        "C^person",
         "A^country"
       ]
     },
@@ -294,16 +294,16 @@
       "target_var": "C^post",
       "depend_on": [
         "C^city",
-        "f^person",
-        "A^person",
         "A^city",
-        "C^person",
-        "f^country",
-        "C^forum",
-        "A^forum",
         "f^city",
+        "A^country",
+        "A^forum",
         "f^forum",
-        "A^country"
+        "f^person",
+        "C^person",
+        "A^person",
+        "f^country",
+        "C^forum"
       ]
     },
     {
@@ -314,18 +314,18 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "C^person",
+        "f^person",
+        "f^city",
+        "A^forum",
+        "A^person",
+        "C^city",
+        "A^country",
+        "C^forum",
+        "f^forum",
         "A^city",
         "f^country",
-        "f^city",
-        "C^forum",
-        "C^post",
-        "C^city",
-        "f^person",
-        "A^person",
-        "A^forum",
-        "f^forum",
-        "A^country"
+        "C^person",
+        "C^post"
       ]
     },
     {
@@ -338,19 +338,19 @@
       "multi_ops": [],
       "target_var": "A^post",
       "depend_on": [
+        "f^person",
+        "A^person",
+        "A^city",
+        "C^city",
+        "f^city",
+        "A^country",
+        "f^forum",
+        "f^post",
         "f^country",
         "A^forum",
-        "f^person",
-        "f^forum",
-        "A^country",
-        "f^city",
-        "f^post",
-        "A^city",
         "C^forum",
-        "C^city",
-        "C^post",
-        "A^person",
-        "C^person"
+        "C^person",
+        "C^post"
       ]
     },
     {
@@ -361,20 +361,20 @@
       "multi_ops": [],
       "target_var": "C^comment",
       "depend_on": [
-        "f^forum",
-        "A^country",
-        "A^city",
-        "C^forum",
-        "A^post",
-        "C^post",
-        "f^post",
+        "f^city",
         "A^person",
         "C^city",
-        "C^person",
-        "f^person",
+        "f^forum",
+        "f^post",
+        "A^country",
+        "A^forum",
+        "C^forum",
         "f^country",
-        "f^city",
-        "A^forum"
+        "C^person",
+        "A^post",
+        "C^post",
+        "f^person",
+        "A^city"
       ]
     },
     {
@@ -386,20 +386,20 @@
       "target_var": "f^comment",
       "depend_on": [
         "C^city",
-        "A^city",
         "f^forum",
-        "f^person",
         "C^forum",
-        "A^forum",
-        "C^comment",
-        "A^country",
         "f^country",
+        "A^country",
+        "C^comment",
         "A^person",
+        "A^forum",
+        "A^city",
+        "C^person",
+        "f^person",
+        "C^post",
         "f^city",
         "f^post",
-        "C^post",
-        "A^post",
-        "C^person"
+        "A^post"
       ]
     },
     {
@@ -412,22 +412,22 @@
       "multi_ops": [],
       "target_var": "A^comment",
       "depend_on": [
-        "A^country",
-        "f^post",
+        "f^forum",
         "C^post",
-        "f^city",
-        "C^city",
         "C^comment",
-        "f^country",
-        "A^city",
-        "C^person",
-        "A^forum",
+        "A^person",
         "C^forum",
         "f^person",
-        "f^forum",
-        "A^person",
+        "f^country",
+        "f^post",
+        "A^city",
+        "A^forum",
+        "f^comment",
+        "C^person",
+        "f^city",
         "A^post",
-        "f^comment"
+        "A^country",
+        "C^city"
       ]
     },
     {
@@ -438,23 +438,23 @@
       "multi_ops": [],
       "target_var": "C^tag",
       "depend_on": [
-        "C^city",
-        "A^forum",
-        "A^city",
-        "A^country",
-        "f^country",
-        "C^person",
-        "f^person",
         "A^comment",
+        "A^post",
+        "f^post",
+        "A^country",
+        "A^city",
         "f^forum",
+        "C^comment",
+        "C^city",
+        "C^forum",
         "A^person",
         "C^post",
-        "f^comment",
-        "C^comment",
-        "A^post",
+        "f^person",
+        "f^country",
         "f^city",
-        "C^forum",
-        "f^post"
+        "C^person",
+        "f^comment",
+        "A^forum"
       ]
     },
     {
@@ -465,24 +465,24 @@
       "multi_ops": [],
       "target_var": "f^tag",
       "depend_on": [
-        "f^person",
-        "A^comment",
-        "f^city",
-        "A^person",
-        "C^tag",
-        "f^forum",
-        "C^post",
-        "A^city",
-        "C^comment",
-        "A^forum",
-        "f^country",
-        "C^city",
-        "f^comment",
-        "A^post",
-        "f^post",
-        "A^country",
         "C^forum",
-        "C^person"
+        "C^comment",
+        "f^city",
+        "f^person",
+        "A^city",
+        "f^comment",
+        "A^comment",
+        "C^tag",
+        "A^country",
+        "C^person",
+        "f^post",
+        "f^country",
+        "f^forum",
+        "C^city",
+        "A^forum",
+        "A^person",
+        "C^post",
+        "A^post"
       ]
     },
     {
@@ -495,25 +495,25 @@
       "multi_ops": [],
       "target_var": "A^tag",
       "depend_on": [
-        "f^city",
-        "C^person",
-        "C^comment",
-        "f^post",
-        "A^city",
-        "A^forum",
         "C^city",
-        "f^comment",
-        "f^tag",
-        "C^tag",
-        "f^country",
-        "C^post",
-        "A^post",
-        "C^forum",
-        "A^country",
+        "C^comment",
+        "A^city",
+        "f^post",
         "A^comment",
         "f^forum",
+        "A^country",
+        "f^tag",
         "f^person",
-        "A^person"
+        "C^person",
+        "f^comment",
+        "C^tag",
+        "C^forum",
+        "A^forum",
+        "A^post",
+        "f^country",
+        "A^person",
+        "C^post",
+        "f^city"
       ]
     },
     {
@@ -524,26 +524,26 @@
       "multi_ops": [],
       "target_var": "C^tagClass",
       "depend_on": [
-        "f^post",
-        "f^comment",
-        "C^tag",
-        "C^person",
-        "A^tag",
+        "C^post",
         "A^comment",
+        "f^tag",
+        "A^person",
         "f^person",
-        "A^city",
+        "C^city",
+        "f^forum",
+        "f^comment",
         "A^post",
-        "f^city",
+        "C^forum",
+        "A^city",
+        "A^tag",
+        "A^country",
+        "C^comment",
+        "C^tag",
+        "f^post",
+        "C^person",
         "A^forum",
         "f^country",
-        "A^country",
-        "C^forum",
-        "C^comment",
-        "f^forum",
-        "C^post",
-        "A^person",
-        "f^tag",
-        "C^city"
+        "f^city"
       ]
     },
     {
@@ -554,27 +554,27 @@
       "multi_ops": [],
       "target_var": "f^tagClass",
       "depend_on": [
-        "C^forum",
-        "A^comment",
-        "A^tag",
-        "A^country",
-        "f^tag",
-        "C^person",
         "C^tag",
-        "f^forum",
-        "A^forum",
-        "C^tagClass",
-        "f^post",
-        "f^city",
+        "A^tag",
         "C^city",
-        "f^comment",
         "A^city",
-        "f^country",
         "C^post",
         "A^post",
+        "A^country",
+        "A^forum",
+        "A^comment",
+        "C^person",
+        "f^city",
+        "C^forum",
+        "f^country",
         "A^person",
+        "f^comment",
+        "C^comment",
+        "f^post",
+        "f^tag",
         "f^person",
-        "C^comment"
+        "C^tagClass",
+        "f^forum"
       ]
     },
     {
@@ -583,39 +583,39 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^city",
-        "f^tag",
-        "f^post",
-        "f^person",
-        "f^country",
-        "f^comment",
         "f^tagClass",
-        "f^forum"
+        "f^forum",
+        "f^post",
+        "f^country",
+        "f^tag",
+        "f^person",
+        "f^city",
+        "f^comment"
       ],
       "target_var": "f",
       "depend_on": [
-        "C^forum",
-        "A^post",
-        "A^person",
-        "f^country",
-        "f^city",
-        "f^forum",
-        "C^tag",
-        "C^comment",
-        "C^post",
-        "A^comment",
-        "C^tagClass",
-        "f^person",
+        "A^city",
         "A^country",
-        "C^city",
-        "f^comment",
-        "A^forum",
-        "A^tag",
-        "C^person",
-        "f^tag",
+        "f^forum",
+        "A^comment",
+        "A^person",
         "f^post",
+        "C^tag",
+        "A^post",
+        "A^forum",
+        "C^tagClass",
+        "C^city",
+        "f^city",
+        "f^comment",
+        "f^country",
         "f^tagClass",
-        "A^city"
+        "f^person",
+        "C^person",
+        "C^forum",
+        "A^tag",
+        "C^comment",
+        "f^tag",
+        "C^post"
       ]
     }
   ]

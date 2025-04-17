@@ -19,7 +19,7 @@ impl AsyncDefault for Neo4jStorageAdapter {
       .user(username)
       .password(password)
       .db(db_name)
-      .fetch_size(10000)
+      .fetch_size(1024)
       .max_connections(num_cpus::get())
       .build()
       .unwrap();

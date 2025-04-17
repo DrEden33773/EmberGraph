@@ -86,9 +86,7 @@ pub async fn bi_9_on_sf_01() -> io::Result<()> {
   query::<Neo4jStorageAdapter>("ldbc-bi-9.json").await
 }
 
-/// ✅ ⚠️  Slow query: `GetAdj("f^otherTag")`
-/// - Memory usage is normal, computation process is too slow
-/// - `Neo4jStorageAdapter` is `slower` than `SqliteStorageAdapter`
+/// ✅
 pub async fn bi_10_on_sf_01() -> io::Result<()> {
   println!("Querying 'BI-10' on 'SF0.1' ...\n");
   query::<SqliteStorageAdapter>("ldbc-bi-10.json").await

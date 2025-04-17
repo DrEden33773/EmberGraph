@@ -6,16 +6,6 @@
     "post"
   ],
   "vertices": {
-    "tagClass": {
-      "vid": "tagClass",
-      "label": "Tagclass",
-      "attr": null
-    },
-    "comment": {
-      "vid": "comment",
-      "label": "Comment",
-      "attr": null
-    },
     "post": {
       "vid": "post",
       "label": "Post",
@@ -30,9 +20,26 @@
         "value": "Patrick_Vieira",
         "type": "string"
       }
+    },
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
+      "attr": null
+    },
+    "tagClass": {
+      "vid": "tagClass",
+      "label": "Tagclass",
+      "attr": null
     }
   },
   "edges": {
+    "c": {
+      "eid": "c",
+      "src_vid": "tag",
+      "dst_vid": "tagClass",
+      "label": "hasType",
+      "attr": null
+    },
     "b": {
       "eid": "b",
       "src_vid": "comment",
@@ -45,13 +52,6 @@
       "src_vid": "post",
       "dst_vid": "tag",
       "label": "hasTag",
-      "attr": null
-    },
-    "c": {
-      "eid": "c",
-      "src_vid": "tag",
-      "dst_vid": "tagClass",
-      "label": "hasType",
       "attr": null
     }
   },
@@ -69,8 +69,8 @@
       "vid": "tag",
       "type": "get_adj",
       "expand_eid_list": [
-        "a",
         "b",
+        "a",
         "c"
       ],
       "single_op": "f^tag",
@@ -100,9 +100,9 @@
       "multi_ops": [],
       "target_var": "f^tagClass",
       "depend_on": [
-        "C^tagClass",
+        "A^tag",
         "f^tag",
-        "A^tag"
+        "C^tagClass"
       ]
     },
     {
@@ -125,8 +125,8 @@
       "multi_ops": [],
       "target_var": "f^comment",
       "depend_on": [
-        "C^comment",
         "f^tag",
+        "C^comment",
         "A^tag"
       ]
     },
@@ -138,8 +138,8 @@
       "multi_ops": [],
       "target_var": "C^post",
       "depend_on": [
-        "A^tag",
-        "f^tag"
+        "f^tag",
+        "A^tag"
       ]
     },
     {
@@ -150,9 +150,9 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "C^post",
         "f^tag",
-        "A^tag"
+        "A^tag",
+        "C^post"
       ]
     },
     {
@@ -162,19 +162,19 @@
       "single_op": null,
       "multi_ops": [
         "f^tagClass",
-        "f^tag",
+        "f^comment",
         "f^post",
-        "f^comment"
+        "f^tag"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^tag",
-        "C^comment",
-        "f^post",
-        "C^post",
-        "f^tagClass",
         "f^comment",
+        "C^comment",
+        "C^post",
+        "f^tag",
+        "f^tagClass",
         "A^tag",
+        "f^post",
         "C^tagClass"
       ]
     }

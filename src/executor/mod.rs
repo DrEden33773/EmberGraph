@@ -169,6 +169,8 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
             .flat_map(|a| {
               graphs
                 .par_iter()
+                // this `filter` could lead to a HUGE performance improvement
+                .filter(|b| a.has_common_v(b))
                 .map(|b| a.clone() | b.clone())
                 .collect::<Vec<_>>()
             })

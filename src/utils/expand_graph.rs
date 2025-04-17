@@ -129,6 +129,8 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
       return vec![];
     }
 
+    let pending_v_grouped_dangling_eids = self.pending_v_grouped_dangling_eids.as_slice();
+
     // Use index-based approach instead of iterators for better debug mode performance
     let pending_len = self.pending_v_grouped_dangling_eids.len();
     let vertex_len = asc_target_vertex_pattern_pairs.len();
@@ -141,8 +143,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
     // Continue until one of the collections is exhausted
     while pending_idx < pending_len && vertex_idx < vertex_len {
       // Get current elements by index
-      let (pending_vid, dangling_eids) = self
-        .pending_v_grouped_dangling_eids
+      let (pending_vid, dangling_eids) = pending_v_grouped_dangling_eids
         .get_index(pending_idx)
         .unwrap();
       let (vertex, pattern) = &asc_target_vertex_pattern_pairs[vertex_idx];
@@ -217,8 +218,8 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
   l_expand_graph: &ExpandGraph<VType, EType>,
   r_expand_graph: &ExpandGraph<VType, EType>,
 ) -> Vec<ExpandGraph<VType, EType>> {
-  let grouped_l = &l_expand_graph.pending_v_grouped_dangling_eids;
-  let grouped_r = &r_expand_graph.pending_v_grouped_dangling_eids;
+  let grouped_l = l_expand_graph.pending_v_grouped_dangling_eids.as_slice();
+  let grouped_r = r_expand_graph.pending_v_grouped_dangling_eids.as_slice();
 
   if grouped_l.is_empty() || grouped_r.is_empty() {
     return vec![];

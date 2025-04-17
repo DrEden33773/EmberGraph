@@ -120,6 +120,7 @@ impl<S: StorageAdapter> CachedStorageAdapter<S> {
     self.cache.edges_cache.invalidate_all();
   }
 
+  #[allow(dead_code)]
   fn try_background_update<V: Clone + Send + Sync + 'static>(
     &self,
     cache: &Cache<CacheKey, V>,
@@ -145,6 +146,35 @@ impl<S: StorageAdapter> CachedStorageAdapter<S> {
       }
     });
   }
+
+  #[allow(dead_code)]
+  fn force_background_update<V: Clone + Send + Sync + 'static>(
+    &self,
+    cache: &Cache<CacheKey, V>,
+    result: &V,
+    key: CacheKey,
+  ) {
+    let cache = cache.clone();
+    let result = result.clone();
+
+    tokio::spawn(async move {
+      cache.insert(key, result).await;
+    });
+  }
+
+  #[inline]
+  fn background_update<V: Clone + Send + Sync + 'static>(
+    &self,
+    cache: &Cache<CacheKey, V>,
+    result: &V,
+    key: CacheKey,
+  ) {
+    #[cfg(feature = "cache_force_background_update")]
+    self.force_background_update(cache, result, key);
+
+    #[cfg(not(feature = "cache_force_background_update"))]
+    self.try_background_update(cache, result, key);
+  }
 }
 
 impl<S: StorageAdapter> AsyncDefault for CachedStorageAdapter<S> {
@@ -167,7 +197,7 @@ impl<S: StorageAdapter> StorageAdapter for CachedStorageAdapter<S> {
     let result = self.inner.get_v(vid).await;
 
     // update cache with result
-    self.try_background_update(&self.cache.vertex_cache, &result, key);
+    self.background_update(&self.cache.vertex_cache, &result, key);
 
     result
   }
@@ -182,7 +212,7 @@ impl<S: StorageAdapter> StorageAdapter for CachedStorageAdapter<S> {
 
     let result = self.inner.load_v(v_label, v_attr).await;
 
-    self.try_background_update(&self.cache.vertices_cache, &result, key);
+    self.background_update(&self.cache.vertices_cache, &result, key);
 
     result
   }
@@ -208,7 +238,7 @@ impl<S: StorageAdapter> StorageAdapter for CachedStorageAdapter<S> {
 
     let result = self.inner.load_e_with_src(src_vid, e_label, e_attr).await;
 
-    self.try_background_update(&self.cache.edges_cache, &result, key);
+    self.background_update(&self.cache.edges_cache, &result, key);
 
     result
   }
@@ -228,7 +258,7 @@ impl<S: StorageAdapter> StorageAdapter for CachedStorageAdapter<S> {
 
     let result = self.inner.load_e_with_dst(dst_vid, e_label, e_attr).await;
 
-    self.try_background_update(&self.cache.edges_cache, &result, key);
+    self.background_update(&self.cache.edges_cache, &result, key);
 
     result
   }
@@ -262,7 +292,7 @@ impl<S: AdvancedStorageAdapter> AdvancedStorageAdapter for CachedStorageAdapter<
       .load_e_with_src_and_dst_filter(src_vid, e_label, e_attr, dst_v_label, dst_v_attr)
       .await;
 
-    self.try_background_update(&self.cache.edges_cache, &result, key);
+    self.background_update(&self.cache.edges_cache, &result, key);
 
     result
   }
@@ -294,7 +324,7 @@ impl<S: AdvancedStorageAdapter> AdvancedStorageAdapter for CachedStorageAdapter<
       .load_e_with_dst_and_src_filter(dst_vid, e_label, e_attr, src_v_label, src_v_attr)
       .await;
 
-    self.try_background_update(&self.cache.edges_cache, &result, key);
+    self.background_update(&self.cache.edges_cache, &result, key);
 
     result
   }

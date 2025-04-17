@@ -95,6 +95,22 @@ impl<VType: VBase, EType: EBase> BitOr for DynGraph<VType, EType> {
 
 impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
   #[inline]
+  pub fn has_common_v(&self, other: &Self) -> bool {
+    let (shorter, longer) = if self.v_entities.len() < other.v_entities.len() {
+      (self, other)
+    } else {
+      (other, self)
+    };
+
+    shorter
+      .v_entities
+      .keys()
+      .any(|vid| longer.v_entities.contains_key(vid))
+  }
+}
+
+impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
+  #[inline]
   pub fn v_entities(&self) -> &HashMap<Vid, VType> {
     &self.v_entities
   }

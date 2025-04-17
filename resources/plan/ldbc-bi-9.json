@@ -32,18 +32,18 @@
     }
   },
   "edges": {
-    "b": {
-      "eid": "b",
-      "src_vid": "post",
-      "dst_vid": "person",
-      "label": "hasCreator",
-      "attr": null
-    },
     "a": {
       "eid": "a",
       "src_vid": "comment",
       "dst_vid": "post",
       "label": "replyOf",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "post",
+      "dst_vid": "person",
+      "label": "hasCreator",
       "attr": null
     }
   },
@@ -90,9 +90,9 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "C^post",
+        "f^comment",
         "A^comment",
-        "f^comment"
+        "C^post"
       ]
     },
     {
@@ -105,10 +105,10 @@
       "multi_ops": [],
       "target_var": "A^post",
       "depend_on": [
-        "A^comment",
-        "f^post",
         "C^post",
-        "f^comment"
+        "f^comment",
+        "f^post",
+        "A^comment"
       ]
     },
     {
@@ -120,10 +120,10 @@
       "target_var": "C^person",
       "depend_on": [
         "f^post",
-        "f^comment",
         "A^comment",
-        "A^post",
-        "C^post"
+        "f^comment",
+        "C^post",
+        "A^post"
       ]
     },
     {
@@ -134,12 +134,12 @@
       "multi_ops": [],
       "target_var": "f^person",
       "depend_on": [
-        "A^post",
-        "f^post",
         "C^person",
+        "C^post",
+        "f^post",
         "A^comment",
-        "f^comment",
-        "C^post"
+        "A^post",
+        "f^comment"
       ]
     },
     {
@@ -148,19 +148,19 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
+        "f^comment",
         "f^post",
-        "f^person",
-        "f^comment"
+        "f^person"
       ],
       "target_var": "f",
       "depend_on": [
-        "A^post",
-        "f^comment",
-        "C^post",
-        "C^person",
-        "A^comment",
         "f^person",
-        "f^post"
+        "f^post",
+        "C^post",
+        "f^comment",
+        "A^comment",
+        "C^person",
+        "A^post"
       ]
     }
   ]

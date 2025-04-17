@@ -16,7 +16,7 @@ async fn to_run() -> io::Result<()> {
 
   println!();
 
-  #[cfg(feature = "use_tracing")]
+  #[cfg(feature = "enable_log")]
   #[allow(unused_variables)]
   let guard = ember_graph::init_log::init_log().await?;
 

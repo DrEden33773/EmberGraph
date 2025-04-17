@@ -43,7 +43,25 @@ pub async fn bi_3_on_sf_01() -> io::Result<()> {
     "Querying 'BI-3' {} on 'SF0.1' ...\n",
     "with neo4j_matching_order".purple()
   );
-  query::<SqliteStorageAdapter>("ldbc-bi-3.json").await
+  query::<Neo4jStorageAdapter>("ldbc-bi-3.json").await
+}
+
+/// ✅
+pub async fn bi_5_on_sf_01() -> io::Result<()> {
+  println!(
+    "Querying 'BI-5' {} on 'SF0.1' ...\n",
+    "with neo4j_matching_order".purple()
+  );
+  query::<Neo4jStorageAdapter>("ldbc-bi-5.json").await
+}
+
+/// ✅
+pub async fn bi_6_on_sf_01() -> io::Result<()> {
+  println!(
+    "Querying 'BI-6' {} on 'SF0.1' ...\n",
+    "with neo4j_matching_order".purple()
+  );
+  query::<SqliteStorageAdapter>("ldbc-bi-6.json").await
 }
 
 /// ✅
@@ -70,5 +88,5 @@ pub async fn bi_17_on_sf_01() -> io::Result<()> {
     "Querying 'BI-17' {} on 'SF0.1' ...\n",
     "with neo4j_matching_order".purple()
   );
-  query::<SqliteStorageAdapter>("ldbc-bi-17.json").await
+  query::<Neo4jStorageAdapter>("ldbc-bi-17.json").await
 }
