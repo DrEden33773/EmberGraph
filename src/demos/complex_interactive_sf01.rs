@@ -19,15 +19,17 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
   )
   .await;
 
-  println!(
-    "✨  Get {} results in {} ms",
-    result.len().to_string().green(),
-    format!("{elapsed:.2}").yellow()
-  );
+  let len = result.len();
 
   if let Some(df) = ResultDumper::new(result).to_simplified_df(false) {
     println!("{}", df);
   }
+
+  println!(
+    "✨  Get {} results in {} ms",
+    len.to_string().green(),
+    format!("{elapsed:.2}").yellow()
+  );
 
   Ok(())
 }
