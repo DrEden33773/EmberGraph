@@ -2,7 +2,7 @@ cargo-features = ["profile-rustflags"]
 
 [package]
 name = "ember-graph"
-version = "0.1.9"
+version = "0.2.0"
 edition = "2024"
 authors = ["Eden Wang <edwardwang33773@gmail.com>"]
 readme = "README.md"
@@ -28,7 +28,6 @@ futures = "0.3.31"
 hashbrown = { version = "0.15.2", features = [] }
 indexmap = { version = "2.9.0", features = [] }
 itertools = "0.14.0"
-mimalloc = "0.1.46"
 moka = { version = "0.12.10", features = ["future"] }
 neo4rs = "0.8.0"
 num_cpus = "1.16.0"
@@ -42,14 +41,19 @@ serde_json = "1.0.140"
 sqlx = { version = "0.8.5", features = ["runtime-tokio", "sqlite"] }
 strum = "0.27.1"
 strum_macros = "0.27.1"
-tikv-jemallocator = { version = "0.6.0", features = [
-    "unprefixed_malloc_on_supported_platforms",
-] }
 tokio = { version = "1.44.2", features = ["full"] }
 tracing = { version = "0.1.41", features = ["async-await"] }
 tracing-appender = "0.2.3"
 tracing-futures = "0.2.5"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+
+# Windows: use mimalloc
+[target.'cfg(windows)'.dependencies]
+mimalloc = "0.1.46"
+
+# Non-Windows: use tikv-jemallocator
+[target.'cfg(not(windows))'.dependencies]
+tikv-jemallocator = { version = "0.6.0", features = ["unprefixed_malloc_on_supported_platforms"] }
 
 [features]
 default = ["block_spawn_via_rayon", "cache_force_background_update", "intersection_force_element_paralleled"]
