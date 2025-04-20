@@ -1,18 +1,15 @@
+use colored::Colorize;
 use dotenv::dotenv;
-use ember_graph::{demos::bi_sf01_neo4j_ordered::bi_3_on_sf_01, utils::parallel};
-#[cfg(windows)]
-use mimalloc::MiMalloc;
-#[cfg(unix)]
-use tikv_jemallocator::Jemalloc;
+use ember_graph::{demos::bi_sf01_neo4j_ordered::query, storage::*, utils::parallel};
 use tokio::io;
 
 #[cfg(unix)]
 #[global_allocator]
-static GLOBAL: Jemalloc = Jemalloc;
+static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
 #[cfg(windows)]
 #[global_allocator]
-static GLOBAL: MiMalloc = MiMalloc;
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 fn main() -> io::Result<()> {
   parallel::config_before_run(to_run())
@@ -20,5 +17,16 @@ fn main() -> io::Result<()> {
 
 async fn to_run() -> io::Result<()> {
   dotenv().ok();
-  bi_3_on_sf_01().await
+  println!(
+    "Querying 'BI-3' {} on 'SF0.1' ...\n",
+    "with neo4j_matching_order".purple()
+  );
+  #[cfg(unix)]
+  {
+    query::<Neo4jStorageAdapter>("ldbc-bi-3.json").await
+  }
+  #[cfg(windows)]
+  {
+    query::<SqliteStorageAdapter>("ldbc-bi-3.json").await
+  }
 }
