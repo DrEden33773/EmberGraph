@@ -31,8 +31,8 @@ impl AsyncDefault for SqliteStorageAdapter {
         .create_if_missing(true)
         .immutable(true)
         .read_only(true)
-        .row_buffer_size(1024)
-        .statement_cache_capacity(256),
+        .row_buffer_size(2048)
+        .statement_cache_capacity(512),
     )
     .await
     .expect("❌ Failed to connect to SQLite database");

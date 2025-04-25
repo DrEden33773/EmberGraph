@@ -9,7 +9,7 @@ use std::{
 };
 use tokio::sync::Semaphore;
 
-const DEFAULT_CACHE_SIZE: usize = 256;
+const DEFAULT_CACHE_SIZE: usize = 512;
 const MAX_BACKGROUND_WRITE_TASKS: usize = 32;
 
 #[derive(Clone, Eq, PartialEq, Hash)]
