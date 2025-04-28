@@ -28,7 +28,43 @@
     "thiserror",
     "tikv",
     "titlecase",
-    "venv"
+    "venv",
+    "applydate",
+    "Arango",
+    "biber",
+    "classid",
+    "ctexart",
+    "ctexbook",
+    "degreefull",
+    "documentclass",
+    "Flink",
+    "Gelly",
+    "iffalse",
+    "iftrue",
+    "industrialadvisers",
+    "inlinecite",
+    "keywordstyle",
+    "LDBC",
+    "libraryclassid",
+    "majorsubject",
+    "Mathematica",
+    "Matplotlib",
+    "Noto",
+    "papersize",
+    "parray",
+    "pkgs",
+    "pround",
+    "researchfield",
+    "stringstyle",
+    "studentid",
+    "subfigure",
+    "subjectclassid",
+    "texlive",
+    "tlmgr",
+    "Triejoin",
+    "Ullmann",
+    "Wenhan",
+    "Zhaokang"
   ],
   "[rust]": {
     "editor.defaultFormatter": "rust-lang.rust-analyzer",
@@ -50,20 +86,7 @@
     ".vscode",
     ".vscode-insiders",
     "data/**",
-    "resources/**"
-  ],
-  "sqltools.connections": [
-    {
-      "previewLimit": 50,
-      "driver": "SQLite",
-      "database": "${workspaceFolder:ember-sgm}/ldbc_sn_interactive_sf01.db",
-      "name": "ldbc_sn_interactive_sf01"
-    },
-    {
-      "previewLimit": 50,
-      "driver": "SQLite",
-      "database": "${workspaceFolder:ember-sgm}/simple_test_data_graph.db",
-      "name": "simple_test_data_graph"
-    }
+    "resources/**",
+    "thesis/chs/bib"
   ]
 }

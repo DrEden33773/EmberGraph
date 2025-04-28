@@ -226,8 +226,6 @@ struct LoadWithCondCtx<'a, S: AdvancedStorageAdapter> {
 async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   ctx: LoadWithCondCtx<'a, S>,
 ) -> Vec<DataEdge> {
-  use itertools::Itertools;
-
   // load all edges first
   let loaded_edges = if ctx.is_src_curr_pat {
     ctx
@@ -254,8 +252,11 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   };
 
   // filter out the edges that are already matched
-  loaded_edges
-    .into_iter()
-    .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
-    .collect_vec()
+  parallel::spawn_blocking(move || {
+    loaded_edges
+      .into_par_iter()
+      .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
+      .collect()
+  })
+  .await
 }

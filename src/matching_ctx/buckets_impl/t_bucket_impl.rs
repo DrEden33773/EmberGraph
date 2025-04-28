@@ -137,7 +137,7 @@ impl TBucket {
           .flat_map(|right| union_then_intersect_on_connective_v(left, right))
           .collect::<Vec<_>>()
       })
-      .collect::<Vec<_>>()
+      .collect()
   }
 
   #[cfg(not(feature = "intersection_force_element_paralleled"))]
@@ -162,6 +162,6 @@ impl TBucket {
           })
           .collect::<Vec<_>>()
       })
-      .collect::<Vec<_>>()
+      .collect()
   }
 }
