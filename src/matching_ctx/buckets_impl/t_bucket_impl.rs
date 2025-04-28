@@ -129,9 +129,8 @@ impl TBucket {
     longer
       .par_iter()
       .flat_map(|left| {
-        // inner use normal iterator, avoid thread nesting
         shorter
-          .iter()
+          .par_iter()
           // this `filter` will lead to a HUGE performance improvement
           .filter(|right| left.has_common_pending_v(right))
           .flat_map(|right| union_then_intersect_on_connective_v(left, right))

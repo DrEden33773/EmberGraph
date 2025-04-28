@@ -252,11 +252,9 @@ async fn incremental_match_adj_e<'a, S: AdvancedStorageAdapter>(
   };
 
   // filter out the edges that are already matched
-  parallel::spawn_blocking(move || {
-    loaded_edges
-      .into_par_iter()
-      .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
-      .collect()
-  })
-  .await
+  // NOTE: DO NOT block the task
+  loaded_edges
+    .into_par_iter()
+    .filter(|e| !ctx.curr_matched_dg.has_eid(e.eid()))
+    .collect()
 }
