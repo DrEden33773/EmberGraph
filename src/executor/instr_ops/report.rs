@@ -58,9 +58,9 @@ impl ReportOperator {
     true
   }
 
-  pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
+  pub async fn execute(&mut self, _instr: &Instruction) -> Option<()> {
     #[cfg(not(feature = "benchmark"))]
-    println!("\t{instr}");
+    println!("\t{_instr}");
 
     let (plan_v_pat_cnt, plan_e_pat_cnt) = {
       let plan_v_pat_cnt = self

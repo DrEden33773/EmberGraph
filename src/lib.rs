@@ -17,6 +17,10 @@ pub mod schemas;
 pub mod storage;
 pub mod utils;
 
+pub use executor::ExecEngine;
+pub use parser::PatternParser;
+pub use schemas::PlanData;
+
 #[cfg(feature = "enable_log")]
 pub mod init_log {
   use project_root::get_project_root;
