@@ -4,10 +4,12 @@ use crate::{
   storage::{AdvancedStorageAdapter, TestOnlyStorageAdapter},
   utils::{dyn_graph::DynGraph, parallel},
 };
+#[cfg(not(feature = "benchmark"))]
 use colored::Colorize;
 use hashbrown::HashMap;
 use instr_ops::InstrOperatorFactory;
 use itertools::Itertools;
+#[cfg(not(feature = "benchmark"))]
 use polars::{frame::DataFrame, prelude::Column, series::Series};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::{collections::VecDeque, sync::Arc};
@@ -36,6 +38,19 @@ impl<S: TestOnlyStorageAdapter> ExecEngine<S> {
 }
 
 impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
+  pub fn new(plan_data: Arc<PlanData>, storage_adapter: Arc<S>) -> Self {
+    let matching_ctx = Arc::new(MatchingCtx::new(plan_data.clone()));
+    Self {
+      plan_data,
+      storage_adapter,
+      matching_ctx,
+    }
+  }
+
+  pub fn get_storage_adapter(&self) -> Arc<S> {
+    self.storage_adapter.clone()
+  }
+
   pub async fn build_from_json(plan_json_content: &str) -> Self {
     let plan_data: PlanData = serde_json::from_str(plan_json_content).unwrap();
     let plan_data = Arc::new(plan_data);
@@ -52,6 +67,7 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
     res
   }
 
+  #[cfg(not(feature = "benchmark"))]
   fn profile_instructions(&self) {
     let instructions = self
       .plan_data
@@ -171,9 +187,7 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
 
     self.exec_helper(unmerged_results).await
   }
-}
 
-impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
   pub async fn parallel_exec(&mut self) -> Vec<DynGraph> {
     let unmerged_results = self
       .parallel_exec_without_final_merge()
@@ -195,17 +209,17 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
     let layers = layers.unwrap();
 
     // execute the instructions in parallel (by layer)
-    for (layer_idx, layer) in layers.iter().enumerate() {
+    for (_layer_idx, layer) in layers.iter().enumerate() {
       #[cfg(not(feature = "benchmark"))]
       {
-        if layer_idx != 0 {
+        if _layer_idx != 0 {
           println!();
         }
 
         println!(
           "🚀  Executing {}-{}: {}",
           "layer".yellow(),
-          layer_idx.to_string().yellow(),
+          _layer_idx.to_string().yellow(),
           format!("{:?}", layer).blue()
         );
       }
