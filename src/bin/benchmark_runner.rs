@@ -196,7 +196,7 @@ async fn run_benchmark() -> io::Result<()> {
 
   let resource_thread = thread::spawn(move || {
     let mut sys = System::new_with_specifics(
-      RefreshKind::new()
+      RefreshKind::nothing()
         .with_memory(MemoryRefreshKind::everything())
         .with_cpu(CpuRefreshKind::everything())
         .with_processes(ProcessRefreshKind::everything()),
@@ -205,7 +205,7 @@ async fn run_benchmark() -> io::Result<()> {
 
     while monitoring_active_clone.load(Ordering::Relaxed) {
       sys.refresh_specifics(
-        RefreshKind::new()
+        RefreshKind::nothing()
           .with_memory(MemoryRefreshKind::everything())
           .with_cpu(CpuRefreshKind::everything())
           .with_processes(ProcessRefreshKind::everything()),

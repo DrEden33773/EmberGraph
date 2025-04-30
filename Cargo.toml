@@ -2,7 +2,7 @@ cargo-features = ["profile-rustflags"]
 
 [package]
 name        = "ember-graph"
-version     = "0.2.4"
+version     = "0.2.5"
 edition     = "2024"
 authors     = ["Eden Wang <edwardwang33773@gmail.com>"]
 readme      = "README.md"
@@ -41,7 +41,7 @@ tracing-appender   = "0.2.3"
 tracing-futures    = "0.2.5"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 clap               = { version = "4.5.11", features = ["derive"] }
-sysinfo            = "0.30.13"
+sysinfo            = "0.34.2"
 
 # Windows: use mimalloc
 [target.'cfg(windows)'.dependencies]
