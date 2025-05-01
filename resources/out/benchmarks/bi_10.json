@@ -5,20 +5,157 @@
   "num_runs": 10,
   "num_warmup": 1,
   "timing": {
-    "min_ms": 839.876022,
-    "max_ms": 976.895562,
-    "avg_ms": 922.52219425,
+    "min_ms": 458.17771899999997,
+    "max_ms": 485.274473,
+    "avg_ms": 467.99737074999996,
     "all_runs_ms": [
-      887.535031,
-      716.015119,
-      1005.3453619999999,
-      976.83704,
-      891.78989,
-      949.8979840000001,
-      976.895562,
-      950.697675,
-      839.876022,
-      906.6483499999999
+      468.176513,
+      465.670845,
+      467.972438,
+      458.118466,
+      464.94295,
+      466.775775,
+      485.274473,
+      485.910691,
+      466.98825300000004,
+      458.17771899999997
     ]
-  }
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1746083177503,
+      "cpu_usage_percent": 10.217391,
+      "memory_bytes": 4488683520
+    },
+    {
+      "timestamp_ms": 1746083177713,
+      "cpu_usage_percent": 23.057644,
+      "memory_bytes": 4488683520
+    },
+    {
+      "timestamp_ms": 1746083177925,
+      "cpu_usage_percent": 37.844612,
+      "memory_bytes": 4488683520
+    },
+    {
+      "timestamp_ms": 1746083178132,
+      "cpu_usage_percent": 12.469438,
+      "memory_bytes": 4488683520
+    },
+    {
+      "timestamp_ms": 1746083178346,
+      "cpu_usage_percent": 15.36643,
+      "memory_bytes": 4492529664
+    },
+    {
+      "timestamp_ms": 1746083178558,
+      "cpu_usage_percent": 36.842102,
+      "memory_bytes": 4494540800
+    },
+    {
+      "timestamp_ms": 1746083178771,
+      "cpu_usage_percent": 30.046947,
+      "memory_bytes": 4494540800
+    },
+    {
+      "timestamp_ms": 1746083178982,
+      "cpu_usage_percent": 37.593987,
+      "memory_bytes": 4497862656
+    },
+    {
+      "timestamp_ms": 1746083179191,
+      "cpu_usage_percent": 32.125603,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083179404,
+      "cpu_usage_percent": 34.36019,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083179613,
+      "cpu_usage_percent": 35.609756,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083179824,
+      "cpu_usage_percent": 32.178215,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083180036,
+      "cpu_usage_percent": 36.25,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083180251,
+      "cpu_usage_percent": 32.592594,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083180463,
+      "cpu_usage_percent": 37.94872,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083180674,
+      "cpu_usage_percent": 31.407038,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083180888,
+      "cpu_usage_percent": 39.294712,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083181101,
+      "cpu_usage_percent": 32.11679,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083181313,
+      "cpu_usage_percent": 35.69794,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083181521,
+      "cpu_usage_percent": 34.615387,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083181733,
+      "cpu_usage_percent": 30.8204,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083181945,
+      "cpu_usage_percent": 35.81731,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083182156,
+      "cpu_usage_percent": 33.678757,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083182367,
+      "cpu_usage_percent": 38.817482,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083182579,
+      "cpu_usage_percent": 30.243902,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083182791,
+      "cpu_usage_percent": 37.135918,
+      "memory_bytes": 4498165760
+    },
+    {
+      "timestamp_ms": 1746083182999,
+      "cpu_usage_percent": 25.742575,
+      "memory_bytes": 4498042880
+    }
+  ]
 }

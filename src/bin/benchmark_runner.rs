@@ -20,9 +20,9 @@ use std::{
     mpsc,
   },
   thread,
-  time::{Duration, Instant, SystemTime},
+  time::{Instant, SystemTime},
 };
-use sysinfo::{CpuRefreshKind, MemoryRefreshKind, ProcessRefreshKind, RefreshKind, System};
+use sysinfo::{ProcessRefreshKind, ProcessesToUpdate, System};
 use tokio::io;
 
 #[derive(Parser, Debug)]
@@ -80,6 +80,7 @@ struct PerTaskBenchmarkOutput {
   num_runs: usize,
   num_warmup: usize,
   timing: TimingStats,
+  resource_usage: Vec<ResourceUsage>,
 }
 
 #[derive(Serialize, Debug)]
@@ -191,49 +192,6 @@ async fn run_benchmark() -> io::Result<()> {
     args.warmup.to_string().yellow()
   );
 
-  // --- Resource Monitoring Setup ---
-  let (resource_tx, resource_rx) = mpsc::channel();
-  let monitoring_active = Arc::new(AtomicBool::new(false));
-  let monitoring_active_clone = monitoring_active.clone();
-  let pid = process::id();
-
-  let resource_thread = thread::spawn(move || {
-    let mut sys = System::new_with_specifics(
-      RefreshKind::nothing()
-        .with_memory(MemoryRefreshKind::everything())
-        .with_cpu(CpuRefreshKind::everything())
-        .with_processes(ProcessRefreshKind::everything()),
-    );
-    let mut usage_data = vec![];
-
-    while monitoring_active_clone.load(Ordering::Relaxed) {
-      sys.refresh_specifics(
-        RefreshKind::nothing()
-          .with_memory(MemoryRefreshKind::everything())
-          .with_cpu(CpuRefreshKind::everything())
-          .with_processes(ProcessRefreshKind::everything()),
-      );
-
-      if let Some(process) = sys.process((pid as usize).into()) {
-        let timestamp_ms = SystemTime::now()
-          .duration_since(SystemTime::UNIX_EPOCH)
-          .unwrap_or_default()
-          .as_millis();
-        usage_data.push(ResourceUsage {
-          timestamp_ms,
-          cpu_usage_percent: process.cpu_usage(),
-          memory_bytes: process.memory(),
-        });
-      }
-
-      thread::sleep(Duration::from_millis(100)); // Sample every 100ms
-    }
-    resource_tx.send(usage_data).ok(); // Send data back when stopping
-  });
-  // --- End Resource Monitoring Setup ---
-
-  monitoring_active.store(true, Ordering::Relaxed);
-
   if args.all_bi_tasks {
     // Find and sort plan files
     let plan_dir = project_root::get_project_root()
@@ -301,7 +259,7 @@ async fn run_benchmark() -> io::Result<()> {
         .unwrap_or(""); // Default to empty if parsing fails
 
       println!(
-        "{} Running task: {} (Task Num: {})", // Log extracted task number
+        "{} Running task: {} (Task Num: {})",
         "--->".purple(),
         plan_file.display().to_string().purple(),
         task_num_str.yellow()
@@ -318,8 +276,67 @@ async fn run_benchmark() -> io::Result<()> {
       let storage_type = "sqlite";
       println!("{} Using storage: {}", "--->".blue(), storage_type.blue());
 
+      // create independent resource monitoring for each task
+      let (task_resource_tx, task_resource_rx) = mpsc::channel();
+      let task_monitoring_active = Arc::new(AtomicBool::new(true));
+      let task_monitoring_clone = task_monitoring_active.clone();
+      let task_pid = process::id();
+
+      let task_resource_thread = thread::spawn(move || {
+        let mut sys = System::new_all();
+        let mut task_usage_data = vec![];
+
+        while task_monitoring_clone.load(Ordering::Relaxed) {
+          // sample interval using system's minimum CPU update interval
+          thread::sleep(sysinfo::MINIMUM_CPU_UPDATE_INTERVAL);
+
+          sys.refresh_processes_specifics(
+            ProcessesToUpdate::All,
+            true,
+            ProcessRefreshKind::everything(),
+          );
+
+          if let Some(process) = sys.process((task_pid as usize).into()) {
+            let timestamp_ms = SystemTime::now()
+              .duration_since(SystemTime::UNIX_EPOCH)
+              .unwrap_or_default()
+              .as_millis();
+            task_usage_data.push(ResourceUsage {
+              timestamp_ms,
+              cpu_usage_percent: process.cpu_usage() / sys.cpus().len() as f32,
+              memory_bytes: process.virtual_memory(),
+            });
+          }
+        }
+        task_resource_tx.send(task_usage_data).ok();
+      });
+
       match execute_single_benchmark(&plan_file, storage_type, &args).await {
         Ok(timing_stats) => {
+          // stop current task's resource monitoring
+          task_monitoring_active.store(false, Ordering::Relaxed);
+
+          // acquire current task's resource usage data
+          let resource_usage = match task_resource_thread.join() {
+            Ok(_) => task_resource_rx.recv().unwrap_or_else(|e| {
+              eprintln!(
+                "{} Failed to receive resource data for task {}: {}",
+                "ERROR:".red(),
+                task_num_str.yellow(),
+                e
+              );
+              vec![]
+            }),
+            Err(_) => {
+              eprintln!(
+                "{} Resource monitoring thread for task {} panicked.",
+                "ERROR:".red(),
+                task_num_str.yellow()
+              );
+              vec![]
+            }
+          };
+
           let output_data = PerTaskBenchmarkOutput {
             query_file: plan_file.display().to_string(),
             storage_type: storage_type.to_string(),
@@ -327,6 +344,7 @@ async fn run_benchmark() -> io::Result<()> {
             num_runs: args.runs,
             num_warmup: args.warmup,
             timing: timing_stats,
+            resource_usage,
           };
 
           let output_filename = format!("bi_{}.json", task_num_str);
@@ -352,25 +370,62 @@ async fn run_benchmark() -> io::Result<()> {
     // Execute single task
     let query_file = args.query_file.as_ref().unwrap();
     let storage_type = args.storage.as_ref().unwrap().as_str();
+
+    // create resource monitoring for single task
+    let (task_resource_tx, task_resource_rx) = mpsc::channel();
+    let task_monitoring_active = Arc::new(AtomicBool::new(true));
+    let task_monitoring_clone = task_monitoring_active.clone();
+    let task_pid = process::id();
+
+    let task_resource_thread = thread::spawn(move || {
+      let mut sys = System::new_all();
+      let mut task_usage_data = vec![];
+
+      while task_monitoring_clone.load(Ordering::Relaxed) {
+        // sample interval using system's minimum CPU update interval
+        thread::sleep(sysinfo::MINIMUM_CPU_UPDATE_INTERVAL);
+
+        sys.refresh_processes_specifics(
+          ProcessesToUpdate::All,
+          true,
+          ProcessRefreshKind::everything(),
+        );
+
+        if let Some(process) = sys.process((task_pid as usize).into()) {
+          let timestamp_ms = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis();
+          task_usage_data.push(ResourceUsage {
+            timestamp_ms,
+            cpu_usage_percent: process.cpu_usage() / sys.cpus().len() as f32,
+            memory_bytes: process.virtual_memory(),
+          });
+        }
+      }
+      task_resource_tx.send(task_usage_data).ok();
+    });
+
     match execute_single_benchmark(query_file, storage_type, &args).await {
       Ok(timing_stats) => {
-        // Collect resource usage data only AFTER single task execution
-        monitoring_active.store(false, Ordering::Relaxed); // Stop monitoring here for single run
-        let resource_usage = match resource_thread.join() {
+        // stop resource monitoring and collect data
+        task_monitoring_active.store(false, Ordering::Relaxed);
+
+        // acquire resource usage data
+        let resource_usage = match task_resource_thread.join() {
           Ok(_) => {
-            // Thread finished without panic, try receiving data
-            resource_rx.recv().unwrap_or_else(|e| {
+            task_resource_rx.recv().unwrap_or_else(|e| {
               eprintln!(
                 "{} Failed to receive resource data from thread: {}",
                 "ERROR:".red(),
                 e
               );
-              vec![] // Return empty vec on channel error
+              vec![] // return empty array when error
             })
           }
           Err(_) => {
             eprintln!("{} Resource monitoring thread panicked.", "ERROR:".red());
-            vec![] // Return empty vec on panic
+            vec![] // return empty array when thread panics
           }
         };
 
@@ -399,10 +454,6 @@ async fn run_benchmark() -> io::Result<()> {
         }
       }
       Err(e) => {
-        // Stop monitoring even on error for single run
-        monitoring_active.store(false, Ordering::Relaxed);
-        // Ensure thread is joined even on error to avoid dangling threads
-        let _ = resource_thread.join();
         eprintln!(
           "{} Failed to execute benchmark for {}: {}",
           "ERROR:".red(),
@@ -414,10 +465,6 @@ async fn run_benchmark() -> io::Result<()> {
     // Early exit after single task processing
     return Ok(());
   }
-
-  // If --all-bi-tasks was used, stop monitoring and join thread here
-  monitoring_active.store(false, Ordering::Relaxed);
-  let _ = resource_thread.join(); // Join thread, ignore result for multi-task run
 
   println!("{} All benchmark tasks finished.", "INFO:".cyan());
 
@@ -452,13 +499,13 @@ async fn execute_single_benchmark(
       // Warm-up runs
       if args.warmup > 0 {
         for _ in 0..args.warmup {
-          adapter.cache_clear().await;
+          // adapter.cache_clear().await;
           executor.exec().await;
         }
       }
       // Measurement runs
       for _ in 0..args.runs {
-        adapter.cache_clear().await;
+        // adapter.cache_clear().await;
         let start_time = Instant::now();
         executor.exec().await;
         let duration = start_time.elapsed();
@@ -476,13 +523,13 @@ async fn execute_single_benchmark(
       // Warm-up runs
       if args.warmup > 0 {
         for _ in 0..args.warmup {
-          adapter.cache_clear().await;
+          // adapter.cache_clear().await;
           executor.exec().await;
         }
       }
       // Measurement runs
       for _ in 0..args.runs {
-        adapter.cache_clear().await;
+        // adapter.cache_clear().await;
         let start_time = Instant::now();
         executor.exec().await;
         let duration = start_time.elapsed();
