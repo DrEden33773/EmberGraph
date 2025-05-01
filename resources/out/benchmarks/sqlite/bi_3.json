@@ -1,0 +1,76 @@
+{
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/plan/neo4j_ordered/ldbc-bi-3.json",
+  "storage_type": "sqlite",
+  "cache_size": 512,
+  "num_runs": 10,
+  "num_warmup": 1,
+  "timing": {
+    "min_ms": 159.668904,
+    "max_ms": 187.79809,
+    "avg_ms": 170.249310625,
+    "all_runs_ms": [
+      187.79809,
+      173.181375,
+      166.688457,
+      187.992184,
+      170.570457,
+      159.668904,
+      164.683258,
+      176.262268,
+      163.14167600000002,
+      149.079173
+    ]
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1746108415936,
+      "cpu_usage_percent": 12.23176,
+      "memory_bytes": 7393861632
+    },
+    {
+      "timestamp_ms": 1746108416144,
+      "cpu_usage_percent": 8.872902,
+      "memory_bytes": 7393861632
+    },
+    {
+      "timestamp_ms": 1746108416352,
+      "cpu_usage_percent": 12.264151,
+      "memory_bytes": 7394230272
+    },
+    {
+      "timestamp_ms": 1746108416562,
+      "cpu_usage_percent": 13.942308,
+      "memory_bytes": 7532675072
+    },
+    {
+      "timestamp_ms": 1746108416771,
+      "cpu_usage_percent": 12.235294,
+      "memory_bytes": 7532675072
+    },
+    {
+      "timestamp_ms": 1746108416982,
+      "cpu_usage_percent": 15.581395,
+      "memory_bytes": 7532675072
+    },
+    {
+      "timestamp_ms": 1746108417190,
+      "cpu_usage_percent": 12.470589,
+      "memory_bytes": 7532675072
+    },
+    {
+      "timestamp_ms": 1746108417403,
+      "cpu_usage_percent": 14.084508,
+      "memory_bytes": 7534481408
+    },
+    {
+      "timestamp_ms": 1746108417611,
+      "cpu_usage_percent": 12.376237,
+      "memory_bytes": 7534481408
+    },
+    {
+      "timestamp_ms": 1746108417820,
+      "cpu_usage_percent": 15.294118,
+      "memory_bytes": 7503085568
+    }
+  ]
+}

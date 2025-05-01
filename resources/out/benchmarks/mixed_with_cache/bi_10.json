@@ -1,0 +1,86 @@
+{
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/plan/ldbc-bi-10.json",
+  "storage_type": "sqlite",
+  "cache_size": 512,
+  "num_runs": 10,
+  "num_warmup": 1,
+  "timing": {
+    "min_ms": 211.054062,
+    "max_ms": 239.300679,
+    "avg_ms": 221.87671912500002,
+    "all_runs_ms": [
+      225.919411,
+      239.300679,
+      239.34055500000002,
+      211.054062,
+      211.55819400000001,
+      221.571703,
+      203.221511,
+      217.224048,
+      219.072,
+      229.313656
+    ]
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1746108967057,
+      "cpu_usage_percent": 32.989693,
+      "memory_bytes": 11963211776
+    },
+    {
+      "timestamp_ms": 1746108967278,
+      "cpu_usage_percent": 42.3841,
+      "memory_bytes": 11963211776
+    },
+    {
+      "timestamp_ms": 1746108967502,
+      "cpu_usage_percent": 44.026546,
+      "memory_bytes": 11963817984
+    },
+    {
+      "timestamp_ms": 1746108967729,
+      "cpu_usage_percent": 44.88372,
+      "memory_bytes": 11965464576
+    },
+    {
+      "timestamp_ms": 1746108967951,
+      "cpu_usage_percent": 49.135803,
+      "memory_bytes": 11965464576
+    },
+    {
+      "timestamp_ms": 1746108968172,
+      "cpu_usage_percent": 42.95612,
+      "memory_bytes": 11968741376
+    },
+    {
+      "timestamp_ms": 1746108968395,
+      "cpu_usage_percent": 47.85714,
+      "memory_bytes": 11969003520
+    },
+    {
+      "timestamp_ms": 1746108968615,
+      "cpu_usage_percent": 44.68599,
+      "memory_bytes": 11969003520
+    },
+    {
+      "timestamp_ms": 1746108968833,
+      "cpu_usage_percent": 50.645996,
+      "memory_bytes": 11969003520
+    },
+    {
+      "timestamp_ms": 1746108969052,
+      "cpu_usage_percent": 43.24324,
+      "memory_bytes": 11969208320
+    },
+    {
+      "timestamp_ms": 1746108969274,
+      "cpu_usage_percent": 45.901634,
+      "memory_bytes": 11969208320
+    },
+    {
+      "timestamp_ms": 1746108969488,
+      "cpu_usage_percent": 5.1044083,
+      "memory_bytes": 11938131968
+    }
+  ]
+}

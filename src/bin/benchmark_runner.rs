@@ -95,21 +95,103 @@ struct SingleRunBenchmarkOutput {
 }
 
 #[cfg(unix)]
-static SQLITE_TASKS: LazyLock<HashSet<&str>> =
-  LazyLock::new(|| HashSet::from(["3", "5", "6", "7", "10", "11"]));
+#[cfg(not(feature = "benchmark_via_sqlite_only"))]
+#[cfg(not(feature = "benchmark_via_neo4j_only"))]
+static SQLITE_TASKS: LazyLock<HashSet<&str>> = LazyLock::new(|| {
+  let res = HashSet::from(["3", "5", "6", "7", "10", "11"]);
+  println!(
+    "{} SQLite tasks: {}",
+    "INFO:".cyan(),
+    format!("{:?}", res.iter().collect::<Vec<_>>()).cyan()
+  );
+  res
+});
+
+#[cfg(unix)]
+#[cfg(feature = "benchmark_via_neo4j_only")]
+#[cfg(not(feature = "benchmark_via_sqlite_only"))]
+static SQLITE_TASKS: LazyLock<HashSet<&str>> = LazyLock::new(|| {
+  println!("{} {} `SQLite task`", "INFO:".cyan(), "NO".red());
+  HashSet::new()
+});
+
+#[cfg(unix)]
+#[cfg(feature = "benchmark_via_sqlite_only")]
+static SQLITE_TASKS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
+  println!(
+    "{} {} task is registered as `SQLite task`",
+    "INFO:".cyan(),
+    "EACH".green()
+  );
+  HashSet::from([
+    "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17",
+    "18", "19", "20",
+  ])
+});
 
 static NEO4J_ORDERED_TASKS: LazyLock<HashSet<&str>> =
   LazyLock::new(|| HashSet::from(["3", "5", "6", "7", "11", "17"]));
 
 static BENCHMARK_OUTPUT_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
-  let res = project_root::get_project_root()
+  let mut res = project_root::get_project_root()
     .unwrap()
     .join("resources")
     .join("out")
     .join("benchmarks");
+
+  #[cfg(feature = "benchmark_with_cache_eviction")]
+  {
+    #[cfg(feature = "benchmark_via_sqlite_only")]
+    {
+      #[cfg(feature = "benchmark_via_neo4j_only")]
+      panic!(
+        "CANNOT activate {} and {} at the same time",
+        "benchmark_with_cache_eviction".yellow(),
+        "benchmark_via_neo4j_only".yellow()
+      );
+      #[cfg(not(feature = "benchmark_via_neo4j_only"))]
+      res.push("sqlite");
+    }
+    #[cfg(not(feature = "benchmark_via_sqlite_only"))]
+    {
+      #[cfg(feature = "benchmark_via_neo4j_only")]
+      res.push("neo4j");
+      #[cfg(not(feature = "benchmark_via_neo4j_only"))]
+      res.push("mixed");
+    }
+  }
+  #[cfg(not(feature = "benchmark_with_cache_eviction"))]
+  {
+    #[cfg(feature = "benchmark_via_sqlite_only")]
+    {
+      #[cfg(feature = "benchmark_via_neo4j_only")]
+      panic!(
+        "CANNOT activate {} and {} at the same time",
+        "benchmark_with_cache_eviction".yellow(),
+        "benchmark_via_neo4j_only".yellow()
+      );
+      #[cfg(not(feature = "benchmark_via_neo4j_only"))]
+      res.push("sqlite_with_cache");
+    }
+    #[cfg(not(feature = "benchmark_via_sqlite_only"))]
+    {
+      #[cfg(feature = "benchmark_via_neo4j_only")]
+      res.push("neo4j_with_cache");
+      #[cfg(not(feature = "benchmark_via_neo4j_only"))]
+      res.push("mixed_with_cache");
+    }
+  }
+
   if !res.exists() {
     fs::create_dir_all(&res).unwrap();
   }
+
+  println!(
+    "{} Benchmark output directory: {}",
+    "INFO:".cyan(),
+    res.display().to_string().cyan()
+  );
+
   res
 });
 
@@ -499,13 +581,15 @@ async fn execute_single_benchmark(
       // Warm-up runs
       if args.warmup > 0 {
         for _ in 0..args.warmup {
-          // adapter.cache_clear().await;
+          #[cfg(feature = "benchmark_with_cache_eviction")]
+          adapter.cache_clear().await;
           executor.exec().await;
         }
       }
       // Measurement runs
       for _ in 0..args.runs {
-        // adapter.cache_clear().await;
+        #[cfg(feature = "benchmark_with_cache_eviction")]
+        adapter.cache_clear().await;
         let start_time = Instant::now();
         executor.exec().await;
         let duration = start_time.elapsed();
@@ -523,13 +607,15 @@ async fn execute_single_benchmark(
       // Warm-up runs
       if args.warmup > 0 {
         for _ in 0..args.warmup {
-          // adapter.cache_clear().await;
+          #[cfg(feature = "benchmark_with_cache_eviction")]
+          adapter.cache_clear().await;
           executor.exec().await;
         }
       }
       // Measurement runs
       for _ in 0..args.runs {
-        // adapter.cache_clear().await;
+        #[cfg(feature = "benchmark_with_cache_eviction")]
+        adapter.cache_clear().await;
         let start_time = Instant::now();
         executor.exec().await;
         let duration = start_time.elapsed();

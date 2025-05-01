@@ -1,0 +1,106 @@
+{
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/plan/ldbc-bi-10.json",
+  "storage_type": "sqlite",
+  "cache_size": 512,
+  "num_runs": 10,
+  "num_warmup": 1,
+  "timing": {
+    "min_ms": 288.744924,
+    "max_ms": 312.237928,
+    "avg_ms": 300.04531887499996,
+    "all_runs_ms": [
+      313.106098,
+      285.267496,
+      312.237928,
+      299.003415,
+      307.189908,
+      299.106414,
+      288.859641,
+      288.744924,
+      299.718015,
+      305.502306
+    ]
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1746108834847,
+      "cpu_usage_percent": 32.07921,
+      "memory_bytes": 11960934400
+    },
+    {
+      "timestamp_ms": 1746108835070,
+      "cpu_usage_percent": 30.205948,
+      "memory_bytes": 11960934400
+    },
+    {
+      "timestamp_ms": 1746108835288,
+      "cpu_usage_percent": 26.520681,
+      "memory_bytes": 11962830848
+    },
+    {
+      "timestamp_ms": 1746108835505,
+      "cpu_usage_percent": 43.939396,
+      "memory_bytes": 11962830848
+    },
+    {
+      "timestamp_ms": 1746108835725,
+      "cpu_usage_percent": 40.677967,
+      "memory_bytes": 11966107648
+    },
+    {
+      "timestamp_ms": 1746108835944,
+      "cpu_usage_percent": 21.327015,
+      "memory_bytes": 11966107648
+    },
+    {
+      "timestamp_ms": 1746108836159,
+      "cpu_usage_percent": 27.737225,
+      "memory_bytes": 11966107648
+    },
+    {
+      "timestamp_ms": 1746108836373,
+      "cpu_usage_percent": 42.38578,
+      "memory_bytes": 11966107648
+    },
+    {
+      "timestamp_ms": 1746108836597,
+      "cpu_usage_percent": 35.764706,
+      "memory_bytes": 11966107648
+    },
+    {
+      "timestamp_ms": 1746108836816,
+      "cpu_usage_percent": 22.319475,
+      "memory_bytes": 11966107648
+    },
+    {
+      "timestamp_ms": 1746108837031,
+      "cpu_usage_percent": 33.251232,
+      "memory_bytes": 11966107648
+    },
+    {
+      "timestamp_ms": 1746108837246,
+      "cpu_usage_percent": 38.669952,
+      "memory_bytes": 11966107648
+    },
+    {
+      "timestamp_ms": 1746108837471,
+      "cpu_usage_percent": 32.675438,
+      "memory_bytes": 11966107648
+    },
+    {
+      "timestamp_ms": 1746108837685,
+      "cpu_usage_percent": 17.690418,
+      "memory_bytes": 11960860672
+    },
+    {
+      "timestamp_ms": 1746108837898,
+      "cpu_usage_percent": 41.131107,
+      "memory_bytes": 11923349504
+    },
+    {
+      "timestamp_ms": 1746108838112,
+      "cpu_usage_percent": 0.7009346,
+      "memory_bytes": 11923349504
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/plan/ldbc-bi-2.json",
+  "storage_type": "neo4j",
+  "cache_size": 512,
+  "num_runs": 10,
+  "num_warmup": 1,
+  "timing": {
+    "min_ms": 6.5399899999999995,
+    "max_ms": 8.046539000000001,
+    "avg_ms": 7.270606750000001,
+    "all_runs_ms": [
+      12.093279,
+      8.046539000000001,
+      7.518816,
+      7.652532,
+      7.270197,
+      7.59398,
+      6.872302,
+      6.5399899999999995,
+      6.670498,
+      6.383412
+    ]
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1746107989042,
+      "cpu_usage_percent": 3.2822757,
+      "memory_bytes": 2929618944
+    }
+  ]
+}

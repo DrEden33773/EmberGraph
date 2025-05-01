@@ -1,0 +1,86 @@
+{
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/plan/ldbc-bi-15.json",
+  "storage_type": "neo4j",
+  "cache_size": 512,
+  "num_runs": 10,
+  "num_warmup": 1,
+  "timing": {
+    "min_ms": 124.939487,
+    "max_ms": 326.376747,
+    "avg_ms": 246.39686924999998,
+    "all_runs_ms": [
+      305.195501,
+      305.382158,
+      320.134833,
+      326.376747,
+      331.83767400000005,
+      301.065038,
+      147.63420299999999,
+      124.939487,
+      122.707308,
+      140.446987
+    ]
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1746108718525,
+      "cpu_usage_percent": 7.0,
+      "memory_bytes": 7590293504
+    },
+    {
+      "timestamp_ms": 1746108718832,
+      "cpu_usage_percent": 7.1884985,
+      "memory_bytes": 7590293504
+    },
+    {
+      "timestamp_ms": 1746108719054,
+      "cpu_usage_percent": 6.487695,
+      "memory_bytes": 7590293504
+    },
+    {
+      "timestamp_ms": 1746108719261,
+      "cpu_usage_percent": 7.0559616,
+      "memory_bytes": 7590293504
+    },
+    {
+      "timestamp_ms": 1746108719472,
+      "cpu_usage_percent": 7.4879227,
+      "memory_bytes": 7590293504
+    },
+    {
+      "timestamp_ms": 1746108719761,
+      "cpu_usage_percent": 6.747405,
+      "memory_bytes": 7590293504
+    },
+    {
+      "timestamp_ms": 1746108720087,
+      "cpu_usage_percent": 7.3619637,
+      "memory_bytes": 7590293504
+    },
+    {
+      "timestamp_ms": 1746108720314,
+      "cpu_usage_percent": 7.20524,
+      "memory_bytes": 7590293504
+    },
+    {
+      "timestamp_ms": 1746108720522,
+      "cpu_usage_percent": 7.5471697,
+      "memory_bytes": 7590293504
+    },
+    {
+      "timestamp_ms": 1746108720733,
+      "cpu_usage_percent": 12.958435,
+      "memory_bytes": 7590293504
+    },
+    {
+      "timestamp_ms": 1746108720962,
+      "cpu_usage_percent": 9.263158,
+      "memory_bytes": 7590293504
+    },
+    {
+      "timestamp_ms": 1746108721170,
+      "cpu_usage_percent": 4.368932,
+      "memory_bytes": 7590293504
+    }
+  ]
+}

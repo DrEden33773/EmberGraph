@@ -1,0 +1,31 @@
+{
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/plan/ldbc-bi-9.json",
+  "storage_type": "sqlite",
+  "cache_size": 512,
+  "num_runs": 10,
+  "num_warmup": 1,
+  "timing": {
+    "min_ms": 16.996529,
+    "max_ms": 19.223212,
+    "avg_ms": 18.528602624999998,
+    "all_runs_ms": [
+      18.709528,
+      18.632783,
+      18.450578,
+      19.223212,
+      17.965401999999997,
+      19.134423,
+      16.28298,
+      19.600077,
+      19.116366,
+      16.996529
+    ]
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1746108431539,
+      "cpu_usage_percent": 4.1257367,
+      "memory_bytes": 11959918592
+    }
+  ]
+}

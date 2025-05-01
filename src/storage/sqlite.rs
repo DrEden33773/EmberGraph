@@ -1,24 +1,19 @@
-use super::{
-  AdvancedStorageAdapter, AsyncDefault, StorageAdapter, TestOnlyStorageAdapter,
-  WritableStorageAdapter,
-};
-use crate::{
-  schemas::{AttrType, AttrValue, DataEdge, DataVertex, LabelRef, PatternAttr, VidRef},
-  utils::time_async_with_desc,
-};
+use super::{AdvancedStorageAdapter, AsyncDefault, StorageAdapter};
+use crate::schemas::{AttrType, AttrValue, DataEdge, DataVertex, LabelRef, PatternAttr, VidRef};
 use hashbrown::HashMap;
 use project_root::get_project_root;
-use sqlx::{
-  Execute, Row, SqlitePool,
-  sqlite::{
-    SqliteConnectOptions, SqliteJournalMode, SqliteLockingMode, SqliteRow, SqliteSynchronous,
-  },
-};
-use std::env;
+use r2d2::{Pool, PooledConnection};
+use r2d2_sqlite::SqliteConnectionManager;
+use rusqlite::{params, params_from_iter};
+use std::{env, sync::Arc};
+use tokio::task;
+
+type SqlitePool = Pool<SqliteConnectionManager>;
+type SqliteConnection = PooledConnection<SqliteConnectionManager>;
 
 #[derive(Clone)]
 pub struct SqliteStorageAdapter {
-  pool: SqlitePool,
+  pool: Arc<SqlitePool>,
 }
 
 impl AsyncDefault for SqliteStorageAdapter {
@@ -27,32 +22,60 @@ impl AsyncDefault for SqliteStorageAdapter {
     let root = get_project_root().unwrap();
     let db_path = root.join(db_name);
 
-    let pool = sqlx::SqlitePool::connect_with(
-      SqliteConnectOptions::new()
-        .filename(&db_path)
-        .create_if_missing(true)
-        .immutable(true)
-        .read_only(true)
-        .row_buffer_size(4096)
-        .page_size(4096)
-        .locking_mode(SqliteLockingMode::Exclusive)
-        .journal_mode(SqliteJournalMode::Off)
-        .synchronous(SqliteSynchronous::Off)
-        .statement_cache_capacity(1_000_000)
-        .pragma("temp_store", "MEMORY")
-        .pragma("mmap_size", "30000000000"),
-    )
+    // create connection manager and connection pool
+    let manager = SqliteConnectionManager::file(&db_path).with_flags(
+      rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_URI,
+    );
+
+    let pool = task::spawn_blocking(move || {
+      let pool = Pool::builder()
+        .max_size(num_cpus::get() as u32 * 4)
+        .min_idle(Some(4))
+        .idle_timeout(Some(std::time::Duration::from_secs(300)))
+        .max_lifetime(Some(std::time::Duration::from_secs(600)))
+        .build(manager)
+        .expect("❌  Failed to create SQLite connection pool");
+
+      // apply performance optimization configs
+      let conn = pool.get().expect("❌  Failed to get connection from pool");
+      conn
+        .execute_batch(
+          "
+        PRAGMA journal_mode = OFF;
+        PRAGMA synchronous = 0;
+        PRAGMA cache_size = 1000000;
+        PRAGMA locking_mode = EXCLUSIVE;
+        PRAGMA temp_store = MEMORY;
+        PRAGMA mmap_size = 30000000000;
+        PRAGMA page_size = 4096;
+      ",
+        )
+        .expect("❌  Failed to set SQLite PRAGMA options");
+
+      pool
+    })
     .await
-    .expect("❌ Failed to connect to SQLite database");
+    .expect("❌  Failed to create connection pool");
 
-    Self::init_schema(&pool).await;
+    // initialize database schema
+    let pool_clone = Arc::new(pool);
+    task::spawn_blocking({
+      let pool = pool_clone.clone();
+      move || {
+        let conn = pool.get().expect("❌  Failed to get connection from pool");
+        Self::init_schema(&conn);
+      }
+    })
+    .await
+    .expect("❌  Failed to initialize schema");
 
-    Self { pool }
+    Self { pool: pool_clone }
   }
 }
 
 impl SqliteStorageAdapter {
-  async fn clear_tables(pool: &SqlitePool) {
+  #[allow(dead_code)]
+  fn clear_tables(conn: &SqliteConnection) {
     let queries = vec![
       "\n\t\tDELETE FROM db_vertex",
       "\n\t\tDELETE FROM db_edge",
@@ -64,10 +87,7 @@ impl SqliteStorageAdapter {
     ];
 
     for query in queries {
-      let q = sqlx::query(query);
-      time_async_with_desc(q.execute(pool), query.to_string())
-        .await
-        .unwrap();
+      conn.execute(query, []).unwrap();
     }
 
     // reset auto increment values
@@ -77,31 +97,28 @@ impl SqliteStorageAdapter {
     ];
 
     for query in reset_queries {
-      let q = sqlx::query(query);
-      time_async_with_desc(q.execute(pool), query.to_string())
-        .await
-        .unwrap();
+      conn.execute(query, []).unwrap();
     }
   }
 
-  async fn init_schema(pool: &SqlitePool) {
+  fn init_schema(conn: &SqliteConnection) {
     // create db_vertex table
-    sqlx::query(
-      r#"
+    conn
+      .execute_batch(
+        r#"
       CREATE TABLE IF NOT EXISTS db_vertex (
         vid VARCHAR PRIMARY KEY,
         label VARCHAR NOT NULL
       );
       CREATE INDEX IF NOT EXISTS ix_db_vertex_label ON db_vertex(label);
       "#,
-    )
-    .execute(pool)
-    .await
-    .expect("❌  Failed to create `db_vertex` table");
+      )
+      .expect("❌  Failed to create `db_vertex` table");
 
     // create db_edge table
-    sqlx::query(
-      r#"
+    conn
+      .execute_batch(
+        r#"
       CREATE TABLE IF NOT EXISTS db_edge (
         eid VARCHAR PRIMARY KEY,
         label VARCHAR NOT NULL,
@@ -112,14 +129,13 @@ impl SqliteStorageAdapter {
       CREATE INDEX IF NOT EXISTS ix_db_edge_src_vid ON db_edge(src_vid);
       CREATE INDEX IF NOT EXISTS ix_db_edge_dst_vid ON db_edge(dst_vid);
       "#,
-    )
-    .execute(pool)
-    .await
-    .expect("❌  Failed to create `db_edge` table");
+      )
+      .expect("❌  Failed to create `db_edge` table");
 
     // create vertex_attribute table
-    sqlx::query(
-      r#"
+    conn
+      .execute_batch(
+        r#"
       CREATE TABLE IF NOT EXISTS vertex_attribute (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         vid VARCHAR NOT NULL,
@@ -130,14 +146,13 @@ impl SqliteStorageAdapter {
       CREATE INDEX IF NOT EXISTS ix_vertex_attribute_vid ON vertex_attribute(vid);
       CREATE INDEX IF NOT EXISTS ix_vertex_attribute_key ON vertex_attribute(key);
       "#,
-    )
-    .execute(pool)
-    .await
-    .expect("❌  Failed to create `vertex_attribute` table");
+      )
+      .expect("❌  Failed to create `vertex_attribute` table");
 
     // create edge_attribute table
-    sqlx::query(
-      r#"
+    conn
+      .execute_batch(
+        r#"
       CREATE TABLE IF NOT EXISTS edge_attribute (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         eid VARCHAR NOT NULL,
@@ -148,80 +163,124 @@ impl SqliteStorageAdapter {
       CREATE INDEX IF NOT EXISTS ix_edge_attribute_eid ON edge_attribute(eid);
       CREATE INDEX IF NOT EXISTS ix_edge_attribute_key ON edge_attribute(key);
       "#,
-    )
-    .execute(pool)
-    .await
-    .expect("❌  Failed to create edge_attribute table");
+      )
+      .expect("❌  Failed to create edge_attribute table");
   }
 
   async fn query_edge_with_attr_then_collect(
     &self,
     e_attr: Option<&PatternAttr>,
     mut query_str: String,
-    mut params: Vec<String>,
+    params: Vec<String>,
   ) -> Vec<DataEdge> {
-    // add attribute filter
-    if let Some(attr) = e_attr {
-      query_str.push_str(
-        r#"
-      AND EXISTS (
-        SELECT * FROM edge_attribute 
-        WHERE eid = e.eid AND key = ?
-      "#,
-      );
-      params.push(attr.key.clone());
-      add_attr_filter(attr, &mut query_str, &mut params);
-    }
+    let pool = self.pool.clone();
+    let e_attr_cloned = e_attr.cloned();
 
-    // execute query
-    let mut query = sqlx::query(&query_str);
-    for param in params {
-      query = query.bind(param);
-    }
+    task::spawn_blocking(move || {
+      let conn = match pool.get() {
+        Ok(conn) => conn,
+        Err(e) => {
+          eprintln!("❌  Error getting connection from pool: {}", e);
+          return Vec::new();
+        }
+      };
 
-    // collect rows
-    let sql = query.sql();
-    let rows = match time_async_with_desc(query.fetch_all(&self.pool), sql.to_string()).await {
-      Ok(rows) => rows,
-      Err(_) => return vec![],
-    };
+      // add attr filter
+      let mut all_params = params.clone();
+      if let Some(attr) = e_attr_cloned.as_ref() {
+        query_str.push_str(
+          r#"
+        AND EXISTS (
+          SELECT * FROM edge_attribute 
+          WHERE eid = e.eid AND key = ?
+        "#,
+        );
+        all_params.push(attr.key.clone());
+        add_attr_filter(attr, &mut query_str, &mut all_params);
+      }
 
-    collect_edges(rows).into_values().collect()
+      let mut stmt = match conn.prepare_cached(&query_str) {
+        Ok(stmt) => stmt,
+        Err(e) => {
+          eprintln!("❌  Error preparing query: {}", e);
+          return Vec::new();
+        }
+      };
+
+      let rows = match stmt.query(params_from_iter(all_params.iter())) {
+        Ok(rows) => rows,
+        Err(e) => {
+          eprintln!("❌  Error executing query: {}", e);
+          return Vec::new();
+        }
+      };
+
+      let edges = collect_edges(rows);
+      edges.into_values().collect()
+    })
+    .await
+    .unwrap_or_else(|e| {
+      eprintln!("❌  Task failed: {}", e);
+      Vec::new()
+    })
   }
 
   async fn query_vertex_with_attr_then_collect(
     &self,
     v_attr: Option<&PatternAttr>,
     mut query_str: String,
-    mut params: Vec<String>,
+    params: Vec<String>,
   ) -> Vec<DataVertex> {
-    // add attribute filter
-    if let Some(attr) = v_attr {
-      query_str.push_str(
-        r#"
-      AND EXISTS (
-        SELECT * FROM vertex_attribute 
-        WHERE vid = v.vid AND key = ?
-      "#,
-      );
-      params.push(attr.key.clone());
-      add_attr_filter(attr, &mut query_str, &mut params);
-    }
+    let pool = self.pool.clone();
+    let v_attr_cloned = v_attr.cloned();
 
-    // execute query
-    let mut query = sqlx::query(&query_str);
-    for param in params {
-      query = query.bind(param);
-    }
+    task::spawn_blocking(move || {
+      let conn = match pool.get() {
+        Ok(conn) => conn,
+        Err(e) => {
+          eprintln!("❌  Error getting connection from pool: {}", e);
+          return Vec::new();
+        }
+      };
 
-    // collect rows
-    let sql = query.sql();
-    let rows = match time_async_with_desc(query.fetch_all(&self.pool), sql.to_string()).await {
-      Ok(rows) => rows,
-      Err(_) => return vec![],
-    };
+      // add attr filter
+      let mut all_params = params.clone();
+      if let Some(attr) = v_attr_cloned.as_ref() {
+        query_str.push_str(
+          r#"
+        AND EXISTS (
+          SELECT * FROM vertex_attribute 
+          WHERE vid = v.vid AND key = ?
+        "#,
+        );
+        all_params.push(attr.key.clone());
+        add_attr_filter(attr, &mut query_str, &mut all_params);
+      }
 
-    collect_vertices(rows).into_values().collect()
+      let mut stmt = match conn.prepare_cached(&query_str) {
+        Ok(stmt) => stmt,
+        Err(e) => {
+          eprintln!("❌  Error preparing query: {}", e);
+          return Vec::new();
+        }
+      };
+
+      let rows = match stmt.query(params_from_iter(all_params.iter())) {
+        Ok(rows) => rows,
+        Err(e) => {
+          eprintln!("❌  Error executing query: {}", e);
+          return Vec::new();
+        }
+      };
+
+      let vertices = collect_vertices(rows);
+      vertices.into_values().collect()
+    })
+    .await
+    .unwrap_or_else(|e| {
+      eprintln!("❌  Task failed: {}", e);
+      Vec::new()
+    })
   }
 }
 
@@ -266,15 +325,15 @@ fn add_attr_filter(attr: &PatternAttr, query_str: &mut String, params: &mut Vec<
   }
 }
 
-fn collect_vertices(rows: Vec<SqliteRow>) -> HashMap<String, DataVertex> {
+fn collect_vertices(mut rows: rusqlite::Rows) -> HashMap<String, DataVertex> {
   let mut vertices = HashMap::new();
 
-  rows.into_iter().for_each(|row| {
-    let vid: String = row.get("vid");
+  while let Ok(Some(row)) = rows.next() {
+    let vid: String = row.get(0).unwrap();
 
-    // init never-seen vertex
+    // init unseen vertex
     if !vertices.contains_key(&vid) {
-      let label: String = row.get("label");
+      let label: String = row.get(1).unwrap();
       vertices.insert(
         vid.clone(),
         DataVertex {
@@ -285,10 +344,12 @@ fn collect_vertices(rows: Vec<SqliteRow>) -> HashMap<String, DataVertex> {
       );
     }
 
-    // add attribute if it exists in current row
-    if let Ok(key) = row.try_get::<String, _>("key") {
-      let value: String = row.get("value");
-      let type_: String = row.get("type");
+    // if current row has attr, add it
+    if let (Ok(key), Ok(value), Ok(type_)) = (
+      row.get::<_, String>(2),
+      row.get::<_, String>(3),
+      row.get::<_, String>(4),
+    ) {
       let typed_value = get_typed_value(&type_, value);
 
       vertices
@@ -297,22 +358,22 @@ fn collect_vertices(rows: Vec<SqliteRow>) -> HashMap<String, DataVertex> {
         .attrs
         .insert(key, typed_value);
     }
-  });
+  }
 
   vertices
 }
 
-fn collect_edges(rows: Vec<SqliteRow>) -> HashMap<String, DataEdge> {
+fn collect_edges(mut rows: rusqlite::Rows) -> HashMap<String, DataEdge> {
   let mut edges = HashMap::new();
 
-  rows.into_iter().for_each(|row| {
-    let eid: String = row.get("eid");
+  while let Ok(Some(row)) = rows.next() {
+    let eid: String = row.get(0).unwrap();
 
-    // init never-seen edge
+    // init unseen edge
     if !edges.contains_key(&eid) {
-      let label: String = row.get("label");
-      let src_vid: String = row.get("src_vid");
-      let dst_vid: String = row.get("dst_vid");
+      let label: String = row.get(1).unwrap();
+      let src_vid: String = row.get(2).unwrap();
+      let dst_vid: String = row.get(3).unwrap();
 
       edges.insert(
         eid.clone(),
@@ -326,15 +387,17 @@ fn collect_edges(rows: Vec<SqliteRow>) -> HashMap<String, DataEdge> {
       );
     }
 
-    // add attribute if it exists in current row
-    if let Ok(key) = row.try_get::<String, _>("key") {
-      let value: String = row.get("value");
-      let type_: String = row.get("type");
+    // if current row has attr, add it
+    if let (Ok(key), Ok(value), Ok(type_)) = (
+      row.get::<_, String>(4),
+      row.get::<_, String>(5),
+      row.get::<_, String>(6),
+    ) {
       let typed_value = get_typed_value(&type_, value);
 
       edges.get_mut(&eid).unwrap().attrs.insert(key, typed_value);
     }
-  });
+  }
 
   edges
 }
@@ -349,45 +412,80 @@ fn get_typed_value(type_: &str, value: String) -> AttrValue {
 
 impl StorageAdapter for SqliteStorageAdapter {
   async fn get_v(&self, vid: VidRef<'_>) -> Option<DataVertex> {
-    let query = sqlx::query(
-      r#"
-      SELECT v.vid, v.label, a.key, a.value, a.type
-      FROM db_vertex v
-      LEFT JOIN vertex_attribute a ON v.vid = a.vid
-      WHERE v.vid = ?
-      "#,
-    )
-    .bind(vid);
-    let sql = query.sql();
+    let pool = self.pool.clone();
+    let vid_string = vid.to_string();
 
-    let rows = time_async_with_desc(query.fetch_all(&self.pool), sql.to_string())
-      .await
-      .ok()?;
-    if rows.is_empty() {
-      return None;
-    }
+    task::spawn_blocking(move || {
+      let conn = match pool.get() {
+        Ok(conn) => conn,
+        Err(e) => {
+          eprintln!("Error getting connection from pool: {}", e);
+          return None;
+        }
+      };
 
-    let vid: String = rows[0].get("vid");
-    let label: String = rows[0].get("label");
-    let mut attrs = HashMap::new();
+      let query = r#"
+        SELECT v.vid, v.label, a.key, a.value, a.type
+        FROM db_vertex v
+        LEFT JOIN vertex_attribute a ON v.vid = a.vid
+        WHERE v.vid = ?
+      "#;
 
-    // collect all attrs
-    for row in rows {
-      if let Ok(key) = row.try_get::<String, _>("key") {
-        let value: String = row.get("value");
-        let type_: String = row.get("type");
+      let mut stmt = match conn.prepare_cached(query) {
+        Ok(stmt) => stmt,
+        Err(e) => {
+          eprintln!("❌  Error preparing statement: {}", e);
+          return None;
+        }
+      };
 
-        let typed_value = match type_.as_str() {
-          "int" => AttrValue::Int(value.parse().unwrap_or(0)),
-          "float" => AttrValue::Float(value.parse().unwrap_or(0.0)),
-          _ => AttrValue::String(value),
-        };
+      let rows_result = match stmt
+        .query_map(params![vid_string], |row| {
+          Ok((
+            row.get::<_, String>(0)?,
+            row.get::<_, String>(1)?,
+            row.get::<_, Option<String>>(2)?,
+            row.get::<_, Option<String>>(3)?,
+            row.get::<_, Option<String>>(4)?,
+          ))
+        })
+        .and_then(|mapped_rows| mapped_rows.collect::<Result<Vec<_>, _>>())
+      {
+        Ok(rows) => rows,
+        Err(e) => {
+          eprintln!("❌  Error executing query: {}", e);
+          return None;
+        }
+      };
 
-        attrs.insert(key, typed_value);
+      if rows_result.is_empty() {
+        return None;
       }
-    }
 
-    Some(DataVertex { vid, label, attrs })
+      let vid = rows_result[0].0.clone();
+      let label = rows_result[0].1.clone();
+      let mut attrs = HashMap::new();
+
+      // collect all attrs
+      for row in rows_result {
+        if let (Some(key), Some(value), Some(type_)) = (row.2, row.3, row.4) {
+          let typed_value = match type_.as_str() {
+            "int" => AttrValue::Int(value.parse().unwrap_or(0)),
+            "float" => AttrValue::Float(value.parse().unwrap_or(0.0)),
+            _ => AttrValue::String(value),
+          };
+
+          attrs.insert(key, typed_value);
+        }
+      }
+
+      Some(DataVertex { vid, label, attrs })
+    })
+    .await
+    .unwrap_or_else(|e| {
+      eprintln!("❌  Task failed: {}", e);
+      None
+    })
   }
 
   async fn load_v(&self, v_label: LabelRef<'_>, v_attr: Option<&PatternAttr>) -> Vec<DataVertex> {
@@ -467,48 +565,72 @@ impl SqliteStorageAdapter {
     e_attr: Option<&PatternAttr>,
     next_v_attr: Option<&PatternAttr>,
     mut query_str: String,
-    mut params: Vec<String>,
+    params: Vec<String>,
   ) -> Vec<DataEdge> {
-    // add e_attr filter
-    if let Some(e_attr) = e_attr {
-      query_str.push_str(
-        r#"
-      AND EXISTS (
-        SELECT * FROM edge_attribute 
-        WHERE eid = e.eid AND key = ?
-      "#,
-      );
-      params.push(e_attr.key.clone());
-      add_attr_filter(e_attr, &mut query_str, &mut params);
-    }
+    let pool = self.pool.clone();
+    let e_attr_cloned = e_attr.cloned();
+    let next_v_attr_cloned = next_v_attr.cloned();
 
-    // add next_v_attr filter
-    if let Some(v_attr) = next_v_attr {
-      query_str.push_str(
-        r#"
-      AND EXISTS (
-        SELECT * FROM vertex_attribute 
-        WHERE vid = v.vid AND key = ?
-      "#,
-      );
-      params.push(v_attr.key.clone());
-      add_attr_filter(v_attr, &mut query_str, &mut params);
-    }
+    task::spawn_blocking(move || {
+      let conn = match pool.get() {
+        Ok(conn) => conn,
+        Err(e) => {
+          eprintln!("❌  Error getting connection from pool: {}", e);
+          return Vec::new();
+        }
+      };
 
-    // execute query
-    let mut query = sqlx::query(&query_str);
-    for param in params {
-      query = query.bind(param);
-    }
+      // add e_attr filter
+      let mut all_params = params.clone();
+      if let Some(e_attr) = e_attr_cloned.as_ref() {
+        query_str.push_str(
+          r#"
+        AND EXISTS (
+          SELECT * FROM edge_attribute 
+          WHERE eid = e.eid AND key = ?
+        "#,
+        );
+        all_params.push(e_attr.key.clone());
+        add_attr_filter(e_attr, &mut query_str, &mut all_params);
+      }
 
-    // collect rows
-    let sql = query.sql();
-    let rows = match time_async_with_desc(query.fetch_all(&self.pool), sql.to_string()).await {
-      Ok(rows) => rows,
-      Err(_) => return vec![],
-    };
+      // add next_v_attr filter
+      if let Some(v_attr) = next_v_attr_cloned.as_ref() {
+        query_str.push_str(
+          r#"
+        AND EXISTS (
+          SELECT * FROM vertex_attribute 
+          WHERE vid = v.vid AND key = ?
+        "#,
+        );
+        all_params.push(v_attr.key.clone());
+        add_attr_filter(v_attr, &mut query_str, &mut all_params);
+      }
 
-    collect_edges(rows).into_values().collect()
+      let mut stmt = match conn.prepare_cached(&query_str) {
+        Ok(stmt) => stmt,
+        Err(e) => {
+          eprintln!("❌  Error preparing query: {}", e);
+          return Vec::new();
+        }
+      };
+
+      let rows = match stmt.query(params_from_iter(all_params.iter())) {
+        Ok(rows) => rows,
+        Err(e) => {
+          eprintln!("❌  Error executing query: {}", e);
+          return Vec::new();
+        }
+      };
+
+      let edges = collect_edges(rows);
+      edges.into_values().collect()
+    })
+    .await
+    .unwrap_or_else(|e| {
+      eprintln!("❌  Task failed: {}", e);
+      Vec::new()
+    })
   }
 }
 
@@ -565,154 +687,5 @@ impl AdvancedStorageAdapter for SqliteStorageAdapter {
     self
       .query_edge_with_attr_and_next_v_attr_then_collect(e_attr, src_v_attr, query_str, params)
       .await
-  }
-}
-
-impl WritableStorageAdapter for SqliteStorageAdapter {
-  async fn add_v(&self, v: DataVertex) -> Result<(), Box<dyn std::error::Error>> {
-    let mut tx = self.pool.begin().await?;
-
-    let query_str = "
-      INSERT INTO db_vertex (vid, label) VALUES (?, ?)";
-    let query = sqlx::query(query_str).bind(&v.vid).bind(&v.label);
-    let sql = query.sql();
-
-    match time_async_with_desc(query.execute(&mut *tx), sql.to_string()).await {
-      Ok(result) => println!("💾  Inserted {} vertex", result.rows_affected()),
-      Err(e) => {
-        eprintln!("❌  Error inserting vertex: {}", e);
-        return Err(Box::new(e));
-      }
-    };
-
-    for (key, value) in &v.attrs {
-      let attr_query = sqlx::query(
-        "
-      INSERT INTO vertex_attribute (vid, key, value, type) VALUES (?, ?, ?, ?)",
-      )
-      .bind(&v.vid)
-      .bind(key)
-      .bind(value.to_string())
-      .bind(value.to_type().to_string());
-      let sql = attr_query.sql();
-
-      match time_async_with_desc(attr_query.execute(&mut *tx), sql.to_string()).await {
-        Ok(result) => println!("💾  Inserted {} vertex_attribute", result.rows_affected()),
-        Err(e) => {
-          eprintln!("❌  Error inserting vertex attribute: {}", e);
-          return Err(Box::new(e));
-        }
-      }
-    }
-
-    tx.commit().await?;
-
-    Ok(())
-  }
-
-  async fn add_e(&self, e: DataEdge) -> Result<(), Box<dyn std::error::Error>> {
-    let mut tx = self.pool.begin().await?;
-
-    let query_str = "
-      INSERT INTO db_edge (eid, label, src_vid, dst_vid) VALUES (?, ?, ?, ?)";
-    let query = sqlx::query(query_str)
-      .bind(&e.eid)
-      .bind(&e.label)
-      .bind(&e.src_vid)
-      .bind(&e.dst_vid);
-    let sql = query.sql();
-
-    match time_async_with_desc(query.execute(&mut *tx), sql.to_string()).await {
-      Ok(result) => println!("💾  Inserted {} edge", result.rows_affected()),
-      Err(e) => {
-        eprintln!("❌  Error inserting edge: {}", e);
-        return Err(Box::new(e));
-      }
-    };
-
-    for (key, value) in &e.attrs {
-      let attr_query = sqlx::query(
-        "
-      INSERT INTO edge_attribute (eid, key, value, type) VALUES (?, ?, ?, ?)",
-      )
-      .bind(&e.eid)
-      .bind(key)
-      .bind(value.to_string())
-      .bind(value.to_type().to_string());
-      let sql = attr_query.sql();
-
-      match time_async_with_desc(attr_query.execute(&mut *tx), sql.to_string()).await {
-        Ok(result) => println!("💾  Inserted {} edge_attribute", result.rows_affected()),
-        Err(e) => {
-          eprintln!("❌  Error inserting edge attribute: {}", e);
-          return Err(Box::new(e));
-        }
-      }
-    }
-
-    tx.commit().await?;
-
-    Ok(())
-  }
-}
-
-impl TestOnlyStorageAdapter for SqliteStorageAdapter {
-  async fn async_init_test_only() -> Self {
-    let db_name = env::var("TEST_ONLY_SQLITE_DB_PATH").unwrap();
-    // Create an absolute path to the current directory
-    let root = get_project_root().unwrap();
-    let db_path = root.join(db_name);
-    println!("🔍  Using database at: {}\n", db_path.display());
-
-    // Delete existing file if it exists to ensure we start fresh
-    if db_path.exists() {
-      std::fs::remove_file(&db_path).expect("Failed to remove existing database file");
-      println!("🗑️  Removed existing database file\n");
-    }
-
-    let pool = sqlx::SqlitePool::connect_with(
-      SqliteConnectOptions::new()
-        .filename(&db_path)
-        .create_if_missing(true)
-        .journal_mode(SqliteJournalMode::Truncate)
-        .synchronous(SqliteSynchronous::Off),
-    )
-    .await
-    .expect("❌ Failed to connect to SQLite database");
-
-    Self::init_schema(&pool).await;
-    Self::clear_tables(&pool).await;
-
-    Self { pool }
-  }
-}
-
-impl SqliteStorageAdapter {
-  pub async fn count_v(&self) -> usize {
-    let query = sqlx::query(
-      "
-      SELECT COUNT(*) FROM db_vertex",
-    );
-    let sql = query.sql();
-
-    let row = time_async_with_desc(query.fetch_one(&self.pool), sql.to_string())
-      .await
-      .unwrap();
-
-    row.get::<i64, _>(0) as usize
-  }
-
-  pub async fn count_e(&self) -> usize {
-    let query = sqlx::query(
-      "
-      SELECT COUNT(*) FROM db_edge",
-    );
-    let sql = query.sql();
-
-    let row = time_async_with_desc(query.fetch_one(&self.pool), sql.to_string())
-      .await
-      .unwrap();
-
-    row.get::<i64, _>(0) as usize
   }
 }

@@ -32,7 +32,6 @@ project-root       = "0.2.2"
 rayon              = "1.10.0"
 serde              = "1.0.219"
 serde_json         = "1.0.140"
-sqlx               = { version = "0.8.5", features = ["runtime-tokio", "sqlite"] }
 strum              = "0.27.1"
 strum_macros       = "0.27.1"
 tokio              = { version = "1.44.2", features = ["full"] }
@@ -42,6 +41,9 @@ tracing-futures    = "0.2.5"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 clap               = { version = "4.5.11", features = ["derive"] }
 sysinfo            = "0.34.2"
+rusqlite           = "0.35.0"
+r2d2               = "0.8.10"
+r2d2_sqlite        = "0.28.0"
 
 # Windows: use mimalloc
 [target.'cfg(windows)'.dependencies]
@@ -52,13 +54,18 @@ mimalloc = "0.1.46"
 tikv-jemallocator = { version = "0.6.0", features = ["unprefixed_malloc_on_supported_platforms"] }
 
 [features]
-default = [
-    "block_spawn_via_rayon",
-    "cache_force_background_update",
-    # "intersection_force_element_paralleled",
-    "simd_accelerated",
-]
-bench = ["default", "benchmark"]
+default = ["block_spawn_via_rayon", "cache_force_background_update", "simd_accelerated"]
+bench   = ["default", "benchmark"]
+
+bench_via_sqlite_only_with_cache_eviction = ["bench", "benchmark_via_sqlite_only", "benchmark_with_cache_eviction"]
+bench_via_neo4j_only_with_cache_eviction  = ["bench", "benchmark_via_neo4j_only", "benchmark_with_cache_eviction"]
+bench_via_sqlite_only                     = ["bench", "benchmark_via_sqlite_only"]
+bench_via_neo4j_only                      = ["bench", "benchmark_via_neo4j_only"]
+bench_with_cache_eviction                 = ["bench", "benchmark_with_cache_eviction"]
+
+benchmark_with_cache_eviction = []
+benchmark_via_sqlite_only     = []
+benchmark_via_neo4j_only      = []
 
 block_spawn_via_rayon                 = []
 cache_force_background_update         = []
