@@ -63,6 +63,7 @@ bench_via_sqlite_only                     = ["bench", "benchmark_via_sqlite_only
 bench_via_neo4j_only                      = ["bench", "benchmark_via_neo4j_only"]
 bench_with_cache_eviction                 = ["bench", "benchmark_with_cache_eviction"]
 
+benchmark                     = []
 benchmark_with_cache_eviction = []
 benchmark_via_sqlite_only     = []
 benchmark_via_neo4j_only      = []
@@ -70,7 +71,6 @@ benchmark_via_neo4j_only      = []
 block_spawn_via_rayon                 = []
 cache_force_background_update         = []
 intersection_force_element_paralleled = []
-benchmark                             = []
 simd_accelerated                      = []
 
 trace_all     = ["trace_init", "trace_get_adj"]

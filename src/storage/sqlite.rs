@@ -38,12 +38,28 @@ impl AsyncDefault for SqliteStorageAdapter {
 
       // apply performance optimization configs
       let conn = pool.get().expect("❌  Failed to get connection from pool");
+
+      #[cfg(not(feature = "benchmark_with_cache_eviction"))]
       conn
         .execute_batch(
           "
         PRAGMA journal_mode = OFF;
         PRAGMA synchronous = 0;
         PRAGMA cache_size = 1000000;
+        PRAGMA locking_mode = EXCLUSIVE;
+        PRAGMA temp_store = MEMORY;
+        PRAGMA mmap_size = 30000000000;
+        PRAGMA page_size = 4096;
+      ",
+        )
+        .expect("❌  Failed to set SQLite PRAGMA options");
+      #[cfg(feature = "benchmark_with_cache_eviction")]
+      conn
+        .execute_batch(
+          "
+        PRAGMA journal_mode = OFF;
+        PRAGMA synchronous = 0;
+        PRAGMA cache_size = 0;
         PRAGMA locking_mode = EXCLUSIVE;
         PRAGMA temp_store = MEMORY;
         PRAGMA mmap_size = 30000000000;
