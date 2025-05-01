@@ -10,7 +10,9 @@ use hashbrown::HashMap;
 use project_root::get_project_root;
 use sqlx::{
   Execute, Row, SqlitePool,
-  sqlite::{SqliteConnectOptions, SqliteJournalMode, SqliteRow, SqliteSynchronous},
+  sqlite::{
+    SqliteConnectOptions, SqliteJournalMode, SqliteLockingMode, SqliteRow, SqliteSynchronous,
+  },
 };
 use std::env;
 
@@ -32,7 +34,13 @@ impl AsyncDefault for SqliteStorageAdapter {
         .immutable(true)
         .read_only(true)
         .row_buffer_size(2048)
-        .statement_cache_capacity(512),
+        .page_size(4096)
+        .locking_mode(SqliteLockingMode::Exclusive)
+        .journal_mode(SqliteJournalMode::Off)
+        .synchronous(SqliteSynchronous::Off)
+        .statement_cache_capacity(100_000)
+        .pragma("temp_store", "MEMORY")
+        .pragma("mmap_size", "30000000000"),
     )
     .await
     .expect("❌ Failed to connect to SQLite database");

@@ -38,6 +38,7 @@
     "Mathematica",
     "Matplotlib",
     "mimalloc",
+    "mmap",
     "moka",
     "ncpu",
     "Noto",
