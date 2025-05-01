@@ -33,7 +33,7 @@ impl AsyncDefault for SqliteStorageAdapter {
         .create_if_missing(true)
         .immutable(true)
         .read_only(true)
-        .row_buffer_size(2048)
+        .row_buffer_size(4096)
         .page_size(4096)
         .locking_mode(SqliteLockingMode::Exclusive)
         .journal_mode(SqliteJournalMode::Off)
