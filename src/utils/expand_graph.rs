@@ -115,10 +115,10 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
     self.pending_v_grouped_dangling_eids.sort_unstable_keys();
   }
 
-  /// Update `valid target vertices` and return them
+  /// Intersect `valid target vertices` and return them
   ///
   /// - Vertices of any `dangling_edge` could be added to `target_v_adj_table`
-  pub fn update_valid_target_vertices(
+  pub fn intersect_valid_target_vertices(
     &mut self,
     asc_target_vertex_pattern_pairs: &[(VType, String)],
   ) -> Vec<String> {

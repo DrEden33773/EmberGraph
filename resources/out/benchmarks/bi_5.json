@@ -1,24 +1,24 @@
 {
-  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/plan/ldbc-bi-5.json",
-  "storage_type": "neo4j",
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/plan/neo4j_ordered/ldbc-bi-5.json",
+  "storage_type": "sqlite",
   "cache_size": 512,
   "num_runs": 10,
   "num_warmup": 1,
   "timing": {
-    "min_ms": 1864.363996,
-    "max_ms": 2180.734304,
-    "avg_ms": 2002.6658795,
+    "min_ms": 428.098652,
+    "max_ms": 459.199906,
+    "avg_ms": 440.63919712499995,
     "all_runs_ms": [
-      2172.808164,
-      2180.734304,
-      2315.918306,
-      2067.634351,
-      1977.035463,
-      2007.4550109999998,
-      1884.174168,
-      1848.563398,
-      1867.1215789999999,
-      1864.363996
+      429.463229,
+      459.199906,
+      445.200372,
+      428.098652,
+      427.16275399999995,
+      443.18159099999997,
+      449.21053900000004,
+      429.082076,
+      441.677212,
+      481.057258
     ]
   }
 }

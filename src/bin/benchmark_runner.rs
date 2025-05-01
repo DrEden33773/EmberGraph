@@ -95,7 +95,10 @@ struct SingleRunBenchmarkOutput {
 
 #[cfg(unix)]
 static SQLITE_TASKS: LazyLock<HashSet<&str>> =
-  LazyLock::new(|| HashSet::from(["3", "6", "7", "10", "11"]));
+  LazyLock::new(|| HashSet::from(["3", "5", "6", "7", "10", "11"]));
+
+static NEO4J_ORDERED_TASKS: LazyLock<HashSet<&str>> =
+  LazyLock::new(|| HashSet::from(["3", "5", "6", "7", "11", "17"]));
 
 static BENCHMARK_OUTPUT_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
   let res = project_root::get_project_root()
@@ -222,6 +225,7 @@ async fn run_benchmark() -> io::Result<()> {
           memory_bytes: process.memory(),
         });
       }
+
       thread::sleep(Duration::from_millis(100)); // Sample every 100ms
     }
     resource_tx.send(usage_data).ok(); // Send data back when stopping
@@ -236,22 +240,37 @@ async fn run_benchmark() -> io::Result<()> {
       .map_err(io::Error::other)?
       .join("resources")
       .join("plan");
+    let neo4j_ordered_plan_dir = project_root::get_project_root()
+      .map_err(io::Error::other)?
+      .join("resources")
+      .join("plan")
+      .join("neo4j_ordered");
 
-    let mut plan_files: Vec<PathBuf> = Vec::new();
+    let mut plan_paths: Vec<PathBuf> = vec![];
+
     for entry in fs::read_dir(&plan_dir).map_err(io::Error::other)? {
       let entry = entry.map_err(io::Error::other)?;
       let path = entry.path();
       if path.is_file() {
         if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
-          if name.starts_with("ldbc-bi-") && name.ends_with(".json") {
-            plan_files.push(path);
+          if !name.starts_with("ldbc-bi-") || !name.ends_with(".json") {
+            continue;
+          }
+          let task_num_str = name
+            .trim_start_matches("ldbc-bi-")
+            .trim_end_matches(".json");
+          if NEO4J_ORDERED_TASKS.contains(&task_num_str) {
+            let neo4j_path = neo4j_ordered_plan_dir.join(path.file_name().unwrap());
+            plan_paths.push(neo4j_path);
+          } else {
+            plan_paths.push(path);
           }
         }
       }
     }
 
     // Natural sort
-    plan_files.sort_by(|a, b| {
+    plan_paths.sort_by(|a, b| {
       let num_a = a
         .file_stem()
         .and_then(|s| s.to_str())
@@ -270,10 +289,10 @@ async fn run_benchmark() -> io::Result<()> {
     println!(
       "{} Found {} BI task plan files.",
       "INFO:".cyan(),
-      plan_files.len().to_string().yellow()
+      plan_paths.len().to_string().yellow()
     );
 
-    for plan_file in plan_files {
+    for plan_file in plan_paths {
       // Extract task number from filename
       let task_num_str = plan_file
         .file_stem()
@@ -283,7 +302,7 @@ async fn run_benchmark() -> io::Result<()> {
 
       println!(
         "{} Running task: {} (Task Num: {})", // Log extracted task number
-        "--->".blue(),
+        "--->".purple(),
         plan_file.display().to_string().purple(),
         task_num_str.yellow()
       );
@@ -297,7 +316,7 @@ async fn run_benchmark() -> io::Result<()> {
       };
       #[cfg(windows)]
       let storage_type = "sqlite";
-      println!("{} Using storage: {}", "--->".blue(), storage_type.cyan());
+      println!("{} Using storage: {}", "--->".blue(), storage_type.blue());
 
       match execute_single_benchmark(&plan_file, storage_type, &args).await {
         Ok(timing_stats) => {
@@ -317,7 +336,7 @@ async fn run_benchmark() -> io::Result<()> {
           fs::write(&output_path, output_json)?;
           println!(
             "{} Results saved to: {}",
-            "--->".blue(),
+            "--->".green(),
             output_path.display().to_string().green()
           );
         }
@@ -434,7 +453,7 @@ async fn execute_single_benchmark(
       if args.warmup > 0 {
         for _ in 0..args.warmup {
           adapter.cache_clear().await;
-          let _ = executor.exec().await;
+          executor.exec().await;
         }
       }
       // Measurement runs
@@ -458,7 +477,7 @@ async fn execute_single_benchmark(
       if args.warmup > 0 {
         for _ in 0..args.warmup {
           adapter.cache_clear().await;
-          let _ = executor.exec().await;
+          executor.exec().await;
         }
       }
       // Measurement runs
