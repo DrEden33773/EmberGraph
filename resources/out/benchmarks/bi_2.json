@@ -5,52 +5,37 @@
   "num_runs": 10,
   "num_warmup": 1,
   "timing": {
-    "min_ms": 9.002835000000001,
-    "max_ms": 15.130677,
-    "avg_ms": 10.965333875,
+    "min_ms": 7.073366999999999,
+    "max_ms": 8.266973,
+    "avg_ms": 7.52910875,
     "all_runs_ms": [
-      18.145696,
-      15.130677,
-      12.237762,
-      12.856779000000001,
-      10.294368,
-      9.570283,
-      9.081366000000001,
-      9.002835000000001,
-      8.613822,
-      9.548601
+      10.067231,
+      7.3303270000000005,
+      7.669898,
+      7.438362,
+      7.525228,
+      7.073366999999999,
+      7.273121,
+      6.6009199999999995,
+      7.655594,
+      8.266973
     ]
   },
   "resource_usage": [
     {
-      "timestamp_ms": 1746083155376,
-      "cpu_usage_percent": 0.21551724,
-      "memory_bytes": 2920599552
-    },
-    {
-      "timestamp_ms": 1746083155583,
-      "cpu_usage_percent": 0.5025126,
-      "memory_bytes": 2921013248
-    },
-    {
-      "timestamp_ms": 1746083155789,
+      "timestamp_ms": 1746086191070,
       "cpu_usage_percent": 0.0,
-      "memory_bytes": 2921013248
+      "memory_bytes": 2920673280
     },
     {
-      "timestamp_ms": 1746083155999,
-      "cpu_usage_percent": 0.9708737,
-      "memory_bytes": 2925002752
+      "timestamp_ms": 1746086191277,
+      "cpu_usage_percent": 0.9638554,
+      "memory_bytes": 2928623616
     },
     {
-      "timestamp_ms": 1746083156210,
-      "cpu_usage_percent": 3.3333335,
-      "memory_bytes": 2931482624
-    },
-    {
-      "timestamp_ms": 1746083156415,
-      "cpu_usage_percent": 1.9184653,
-      "memory_bytes": 2930958336
+      "timestamp_ms": 1746086191483,
+      "cpu_usage_percent": 2.912621,
+      "memory_bytes": 2930601984
     }
   ]
 }

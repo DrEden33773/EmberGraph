@@ -52,13 +52,19 @@ mimalloc = "0.1.46"
 tikv-jemallocator = { version = "0.6.0", features = ["unprefixed_malloc_on_supported_platforms"] }
 
 [features]
-default = ["block_spawn_via_rayon", "cache_force_background_update", "intersection_force_element_paralleled"]
-bench   = ["default", "benchmark"]
+default = [
+    "block_spawn_via_rayon",
+    "cache_force_background_update",
+    # "intersection_force_element_paralleled",
+    "simd_accelerated",
+]
+bench = ["default", "benchmark"]
 
 block_spawn_via_rayon                 = []
 cache_force_background_update         = []
 intersection_force_element_paralleled = []
 benchmark                             = []
+simd_accelerated                      = []
 
 trace_all     = ["trace_init", "trace_get_adj"]
 trace_init    = []

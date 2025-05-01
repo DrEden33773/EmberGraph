@@ -189,10 +189,11 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
 
     legal_vids
   }
-}
 
-impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
-  #[inline]
+  /// Check if two ExpandGraph have common pending vertices.
+  ///
+  /// This is the performance critical path, need to be implemented efficiently.
+  #[inline(always)]
   pub fn has_common_pending_v(&self, other: &Self) -> bool {
     let (shorter, longer) =
       if self.pending_v_grouped_dangling_eids.len() < other.pending_v_grouped_dangling_eids.len() {
@@ -201,10 +202,86 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
         (other, self)
       };
 
+    // for small-scale collections, directly iterate and compare
+    if shorter.pending_v_grouped_dangling_eids.len() <= 4 {
+      for (vid, _) in &shorter.pending_v_grouped_dangling_eids {
+        if longer.pending_v_grouped_dangling_eids.contains_key(vid) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // for medium-scale collections, use binary search to accelerate comparison
+    if shorter.pending_v_grouped_dangling_eids.len() <= 16
+      && longer.pending_v_grouped_dangling_eids.len() > 32
+    {
+      // collect keys of the longer collection
+      let keys: Vec<_> = longer.pending_v_grouped_dangling_eids.keys().collect();
+
+      // binary search each key of the shorter collection
+      for (vid, _) in &shorter.pending_v_grouped_dangling_eids {
+        if keys.binary_search(&vid).is_ok() {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // normal case, use standard iteration
     shorter
       .pending_v_grouped_dangling_eids
       .iter()
       .any(|(vid, _)| longer.pending_v_grouped_dangling_eids.contains_key(vid))
+  }
+
+  /// High-performance version of common point comparison, optimized for large data sets.
+  ///
+  /// Use mask to filter out impossible matches in advance.
+  #[inline]
+  pub fn has_common_pending_v_optimized(&self, other: &Self) -> bool {
+    // if one of the collections is empty, return false directly
+    if self.pending_v_grouped_dangling_eids.is_empty()
+      || other.pending_v_grouped_dangling_eids.is_empty()
+    {
+      return false;
+    }
+
+    // create character masks: record the occurrence of the first character of each vid
+    let mut self_mask = [false; 256];
+    let mut other_mask = [false; 256];
+
+    // fill the masks: record the occurrence of the first character of each vid
+    for (vid, _) in &self.pending_v_grouped_dangling_eids {
+      if let Some(first_byte) = vid.bytes().next() {
+        self_mask[first_byte as usize] = true;
+      }
+    }
+
+    // check the other collection and return early
+    for (vid, _) in &other.pending_v_grouped_dangling_eids {
+      if let Some(first_byte) = vid.bytes().next() {
+        // if the current element's mask bit is already set in self_mask, there may be an intersection
+        if self_mask[first_byte as usize] {
+          // set other_mask, and perform actual comparison
+          other_mask[first_byte as usize] = true;
+
+          // directly check if there is an intersection
+          for (vid, _) in &self.pending_v_grouped_dangling_eids {
+            if let Some(first_byte_self) = vid.bytes().next() {
+              // only check the bucket that matches the mask
+              if other_mask[first_byte_self as usize]
+                && other.pending_v_grouped_dangling_eids.contains_key(vid)
+              {
+                return true;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    false
   }
 }
 
