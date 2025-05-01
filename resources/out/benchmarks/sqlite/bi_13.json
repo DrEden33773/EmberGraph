@@ -1,0 +1,41 @@
+{
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/plan/ldbc-bi-13.json",
+  "storage_type": "sqlite",
+  "cache_size": 512,
+  "num_runs": 10,
+  "num_warmup": 1,
+  "timing": {
+    "min_ms": 38.489124,
+    "max_ms": 42.756934,
+    "avg_ms": 40.469665625,
+    "all_runs_ms": [
+      54.132253999999996,
+      40.369143,
+      40.185793999999994,
+      39.159797000000005,
+      41.682311,
+      42.756934,
+      37.876549000000004,
+      39.332201,
+      41.782021,
+      38.489124
+    ]
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1746108436548,
+      "cpu_usage_percent": 16.885553,
+      "memory_bytes": 12016676864
+    },
+    {
+      "timestamp_ms": 1746108436763,
+      "cpu_usage_percent": 16.666666,
+      "memory_bytes": 11985281024
+    },
+    {
+      "timestamp_ms": 1746108436976,
+      "cpu_usage_percent": 0.70588243,
+      "memory_bytes": 11985281024
+    }
+  ]
+}
