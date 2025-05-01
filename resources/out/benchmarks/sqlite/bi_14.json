@@ -5,52 +5,52 @@
   "num_runs": 10,
   "num_warmup": 1,
   "timing": {
-    "min_ms": 98.471366,
-    "max_ms": 107.003591,
-    "avg_ms": 102.854054375,
+    "min_ms": 98.203507,
+    "max_ms": 104.182693,
+    "avg_ms": 102.07360475,
     "all_runs_ms": [
-      90.54668000000001,
-      98.471366,
-      102.220198,
-      106.21539800000001,
-      100.668164,
-      104.20285799999999,
-      102.885474,
-      107.003591,
-      107.497692,
-      101.165386
+      103.245044,
+      100.607729,
+      97.523256,
+      98.203507,
+      101.217077,
+      104.182693,
+      102.538263,
+      102.654659,
+      103.93986600000001,
+      108.702611
     ]
   },
   "resource_usage": [
     {
-      "timestamp_ms": 1746108437282,
-      "cpu_usage_percent": 41.329014,
-      "memory_bytes": 12023017472
+      "timestamp_ms": 1746118760336,
+      "cpu_usage_percent": 36.79727,
+      "memory_bytes": 12021362688
     },
     {
-      "timestamp_ms": 1746108437502,
-      "cpu_usage_percent": 51.543945,
-      "memory_bytes": 12023017472
+      "timestamp_ms": 1746118760559,
+      "cpu_usage_percent": 52.267815,
+      "memory_bytes": 12021362688
     },
     {
-      "timestamp_ms": 1746108437720,
-      "cpu_usage_percent": 51.666664,
-      "memory_bytes": 12023017472
+      "timestamp_ms": 1746118760775,
+      "cpu_usage_percent": 48.636364,
+      "memory_bytes": 12021362688
     },
     {
-      "timestamp_ms": 1746108437936,
-      "cpu_usage_percent": 49.537033,
-      "memory_bytes": 12023017472
+      "timestamp_ms": 1746118760989,
+      "cpu_usage_percent": 49.882355,
+      "memory_bytes": 12021362688
     },
     {
-      "timestamp_ms": 1746108438151,
-      "cpu_usage_percent": 50.7109,
-      "memory_bytes": 11991621632
+      "timestamp_ms": 1746118761205,
+      "cpu_usage_percent": 48.96074,
+      "memory_bytes": 11989966848
     },
     {
-      "timestamp_ms": 1746108438363,
-      "cpu_usage_percent": 0.4716981,
-      "memory_bytes": 11991621632
+      "timestamp_ms": 1746118761418,
+      "cpu_usage_percent": 0.4683841,
+      "memory_bytes": 11989966848
     }
   ]
 }
