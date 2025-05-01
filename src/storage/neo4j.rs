@@ -19,8 +19,8 @@ impl AsyncDefault for Neo4jStorageAdapter {
       .user(username)
       .password(password)
       .db(db_name)
-      .fetch_size(2048)
-      .max_connections(num_cpus::get())
+      .fetch_size(4096)
+      .max_connections(num_cpus::get() * 4)
       .build()
       .unwrap();
 
@@ -140,10 +140,12 @@ impl StorageAdapter for Neo4jStorageAdapter {
     e_attr: Option<&PatternAttr>,
   ) -> Vec<DataEdge> {
     let mut query_str = format!("\n\t\tMATCH (src)-[e: {e_label}]->(dst)\n");
-    query_str += &format!("\t\tWHERE elementId(src) = '{src_vid}'\n");
+    let mut constraint_parts = vec![format!("elementId(src) = '{src_vid}'")];
     if let Some(attr) = e_attr {
-      let constraint = attr.to_neo4j_constraint("e");
-      query_str += &format!("\t\tAND {constraint}\n");
+      constraint_parts.push(attr.to_neo4j_constraint("e"));
+    }
+    if !constraint_parts.is_empty() {
+      query_str += &format!("\t\tWHERE {}\n", constraint_parts.join(" AND "));
     }
     query_str += "
       RETURN
@@ -173,10 +175,12 @@ impl StorageAdapter for Neo4jStorageAdapter {
     e_attr: Option<&PatternAttr>,
   ) -> Vec<DataEdge> {
     let mut query_str = format!("\n\t\tMATCH (src)-[e: {e_label}]->(dst)\n");
-    query_str += &format!("\t\tWHERE elementId(dst) = '{dst_vid}'\n");
+    let mut constraint_parts = vec![format!("elementId(dst) = '{dst_vid}'")];
     if let Some(attr) = e_attr {
-      let constraint = attr.to_neo4j_constraint("e");
-      query_str += &format!("\t\tAND {constraint}\n");
+      constraint_parts.push(attr.to_neo4j_constraint("e"));
+    }
+    if !constraint_parts.is_empty() {
+      query_str += &format!("\t\tWHERE {}\n", constraint_parts.join(" AND "));
     }
     query_str += "
       RETURN
@@ -210,14 +214,15 @@ impl AdvancedStorageAdapter for Neo4jStorageAdapter {
     dst_v_attr: Option<&PatternAttr>,
   ) -> Vec<DataEdge> {
     let mut query_str = format!("\n\t\tMATCH (src)-[e: {e_label}]->(dst: {dst_v_label})\n");
-    query_str += &format!("\t\tWHERE elementId(src) = '{src_vid}'\n");
-    if let Some(attr) = e_attr {
-      let constraint = attr.to_neo4j_constraint("e");
-      query_str += &format!("\t\tAND {constraint}\n");
-    }
+    let mut constraint_parts = vec![format!("elementId(src) = '{src_vid}'")];
     if let Some(attr) = dst_v_attr {
-      let constraint = attr.to_neo4j_constraint("dst");
-      query_str += &format!("\t\tAND {constraint}\n");
+      constraint_parts.push(attr.to_neo4j_constraint("dst"));
+    }
+    if let Some(attr) = e_attr {
+      constraint_parts.push(attr.to_neo4j_constraint("e"));
+    }
+    if !constraint_parts.is_empty() {
+      query_str += &format!("\t\tWHERE {}\n", constraint_parts.join(" AND "));
     }
     query_str += "
       RETURN
@@ -248,14 +253,15 @@ impl AdvancedStorageAdapter for Neo4jStorageAdapter {
     src_v_attr: Option<&PatternAttr>,
   ) -> Vec<DataEdge> {
     let mut query_str = format!("\n\t\tMATCH (src: {src_v_label})-[e: {e_label}]->(dst)\n");
-    query_str += &format!("\t\tWHERE elementId(dst) = '{dst_vid}'\n");
-    if let Some(attr) = e_attr {
-      let constraint = attr.to_neo4j_constraint("e");
-      query_str += &format!("\t\tAND {constraint}\n");
-    }
+    let mut constraint_parts = vec![format!("elementId(dst) = '{dst_vid}'")];
     if let Some(attr) = src_v_attr {
-      let constraint = attr.to_neo4j_constraint("src");
-      query_str += &format!("\t\tAND {constraint}\n");
+      constraint_parts.push(attr.to_neo4j_constraint("src"));
+    }
+    if let Some(attr) = e_attr {
+      constraint_parts.push(attr.to_neo4j_constraint("e"));
+    }
+    if !constraint_parts.is_empty() {
+      query_str += &format!("\t\tWHERE {}\n", constraint_parts.join(" AND "));
     }
     query_str += "
       RETURN
