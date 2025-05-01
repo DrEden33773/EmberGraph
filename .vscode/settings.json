@@ -49,6 +49,7 @@
     "pround",
     "pyproject",
     "researchfield",
+    "rusqlite",
     "rustflags",
     "sqlmodel",
     "stringstyle",
