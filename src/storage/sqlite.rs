@@ -38,7 +38,7 @@ impl AsyncDefault for SqliteStorageAdapter {
         .locking_mode(SqliteLockingMode::Exclusive)
         .journal_mode(SqliteJournalMode::Off)
         .synchronous(SqliteSynchronous::Off)
-        .statement_cache_capacity(100_000)
+        .statement_cache_capacity(1_000_000)
         .pragma("temp_store", "MEMORY")
         .pragma("mmap_size", "30000000000"),
     )
