@@ -1,0 +1,39 @@
+{
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/cypher/bi-16.cypher",
+  "num_runs": 10,
+  "num_warmup": 1,
+  "timing": {
+    "min_ms": 35.105850000000004,
+    "max_ms": 40.308370000000004,
+    "avg_ms": 37.99059375,
+    "all_runs_ms": [
+      37.391528,
+      63.175227,
+      38.664485,
+      40.034867,
+      38.092483,
+      38.335046999999996,
+      40.308370000000004,
+      35.99212,
+      30.864124999999998,
+      35.105850000000004
+    ]
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1746182649818,
+      "cpu_usage_percent": 0.0,
+      "memory_bytes": 2916687872
+    },
+    {
+      "timestamp_ms": 1746182650023,
+      "cpu_usage_percent": 0.24390242,
+      "memory_bytes": 2916687872
+    },
+    {
+      "timestamp_ms": 1746182650227,
+      "cpu_usage_percent": 0.24390242,
+      "memory_bytes": 2916687872
+    }
+  ]
+}

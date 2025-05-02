@@ -1,4 +1,3 @@
-PROFILE
 MATCH
     (personA: Person)-[a: knows]->(personB: Person),
     (c1: Comment)-[b: hasCreator]->(personA),

@@ -1,4 +1,3 @@
-PROFILE
 MATCH
     (person1: Person)-[a: knows]->(person2: Person),
     (person1)-[b: workAt]->(company: Company),

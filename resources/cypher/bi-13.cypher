@@ -1,4 +1,3 @@
-PROFILE
 MATCH
     (post: Post)-[a: hasCreator]->(zombie: Person),
     (zombie)-[b: isLocatedIn]->(city: City),

@@ -1,0 +1,29 @@
+{
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/cypher/bi-13.cypher",
+  "num_runs": 10,
+  "num_warmup": 1,
+  "timing": {
+    "min_ms": 2.604721,
+    "max_ms": 3.660153,
+    "avg_ms": 3.0804025,
+    "all_runs_ms": [
+      3.660153,
+      3.599424,
+      3.326832,
+      2.9167099999999997,
+      2.61518,
+      3.129164,
+      2.791036,
+      2.604721,
+      2.6015309999999996,
+      8.756877999999999
+    ]
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1746182923273,
+      "cpu_usage_percent": 0.0,
+      "memory_bytes": 2916700160
+    }
+  ]
+}

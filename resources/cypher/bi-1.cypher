@@ -1,4 +1,3 @@
-PROFILE
 MATCH
     (message: Post)
 WHERE

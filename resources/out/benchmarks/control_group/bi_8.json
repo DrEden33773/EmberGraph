@@ -1,0 +1,44 @@
+{
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/cypher/bi-8.cypher",
+  "num_runs": 10,
+  "num_warmup": 1,
+  "timing": {
+    "min_ms": 54.921478,
+    "max_ms": 83.904218,
+    "avg_ms": 64.315775125,
+    "all_runs_ms": [
+      54.921478,
+      59.404318999999994,
+      51.798801,
+      83.904218,
+      64.505856,
+      63.312760999999995,
+      90.319472,
+      61.147521000000005,
+      62.168797,
+      65.16125100000001
+    ]
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1746182639201,
+      "cpu_usage_percent": 0.22573364,
+      "memory_bytes": 2916700160
+    },
+    {
+      "timestamp_ms": 1746182639406,
+      "cpu_usage_percent": 0.0,
+      "memory_bytes": 2916700160
+    },
+    {
+      "timestamp_ms": 1746182639611,
+      "cpu_usage_percent": 0.24271843,
+      "memory_bytes": 2916700160
+    },
+    {
+      "timestamp_ms": 1746182639816,
+      "cpu_usage_percent": 0.0,
+      "memory_bytes": 2916700160
+    }
+  ]
+}

@@ -1,14 +1,10 @@
 use clap::Parser;
 use colored::Colorize;
 use dotenv::dotenv;
-use ember_graph::{
-  executor::ExecEngine,
-  schemas::PlanData,
-  storage::{AsyncDefault, CachedStorageAdapter, Neo4jStorageAdapter, SqliteStorageAdapter},
-  utils::parallel,
-};
+use ember_graph::utils::parallel;
+use neo4rs::{ConfigBuilder, Graph, query};
 use serde::Serialize;
-use std::collections::HashSet;
+use std::env;
 use std::sync::LazyLock;
 use std::{
   fs,
@@ -32,10 +28,6 @@ struct Args {
   #[arg(short, long)]
   query_file: Option<PathBuf>,
 
-  /// Storage adapter type to use (ignored if --all-bi-tasks is used).
-  #[arg(long, value_parser = clap::value_parser!(String))]
-  storage: Option<String>, // "neo4j" or "sqlite"
-
   /// Run benchmarks for all ldbc-bi-*.json tasks found in resources/plan.
   #[arg(long, default_value_t = false)]
   all_bi_tasks: bool,
@@ -51,10 +43,6 @@ struct Args {
   /// Output file path for results (JSON format). If not specified, prints to stdout.
   #[arg(short, long)]
   output: Option<PathBuf>,
-
-  /// Cache size for the storage adapter.
-  #[arg(long, default_value_t = 512)]
-  cache_size: usize,
 }
 
 #[derive(Serialize, Debug, Clone)]
@@ -75,8 +63,6 @@ struct ResourceUsage {
 #[derive(Serialize, Debug)]
 struct PerTaskBenchmarkOutput {
   query_file: String,
-  storage_type: String,
-  cache_size: usize,
   num_runs: usize,
   num_warmup: usize,
   timing: TimingStats,
@@ -86,51 +72,11 @@ struct PerTaskBenchmarkOutput {
 #[derive(Serialize, Debug)]
 struct SingleRunBenchmarkOutput {
   query_file: String,
-  storage_type: String,
-  cache_size: usize,
   num_runs: usize,
   num_warmup: usize,
   timing: TimingStats,
   resource_usage: Vec<ResourceUsage>,
 }
-
-#[cfg(unix)]
-#[cfg(not(feature = "benchmark_via_sqlite_only"))]
-#[cfg(not(feature = "benchmark_via_neo4j_only"))]
-static SQLITE_TASKS: LazyLock<HashSet<&str>> = LazyLock::new(|| {
-  let res = HashSet::from(["3", "5", "6", "7", "10", "11"]);
-  println!(
-    "{} SQLite tasks: {}",
-    "INFO:".cyan(),
-    format!("{:?}", res.iter().collect::<Vec<_>>()).cyan()
-  );
-  res
-});
-
-#[cfg(unix)]
-#[cfg(feature = "benchmark_via_neo4j_only")]
-#[cfg(not(feature = "benchmark_via_sqlite_only"))]
-static SQLITE_TASKS: LazyLock<HashSet<&str>> = LazyLock::new(|| {
-  println!("{} {} `SQLite task`", "INFO:".cyan(), "NO".red());
-  HashSet::new()
-});
-
-#[cfg(unix)]
-#[cfg(feature = "benchmark_via_sqlite_only")]
-static SQLITE_TASKS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
-  println!(
-    "{} {} task is registered as `SQLite task`",
-    "INFO:".cyan(),
-    "EACH".green()
-  );
-  HashSet::from([
-    "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17",
-    "18", "19", "20",
-  ])
-});
-
-static NEO4J_ORDERED_TASKS: LazyLock<HashSet<&str>> =
-  LazyLock::new(|| HashSet::from(["3", "5", "6", "7", "11", "17"]));
 
 static BENCHMARK_OUTPUT_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
   let mut res = project_root::get_project_root()
@@ -140,47 +86,9 @@ static BENCHMARK_OUTPUT_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
     .join("benchmarks");
 
   #[cfg(feature = "benchmark_with_cache_eviction")]
-  {
-    #[cfg(feature = "benchmark_via_sqlite_only")]
-    {
-      #[cfg(feature = "benchmark_via_neo4j_only")]
-      panic!(
-        "CANNOT activate {} and {} at the same time",
-        "benchmark_with_cache_eviction".yellow(),
-        "benchmark_via_neo4j_only".yellow()
-      );
-      #[cfg(not(feature = "benchmark_via_neo4j_only"))]
-      res.push("sqlite");
-    }
-    #[cfg(not(feature = "benchmark_via_sqlite_only"))]
-    {
-      #[cfg(feature = "benchmark_via_neo4j_only")]
-      res.push("neo4j");
-      #[cfg(not(feature = "benchmark_via_neo4j_only"))]
-      res.push("mixed");
-    }
-  }
+  res.push("control_group");
   #[cfg(not(feature = "benchmark_with_cache_eviction"))]
-  {
-    #[cfg(feature = "benchmark_via_sqlite_only")]
-    {
-      #[cfg(feature = "benchmark_via_neo4j_only")]
-      panic!(
-        "CANNOT activate {} and {} at the same time",
-        "benchmark_with_cache_eviction".yellow(),
-        "benchmark_via_neo4j_only".yellow()
-      );
-      #[cfg(not(feature = "benchmark_via_neo4j_only"))]
-      res.push("sqlite_with_cache");
-    }
-    #[cfg(not(feature = "benchmark_via_sqlite_only"))]
-    {
-      #[cfg(feature = "benchmark_via_neo4j_only")]
-      res.push("neo4j_with_cache");
-      #[cfg(not(feature = "benchmark_via_neo4j_only"))]
-      res.push("mixed_with_cache");
-    }
-  }
+  res.push("control_group_with_cache");
 
   if !res.exists() {
     fs::create_dir_all(&res).unwrap();
@@ -201,12 +109,16 @@ fn main() -> io::Result<()> {
 
 async fn run_benchmark() -> io::Result<()> {
   dotenv().ok();
-  let args = Args::parse();
 
+  let args = Args::parse();
   arg_validation(&args)?;
 
+  let neo4j_db = init_neo4j_db()
+    .await
+    .expect("❌  Failed to connect to Neo4j database");
+
   println!(
-    "{} Running benchmark for {} with {} storage (cache size: {})",
+    "{} Running benchmark for {} ({} on {} db)",
     "INFO:".cyan(),
     if args.all_bi_tasks {
       "all BI tasks".cyan()
@@ -219,13 +131,10 @@ async fn run_benchmark() -> io::Result<()> {
         .to_string()
         .cyan()
     },
-    if args.all_bi_tasks {
-      "determined storage".cyan()
-    } else {
-      args.storage.as_ref().unwrap().cyan()
-    },
-    args.cache_size.to_string().yellow()
+    "control group".yellow(),
+    "neo4j".purple()
   );
+
   println!(
     "{} Runs: {}, Warm-up: {}",
     "INFO:".cyan(),
@@ -234,88 +143,63 @@ async fn run_benchmark() -> io::Result<()> {
   );
 
   if args.all_bi_tasks {
-    // Find and sort plan files
-    let plan_dir = project_root::get_project_root()
+    let query_dir = project_root::get_project_root()
       .map_err(io::Error::other)?
       .join("resources")
-      .join("plan");
-    let neo4j_ordered_plan_dir = project_root::get_project_root()
-      .map_err(io::Error::other)?
-      .join("resources")
-      .join("plan")
-      .join("neo4j_ordered");
+      .join("cypher");
 
-    let mut plan_paths: Vec<PathBuf> = vec![];
+    let mut query_paths: Vec<PathBuf> = vec![];
 
-    for entry in fs::read_dir(&plan_dir).map_err(io::Error::other)? {
+    for entry in fs::read_dir(&query_dir).map_err(io::Error::other)? {
       let entry = entry.map_err(io::Error::other)?;
       let path = entry.path();
       if path.is_file() {
         if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
-          if !name.starts_with("ldbc-bi-") || !name.ends_with(".json") {
+          if !name.starts_with("bi-") || !name.ends_with("cypher") {
             continue;
           }
-          let task_num_str = name
-            .trim_start_matches("ldbc-bi-")
-            .trim_end_matches(".json");
-          if NEO4J_ORDERED_TASKS.contains(&task_num_str) {
-            let neo4j_path = neo4j_ordered_plan_dir.join(path.file_name().unwrap());
-            plan_paths.push(neo4j_path);
-          } else {
-            plan_paths.push(path);
-          }
+          query_paths.push(path);
         }
       }
     }
 
     // Natural sort
-    plan_paths.sort_by(|a, b| {
+    query_paths.sort_by(|a, b| {
       let num_a = a
         .file_stem()
         .and_then(|s| s.to_str())
-        .map(|s| s.trim_start_matches("ldbc-bi-"))
+        .map(|s| s.trim_start_matches("bi-"))
         .and_then(|s| s.parse::<u32>().ok())
         .unwrap_or(u32::MAX);
       let num_b = b
         .file_stem()
         .and_then(|s| s.to_str())
-        .map(|s| s.trim_start_matches("ldbc-bi-"))
+        .map(|s| s.trim_start_matches("bi-"))
         .and_then(|s| s.parse::<u32>().ok())
         .unwrap_or(u32::MAX);
       num_a.cmp(&num_b)
     });
 
     println!(
-      "{} Found {} BI task plan files.",
+      "{} Found {} BI task query files.",
       "INFO:".cyan(),
-      plan_paths.len().to_string().yellow()
+      query_paths.len().to_string().yellow()
     );
 
-    for plan_file in plan_paths {
+    for query_file in query_paths {
       // Extract task number from filename
-      let task_num_str = plan_file
+      let task_num_str = query_file
         .file_stem()
         .and_then(|s| s.to_str())
-        .map(|s| s.trim_start_matches("ldbc-bi-"))
+        .map(|s| s.trim_start_matches("bi-"))
         .unwrap_or(""); // Default to empty if parsing fails
 
       println!(
         "{} Running task: {} (Task Num: {})",
         "--->".purple(),
-        plan_file.display().to_string().purple(),
+        query_file.display().to_string().purple(),
         task_num_str.yellow()
       );
-
-      // Determine storage type: Always sqlite based on example analysis
-      #[cfg(unix)]
-      let storage_type = if SQLITE_TASKS.contains(&task_num_str) {
-        "sqlite"
-      } else {
-        "neo4j"
-      };
-      #[cfg(windows)]
-      let storage_type = "sqlite";
-      println!("{} Using storage: {}", "--->".blue(), storage_type.blue());
 
       // create independent resource monitoring for each task
       let (task_resource_tx, task_resource_rx) = mpsc::channel();
@@ -352,7 +236,7 @@ async fn run_benchmark() -> io::Result<()> {
         task_resource_tx.send(task_usage_data).ok();
       });
 
-      match execute_single_benchmark(&plan_file, storage_type, &args).await {
+      match execute_single(&query_file, &args, &neo4j_db).await {
         Ok(timing_stats) => {
           // stop current task's resource monitoring
           task_monitoring_active.store(false, Ordering::Relaxed);
@@ -379,9 +263,7 @@ async fn run_benchmark() -> io::Result<()> {
           };
 
           let output_data = PerTaskBenchmarkOutput {
-            query_file: plan_file.display().to_string(),
-            storage_type: storage_type.to_string(),
-            cache_size: args.cache_size,
+            query_file: query_file.display().to_string(),
             num_runs: args.runs,
             num_warmup: args.warmup,
             timing: timing_stats,
@@ -402,15 +284,16 @@ async fn run_benchmark() -> io::Result<()> {
         Err(e) => eprintln!(
           "{} Failed to execute benchmark for {}: {}",
           "ERROR:".red(),
-          plan_file.display().to_string().purple(),
+          query_file.display().to_string().purple(),
           e
         ),
       }
     }
   } else {
+    // TODO
     // Execute single task
+
     let query_file = args.query_file.as_ref().unwrap();
-    let storage_type = args.storage.as_ref().unwrap().as_str();
 
     // create resource monitoring for single task
     let (task_resource_tx, task_resource_rx) = mpsc::channel();
@@ -447,7 +330,7 @@ async fn run_benchmark() -> io::Result<()> {
       task_resource_tx.send(task_usage_data).ok();
     });
 
-    match execute_single_benchmark(query_file, storage_type, &args).await {
+    match execute_single(query_file, &args, &neo4j_db).await {
       Ok(timing_stats) => {
         // stop resource monitoring and collect data
         task_monitoring_active.store(false, Ordering::Relaxed);
@@ -472,8 +355,6 @@ async fn run_benchmark() -> io::Result<()> {
 
         let final_output = SingleRunBenchmarkOutput {
           query_file: query_file.display().to_string(),
-          storage_type: storage_type.to_string(),
-          cache_size: args.cache_size,
           num_runs: args.runs,
           num_warmup: args.warmup,
           timing: timing_stats,
@@ -507,19 +388,22 @@ async fn run_benchmark() -> io::Result<()> {
     return Ok(());
   }
 
-  println!("{} All benchmark tasks finished.", "INFO:".cyan());
+  println!(
+    "{} All benchmark tasks {} finished.",
+    "INFO:".cyan(),
+    "(control group)".yellow()
+  );
 
   Ok(())
 }
 
 fn arg_validation(args: &Args) -> io::Result<()> {
   if args.all_bi_tasks {
-    if args.query_file.is_some() || args.storage.is_some() {
+    if args.query_file.is_some() {
       eprintln!(
-        "{} Cannot use {} or {} with {}.",
+        "{} Cannot use {} with {}.",
         "ERROR:".red(),
         "--query-file".yellow(),
-        "--storage".yellow(),
         "--all-bi-tasks".cyan()
       );
       return Err(io::Error::new(
@@ -540,12 +424,11 @@ fn arg_validation(args: &Args) -> io::Result<()> {
         "Conflicting arguments",
       ));
     }
-  } else if args.query_file.is_none() || args.storage.is_none() {
+  } else if args.query_file.is_none() {
     eprintln!(
-      "{} Must provide {} and {} unless {} is used.",
+      "{} Must provide {} unless {} is used.",
       "ERROR:".red(),
       "--query-file".yellow(),
-      "--storage".yellow(),
       "--all-bi-tasks".cyan()
     );
     return Err(io::Error::new(
@@ -557,84 +440,42 @@ fn arg_validation(args: &Args) -> io::Result<()> {
   Ok(())
 }
 
-// --- Refactored Benchmark Execution Function ---
-async fn execute_single_benchmark(
-  query_file: &PathBuf,
-  storage_type: &str,
-  args: &Args,
-) -> io::Result<TimingStats> {
-  // Load query plan
-  let plan_json = fs::read_to_string(query_file)?; // Correctly use the reference
-  let plan: PlanData =
-    serde_json::from_str(&plan_json).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-  let plan_arc = Arc::new(plan);
+async fn init_neo4j_db() -> Result<Graph, neo4rs::Error> {
+  let uri = env::var("NEO4J_URI").unwrap();
+  let username = env::var("NEO4J_USERNAME").unwrap();
+  let password = env::var("NEO4J_PASSWORD").unwrap();
+  let db_name = env::var("NEO4J_DATABASE").unwrap();
+  let config = ConfigBuilder::default()
+    .uri(uri)
+    .user(username)
+    .password(password)
+    .db(db_name)
+    .fetch_size(4096)
+    .max_connections(num_cpus::get() * 4)
+    .build()
+    .unwrap();
 
+  Graph::connect(config).await
+}
+
+async fn execute_single(cypher_file: &PathBuf, args: &Args, db: &Graph) -> io::Result<TimingStats> {
+  let cypher_stmt = fs::read_to_string(cypher_file).unwrap();
   let mut durations_ms = Vec::with_capacity(args.runs);
 
-  // This match is now inside the function and only handles executor creation
-  // It doesn't return different types anymore
-  match storage_type.to_lowercase().as_str() {
-    "neo4j" => {
-      // Create adapter first
-      let neo4j_adapter = Neo4jStorageAdapter::async_default().await;
-      let cached_adapter =
-        CachedStorageAdapter::<Neo4jStorageAdapter>::new(neo4j_adapter, args.cache_size);
-      let adapter = Arc::new(cached_adapter);
-      let mut executor = ExecEngine::new(plan_arc.clone(), adapter.clone());
+  // Warm-up runs
+  if args.warmup > 0 {
+    for _ in 0..args.warmup {
+      db.run(query(&cypher_stmt)).await.unwrap();
+    }
+  }
 
-      // Warm-up runs
-      if args.warmup > 0 {
-        for _ in 0..args.warmup {
-          #[cfg(feature = "benchmark_with_cache_eviction")]
-          adapter.cache_clear().await;
-          executor.exec().await;
-        }
-      }
-      // Measurement runs
-      for _ in 0..args.runs {
-        #[cfg(feature = "benchmark_with_cache_eviction")]
-        adapter.cache_clear().await;
-        let start_time = Instant::now();
-        executor.exec().await;
-        let duration = start_time.elapsed();
-        durations_ms.push(duration.as_secs_f64() * 1000.0);
-      }
-    }
-    "sqlite" => {
-      // Create adapter first
-      let sqlite_adapter = SqliteStorageAdapter::async_default().await;
-      let cached_adapter =
-        CachedStorageAdapter::<SqliteStorageAdapter>::new(sqlite_adapter, args.cache_size);
-      let adapter = Arc::new(cached_adapter);
-      let mut executor = ExecEngine::new(plan_arc.clone(), adapter.clone());
-
-      // Warm-up runs
-      if args.warmup > 0 {
-        for _ in 0..args.warmup {
-          #[cfg(feature = "benchmark_with_cache_eviction")]
-          adapter.cache_clear().await;
-          executor.exec().await;
-        }
-      }
-      // Measurement runs
-      for _ in 0..args.runs {
-        #[cfg(feature = "benchmark_with_cache_eviction")]
-        adapter.cache_clear().await;
-        let start_time = Instant::now();
-        executor.exec().await;
-        let duration = start_time.elapsed();
-        durations_ms.push(duration.as_secs_f64() * 1000.0);
-      }
-    }
-    _ => {
-      // This case should ideally be caught by earlier validation
-      // but we return an error just in case.
-      return Err(io::Error::new(
-        io::ErrorKind::InvalidInput,
-        format!("Invalid storage type encountered: {}", storage_type),
-      ));
-    }
-  };
+  // Measurement runs
+  for _ in 0..args.runs {
+    let start_time = Instant::now();
+    db.run(query(&cypher_stmt)).await.unwrap();
+    let duration = start_time.elapsed();
+    durations_ms.push(duration.as_secs_f64() * 1000.0);
+  }
 
   // Calculate timing statistics
   let timing_stats = if durations_ms.len() > 2 {

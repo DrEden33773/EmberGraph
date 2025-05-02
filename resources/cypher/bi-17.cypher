@@ -1,4 +1,3 @@
-PROFILE
 MATCH
     (tag: Tag)<-[a: hasTag]-(message1: Comment),
     (tag)<-[b: hasTag]-(message2: Comment),

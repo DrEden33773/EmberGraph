@@ -1,0 +1,54 @@
+{
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/cypher/bi-14.cypher",
+  "num_runs": 10,
+  "num_warmup": 1,
+  "timing": {
+    "min_ms": 73.24745300000001,
+    "max_ms": 136.60090599999998,
+    "avg_ms": 102.378263875,
+    "all_runs_ms": [
+      96.984973,
+      120.696506,
+      82.965892,
+      93.717889,
+      136.60090599999998,
+      110.933981,
+      147.382149,
+      103.878511,
+      73.24745300000001,
+      72.836432
+    ]
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1746182647521,
+      "cpu_usage_percent": 0.22883293,
+      "memory_bytes": 2916687872
+    },
+    {
+      "timestamp_ms": 1746182647726,
+      "cpu_usage_percent": 0.0,
+      "memory_bytes": 2916687872
+    },
+    {
+      "timestamp_ms": 1746182647934,
+      "cpu_usage_percent": 0.24038462,
+      "memory_bytes": 2916687872
+    },
+    {
+      "timestamp_ms": 1746182648146,
+      "cpu_usage_percent": 0.24271843,
+      "memory_bytes": 2916687872
+    },
+    {
+      "timestamp_ms": 1746182648351,
+      "cpu_usage_percent": 0.23584905,
+      "memory_bytes": 2916687872
+    },
+    {
+      "timestamp_ms": 1746182648556,
+      "cpu_usage_percent": 0.0,
+      "memory_bytes": 2916687872
+    }
+  ]
+}

@@ -1,4 +1,3 @@
-PROFILE
 MATCH
     (comment: Comment)-[a: replyOf]->(post: Post),
     (post)-[b: hasCreator]->(person: Person)

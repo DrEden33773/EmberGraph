@@ -1,4 +1,3 @@
-PROFILE
 MATCH
     (c: Person)-[_a: knows]->(a: Person),
     (c)-[_b: isLocatedIn]->(city_c: City),
@@ -15,19 +14,19 @@ WHERE
     _c.creationDate >= 1282382587409 AND
     _d.creationDate >= 1281681940915
 RETURN 
-    elementId(c) as c,
-    elementId(a) as a,
-    elementId(b) as b,
-    elementId(city_c) as city_c,
-    elementId(city_a) as city_a,
-    elementId(city_b) as city_b,
-    elementId(country) as country,
-    elementId(_a) as _a,
-    elementId(_b) as _b,
-    elementId(_c) as _c,
-    elementId(_d) as _d,
-    elementId(_e) as _e,
-    elementId(_f) as _f,
-    elementId(_g) as _g,
-    elementId(_h) as _h,
-    elementId(_i) as _i
+    c,
+    a,
+    b,
+    city_c,
+    city_a,
+    city_b,
+    country,
+    _a,
+    _b,
+    _c,
+    _d,
+    _e,
+    _f,
+    _g,
+    _h,
+    _i

@@ -1,0 +1,89 @@
+{
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/cypher/bi-3.cypher",
+  "num_runs": 10,
+  "num_warmup": 1,
+  "timing": {
+    "min_ms": 168.273767,
+    "max_ms": 231.36410700000002,
+    "avg_ms": 200.58093050000002,
+    "all_runs_ms": [
+      304.918159,
+      231.36410700000002,
+      223.622444,
+      221.233026,
+      193.187566,
+      205.761736,
+      168.273767,
+      180.306276,
+      180.898522,
+      162.473705
+    ]
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1746182632932,
+      "cpu_usage_percent": 0.22222224,
+      "memory_bytes": 2916700160
+    },
+    {
+      "timestamp_ms": 1746182633140,
+      "cpu_usage_percent": 0.24154589,
+      "memory_bytes": 2916700160
+    },
+    {
+      "timestamp_ms": 1746182633346,
+      "cpu_usage_percent": 0.0,
+      "memory_bytes": 2916700160
+    },
+    {
+      "timestamp_ms": 1746182633552,
+      "cpu_usage_percent": 0.23752971,
+      "memory_bytes": 2916700160
+    },
+    {
+      "timestamp_ms": 1746182633759,
+      "cpu_usage_percent": 0.23640661,
+      "memory_bytes": 2916700160
+    },
+    {
+      "timestamp_ms": 1746182633968,
+      "cpu_usage_percent": 0.23752971,
+      "memory_bytes": 2916700160
+    },
+    {
+      "timestamp_ms": 1746182634179,
+      "cpu_usage_percent": 0.23474178,
+      "memory_bytes": 2916700160
+    },
+    {
+      "timestamp_ms": 1746182634384,
+      "cpu_usage_percent": 0.0,
+      "memory_bytes": 2916700160
+    },
+    {
+      "timestamp_ms": 1746182634589,
+      "cpu_usage_percent": 0.24038462,
+      "memory_bytes": 2916700160
+    },
+    {
+      "timestamp_ms": 1746182634795,
+      "cpu_usage_percent": 0.0,
+      "memory_bytes": 2916700160
+    },
+    {
+      "timestamp_ms": 1746182635001,
+      "cpu_usage_percent": 0.23696682,
+      "memory_bytes": 2916700160
+    },
+    {
+      "timestamp_ms": 1746182635207,
+      "cpu_usage_percent": 0.24271843,
+      "memory_bytes": 2916700160
+    },
+    {
+      "timestamp_ms": 1746182635412,
+      "cpu_usage_percent": 0.24449877,
+      "memory_bytes": 2916700160
+    }
+  ]
+}

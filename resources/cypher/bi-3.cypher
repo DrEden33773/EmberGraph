@@ -1,4 +1,3 @@
-PROFILE
 MATCH
     (country: Country)<-[a: isPartOf]-(city: City),
     (city)<-[b: isLocatedIn]-(person: Person),

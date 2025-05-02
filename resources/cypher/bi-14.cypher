@@ -1,4 +1,3 @@
-PROFILE
 MATCH
     (person1: Person)-[a: isLocatedIn]->(city1: City),
     (person2: Person)-[b: isLocatedIn]->(city2: City),

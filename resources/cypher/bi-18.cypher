@@ -1,4 +1,3 @@
-PROFILE
 MATCH
     (person: Person)-[a: knows]->(person1: Person),
     (person)-[b: knows]->(person2: Person),

@@ -1,4 +1,3 @@
-PROFILE
 MATCH
     (post: Post)-[a: hasTag]->(tag: Tag),
     (tag)-[b: hasType]->(tagClass: Tagclass),
