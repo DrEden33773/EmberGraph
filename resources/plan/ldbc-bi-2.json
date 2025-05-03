@@ -6,6 +6,16 @@
     "post"
   ],
   "vertices": {
+    "tagClass": {
+      "vid": "tagClass",
+      "label": "Tagclass",
+      "attr": null
+    },
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
+      "attr": null
+    },
     "post": {
       "vid": "post",
       "label": "Post",
@@ -20,19 +30,16 @@
         "value": "Patrick_Vieira",
         "type": "string"
       }
-    },
-    "comment": {
-      "vid": "comment",
-      "label": "Comment",
-      "attr": null
-    },
-    "tagClass": {
-      "vid": "tagClass",
-      "label": "Tagclass",
-      "attr": null
     }
   },
   "edges": {
+    "a": {
+      "eid": "a",
+      "src_vid": "post",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    },
     "c": {
       "eid": "c",
       "src_vid": "tag",
@@ -43,13 +50,6 @@
     "b": {
       "eid": "b",
       "src_vid": "comment",
-      "dst_vid": "tag",
-      "label": "hasTag",
-      "attr": null
-    },
-    "a": {
-      "eid": "a",
-      "src_vid": "post",
       "dst_vid": "tag",
       "label": "hasTag",
       "attr": null
@@ -69,9 +69,9 @@
       "vid": "tag",
       "type": "get_adj",
       "expand_eid_list": [
+        "c",
         "b",
-        "a",
-        "c"
+        "a"
       ],
       "single_op": "f^tag",
       "multi_ops": [],
@@ -100,9 +100,9 @@
       "multi_ops": [],
       "target_var": "f^tagClass",
       "depend_on": [
-        "A^tag",
+        "C^tagClass",
         "f^tag",
-        "C^tagClass"
+        "A^tag"
       ]
     },
     {
@@ -125,9 +125,9 @@
       "multi_ops": [],
       "target_var": "f^comment",
       "depend_on": [
-        "f^tag",
+        "A^tag",
         "C^comment",
-        "A^tag"
+        "f^tag"
       ]
     },
     {
@@ -161,21 +161,21 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
+        "f^tag",
         "f^tagClass",
         "f^comment",
-        "f^post",
-        "f^tag"
+        "f^post"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^comment",
-        "C^comment",
-        "C^post",
-        "f^tag",
         "f^tagClass",
+        "C^comment",
+        "f^comment",
         "A^tag",
+        "C^tagClass",
         "f^post",
-        "C^tagClass"
+        "f^tag",
+        "C^post"
       ]
     }
   ]

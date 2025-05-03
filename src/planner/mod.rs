@@ -1,11 +1,12 @@
 use crate::{parser::PatternParser, schemas::PlanData};
 use itertools::Itertools;
-use order_calc::{OrderCalculator, PlanGenInput};
+use order_calc::PlanGenInput;
 use plan_dump::PlanDumper;
 use plan_gen::PlanGenerator;
 use plan_opt::PlanOptimizer;
 use std::{fs, path::Path};
 
+pub mod advanced_order_calc;
 pub mod order_calc;
 pub mod plan_dump;
 pub mod plan_gen;
@@ -20,8 +21,16 @@ pub fn generate_optimal_plan(query_path: &Path) -> PlanData {
   let pattern_graph = parser.take_as_pattern_graph();
 
   // Compute the optimal matching order
-  let order_calc = OrderCalculator::new(pattern_graph);
-  let plan_gen_input = order_calc.compute_optimal_order();
+  #[cfg(not(feature = "advanced_statistics"))]
+  let plan_gen_input = {
+    let order_calc = order_calc::OrderCalculator::new(pattern_graph);
+    order_calc.compute_optimal_order()
+  };
+  #[cfg(feature = "advanced_statistics")]
+  let plan_gen_input = {
+    let order_calc = advanced_order_calc::AdvancedOrderCalculator::new(pattern_graph);
+    order_calc.compute_optimal_order()
+  };
 
   // Generate the raw plan
   let mut plan_gen = PlanGenerator::from(plan_gen_input);

@@ -59,6 +59,7 @@ default = [
     "cache_force_background_update",
     "simd_accelerated",
     # "refactored_incremental_load_new_edges",
+    "advanced_statistics",
 ]
 bench = ["default", "benchmark"]
 
@@ -78,6 +79,7 @@ cache_force_background_update         = []
 intersection_force_element_paralleled = []
 simd_accelerated                      = []
 refactored_incremental_load_new_edges = []
+advanced_statistics                   = []
 
 trace_all     = ["trace_init", "trace_get_adj"]
 trace_init    = []

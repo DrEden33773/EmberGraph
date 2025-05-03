@@ -77,9 +77,9 @@
       "multi_ops": [],
       "target_var": "f^friend",
       "depend_on": [
-        "C^friend",
         "A^person",
-        "f^person"
+        "f^person",
+        "C^friend"
       ]
     },
     {
@@ -93,10 +93,10 @@
       ],
       "target_var": "f",
       "depend_on": [
+        "f^person",
         "f^friend",
-        "A^person",
         "C^friend",
-        "f^person"
+        "A^person"
       ]
     }
   ]

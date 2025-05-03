@@ -17,6 +17,16 @@
         "type": "int"
       }
     },
+    "zombie": {
+      "vid": "zombie",
+      "label": "Person",
+      "attr": {
+        "attr": "creationDate",
+        "op": "<",
+        "value": 1262778975430,
+        "type": "int"
+      }
+    },
     "country": {
       "vid": "country",
       "label": "Country",
@@ -32,16 +42,6 @@
       "label": "City",
       "attr": null
     },
-    "zombie": {
-      "vid": "zombie",
-      "label": "Person",
-      "attr": {
-        "attr": "creationDate",
-        "op": "<",
-        "value": 1262778975430,
-        "type": "int"
-      }
-    },
     "post": {
       "vid": "post",
       "label": "Post",
@@ -54,11 +54,11 @@
     }
   },
   "edges": {
-    "c": {
-      "eid": "c",
-      "src_vid": "city",
-      "dst_vid": "country",
-      "label": "isPartOf",
+    "b": {
+      "eid": "b",
+      "src_vid": "zombie",
+      "dst_vid": "city",
+      "label": "isLocatedIn",
       "attr": null
     },
     "a": {
@@ -68,11 +68,11 @@
       "label": "hasCreator",
       "attr": null
     },
-    "b": {
-      "eid": "b",
-      "src_vid": "zombie",
-      "dst_vid": "city",
-      "label": "isLocatedIn",
+    "c": {
+      "eid": "c",
+      "src_vid": "city",
+      "dst_vid": "country",
+      "label": "isPartOf",
       "attr": null
     },
     "d": {
@@ -157,15 +157,15 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^zombie",
-        "A^likerPerson"
+        "A^likerPerson",
+        "A^zombie"
       ],
       "target_var": "T^post",
       "depend_on": [
+        "A^likerPerson",
         "f^zombie",
         "A^zombie",
-        "f^likerPerson",
-        "A^likerPerson"
+        "f^likerPerson"
       ]
     },
     {
@@ -176,11 +176,11 @@
       "multi_ops": [],
       "target_var": "C^post",
       "depend_on": [
-        "A^likerPerson",
-        "f^zombie",
-        "f^likerPerson",
         "A^zombie",
-        "T^post"
+        "f^likerPerson",
+        "T^post",
+        "A^likerPerson",
+        "f^zombie"
       ]
     },
     {
@@ -191,12 +191,12 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "f^likerPerson",
-        "T^post",
-        "A^zombie",
         "C^post",
+        "f^zombie",
+        "A^zombie",
+        "f^likerPerson",
         "A^likerPerson",
-        "f^zombie"
+        "T^post"
       ]
     },
     {
@@ -205,14 +205,14 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^country",
-        "A^zombie"
+        "A^zombie",
+        "A^country"
       ],
       "target_var": "T^city",
       "depend_on": [
         "f^zombie",
-        "A^country",
         "A^zombie",
+        "A^country",
         "f^country"
       ]
     },
@@ -224,9 +224,9 @@
       "multi_ops": [],
       "target_var": "C^city",
       "depend_on": [
-        "T^city",
         "f^zombie",
         "A^zombie",
+        "T^city",
         "f^country",
         "A^country"
       ]
@@ -239,11 +239,11 @@
       "multi_ops": [],
       "target_var": "f^city",
       "depend_on": [
-        "T^city",
-        "A^country",
-        "C^city",
         "f^country",
         "A^zombie",
+        "T^city",
+        "C^city",
+        "A^country",
         "f^zombie"
       ]
     },
@@ -253,26 +253,26 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
+        "f^zombie",
         "f^city",
-        "f^post",
         "f^likerPerson",
-        "f^country",
-        "f^zombie"
+        "f^post",
+        "f^country"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^likerPerson",
-        "T^post",
-        "f^country",
-        "A^country",
-        "f^city",
-        "T^city",
         "f^zombie",
         "A^likerPerson",
-        "C^post",
-        "C^city",
+        "T^post",
+        "f^likerPerson",
+        "f^country",
+        "f^post",
         "A^zombie",
-        "f^post"
+        "T^city",
+        "C^post",
+        "f^city",
+        "C^city",
+        "A^country"
       ]
     }
   ]

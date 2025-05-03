@@ -15,6 +15,11 @@
         "type": "int"
       }
     },
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": null
+    },
     "post": {
       "vid": "post",
       "label": "Post",
@@ -24,26 +29,21 @@
         "value": 1290661462488,
         "type": "int"
       }
-    },
-    "person": {
-      "vid": "person",
-      "label": "Person",
-      "attr": null
     }
   },
   "edges": {
-    "a": {
-      "eid": "a",
-      "src_vid": "comment",
-      "dst_vid": "post",
-      "label": "replyOf",
-      "attr": null
-    },
     "b": {
       "eid": "b",
       "src_vid": "post",
       "dst_vid": "person",
       "label": "hasCreator",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "comment",
+      "dst_vid": "post",
+      "label": "replyOf",
       "attr": null
     }
   },
@@ -91,8 +91,8 @@
       "target_var": "f^post",
       "depend_on": [
         "f^comment",
-        "A^comment",
-        "C^post"
+        "C^post",
+        "A^comment"
       ]
     },
     {
@@ -105,10 +105,10 @@
       "multi_ops": [],
       "target_var": "A^post",
       "depend_on": [
-        "C^post",
-        "f^comment",
         "f^post",
-        "A^comment"
+        "f^comment",
+        "A^comment",
+        "C^post"
       ]
     },
     {
@@ -121,9 +121,9 @@
       "depend_on": [
         "f^post",
         "A^comment",
+        "A^post",
         "f^comment",
-        "C^post",
-        "A^post"
+        "C^post"
       ]
     },
     {
@@ -134,12 +134,12 @@
       "multi_ops": [],
       "target_var": "f^person",
       "depend_on": [
-        "C^person",
+        "f^comment",
         "C^post",
-        "f^post",
         "A^comment",
         "A^post",
-        "f^comment"
+        "C^person",
+        "f^post"
       ]
     },
     {
@@ -149,18 +149,18 @@
       "single_op": null,
       "multi_ops": [
         "f^comment",
-        "f^post",
-        "f^person"
+        "f^person",
+        "f^post"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^person",
-        "f^post",
-        "C^post",
         "f^comment",
-        "A^comment",
+        "C^post",
+        "A^post",
+        "f^post",
+        "f^person",
         "C^person",
-        "A^post"
+        "A^comment"
       ]
     }
   ]
