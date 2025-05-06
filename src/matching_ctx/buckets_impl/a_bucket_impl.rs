@@ -183,7 +183,7 @@ impl ABucket {
                 expanding_graph.update_valid_dangling_edges(
                   edges.iter().zip(pat_strs.iter().map(String::as_str)),
                 );
-                expanding_graph.sort_key_after_update_valid_target_vertices();
+                expanding_graph.sort_key_after_update_dangling_edges();
 
                 let sender = sender.clone();
 
@@ -364,7 +364,7 @@ impl ABucket {
                 expanding_graph.update_valid_dangling_edges(
                   edges.iter().zip(pat_strs.iter().map(String::as_str)),
                 );
-                expanding_graph.sort_key_after_update_valid_target_vertices();
+                expanding_graph.sort_key_after_update_dangling_edges();
 
                 sender
                   .send((next_pat_vid.to_string(), expanding_graph))

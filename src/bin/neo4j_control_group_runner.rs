@@ -61,16 +61,7 @@ struct ResourceUsage {
 }
 
 #[derive(Serialize, Debug)]
-struct PerTaskBenchmarkOutput {
-  query_file: String,
-  num_runs: usize,
-  num_warmup: usize,
-  timing: TimingStats,
-  resource_usage: Vec<ResourceUsage>,
-}
-
-#[derive(Serialize, Debug)]
-struct SingleRunBenchmarkOutput {
+struct BenchmarkOutput {
   query_file: String,
   num_runs: usize,
   num_warmup: usize,
@@ -262,7 +253,7 @@ async fn run_benchmark() -> io::Result<()> {
             }
           };
 
-          let output_data = PerTaskBenchmarkOutput {
+          let output_data = BenchmarkOutput {
             query_file: query_file.display().to_string(),
             num_runs: args.runs,
             num_warmup: args.warmup,
@@ -353,7 +344,7 @@ async fn run_benchmark() -> io::Result<()> {
           }
         };
 
-        let final_output = SingleRunBenchmarkOutput {
+        let final_output = BenchmarkOutput {
           query_file: query_file.display().to_string(),
           num_runs: args.runs,
           num_warmup: args.warmup,

@@ -110,8 +110,8 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
 
   /// Sort the pending_v_grouped_dangling_eids by the key
   ///
-  /// - Note that this function should only be called after `update_valid_target_vertices`
-  pub fn sort_key_after_update_valid_target_vertices(&mut self) {
+  /// - Note that this function should only be called after `update_valid_dangling_edges`
+  pub fn sort_key_after_update_dangling_edges(&mut self) {
     self.pending_v_grouped_dangling_eids.sort_unstable_keys();
   }
 
@@ -334,7 +334,7 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
             r_expand_graph.dangling_e_patterns[eid].as_str(),
           )
         }));
-        expanding_dg.sort_key_after_update_valid_target_vertices();
+        expanding_dg.sort_key_after_update_dangling_edges();
 
         result.push(expanding_dg);
 
