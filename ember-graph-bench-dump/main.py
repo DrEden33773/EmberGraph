@@ -1,6 +1,5 @@
 from typing import Optional
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import scienceplots  # type: ignore
@@ -12,13 +11,12 @@ from path_utils import PLOTTING_OUTPUT_DIR
 
 print(scienceplots)
 
-# try to solve the problem of Chinese characters not being displayed
-mpl.rcParams["font.family"] = "sans-serif"
 # use English labels by default
-USE_ENGLISH_LABELS = True
+USE_ENGLISH_LABELS = False
+
 MARKER: Optional[str] = None
 
-plt.style.use(["science", "ieee", "no-latex"])
+plt.style.use(["science", "ieee", "no-latex", "cjk-sc-font"])
 
 print()
 

@@ -6,5 +6,6 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "matplotlib>=3.10.1",
+    "mplfonts>=0.0.10",
     "scienceplots>=2.1.1",
 ]
