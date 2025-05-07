@@ -87,7 +87,10 @@ impl PartialOrd for AttrValue {
       (Self::Float(l0), Self::Float(r0)) => l0.partial_cmp(r0),
       (Self::Float(l0), Self::Int(r0)) => l0.partial_cmp(&(*r0 as f64)),
       (Self::String(l0), Self::String(r0)) => l0.partial_cmp(r0),
-      _ => None,
+      (Self::String(l0), Self::Int(r0)) => l0.partial_cmp(&r0.to_string()),
+      (Self::String(l0), Self::Float(r0)) => l0.partial_cmp(&r0.to_string()),
+      (Self::Int(l0), Self::String(r0)) => l0.to_string().partial_cmp(r0),
+      (Self::Float(l0), Self::String(r0)) => l0.to_string().partial_cmp(r0),
     }
   }
 }
@@ -100,7 +103,10 @@ impl PartialEq for AttrValue {
       (Self::Float(l0), Self::Float(r0)) => l0 == r0,
       (Self::Float(l0), Self::Int(r0)) => *l0 == *r0 as f64,
       (Self::String(l0), Self::String(r0)) => l0 == r0,
-      _ => false,
+      (Self::String(l0), Self::Int(r0)) => *l0 == r0.to_string(),
+      (Self::String(l0), Self::Float(r0)) => *l0 == r0.to_string(),
+      (Self::Int(l0), Self::String(r0)) => l0.to_string() == *r0,
+      (Self::Float(l0), Self::String(r0)) => l0.to_string() == *r0,
     }
   }
 }

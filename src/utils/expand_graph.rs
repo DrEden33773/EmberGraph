@@ -1,5 +1,8 @@
 use super::dyn_graph::DynGraph;
-use crate::schemas::*;
+use crate::{schemas::*, storage::StorageAdapter};
+use colored::Colorize;
+#[cfg(not(feature = "use_tokio_mpsc_unbounded_channel"))]
+use futures::TryFutureExt;
 use hashbrown::HashMap;
 use indexmap::IndexMap;
 use std::{cmp::Ordering, sync::Arc};
@@ -64,6 +67,86 @@ impl<VType: VBase, EType: EBase> From<ExpandGraph<VType, EType>> for DynGraph<VT
     }
 
     graph
+  }
+}
+
+impl ExpandGraph<DataVertex, DataEdge> {
+  pub async fn lazy_intersect_valid_target_vertices(
+    &mut self,
+    pattern_str: impl AsRef<str>,
+    expected_label: Arc<str>,
+    expected_attr: Option<Arc<PatternAttr>>,
+    storage_adapter: Arc<impl StorageAdapter + 'static>,
+  ) -> Vec<String> {
+    if self.pending_v_grouped_dangling_eids.is_empty() {
+      return vec![];
+    }
+
+    let pending_v_grouped_dangling_eids = self.pending_v_grouped_dangling_eids.as_slice();
+
+    self
+      .target_vs
+      .reserve(pending_v_grouped_dangling_eids.len());
+
+    let mut legal_vids = Vec::with_capacity(pending_v_grouped_dangling_eids.len());
+
+    // channel
+    #[cfg(feature = "use_tokio_mpsc_unbounded_channel")]
+    let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel();
+    #[cfg(not(feature = "use_tokio_mpsc_unbounded_channel"))]
+    let (tx, mut rx) = tokio::sync::mpsc::channel(pending_v_grouped_dangling_eids.len() + 4);
+
+    for (pending_vid, _) in pending_v_grouped_dangling_eids.iter() {
+      let tx = tx.clone();
+      let pending_vid = pending_vid.clone();
+      let storage_adapter = storage_adapter.clone();
+      let expected_label = expected_label.clone();
+      let expected_attr = expected_attr.clone();
+
+      tokio::spawn(async move {
+        let pending_v = storage_adapter.get_v(&pending_vid).await;
+        if let Some(pending_v) = pending_v {
+          if pending_v.label() != expected_label.as_ref()
+            || !pending_v.satisfy_attr(expected_attr.as_ref())
+          {
+            return;
+          }
+
+          #[cfg(feature = "use_tokio_mpsc_unbounded_channel")]
+          tx.send(pending_v).unwrap_or_else(|_| {
+            panic!(
+              "❌  Failed to send {} to channel",
+              format!("({}, <pattern_v>)", pending_vid).yellow()
+            );
+          });
+          #[cfg(not(feature = "use_tokio_mpsc_unbounded_channel"))]
+          tx.send(pending_v)
+            .unwrap_or_else(|_| {
+              panic!(
+                "❌  Failed to send {} to channel",
+                format!("({}, <pattern_v>)", pending_vid).yellow()
+              );
+            })
+            .await;
+        }
+      });
+    }
+
+    // don't forget to close the channel
+    drop(tx);
+
+    while let Some(vertex) = rx.recv().await {
+      self.target_vs.push(vertex.vid().to_string());
+      legal_vids.push(vertex.vid().to_string());
+      self
+        .target_v_patterns
+        .insert(vertex.vid().to_string(), pattern_str.as_ref().to_string());
+      self
+        .target_v_entities
+        .insert(vertex.vid().to_string(), vertex);
+    }
+
+    legal_vids
   }
 }
 

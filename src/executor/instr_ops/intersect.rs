@@ -13,12 +13,12 @@ use rayon::slice::ParallelSliceMut;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
-pub struct IntersectOperator<S: StorageAdapter> {
+pub struct IntersectOperator<S: StorageAdapter + 'static> {
   pub(crate) storage_adapter: Arc<S>,
   pub(crate) ctx: Arc<MatchingCtx>,
 }
 
-impl<S: StorageAdapter> IntersectOperator<S> {
+impl<S: StorageAdapter + 'static> IntersectOperator<S> {
   pub async fn execute(&mut self, instr: &Instruction) -> Option<()> {
     #[cfg(not(feature = "benchmark"))]
     println!("\t{instr}");
@@ -37,13 +37,30 @@ impl<S: StorageAdapter> IntersectOperator<S> {
 
   /// `Vi` ∩ `Ax` -> `Cy`
   async fn with_adj_set(&mut self, instr: &Instruction) -> Option<()> {
-    let loaded_v_pat_pairs_asc = self.load_vertices_asc(instr).await?;
-
     let a_group = self
       .ctx
       .pop_group_by_pat_from_a_block(instr.single_op.as_ref().unwrap(), &instr.vid)?;
 
-    let c_bucket = CBucket::build_from_a_group(a_group, loaded_v_pat_pairs_asc).await;
+    #[cfg(not(feature = "lazy_load_v"))]
+    let c_bucket = {
+      let loaded_v_pat_pairs_asc = self.load_vertices_asc(instr).await?;
+      CBucket::build_from_a_group(a_group, loaded_v_pat_pairs_asc).await
+    };
+    #[cfg(feature = "lazy_load_v")]
+    let c_bucket = {
+      let pattern_v = self.ctx.get_pattern_v(&instr.vid)?.clone();
+      let pattern_vid = pattern_v.vid.clone();
+      let expected_label = pattern_v.label.clone();
+      let expected_attr = pattern_v.attr.clone();
+      CBucket::build_from_a_group_lazy(
+        a_group,
+        pattern_vid.into(),
+        expected_label.into(),
+        expected_attr.map(Arc::new),
+        self.storage_adapter.clone(),
+      )
+      .await
+    };
 
     self.ctx.update_c_block(&instr.target_var, c_bucket);
 
@@ -110,19 +127,37 @@ impl<S: StorageAdapter> IntersectOperator<S> {
 
   /// `Vi` ∩ `Tx` -> `Cy`
   async fn with_temp_intersected(&mut self, instr: &Instruction) -> Option<()> {
-    let loaded_v_pat_pairs_asc = self.load_vertices_asc(instr).await?;
-
     let t_bucket = self
       .ctx
       .pop_from_t_block(instr.single_op.as_ref().unwrap())?;
 
-    let c_bucket = CBucket::build_from_t(t_bucket, loaded_v_pat_pairs_asc).await;
+    #[cfg(not(feature = "lazy_load_v"))]
+    let c_bucket = {
+      let loaded_v_pat_pairs_asc = self.load_vertices_asc(instr).await?;
+      CBucket::build_from_t(t_bucket, loaded_v_pat_pairs_asc).await
+    };
+    #[cfg(feature = "lazy_load_v")]
+    let c_bucket = {
+      let pattern_v = self.ctx.get_pattern_v(&instr.vid)?.clone();
+      let pattern_vid = pattern_v.vid.clone();
+      let expected_label = pattern_v.label.clone();
+      let expected_attr = pattern_v.attr.clone();
+      CBucket::build_from_t_lazy(
+        t_bucket,
+        pattern_vid.into(),
+        expected_label.into(),
+        expected_attr.map(Arc::new),
+        self.storage_adapter.clone(),
+      )
+      .await
+    };
 
     self.ctx.update_c_block(&instr.target_var, c_bucket);
 
     Some(())
   }
 
+  #[allow(dead_code)]
   async fn load_vertices_asc(&self, instr: &Instruction) -> Option<Vec<(DataVertex, String)>> {
     let pattern_v = self.ctx.get_pattern_v(&instr.vid)?.clone();
     let pattern_vid = pattern_v.vid.clone();

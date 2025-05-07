@@ -43,6 +43,7 @@
     "mimalloc",
     "mmap",
     "moka",
+    "mpsc",
     "ncpu",
     "Noto",
     "numpy",

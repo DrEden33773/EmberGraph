@@ -133,3 +133,40 @@ impl EBase for DataEdge {
     &self.label
   }
 }
+
+impl DataVertex {
+  pub fn satisfy_attr(&self, attr: Option<impl AsRef<PatternAttr>>) -> bool {
+    if attr.is_none() {
+      return true;
+    }
+
+    let attr = attr.unwrap();
+
+    match attr.as_ref().op {
+      super::Op::Eq => self
+        .attrs
+        .get(&attr.as_ref().key)
+        .is_some_and(|v| v == &attr.as_ref().value),
+      super::Op::Ne => self
+        .attrs
+        .get(&attr.as_ref().key)
+        .is_some_and(|v| v != &attr.as_ref().value),
+      super::Op::Gt => self
+        .attrs
+        .get(&attr.as_ref().key)
+        .is_some_and(|v| v > &attr.as_ref().value),
+      super::Op::Ge => self
+        .attrs
+        .get(&attr.as_ref().key)
+        .is_some_and(|v| v >= &attr.as_ref().value),
+      super::Op::Lt => self
+        .attrs
+        .get(&attr.as_ref().key)
+        .is_some_and(|v| v < &attr.as_ref().value),
+      super::Op::Le => self
+        .attrs
+        .get(&attr.as_ref().key)
+        .is_some_and(|v| v <= &attr.as_ref().value),
+    }
+  }
+}

@@ -1,4 +1,6 @@
 use super::*;
+#[cfg(not(feature = "use_tokio_mpsc_unbounded_channel"))]
+use futures::TryFutureExt;
 use itertools::Itertools;
 
 const BATCH_SIZE: usize = 8;
@@ -23,12 +25,16 @@ impl ABucket {
     let pattern_es = Arc::new(pattern_es);
     let pattern_vs = Arc::new(pattern_vs);
 
-    // channel
-    let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel();
-
     let matched_with_frontiers = self.matched_with_frontiers.drain().collect_vec();
     let mut all_matched_data = Vec::with_capacity(self.all_matched.len());
     all_matched_data.append(&mut self.all_matched);
+
+    // channel
+    #[cfg(not(feature = "use_tokio_mpsc_unbounded_channel"))]
+    let (tx, mut rx) =
+      tokio::sync::mpsc::channel(matched_with_frontiers.chunks(BATCH_SIZE).len() + 4);
+    #[cfg(feature = "use_tokio_mpsc_unbounded_channel")]
+    let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel();
 
     // batch configuration
     let total_batches = matched_with_frontiers.len().div_ceil(BATCH_SIZE);
@@ -187,6 +193,17 @@ impl ABucket {
 
                 let sender = sender.clone();
 
+                #[cfg(not(feature = "use_tokio_mpsc_unbounded_channel"))]
+                sender
+                  .send((next_pat_vid.to_string(), expanding_graph))
+                  .unwrap_or_else(|_| {
+                    panic!(
+                      "❌  Failed to send {} to channel",
+                      format!("({}, <expanding_graph>)", next_pat_vid).yellow()
+                    );
+                  })
+                  .await;
+                #[cfg(feature = "use_tokio_mpsc_unbounded_channel")]
                 sender
                   .send((next_pat_vid.to_string(), expanding_graph))
                   .unwrap_or_else(|_| {
@@ -243,9 +260,6 @@ impl ABucket {
     let pattern_es = pattern_es.into_iter().map(Arc::new).collect_vec();
     let pattern_vs = Arc::new(pattern_vs);
 
-    // channel
-    let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel();
-
     let matched_with_frontiers = self.matched_with_frontiers.drain().collect_vec();
     let mut all_matched_data = Vec::with_capacity(self.all_matched.len());
     all_matched_data.append(&mut self.all_matched);
@@ -254,6 +268,12 @@ impl ABucket {
     // but each matched_dg's processing logic is independent
     let total_batches = matched_with_frontiers.len().div_ceil(BATCH_SIZE);
     let mut task_handles = Vec::with_capacity(total_batches * pattern_es.len());
+
+    // channel
+    #[cfg(not(feature = "use_tokio_mpsc_unbounded_channel"))]
+    let (tx, mut rx) = tokio::sync::mpsc::channel(total_batches * pattern_es.len() + 4);
+    #[cfg(feature = "use_tokio_mpsc_unbounded_channel")]
+    let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel();
 
     for chunk in matched_with_frontiers.chunks(BATCH_SIZE) {
       // collect the matched_dgs and frontiers of current batch
@@ -366,6 +386,7 @@ impl ABucket {
                 );
                 expanding_graph.sort_key_after_update_dangling_edges();
 
+                #[cfg(not(feature = "use_tokio_mpsc_unbounded_channel"))]
                 sender
                   .send((next_pat_vid.to_string(), expanding_graph))
                   .unwrap_or_else(|_| {
@@ -373,7 +394,17 @@ impl ABucket {
                       "❌  Failed to send {} to channel",
                       format!("({}, <expanding_graph>)", next_pat_vid).yellow()
                     );
-                  });
+                  })
+                  .await;
+                #[cfg(feature = "use_tokio_mpsc_unbounded_channel")]
+                sender
+                  .send((next_pat_vid.to_string(), expanding_graph))
+                  .unwrap_or_else(|_| {
+                    panic!(
+                      "❌  Failed to send {} to channel",
+                      format!("({}, <expanding_graph>)", next_pat_vid).yellow()
+                    );
+                  })
               }
             }
           }

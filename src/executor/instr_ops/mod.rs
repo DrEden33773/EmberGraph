@@ -25,7 +25,7 @@ pub(crate) fn resolve_var(target_var: &str) -> (VarPrefix, &str) {
   (VarPrefix::from_str(var_type).unwrap(), var_name)
 }
 
-pub enum InstrOperator<S: AdvancedStorageAdapter> {
+pub enum InstrOperator<S: AdvancedStorageAdapter + 'static> {
   Init(InitOperator<S>),
   GetAdj(GetAdjOperator<S>),
   Foreach(ForeachOperator),
