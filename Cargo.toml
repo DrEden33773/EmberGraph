@@ -62,7 +62,7 @@ default = [
     # "refactored_incremental_load_new_edges",
     # "lazy_load_v",
     "use_tokio_mpsc_unbounded_channel",
-    # "use_sort_merge_join",
+    "use_sort_merge_join",
 ]
 bench = [
     "default",

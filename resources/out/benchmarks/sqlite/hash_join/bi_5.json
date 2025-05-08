@@ -1,0 +1,86 @@
+{
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/plan/neo4j_ordered/ldbc-bi-5.json",
+  "storage_type": "sqlite",
+  "cache_size": 512,
+  "num_runs": 10,
+  "num_warmup": 1,
+  "timing": {
+    "min_ms": 183.030773,
+    "max_ms": 201.274391,
+    "avg_ms": 191.976901875,
+    "all_runs_ms": [
+      213.28885,
+      200.7905,
+      196.835458,
+      201.274391,
+      190.682844,
+      187.516437,
+      191.350195,
+      174.62734799999998,
+      184.334617,
+      183.030773
+    ]
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1746711603614,
+      "cpu_usage_percent": 24.649298,
+      "memory_bytes": 11147452416
+    },
+    {
+      "timestamp_ms": 1746711603824,
+      "cpu_usage_percent": 11.943793,
+      "memory_bytes": 11147452416
+    },
+    {
+      "timestamp_ms": 1746711604034,
+      "cpu_usage_percent": 29.876541,
+      "memory_bytes": 11149778944
+    },
+    {
+      "timestamp_ms": 1746711604245,
+      "cpu_usage_percent": 29.807693,
+      "memory_bytes": 11149987840
+    },
+    {
+      "timestamp_ms": 1746711604459,
+      "cpu_usage_percent": 28.400951,
+      "memory_bytes": 11150123008
+    },
+    {
+      "timestamp_ms": 1746711604671,
+      "cpu_usage_percent": 25.882355,
+      "memory_bytes": 11150835712
+    },
+    {
+      "timestamp_ms": 1746711604881,
+      "cpu_usage_percent": 26.781326,
+      "memory_bytes": 11150835712
+    },
+    {
+      "timestamp_ms": 1746711605095,
+      "cpu_usage_percent": 27.857143,
+      "memory_bytes": 11150835712
+    },
+    {
+      "timestamp_ms": 1746711605308,
+      "cpu_usage_percent": 35.091743,
+      "memory_bytes": 11150835712
+    },
+    {
+      "timestamp_ms": 1746711605519,
+      "cpu_usage_percent": 25.058004,
+      "memory_bytes": 11150835712
+    },
+    {
+      "timestamp_ms": 1746711605728,
+      "cpu_usage_percent": 25.798527,
+      "memory_bytes": 11151220736
+    },
+    {
+      "timestamp_ms": 1746711605936,
+      "cpu_usage_percent": 1.6908213,
+      "memory_bytes": 11119824896
+    }
+  ]
+}

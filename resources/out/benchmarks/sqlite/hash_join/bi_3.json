@@ -1,0 +1,86 @@
+{
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/plan/neo4j_ordered/ldbc-bi-3.json",
+  "storage_type": "sqlite",
+  "cache_size": 512,
+  "num_runs": 10,
+  "num_warmup": 1,
+  "timing": {
+    "min_ms": 195.94226600000002,
+    "max_ms": 217.91854,
+    "avg_ms": 205.43710750000002,
+    "all_runs_ms": [
+      204.845934,
+      207.44065,
+      195.94226600000002,
+      197.14699399999998,
+      243.613097,
+      217.91854,
+      208.54218899999998,
+      210.976938,
+      193.821411,
+      200.68334900000002
+    ]
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1746711600594,
+      "cpu_usage_percent": 10.467706,
+      "memory_bytes": 4347981824
+    },
+    {
+      "timestamp_ms": 1746711600802,
+      "cpu_usage_percent": 11.274509,
+      "memory_bytes": 4348194816
+    },
+    {
+      "timestamp_ms": 1746711601015,
+      "cpu_usage_percent": 14.482758,
+      "memory_bytes": 4348194816
+    },
+    {
+      "timestamp_ms": 1746711601229,
+      "cpu_usage_percent": 13.901346,
+      "memory_bytes": 4348338176
+    },
+    {
+      "timestamp_ms": 1746711601441,
+      "cpu_usage_percent": 12.765957,
+      "memory_bytes": 4348338176
+    },
+    {
+      "timestamp_ms": 1746711601652,
+      "cpu_usage_percent": 10.478359,
+      "memory_bytes": 4348338176
+    },
+    {
+      "timestamp_ms": 1746711601860,
+      "cpu_usage_percent": 11.764707,
+      "memory_bytes": 4348338176
+    },
+    {
+      "timestamp_ms": 1746711602067,
+      "cpu_usage_percent": 12.351544,
+      "memory_bytes": 4348338176
+    },
+    {
+      "timestamp_ms": 1746711602276,
+      "cpu_usage_percent": 13.551402,
+      "memory_bytes": 4348338176
+    },
+    {
+      "timestamp_ms": 1746711602486,
+      "cpu_usage_percent": 12.230215,
+      "memory_bytes": 4625227776
+    },
+    {
+      "timestamp_ms": 1746711602695,
+      "cpu_usage_percent": 13.443396,
+      "memory_bytes": 4625227776
+    },
+    {
+      "timestamp_ms": 1746711602902,
+      "cpu_usage_percent": 2.6570046,
+      "memory_bytes": 4593831936
+    }
+  ]
+}
