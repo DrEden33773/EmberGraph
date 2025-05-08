@@ -43,8 +43,16 @@ impl<S: StorageAdapter + 'static> IntersectOperator<S> {
 
     #[cfg(not(feature = "lazy_load_v"))]
     let c_bucket = {
-      let loaded_v_pat_pairs_asc = self.load_vertices_asc(instr).await?;
-      CBucket::build_from_a_group(a_group, loaded_v_pat_pairs_asc).await
+      #[cfg(feature = "use_sort_merge_join")]
+      {
+        let loaded_v_pat_pairs_asc = self.load_vertices(instr, true).await?;
+        CBucket::build_from_a_group(a_group, loaded_v_pat_pairs_asc).await
+      }
+      #[cfg(not(feature = "use_sort_merge_join"))]
+      {
+        let loaded_v_pat_pairs = self.load_vertices(instr, false).await?;
+        CBucket::build_from_a_group(a_group, loaded_v_pat_pairs).await
+      }
     };
     #[cfg(feature = "lazy_load_v")]
     let c_bucket = {
@@ -133,8 +141,16 @@ impl<S: StorageAdapter + 'static> IntersectOperator<S> {
 
     #[cfg(not(feature = "lazy_load_v"))]
     let c_bucket = {
-      let loaded_v_pat_pairs_asc = self.load_vertices_asc(instr).await?;
-      CBucket::build_from_t(t_bucket, loaded_v_pat_pairs_asc).await
+      #[cfg(feature = "use_sort_merge_join")]
+      {
+        let loaded_v_pat_pairs_asc = self.load_vertices(instr, true).await?;
+        CBucket::build_from_t(t_bucket, loaded_v_pat_pairs_asc).await
+      }
+      #[cfg(not(feature = "use_sort_merge_join"))]
+      {
+        let loaded_v_pat_pairs = self.load_vertices(instr, false).await?;
+        CBucket::build_from_t(t_bucket, loaded_v_pat_pairs).await
+      }
     };
     #[cfg(feature = "lazy_load_v")]
     let c_bucket = {
@@ -158,7 +174,11 @@ impl<S: StorageAdapter + 'static> IntersectOperator<S> {
   }
 
   #[allow(dead_code)]
-  async fn load_vertices_asc(&self, instr: &Instruction) -> Option<Vec<(DataVertex, String)>> {
+  async fn load_vertices(
+    &self,
+    instr: &Instruction,
+    asc_ordered: bool,
+  ) -> Option<Vec<(DataVertex, String)>> {
     let pattern_v = self.ctx.get_pattern_v(&instr.vid)?.clone();
     let pattern_vid = pattern_v.vid.clone();
 
@@ -171,12 +191,16 @@ impl<S: StorageAdapter + 'static> IntersectOperator<S> {
       .map(|v| (v, pattern_vid.clone()))
       .collect_vec();
 
-    let sorted = parallel::spawn_blocking(move || {
-      raw.par_sort_unstable_by(|(v1, _), (v2, _)| v1.vid().cmp(v2.vid()));
-      raw
-    })
-    .await;
+    if asc_ordered {
+      let sorted = parallel::spawn_blocking(move || {
+        raw.par_sort_unstable_by(|(v1, _), (v2, _)| v1.vid().cmp(v2.vid()));
+        raw
+      })
+      .await;
 
-    sorted.into()
+      sorted.into()
+    } else {
+      raw.into()
+    }
   }
 }

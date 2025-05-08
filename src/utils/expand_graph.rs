@@ -5,13 +5,16 @@ use colored::Colorize;
 use futures::TryFutureExt;
 use hashbrown::HashMap;
 use indexmap::IndexMap;
-use std::{cmp::Ordering, sync::Arc};
+#[cfg(feature = "use_sort_merge_join")]
+use std::cmp::Ordering;
+use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct ExpandGraph<VType: VBase = DataVertex, EType: EBase = DataEdge> {
   pub(crate) dyn_graph: Arc<DynGraph<VType, EType>>,
 
   pub(crate) pending_v_grouped_dangling_eids: IndexMap<Vid, Vec<Eid>>,
+
   pub(crate) target_vs: Vec<Vid>,
 
   pub(crate) dangling_e_entities: HashMap<Eid, EType>,
@@ -82,21 +85,18 @@ impl ExpandGraph<DataVertex, DataEdge> {
       return vec![];
     }
 
-    let pending_v_grouped_dangling_eids = self.pending_v_grouped_dangling_eids.as_slice();
+    let len = self.pending_v_grouped_dangling_eids.len();
 
-    self
-      .target_vs
-      .reserve(pending_v_grouped_dangling_eids.len());
-
-    let mut legal_vids = Vec::with_capacity(pending_v_grouped_dangling_eids.len());
+    self.target_vs.reserve(len);
+    let mut legal_vids = Vec::with_capacity(len);
 
     // channel
     #[cfg(feature = "use_tokio_mpsc_unbounded_channel")]
     let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel();
     #[cfg(not(feature = "use_tokio_mpsc_unbounded_channel"))]
-    let (tx, mut rx) = tokio::sync::mpsc::channel(pending_v_grouped_dangling_eids.len() + 4);
+    let (tx, mut rx) = tokio::sync::mpsc::channel(len + 4);
 
-    for (pending_vid, _) in pending_v_grouped_dangling_eids.iter() {
+    for (pending_vid, _) in self.pending_v_grouped_dangling_eids.iter() {
       let tx = tx.clone();
       let pending_vid = pending_vid.clone();
       let storage_adapter = storage_adapter.clone();
@@ -191,6 +191,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
     }
   }
 
+  #[cfg(feature = "use_sort_merge_join")]
   /// Sort the pending_v_grouped_dangling_eids by the key
   ///
   /// - Note that this function should only be called after `update_valid_dangling_edges`
@@ -198,7 +199,8 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
     self.pending_v_grouped_dangling_eids.sort_unstable_keys();
   }
 
-  /// Intersect `valid target vertices` and return them
+  #[cfg(feature = "use_sort_merge_join")]
+  /// Intersect `valid target vertices` and return them (sort-merge-join version)
   ///
   /// - Vertices of any `dangling_edge` could be added to `target_v_adj_table`
   pub fn intersect_valid_target_vertices(
@@ -266,6 +268,77 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
           // pending_vid > vertex.vid(), current vertex is not found in pending,
           // move to next vertex
           vertex_idx += 1;
+        }
+      }
+    }
+
+    legal_vids
+  }
+
+  #[cfg(not(feature = "use_sort_merge_join"))]
+  /// Intersect `valid target vertices` and return them (hash-join version)
+  ///
+  /// - Vertices of any `dangling_edge` could be added to `target_v_adj_table`
+  pub fn intersect_valid_target_vertices(
+    &mut self,
+    target_vertex_pattern_pairs: &[(VType, String)],
+  ) -> Vec<String> {
+    if target_vertex_pattern_pairs.is_empty() || self.pending_v_grouped_dangling_eids.is_empty() {
+      return vec![];
+    }
+
+    let pending_v_grouped_dangling_eids = &self.pending_v_grouped_dangling_eids;
+
+    let target_vid_2_vertex_pattern_pairs = target_vertex_pattern_pairs
+      .iter()
+      .map(|(v, p)| (v.vid(), (v, p)))
+      .collect::<IndexMap<_, _>>();
+
+    let mut legal_vids = Vec::with_capacity(
+      pending_v_grouped_dangling_eids
+        .len()
+        .min(target_vid_2_vertex_pattern_pairs.len()),
+    );
+
+    if pending_v_grouped_dangling_eids.len() <= target_vid_2_vertex_pattern_pairs.len() {
+      for (pending_vid, _) in pending_v_grouped_dangling_eids {
+        if let Some((vertex, pattern)) = target_vid_2_vertex_pattern_pairs
+          .get(pending_vid.as_str())
+          .cloned()
+        {
+          if self.dyn_graph.has_vid(vertex.vid()) {
+            continue;
+          }
+
+          self.target_vs.push(vertex.vid().to_string());
+          legal_vids.push(vertex.vid().to_string());
+
+          self
+            .target_v_patterns
+            .insert(vertex.vid().to_string(), pattern.clone());
+
+          self
+            .target_v_entities
+            .insert(vertex.vid().to_string(), vertex.clone());
+        }
+      }
+    } else {
+      for (vid, (vertex, pattern)) in target_vid_2_vertex_pattern_pairs {
+        if pending_v_grouped_dangling_eids.contains_key(vid) {
+          if self.dyn_graph.has_vid(vid) {
+            continue;
+          }
+
+          self.target_vs.push(vid.to_string());
+          legal_vids.push(vid.to_string());
+
+          self
+            .target_v_patterns
+            .insert(vid.to_string(), pattern.clone());
+
+          self
+            .target_v_entities
+            .insert(vid.to_string(), vertex.clone());
         }
       }
     }
@@ -368,8 +441,11 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
   }
 }
 
+#[cfg(feature = "use_sort_merge_join")]
 /// 1. Take two expand_graphs' `vertices` and `non-dangling-edges` into a new graph
 /// 2. Iterate through the `dangling_edges` of both, select those connective ones
+///
+/// (Sort-Merge-Join version)
 pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
   l_expand_graph: &ExpandGraph<VType, EType>,
   r_expand_graph: &ExpandGraph<VType, EType>,
@@ -384,7 +460,6 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
   // Create the basic graph structure (only create once)
   let new_graph = (*l_expand_graph.dyn_graph).clone() | (*r_expand_graph.dyn_graph).clone();
   let new_graph = Arc::new(new_graph);
-
   // Use index-based approach instead of iterators for better debug mode performance
   let l_len = grouped_l.len();
   let r_len = grouped_r.len();
@@ -433,6 +508,61 @@ pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
         // l_vid > r_vid, move the right index
         r_idx += 1;
       }
+    }
+  }
+
+  result
+}
+
+#[cfg(not(feature = "use_sort_merge_join"))]
+/// 1. Take two expand_graphs' `vertices` and `non-dangling-edges` into a new graph
+/// 2. Iterate through the `dangling_edges` of both, select those connective ones
+///
+/// (Hash-Join version)
+pub fn union_then_intersect_on_connective_v<VType: VBase, EType: EBase>(
+  l_expand_graph: &ExpandGraph<VType, EType>,
+  r_expand_graph: &ExpandGraph<VType, EType>,
+) -> Vec<ExpandGraph<VType, EType>> {
+  let grouped_l = &l_expand_graph.pending_v_grouped_dangling_eids;
+  let grouped_r = &r_expand_graph.pending_v_grouped_dangling_eids;
+
+  if grouped_l.is_empty() || grouped_r.is_empty() {
+    return vec![];
+  }
+
+  // Create the basic graph structure (only create once)
+  let new_graph = (*l_expand_graph.dyn_graph).clone() | (*r_expand_graph.dyn_graph).clone();
+  let new_graph = Arc::new(new_graph);
+
+  let (shorter, longer) = if grouped_l.len() < grouped_r.len() {
+    (grouped_l, grouped_r)
+  } else {
+    (grouped_r, grouped_l)
+  };
+
+  let mut result = Vec::with_capacity(shorter.len());
+
+  for (vid, _) in shorter {
+    if longer.contains_key(vid) {
+      let mut expanding_dg: ExpandGraph<VType, EType> = new_graph.clone().into();
+
+      let l_dangling_eids = grouped_l.get(vid).unwrap();
+      let r_dangling_eids = grouped_r.get(vid).unwrap();
+
+      expanding_dg.update_valid_dangling_edges(l_dangling_eids.iter().map(|eid| {
+        (
+          &l_expand_graph.dangling_e_entities[eid],
+          l_expand_graph.dangling_e_patterns[eid].as_str(),
+        )
+      }));
+      expanding_dg.update_valid_dangling_edges(r_dangling_eids.iter().map(|eid| {
+        (
+          &r_expand_graph.dangling_e_entities[eid],
+          r_expand_graph.dangling_e_patterns[eid].as_str(),
+        )
+      }));
+
+      result.push(expanding_dg);
     }
   }
 

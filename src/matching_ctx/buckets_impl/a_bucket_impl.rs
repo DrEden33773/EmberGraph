@@ -189,6 +189,8 @@ impl ABucket {
                 expanding_graph.update_valid_dangling_edges(
                   edges.iter().zip(pat_strs.iter().map(String::as_str)),
                 );
+
+                #[cfg(feature = "use_sort_merge_join")]
                 expanding_graph.sort_key_after_update_dangling_edges();
 
                 let sender = sender.clone();
@@ -384,6 +386,8 @@ impl ABucket {
                 expanding_graph.update_valid_dangling_edges(
                   edges.iter().zip(pat_strs.iter().map(String::as_str)),
                 );
+
+                #[cfg(feature = "use_sort_merge_join")]
                 expanding_graph.sort_key_after_update_dangling_edges();
 
                 #[cfg(not(feature = "use_tokio_mpsc_unbounded_channel"))]

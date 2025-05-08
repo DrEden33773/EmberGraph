@@ -62,6 +62,7 @@ default = [
     # "refactored_incremental_load_new_edges",
     # "lazy_load_v",
     "use_tokio_mpsc_unbounded_channel",
+    # "use_sort_merge_join",
 ]
 bench = [
     "default",
@@ -88,6 +89,7 @@ refactored_incremental_load_new_edges = []
 lazy_load_v                           = []
 use_tokio_mpsc_unbounded_channel      = []
 use_neo4j_ordered_plan                = []
+use_sort_merge_join                   = []
 
 trace_all     = ["trace_init", "trace_get_adj"]
 trace_init    = []
