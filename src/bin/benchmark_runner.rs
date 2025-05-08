@@ -118,8 +118,16 @@ static SQLITE_TASKS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
   ])
 });
 
-static NEO4J_ORDERED_TASKS: LazyLock<HashSet<&str>> =
-  LazyLock::new(|| HashSet::from(["3", "5", "6", "7", "11", "17"]));
+static NEO4J_ORDERED_TASKS: LazyLock<HashSet<&str>> = LazyLock::new(|| {
+  #[cfg(feature = "use_neo4j_ordered_plan")]
+  {
+    HashSet::from(["3", "5", "11", "17"])
+  }
+  #[cfg(not(feature = "use_neo4j_ordered_plan"))]
+  {
+    HashSet::new()
+  }
+});
 
 static BENCHMARK_OUTPUT_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
   let mut res = project_root::get_project_root()

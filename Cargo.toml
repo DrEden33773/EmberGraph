@@ -63,7 +63,11 @@ default = [
     # "lazy_load_v",
     "use_tokio_mpsc_unbounded_channel",
 ]
-bench = ["default", "benchmark"]
+bench = [
+    "default",
+    "benchmark",
+    "use_neo4j_ordered_plan",
+]
 
 bench_via_sqlite_only_with_cache_eviction = ["bench", "benchmark_via_sqlite_only", "benchmark_with_cache_eviction"]
 bench_via_neo4j_only_with_cache_eviction  = ["bench", "benchmark_via_neo4j_only", "benchmark_with_cache_eviction"]
@@ -83,6 +87,7 @@ simd_accelerated                      = []
 refactored_incremental_load_new_edges = []
 lazy_load_v                           = []
 use_tokio_mpsc_unbounded_channel      = []
+use_neo4j_ordered_plan                = []
 
 trace_all     = ["trace_init", "trace_get_adj"]
 trace_init    = []

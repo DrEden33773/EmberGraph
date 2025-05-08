@@ -5,52 +5,52 @@
   "num_runs": 10,
   "num_warmup": 1,
   "timing": {
-    "min_ms": 99.116601,
-    "max_ms": 105.16568799999999,
-    "avg_ms": 102.56255074999999,
+    "min_ms": 100.99979,
+    "max_ms": 108.984574,
+    "avg_ms": 106.23946387499998,
     "all_runs_ms": [
-      98.897899,
-      103.84101199999999,
-      106.351375,
-      102.8193,
-      103.776931,
-      101.36832899999999,
-      99.116601,
-      105.16568799999999,
-      100.577248,
-      103.835297
+      108.984574,
+      108.02447799999999,
+      105.339501,
+      100.16356999999999,
+      107.599643,
+      108.60884,
+      105.62578,
+      110.36838999999999,
+      104.73310500000001,
+      100.99979
     ]
   },
   "resource_usage": [
     {
-      "timestamp_ms": 1746168623415,
-      "cpu_usage_percent": 41.247482,
-      "memory_bytes": 11973214208
+      "timestamp_ms": 1746695329990,
+      "cpu_usage_percent": 46.289062,
+      "memory_bytes": 12004802560
     },
     {
-      "timestamp_ms": 1746168623628,
-      "cpu_usage_percent": 46.938774,
-      "memory_bytes": 11973214208
+      "timestamp_ms": 1746695330204,
+      "cpu_usage_percent": 50.691242,
+      "memory_bytes": 12004802560
     },
     {
-      "timestamp_ms": 1746168623862,
-      "cpu_usage_percent": 52.00846,
-      "memory_bytes": 11973214208
+      "timestamp_ms": 1746695330419,
+      "cpu_usage_percent": 50.450447,
+      "memory_bytes": 12004802560
     },
     {
-      "timestamp_ms": 1746168624084,
-      "cpu_usage_percent": 48.33703,
-      "memory_bytes": 11973214208
+      "timestamp_ms": 1746695330632,
+      "cpu_usage_percent": 51.643196,
+      "memory_bytes": 12004802560
     },
     {
-      "timestamp_ms": 1746168624302,
-      "cpu_usage_percent": 46.756153,
-      "memory_bytes": 11973214208
+      "timestamp_ms": 1746695330845,
+      "cpu_usage_percent": 53.52113,
+      "memory_bytes": 12004802560
     },
     {
-      "timestamp_ms": 1746168624515,
-      "cpu_usage_percent": 8.530806,
-      "memory_bytes": 11941818368
+      "timestamp_ms": 1746695331055,
+      "cpu_usage_percent": 25.056946,
+      "memory_bytes": 11973406720
     }
   ]
 }
