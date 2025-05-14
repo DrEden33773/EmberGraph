@@ -2,18 +2,18 @@
   "matching_order": [
     "otherRed",
     "green",
-    "red",
-    "blue"
+    "blue",
+    "red"
   ],
   "vertices": {
-    "red": {
-      "vid": "red",
-      "label": "Red",
-      "attr": null
-    },
     "blue": {
       "vid": "blue",
       "label": "Blue",
+      "attr": null
+    },
+    "otherRed": {
+      "vid": "otherRed",
+      "label": "Red",
       "attr": null
     },
     "green": {
@@ -21,17 +21,17 @@
       "label": "Green",
       "attr": null
     },
-    "otherRed": {
-      "vid": "otherRed",
+    "red": {
+      "vid": "red",
       "label": "Red",
       "attr": null
     }
   },
   "edges": {
-    "b": {
-      "eid": "b",
-      "src_vid": "blue",
-      "dst_vid": "green",
+    "c": {
+      "eid": "c",
+      "src_vid": "green",
+      "dst_vid": "red",
       "label": "Edge",
       "attr": null
     },
@@ -42,10 +42,10 @@
       "label": "Edge",
       "attr": null
     },
-    "c": {
-      "eid": "c",
-      "src_vid": "green",
-      "dst_vid": "red",
+    "b": {
+      "eid": "b",
+      "src_vid": "blue",
+      "dst_vid": "green",
       "label": "Edge",
       "attr": null
     }
@@ -84,77 +84,14 @@
       ]
     },
     {
-      "vid": "red",
+      "vid": "blue",
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": "A^green",
       "multi_ops": [],
-      "target_var": "C^red",
-      "depend_on": [
-        "A^green",
-        "f^green"
-      ]
-    },
-    {
-      "vid": "red",
-      "type": "foreach",
-      "expand_eid_list": [],
-      "single_op": "C^red",
-      "multi_ops": [],
-      "target_var": "f^red",
-      "depend_on": [
-        "C^red",
-        "A^green",
-        "f^green"
-      ]
-    },
-    {
-      "vid": "red",
-      "type": "get_adj",
-      "expand_eid_list": [
-        "a"
-      ],
-      "single_op": "f^red",
-      "multi_ops": [],
-      "target_var": "A^red",
-      "depend_on": [
-        "A^green",
-        "C^red",
-        "f^green",
-        "f^red"
-      ]
-    },
-    {
-      "vid": "blue",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": null,
-      "multi_ops": [
-        "A^red",
-        "A^green"
-      ],
-      "target_var": "T^blue",
-      "depend_on": [
-        "A^green",
-        "C^red",
-        "A^red",
-        "f^red",
-        "f^green"
-      ]
-    },
-    {
-      "vid": "blue",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": "T^blue",
-      "multi_ops": [],
       "target_var": "C^blue",
       "depend_on": [
-        "C^red",
         "f^green",
-        "T^blue",
-        "A^red",
-        "f^red",
         "A^green"
       ]
     },
@@ -166,13 +103,76 @@
       "multi_ops": [],
       "target_var": "f^blue",
       "depend_on": [
-        "T^blue",
-        "A^red",
-        "A^green",
-        "f^red",
+        "C^blue",
         "f^green",
+        "A^green"
+      ]
+    },
+    {
+      "vid": "blue",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "a"
+      ],
+      "single_op": "f^blue",
+      "multi_ops": [],
+      "target_var": "A^blue",
+      "depend_on": [
+        "C^blue",
+        "f^blue",
+        "f^green",
+        "A^green"
+      ]
+    },
+    {
+      "vid": "red",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^green",
+        "A^blue"
+      ],
+      "target_var": "T^red",
+      "depend_on": [
+        "f^blue",
+        "A^blue",
+        "f^green",
+        "C^blue",
+        "A^green"
+      ]
+    },
+    {
+      "vid": "red",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^red",
+      "multi_ops": [],
+      "target_var": "C^red",
+      "depend_on": [
+        "T^red",
+        "C^blue",
+        "A^green",
+        "f^blue",
+        "A^blue",
+        "f^green"
+      ]
+    },
+    {
+      "vid": "red",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^red",
+      "multi_ops": [],
+      "target_var": "f^red",
+      "depend_on": [
+        "A^blue",
+        "f^blue",
+        "A^green",
+        "f^green",
+        "C^blue",
         "C^red",
-        "C^blue"
+        "T^red"
       ]
     },
     {
@@ -181,22 +181,22 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^otherRed",
-        "f^red",
         "f^green",
-        "f^blue"
+        "f^otherRed",
+        "f^blue",
+        "f^red"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^red",
-        "C^blue",
-        "f^blue",
-        "A^green",
-        "f^green",
-        "C^red",
-        "T^blue",
         "f^otherRed",
-        "A^red"
+        "C^red",
+        "A^green",
+        "A^blue",
+        "C^blue",
+        "f^green",
+        "f^blue",
+        "T^red",
+        "f^red"
       ]
     }
   ]

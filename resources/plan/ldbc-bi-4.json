@@ -6,21 +6,6 @@
     "city"
   ],
   "vertices": {
-    "country": {
-      "vid": "country",
-      "label": "Country",
-      "attr": null
-    },
-    "city": {
-      "vid": "city",
-      "label": "City",
-      "attr": null
-    },
-    "member": {
-      "vid": "member",
-      "label": "Person",
-      "attr": null
-    },
     "forum": {
       "vid": "forum",
       "label": "Forum",
@@ -30,9 +15,31 @@
         "value": 1290494980289,
         "type": "int"
       }
+    },
+    "country": {
+      "vid": "country",
+      "label": "Country",
+      "attr": null
+    },
+    "member": {
+      "vid": "member",
+      "label": "Person",
+      "attr": null
+    },
+    "city": {
+      "vid": "city",
+      "label": "City",
+      "attr": null
     }
   },
   "edges": {
+    "a": {
+      "eid": "a",
+      "src_vid": "forum",
+      "dst_vid": "member",
+      "label": "hasMember",
+      "attr": null
+    },
     "c": {
       "eid": "c",
       "src_vid": "city",
@@ -45,13 +52,6 @@
       "src_vid": "member",
       "dst_vid": "city",
       "label": "isLocatedIn",
-      "attr": null
-    },
-    "a": {
-      "eid": "a",
-      "src_vid": "forum",
-      "dst_vid": "member",
-      "label": "hasMember",
       "attr": null
     }
   },
@@ -121,8 +121,8 @@
       "target_var": "f^member",
       "depend_on": [
         "A^forum",
-        "C^member",
-        "f^forum"
+        "f^forum",
+        "C^member"
       ]
     },
     {
@@ -135,10 +135,10 @@
       "multi_ops": [],
       "target_var": "A^member",
       "depend_on": [
-        "f^member",
-        "A^forum",
+        "C^member",
         "f^forum",
-        "C^member"
+        "f^member",
+        "A^forum"
       ]
     },
     {
@@ -154,10 +154,10 @@
       "depend_on": [
         "A^forum",
         "A^member",
+        "f^forum",
         "f^member",
         "A^country",
         "C^member",
-        "f^forum",
         "f^country"
       ]
     },
@@ -169,14 +169,14 @@
       "multi_ops": [],
       "target_var": "C^city",
       "depend_on": [
-        "A^member",
-        "A^forum",
         "C^member",
-        "T^city",
-        "f^country",
-        "A^country",
+        "A^forum",
+        "f^forum",
         "f^member",
-        "f^forum"
+        "A^country",
+        "A^member",
+        "T^city",
+        "f^country"
       ]
     },
     {
@@ -187,15 +187,15 @@
       "multi_ops": [],
       "target_var": "f^city",
       "depend_on": [
-        "A^forum",
-        "f^forum",
         "f^country",
-        "A^country",
         "C^member",
-        "A^member",
-        "C^city",
         "f^member",
-        "T^city"
+        "C^city",
+        "A^member",
+        "A^country",
+        "f^forum",
+        "T^city",
+        "A^forum"
       ]
     },
     {
@@ -204,23 +204,23 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^member",
+        "f^country",
         "f^forum",
-        "f^city",
-        "f^country"
+        "f^member",
+        "f^city"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^city",
-        "C^member",
         "f^member",
-        "A^forum",
+        "A^member",
+        "C^member",
+        "f^city",
         "A^country",
         "f^forum",
         "f^country",
-        "A^member",
+        "T^city",
         "C^city",
-        "T^city"
+        "A^forum"
       ]
     }
   ]

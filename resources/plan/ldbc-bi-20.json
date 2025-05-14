@@ -6,6 +6,21 @@
     "university"
   ],
   "vertices": {
+    "university": {
+      "vid": "university",
+      "label": "University",
+      "attr": null
+    },
+    "company": {
+      "vid": "company",
+      "label": "Company",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "MDLR_Airlines",
+        "type": "string"
+      }
+    },
     "person1": {
       "vid": "person1",
       "label": "Person",
@@ -25,29 +40,14 @@
         "value": 8796093022379,
         "type": "int"
       }
-    },
-    "company": {
-      "vid": "company",
-      "label": "Company",
-      "attr": {
-        "attr": "name",
-        "op": "=",
-        "value": "MDLR_Airlines",
-        "type": "string"
-      }
-    },
-    "university": {
-      "vid": "university",
-      "label": "University",
-      "attr": null
     }
   },
   "edges": {
-    "b": {
-      "eid": "b",
+    "a": {
+      "eid": "a",
       "src_vid": "person1",
-      "dst_vid": "company",
-      "label": "workAt",
+      "dst_vid": "person2",
+      "label": "knows",
       "attr": null
     },
     "d": {
@@ -57,18 +57,18 @@
       "label": "studyAt",
       "attr": null
     },
+    "b": {
+      "eid": "b",
+      "src_vid": "person1",
+      "dst_vid": "company",
+      "label": "workAt",
+      "attr": null
+    },
     "c": {
       "eid": "c",
       "src_vid": "person1",
       "dst_vid": "university",
       "label": "studyAt",
-      "attr": null
-    },
-    "a": {
-      "eid": "a",
-      "src_vid": "person1",
-      "dst_vid": "person2",
-      "label": "knows",
       "attr": null
     }
   },
@@ -86,8 +86,8 @@
       "vid": "person2",
       "type": "get_adj",
       "expand_eid_list": [
-        "a",
-        "d"
+        "d",
+        "a"
       ],
       "single_op": "f^person2",
       "multi_ops": [],
@@ -129,10 +129,10 @@
       ],
       "target_var": "T^person1",
       "depend_on": [
-        "A^company",
+        "f^company",
         "A^person2",
         "f^person2",
-        "f^company"
+        "A^company"
       ]
     },
     {
@@ -143,11 +143,11 @@
       "multi_ops": [],
       "target_var": "C^person1",
       "depend_on": [
-        "A^person2",
-        "f^person2",
-        "f^company",
         "T^person1",
-        "A^company"
+        "f^company",
+        "A^company",
+        "f^person2",
+        "A^person2"
       ]
     },
     {
@@ -158,12 +158,12 @@
       "multi_ops": [],
       "target_var": "f^person1",
       "depend_on": [
+        "f^company",
         "A^company",
-        "T^person1",
-        "C^person1",
         "A^person2",
+        "T^person1",
         "f^person2",
-        "f^company"
+        "C^person1"
       ]
     },
     {
@@ -176,13 +176,13 @@
       "multi_ops": [],
       "target_var": "A^person1",
       "depend_on": [
-        "A^company",
-        "C^person1",
-        "T^person1",
         "A^person2",
-        "f^person2",
+        "T^person1",
         "f^company",
-        "f^person1"
+        "f^person1",
+        "f^person2",
+        "C^person1",
+        "A^company"
       ]
     },
     {
@@ -196,14 +196,14 @@
       ],
       "target_var": "T^university",
       "depend_on": [
-        "T^person1",
-        "A^person1",
-        "f^person1",
+        "f^company",
         "A^person2",
-        "C^person1",
+        "f^person1",
         "f^person2",
+        "A^person1",
+        "C^person1",
         "A^company",
-        "f^company"
+        "T^person1"
       ]
     },
     {
@@ -214,15 +214,15 @@
       "multi_ops": [],
       "target_var": "C^university",
       "depend_on": [
-        "T^university",
-        "A^person1",
-        "A^person2",
-        "A^company",
-        "f^person2",
-        "f^company",
+        "C^person1",
         "f^person1",
+        "f^company",
+        "A^person1",
+        "f^person2",
+        "A^person2",
         "T^person1",
-        "C^person1"
+        "A^company",
+        "T^university"
       ]
     },
     {
@@ -233,16 +233,16 @@
       "multi_ops": [],
       "target_var": "f^university",
       "depend_on": [
-        "T^university",
-        "f^person1",
-        "A^person2",
-        "C^person1",
-        "A^company",
-        "f^company",
-        "A^person1",
         "C^university",
+        "C^person1",
+        "f^person2",
+        "A^company",
+        "A^person1",
+        "f^person1",
+        "f^company",
         "T^person1",
-        "f^person2"
+        "T^university",
+        "A^person2"
       ]
     },
     {
@@ -252,23 +252,23 @@
       "single_op": null,
       "multi_ops": [
         "f^person2",
+        "f^company",
         "f^person1",
-        "f^university",
-        "f^company"
+        "f^university"
       ],
       "target_var": "f",
       "depend_on": [
-        "C^person1",
-        "f^person2",
-        "C^university",
-        "A^company",
-        "f^university",
-        "f^company",
-        "A^person2",
         "f^person1",
-        "A^person1",
+        "C^person1",
         "T^person1",
-        "T^university"
+        "f^university",
+        "A^person2",
+        "C^university",
+        "T^university",
+        "f^company",
+        "A^company",
+        "A^person1",
+        "f^person2"
       ]
     }
   ]

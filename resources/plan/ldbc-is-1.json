@@ -89,9 +89,9 @@
       "target_var": "f",
       "depend_on": [
         "A^person",
+        "C^city",
         "f^person",
-        "f^city",
-        "C^city"
+        "f^city"
       ]
     }
   ]
