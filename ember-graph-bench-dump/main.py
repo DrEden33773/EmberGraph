@@ -3,6 +3,7 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import numpy as np
 import scienceplots  # type: ignore
+from csv_dumper import csv_dumper
 from data_fetcher import (
     load_experiment_and_control_group_timing_data,
     load_experiment_group_resource_usage_data,
@@ -38,6 +39,8 @@ def plot_min_execution_time():
     exp_min_times = [timing_data[name][0].min_ms for name in sample_names]
     ctrl_min_times = [timing_data[name][1].min_ms for name in sample_names]
 
+    csv_dumper(exp_min_times, ctrl_min_times, "min_execution_time")
+
     ax.bar(  # type: ignore
         x - width / 2,
         exp_min_times,
@@ -45,16 +48,16 @@ def plot_min_execution_time():
         label="Experimental Group" if USE_ENGLISH_LABELS else "实验组",
         color="white",
         edgecolor="black",
-        hatch="///",
+        # hatch="///",
     )
     ax.bar(  # type: ignore
         x + width / 2,
         ctrl_min_times,
         width,
         label="Control Group" if USE_ENGLISH_LABELS else "对照组",
-        color="white",
+        color="black",
         edgecolor="black",
-        hatch="...",
+        # hatch="...",
     )
     ax.set_title("Minimum Execution Time" if USE_ENGLISH_LABELS else "最短执行时间")  # type: ignore
     ax.set_ylabel("Time (ms)" if USE_ENGLISH_LABELS else "时间 (ms)")  # type: ignore
@@ -84,6 +87,8 @@ def plot_avg_execution_time():
     exp_avg_times = [timing_data[name][0].avg_ms for name in sample_names]
     ctrl_avg_times = [timing_data[name][1].avg_ms for name in sample_names]
 
+    csv_dumper(exp_avg_times, ctrl_avg_times, "avg_execution_time")
+
     ax.bar(  # type: ignore
         x - width / 2,
         exp_avg_times,
@@ -91,16 +96,16 @@ def plot_avg_execution_time():
         label="EmberGraph",
         color="white",
         edgecolor="black",
-        hatch="///",
+        # hatch="///",
     )
     ax.bar(  # type: ignore
         x + width / 2,
         ctrl_avg_times,
         width,
         label="Neo4j",
-        color="white",
+        color="black",
         edgecolor="black",
-        hatch="...",
+        # hatch="...",
     )
     ax.set_title("Average Execution Time" if USE_ENGLISH_LABELS else "平均执行时间")  # type: ignore
     ax.set_ylabel("Time (ms)" if USE_ENGLISH_LABELS else "时间 (ms)")  # type: ignore
@@ -130,6 +135,8 @@ def plot_max_execution_time():
     exp_max_times = [timing_data[name][0].max_ms for name in sample_names]
     ctrl_max_times = [timing_data[name][1].max_ms for name in sample_names]
 
+    csv_dumper(exp_max_times, ctrl_max_times, "max_execution_time")
+
     ax.bar(  # type: ignore
         x - width / 2,
         exp_max_times,
@@ -137,16 +144,16 @@ def plot_max_execution_time():
         label="EmberGraph",
         color="white",
         edgecolor="black",
-        hatch="///",
+        # hatch="///",
     )
     ax.bar(  # type: ignore
         x + width / 2,
         ctrl_max_times,
         width,
         label="Neo4j",
-        color="white",
+        color="black",
         edgecolor="black",
-        hatch="...",
+        # hatch="...",
     )
     ax.set_title("Maximum Execution Time" if USE_ENGLISH_LABELS else "最长执行时间")  # type: ignore
     ax.set_ylabel("Time (ms)" if USE_ENGLISH_LABELS else "时间 (ms)")  # type: ignore

@@ -87,7 +87,7 @@ impl ReportOperator {
     // Actually, graph in f_bucket <= pattern graph (is subset of).
     // They will be merged in later `merge` step.
     //
-    // So, we can filter out the graph that is real-superset of pattern graph.
+    // So, we can filter OUT the graph that is real-superset of pattern graph.
     for f_bucket in f_buckets {
       let curr_group = f_bucket.all_matched.into_iter().collect_vec();
 

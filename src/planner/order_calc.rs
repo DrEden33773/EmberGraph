@@ -196,7 +196,7 @@ impl OrderCalculator {
       &mut self.plain_vids,
     ] {
       // Sort by cost (ASC)
-      bucket.sort_unstable_by_key(|vid| v_costs[vid]);
+      bucket.sort_by_key(|vid| v_costs[vid]);
     }
   }
 

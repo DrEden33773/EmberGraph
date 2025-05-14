@@ -1,10 +1,12 @@
 use clap::Parser;
 use colored::Colorize;
 use dotenv::dotenv;
+#[cfg(not(feature = "benchmark_with_cache_eviction"))]
+use ember_graph::storage::CachedStorageAdapter;
 use ember_graph::{
   executor::ExecEngine,
   schemas::PlanData,
-  storage::{AsyncDefault, CachedStorageAdapter, Neo4jStorageAdapter, SqliteStorageAdapter},
+  storage::{AsyncDefault, Neo4jStorageAdapter, SqliteStorageAdapter},
   utils::parallel,
 };
 use serde::Serialize;
@@ -574,23 +576,22 @@ async fn execute_single_benchmark(
     "neo4j" => {
       // Create adapter first
       let neo4j_adapter = Neo4jStorageAdapter::async_default().await;
-      let cached_adapter =
-        CachedStorageAdapter::<Neo4jStorageAdapter>::new(neo4j_adapter, args.cache_size);
+      #[cfg(not(feature = "benchmark_with_cache_eviction"))]
+      let cached_adapter = CachedStorageAdapter::new(neo4j_adapter, args.cache_size);
+      #[cfg(not(feature = "benchmark_with_cache_eviction"))]
       let adapter = Arc::new(cached_adapter);
-      let mut executor = ExecEngine::new(plan_arc.clone(), adapter.clone());
+      #[cfg(feature = "benchmark_with_cache_eviction")]
+      let adapter = Arc::new(neo4j_adapter);
+      let mut executor = ExecEngine::new(plan_arc, adapter);
 
       // Warm-up runs
       if args.warmup > 0 {
         for _ in 0..args.warmup {
-          #[cfg(feature = "benchmark_with_cache_eviction")]
-          adapter.cache_clear().await;
           executor.exec().await;
         }
       }
       // Measurement runs
       for _ in 0..args.runs {
-        #[cfg(feature = "benchmark_with_cache_eviction")]
-        adapter.cache_clear().await;
         let start_time = Instant::now();
         executor.exec().await;
         let duration = start_time.elapsed();
@@ -600,23 +601,22 @@ async fn execute_single_benchmark(
     "sqlite" => {
       // Create adapter first
       let sqlite_adapter = SqliteStorageAdapter::async_default().await;
-      let cached_adapter =
-        CachedStorageAdapter::<SqliteStorageAdapter>::new(sqlite_adapter, args.cache_size);
+      #[cfg(not(feature = "benchmark_with_cache_eviction"))]
+      let cached_adapter = CachedStorageAdapter::new(sqlite_adapter, args.cache_size);
+      #[cfg(not(feature = "benchmark_with_cache_eviction"))]
       let adapter = Arc::new(cached_adapter);
-      let mut executor = ExecEngine::new(plan_arc.clone(), adapter.clone());
+      #[cfg(feature = "benchmark_with_cache_eviction")]
+      let adapter = Arc::new(sqlite_adapter);
+      let mut executor = ExecEngine::new(plan_arc, adapter);
 
       // Warm-up runs
       if args.warmup > 0 {
         for _ in 0..args.warmup {
-          #[cfg(feature = "benchmark_with_cache_eviction")]
-          adapter.cache_clear().await;
           executor.exec().await;
         }
       }
       // Measurement runs
       for _ in 0..args.runs {
-        #[cfg(feature = "benchmark_with_cache_eviction")]
-        adapter.cache_clear().await;
         let start_time = Instant::now();
         executor.exec().await;
         let duration = start_time.elapsed();

@@ -349,7 +349,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
   /// Check if two ExpandGraph have common pending vertices.
   ///
   /// This is the performance critical path, need to be implemented efficiently.
-  #[inline(always)]
+  #[inline]
   pub fn has_common_pending_v(&self, other: &Self) -> bool {
     let (shorter, longer) =
       if self.pending_v_grouped_dangling_eids.len() < other.pending_v_grouped_dangling_eids.len() {
@@ -370,7 +370,7 @@ impl<VType: VBase, EType: EBase> ExpandGraph<VType, EType> {
 
     // for medium-scale collections, use binary search to accelerate comparison
     if shorter.pending_v_grouped_dangling_eids.len() <= 16
-      && longer.pending_v_grouped_dangling_eids.len() > 32
+      && longer.pending_v_grouped_dangling_eids.len() <= 32
     {
       // collect keys of the longer collection
       let keys: Vec<_> = longer.pending_v_grouped_dangling_eids.keys().collect();
