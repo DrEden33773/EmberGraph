@@ -125,15 +125,11 @@
     {
       "vid": "tagClass",
       "type": "get_adj",
-      "expand_eid_list": [
-        "g"
-      ],
+      "expand_eid_list": ["g"],
       "single_op": "f^tagClass",
       "multi_ops": [],
       "target_var": "A^tagClass",
-      "depend_on": [
-        "f^tagClass"
-      ]
+      "depend_on": ["f^tagClass"]
     },
     {
       "vid": "country",
@@ -147,15 +143,11 @@
     {
       "vid": "country",
       "type": "get_adj",
-      "expand_eid_list": [
-        "a"
-      ],
+      "expand_eid_list": ["a"],
       "single_op": "f^country",
       "multi_ops": [],
       "target_var": "A^country",
-      "depend_on": [
-        "f^country"
-      ]
+      "depend_on": ["f^country"]
     },
     {
       "vid": "person",
@@ -169,16 +161,11 @@
     {
       "vid": "person",
       "type": "get_adj",
-      "expand_eid_list": [
-        "b",
-        "c"
-      ],
+      "expand_eid_list": ["b", "c"],
       "single_op": "f^person",
       "multi_ops": [],
       "target_var": "A^person",
-      "depend_on": [
-        "f^person"
-      ]
+      "depend_on": ["f^person"]
     },
     {
       "vid": "forum",
@@ -187,10 +174,7 @@
       "single_op": "A^person",
       "multi_ops": [],
       "target_var": "C^forum",
-      "depend_on": [
-        "A^person",
-        "f^person"
-      ]
+      "depend_on": ["A^person", "f^person"]
     },
     {
       "vid": "forum",
@@ -199,44 +183,25 @@
       "single_op": "C^forum",
       "multi_ops": [],
       "target_var": "f^forum",
-      "depend_on": [
-        "A^person",
-        "f^person",
-        "C^forum"
-      ]
+      "depend_on": ["A^person", "f^person", "C^forum"]
     },
     {
       "vid": "forum",
       "type": "get_adj",
-      "expand_eid_list": [
-        "d"
-      ],
+      "expand_eid_list": ["d"],
       "single_op": "f^forum",
       "multi_ops": [],
       "target_var": "A^forum",
-      "depend_on": [
-        "f^person",
-        "f^forum",
-        "A^person",
-        "C^forum"
-      ]
+      "depend_on": ["f^person", "f^forum", "A^person", "C^forum"]
     },
     {
       "vid": "city",
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "A^country",
-        "A^person"
-      ],
+      "multi_ops": ["A^country", "A^person"],
       "target_var": "T^city",
-      "depend_on": [
-        "A^person",
-        "A^country",
-        "f^country",
-        "f^person"
-      ]
+      "depend_on": ["A^person", "A^country", "f^country", "f^person"]
     },
     {
       "vid": "city",
@@ -245,13 +210,7 @@
       "single_op": "T^city",
       "multi_ops": [],
       "target_var": "C^city",
-      "depend_on": [
-        "A^country",
-        "f^country",
-        "f^person",
-        "T^city",
-        "A^person"
-      ]
+      "depend_on": ["A^country", "f^country", "f^person", "T^city", "A^person"]
     },
     {
       "vid": "city",
@@ -281,26 +240,18 @@
     {
       "vid": "comment",
       "type": "get_adj",
-      "expand_eid_list": [
-        "e",
-        "f"
-      ],
+      "expand_eid_list": ["e", "f"],
       "single_op": "f^comment",
       "multi_ops": [],
       "target_var": "A^comment",
-      "depend_on": [
-        "f^comment"
-      ]
+      "depend_on": ["f^comment"]
     },
     {
       "vid": "post",
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "A^forum",
-        "A^comment"
-      ],
+      "multi_ops": ["A^forum", "A^comment"],
       "target_var": "T^post",
       "depend_on": [
         "f^forum",
@@ -354,17 +305,9 @@
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "A^comment",
-        "A^tagClass"
-      ],
+      "multi_ops": ["A^comment", "A^tagClass"],
       "target_var": "T^tag",
-      "depend_on": [
-        "A^comment",
-        "A^tagClass",
-        "f^tagClass",
-        "f^comment"
-      ]
+      "depend_on": ["A^comment", "A^tagClass", "f^tagClass", "f^comment"]
     },
     {
       "vid": "tag",

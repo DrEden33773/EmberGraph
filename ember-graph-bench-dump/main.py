@@ -6,6 +6,7 @@ import scienceplots  # type: ignore
 from csv_dumper import csv_dumper
 from data_fetcher import (
     load_experiment_and_control_group_timing_data,
+    load_experiment_and_unoptimized_group_timing_data,
     load_experiment_group_resource_usage_data,
 )
 from path_utils import PLOTTING_OUTPUT_DIR
@@ -70,9 +71,13 @@ def plot_min_execution_time():
     plt.close(fig)
 
 
-def plot_avg_execution_time():
+def plot_avg_execution_time(test_between_experiment_and_control_group: bool = True):
     """Plot the average execution time comparison."""
-    timing_data = load_experiment_and_control_group_timing_data()
+    timing_data = (
+        load_experiment_and_control_group_timing_data()
+        if test_between_experiment_and_control_group
+        else load_experiment_and_unoptimized_group_timing_data()
+    )
 
     sample_names = sorted(
         list(timing_data.keys()),
@@ -85,24 +90,41 @@ def plot_avg_execution_time():
 
     # avg_ms
     exp_avg_times = [timing_data[name][0].avg_ms for name in sample_names]
-    ctrl_avg_times = [timing_data[name][1].avg_ms for name in sample_names]
+    ctrl_or_unoptimized_avg_times = [
+        timing_data[name][1].avg_ms for name in sample_names
+    ]
 
-    csv_dumper(exp_avg_times, ctrl_avg_times, "avg_execution_time")
+    filename = (
+        "avg_execution_time"
+        if test_between_experiment_and_control_group
+        else "avg_execution_time_after_and_before_unoptimized"
+    )
+    csv_dumper(exp_avg_times, ctrl_or_unoptimized_avg_times, filename)
 
+    optimized_label = " (Optimized)" if USE_ENGLISH_LABELS else "（有优化）"
+    unoptimized_label = " (Unoptimized)" if USE_ENGLISH_LABELS else "（无优化）"
     ax.bar(  # type: ignore
         x - width / 2,
         exp_avg_times,
         width,
-        label="EmberGraph",
+        label=(
+            "EmberGraph"
+            if test_between_experiment_and_control_group
+            else "EmberGraph" + optimized_label
+        ),
         color="white",
         edgecolor="black",
         # hatch="///",
     )
     ax.bar(  # type: ignore
         x + width / 2,
-        ctrl_avg_times,
+        ctrl_or_unoptimized_avg_times,
         width,
-        label="Neo4j",
+        label=(
+            "Neo4j"
+            if test_between_experiment_and_control_group
+            else "EmberGraph" + unoptimized_label
+        ),
         color="black",
         edgecolor="black",
         # hatch="...",
@@ -114,7 +136,7 @@ def plot_avg_execution_time():
     ax.legend()  # type: ignore
 
     plt.tight_layout()
-    plt.savefig(PLOTTING_OUTPUT_DIR / "avg_execution_time.png", dpi=300)  # type: ignore
+    plt.savefig(PLOTTING_OUTPUT_DIR / f"{filename}.png", dpi=300)  # type: ignore
     plt.close(fig)
 
 
@@ -211,9 +233,12 @@ def plot_memory_usage():
 
 
 if __name__ == "__main__":
-    plot_min_execution_time()
-    plot_avg_execution_time()
-    plot_max_execution_time()
+    print("Plotting...")
+
+    # plot_min_execution_time()
+    plot_avg_execution_time(test_between_experiment_and_control_group=True)
+    plot_avg_execution_time(test_between_experiment_and_control_group=False)
+    # plot_max_execution_time()
     plot_cpu_usage()
     plot_memory_usage()
 

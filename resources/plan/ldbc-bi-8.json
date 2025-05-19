@@ -1,10 +1,5 @@
 {
-  "matching_order": [
-    "tag",
-    "comment",
-    "friend",
-    "person"
-  ],
+  "matching_order": ["tag", "comment", "friend", "person"],
   "vertices": {
     "person": {
       "vid": "person",
@@ -80,16 +75,11 @@
     {
       "vid": "tag",
       "type": "get_adj",
-      "expand_eid_list": [
-        "c",
-        "a"
-      ],
+      "expand_eid_list": ["c", "a"],
       "single_op": "f^tag",
       "multi_ops": [],
       "target_var": "A^tag",
-      "depend_on": [
-        "f^tag"
-      ]
+      "depend_on": ["f^tag"]
     },
     {
       "vid": "comment",
@@ -98,10 +88,7 @@
       "single_op": "A^tag",
       "multi_ops": [],
       "target_var": "C^comment",
-      "depend_on": [
-        "A^tag",
-        "f^tag"
-      ]
+      "depend_on": ["A^tag", "f^tag"]
     },
     {
       "vid": "comment",
@@ -110,27 +97,16 @@
       "single_op": "C^comment",
       "multi_ops": [],
       "target_var": "f^comment",
-      "depend_on": [
-        "f^tag",
-        "C^comment",
-        "A^tag"
-      ]
+      "depend_on": ["f^tag", "C^comment", "A^tag"]
     },
     {
       "vid": "comment",
       "type": "get_adj",
-      "expand_eid_list": [
-        "b"
-      ],
+      "expand_eid_list": ["b"],
       "single_op": "f^comment",
       "multi_ops": [],
       "target_var": "A^comment",
-      "depend_on": [
-        "f^comment",
-        "A^tag",
-        "f^tag",
-        "C^comment"
-      ]
+      "depend_on": ["f^comment", "A^tag", "f^tag", "C^comment"]
     },
     {
       "vid": "friend",
@@ -144,25 +120,18 @@
     {
       "vid": "friend",
       "type": "get_adj",
-      "expand_eid_list": [
-        "d"
-      ],
+      "expand_eid_list": ["d"],
       "single_op": "f^friend",
       "multi_ops": [],
       "target_var": "A^friend",
-      "depend_on": [
-        "f^friend"
-      ]
+      "depend_on": ["f^friend"]
     },
     {
       "vid": "person",
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "A^comment",
-        "A^friend"
-      ],
+      "multi_ops": ["A^comment", "A^friend"],
       "target_var": "T^@1",
       "depend_on": [
         "A^comment",
@@ -179,10 +148,7 @@
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "T^@1",
-        "A^tag"
-      ],
+      "multi_ops": ["T^@1", "A^tag"],
       "target_var": "T^person",
       "depend_on": [
         "f^comment",
@@ -239,12 +205,7 @@
       "type": "report",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "f^friend",
-        "f^person",
-        "f^tag",
-        "f^comment"
-      ],
+      "multi_ops": ["f^friend", "f^person", "f^tag", "f^comment"],
       "target_var": "f",
       "depend_on": [
         "f^person",

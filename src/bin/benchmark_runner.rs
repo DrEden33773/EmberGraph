@@ -131,12 +131,27 @@ static NEO4J_ORDERED_TASKS: LazyLock<HashSet<&str>> = LazyLock::new(|| {
   }
 });
 
-static BENCHMARK_OUTPUT_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
-  let mut res = project_root::get_project_root()
+#[cfg(not(feature = "no_optimizations"))]
+static BASE_BENCHMARK_OUTPUT_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
+  project_root::get_project_root()
     .unwrap()
     .join("resources")
     .join("out")
-    .join("benchmarks");
+    .join("benchmarks")
+});
+
+#[cfg(feature = "no_optimizations")]
+static BASE_BENCHMARK_OUTPUT_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
+  project_root::get_project_root()
+    .unwrap()
+    .join("resources")
+    .join("out")
+    .join("benchmarks")
+    .join("unoptimized")
+});
+
+static BENCHMARK_OUTPUT_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
+  let mut res = BASE_BENCHMARK_OUTPUT_DIR.clone();
 
   #[cfg(feature = "benchmark_with_cache_eviction")]
   {
@@ -194,6 +209,26 @@ static BENCHMARK_OUTPUT_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
   res
 });
 
+#[cfg(not(feature = "no_optimizations"))]
+static PLAN_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
+  project_root::get_project_root()
+    .unwrap()
+    .join("resources")
+    .join("plan")
+});
+
+#[cfg(feature = "no_optimizations")]
+static PLAN_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
+  project_root::get_project_root()
+    .unwrap()
+    .join("resources")
+    .join("plan")
+    .join("unoptimized")
+});
+
+static NEO4J_ORDERED_PLAN_DIR: LazyLock<PathBuf> =
+  LazyLock::new(|| PLAN_DIR.clone().join("neo4j_ordered"));
+
 fn main() -> io::Result<()> {
   parallel::config_before_run(run_benchmark())
 }
@@ -234,15 +269,8 @@ async fn run_benchmark() -> io::Result<()> {
 
   if args.all_bi_tasks {
     // Find and sort plan files
-    let plan_dir = project_root::get_project_root()
-      .map_err(io::Error::other)?
-      .join("resources")
-      .join("plan");
-    let neo4j_ordered_plan_dir = project_root::get_project_root()
-      .map_err(io::Error::other)?
-      .join("resources")
-      .join("plan")
-      .join("neo4j_ordered");
+    let plan_dir = PLAN_DIR.clone();
+    let neo4j_ordered_plan_dir = NEO4J_ORDERED_PLAN_DIR.clone();
 
     let mut plan_paths: Vec<PathBuf> = vec![];
 

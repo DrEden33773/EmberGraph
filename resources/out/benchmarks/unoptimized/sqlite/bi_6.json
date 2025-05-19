@@ -1,0 +1,86 @@
+{
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/plan/unoptimized/ldbc-bi-6.json",
+  "storage_type": "sqlite",
+  "cache_size": 512,
+  "num_runs": 10,
+  "num_warmup": 1,
+  "timing": {
+    "min_ms": 198.625243,
+    "max_ms": 240.92599,
+    "avg_ms": 222.29364375,
+    "all_runs_ms": [
+      229.62835,
+      198.625243,
+      225.85634199999998,
+      238.614906,
+      213.851551,
+      221.814116,
+      191.744643,
+      209.032652,
+      241.064043,
+      240.92599
+    ]
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1747684398655,
+      "cpu_usage_percent": 30.452677,
+      "memory_bytes": 11519295488
+    },
+    {
+      "timestamp_ms": 1747684398865,
+      "cpu_usage_percent": 28.140705,
+      "memory_bytes": 11519295488
+    },
+    {
+      "timestamp_ms": 1747684399074,
+      "cpu_usage_percent": 23.255814,
+      "memory_bytes": 11519295488
+    },
+    {
+      "timestamp_ms": 1747684399284,
+      "cpu_usage_percent": 25.659473,
+      "memory_bytes": 11519295488
+    },
+    {
+      "timestamp_ms": 1747684399499,
+      "cpu_usage_percent": 26.573425,
+      "memory_bytes": 11519295488
+    },
+    {
+      "timestamp_ms": 1747684399711,
+      "cpu_usage_percent": 25.05747,
+      "memory_bytes": 11519295488
+    },
+    {
+      "timestamp_ms": 1747684399924,
+      "cpu_usage_percent": 24.50495,
+      "memory_bytes": 11519295488
+    },
+    {
+      "timestamp_ms": 1747684400137,
+      "cpu_usage_percent": 24.50495,
+      "memory_bytes": 11519295488
+    },
+    {
+      "timestamp_ms": 1747684400348,
+      "cpu_usage_percent": 23.448277,
+      "memory_bytes": 11519295488
+    },
+    {
+      "timestamp_ms": 1747684400566,
+      "cpu_usage_percent": 26.291082,
+      "memory_bytes": 11519295488
+    },
+    {
+      "timestamp_ms": 1747684400780,
+      "cpu_usage_percent": 21.534653,
+      "memory_bytes": 11519295488
+    },
+    {
+      "timestamp_ms": 1747684400988,
+      "cpu_usage_percent": 14.814815,
+      "memory_bytes": 11487899648
+    }
+  ]
+}

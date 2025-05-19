@@ -1,0 +1,296 @@
+{
+  "matching_order": [
+    "person2",
+    "company",
+    "person1",
+    "university"
+  ],
+  "vertices": {
+    "university": {
+      "vid": "university",
+      "label": "University",
+      "attr": null
+    },
+    "person1": {
+      "vid": "person1",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "!=",
+        "value": 8796093022379,
+        "type": "int"
+      }
+    },
+    "person2": {
+      "vid": "person2",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "=",
+        "value": 8796093022379,
+        "type": "int"
+      }
+    },
+    "company": {
+      "vid": "company",
+      "label": "Company",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "MDLR_Airlines",
+        "type": "string"
+      }
+    }
+  },
+  "edges": {
+    "b": {
+      "eid": "b",
+      "src_vid": "person1",
+      "dst_vid": "company",
+      "label": "workAt",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "person1",
+      "dst_vid": "university",
+      "label": "studyAt",
+      "attr": null
+    },
+    "d": {
+      "eid": "d",
+      "src_vid": "person2",
+      "dst_vid": "university",
+      "label": "studyAt",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "person1",
+      "dst_vid": "person2",
+      "label": "knows",
+      "attr": null
+    }
+  },
+  "instructions": [
+    {
+      "vid": "person2",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^person2",
+      "depend_on": []
+    },
+    {
+      "vid": "person2",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "d",
+        "a"
+      ],
+      "single_op": "f^person2",
+      "multi_ops": [],
+      "target_var": "A^person2",
+      "depend_on": [
+        "f^person2"
+      ]
+    },
+    {
+      "vid": "company",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^company",
+      "depend_on": []
+    },
+    {
+      "vid": "company",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "b"
+      ],
+      "single_op": "f^company",
+      "multi_ops": [],
+      "target_var": "A^company",
+      "depend_on": [
+        "f^company"
+      ]
+    },
+    {
+      "vid": "person1",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^person2",
+        "A^company"
+      ],
+      "target_var": "T^person1",
+      "depend_on": [
+        "A^company",
+        "A^person2",
+        "f^company",
+        "f^person2"
+      ]
+    },
+    {
+      "vid": "person1",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^person1",
+      "multi_ops": [],
+      "target_var": "C^person1",
+      "depend_on": [
+        "T^person1",
+        "f^person2",
+        "A^company",
+        "f^company",
+        "A^person2"
+      ]
+    },
+    {
+      "vid": "person1",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^person1",
+      "multi_ops": [],
+      "target_var": "f^person1",
+      "depend_on": [
+        "f^person2",
+        "A^company",
+        "f^company",
+        "T^person1",
+        "A^person2",
+        "C^person1"
+      ]
+    },
+    {
+      "vid": "person1",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "c"
+      ],
+      "single_op": "f^person1",
+      "multi_ops": [],
+      "target_var": "A^person1",
+      "depend_on": [
+        "A^company",
+        "f^company",
+        "T^person1",
+        "C^person1",
+        "A^person2",
+        "f^person2",
+        "f^person1"
+      ]
+    },
+    {
+      "vid": "university",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^person2",
+        "A^person1"
+      ],
+      "target_var": "T^university",
+      "depend_on": [
+        "f^company",
+        "A^company",
+        "A^person2",
+        "C^person1",
+        "A^person1",
+        "f^person1",
+        "f^person2",
+        "T^person1"
+      ]
+    },
+    {
+      "vid": "university",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^university",
+      "multi_ops": [],
+      "target_var": "C^university",
+      "depend_on": [
+        "f^person2",
+        "A^company",
+        "A^person2",
+        "C^person1",
+        "A^person1",
+        "f^person1",
+        "f^company",
+        "T^university",
+        "T^person1"
+      ]
+    },
+    {
+      "vid": "university",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^university",
+      "multi_ops": [],
+      "target_var": "f^university",
+      "depend_on": [
+        "T^university",
+        "A^person1",
+        "f^person1",
+        "A^company",
+        "A^person2",
+        "C^person1",
+        "f^person2",
+        "T^person1",
+        "C^university",
+        "f^company"
+      ]
+    },
+    {
+      "vid": "university",
+      "type": "get_adj",
+      "expand_eid_list": [],
+      "single_op": "f^university",
+      "multi_ops": [],
+      "target_var": "A^university",
+      "depend_on": [
+        "A^person2",
+        "A^company",
+        "f^university",
+        "f^person1",
+        "T^university",
+        "C^university",
+        "f^company",
+        "f^person2",
+        "C^person1",
+        "A^person1",
+        "T^person1"
+      ]
+    },
+    {
+      "vid": "",
+      "type": "report",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "f^university",
+        "f^person2",
+        "f^company",
+        "f^person1"
+      ],
+      "target_var": "f",
+      "depend_on": [
+        "f^company",
+        "f^person1",
+        "f^person2",
+        "C^person1",
+        "A^person1",
+        "C^university",
+        "A^person2",
+        "T^person1",
+        "f^university",
+        "A^company",
+        "T^university"
+      ]
+    }
+  ]
+}

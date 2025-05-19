@@ -1,0 +1,293 @@
+{
+  "matching_order": [
+    "person",
+    "otherPerson",
+    "forum",
+    "post"
+  ],
+  "vertices": {
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "=",
+        "value": 94,
+        "type": "int"
+      }
+    },
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
+    },
+    "otherPerson": {
+      "vid": "otherPerson",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "!=",
+        "value": 94,
+        "type": "int"
+      }
+    },
+    "forum": {
+      "vid": "forum",
+      "label": "Forum",
+      "attr": null
+    }
+  },
+  "edges": {
+    "d": {
+      "eid": "d",
+      "src_vid": "post",
+      "dst_vid": "otherPerson",
+      "label": "hasCreator",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "forum",
+      "dst_vid": "otherPerson",
+      "label": "hasMember",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "person",
+      "dst_vid": "otherPerson",
+      "label": "knows",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "forum",
+      "dst_vid": "post",
+      "label": "containerOf",
+      "attr": null
+    }
+  },
+  "instructions": [
+    {
+      "vid": "person",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^person",
+      "depend_on": []
+    },
+    {
+      "vid": "person",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "a"
+      ],
+      "single_op": "f^person",
+      "multi_ops": [],
+      "target_var": "A^person",
+      "depend_on": [
+        "f^person"
+      ]
+    },
+    {
+      "vid": "otherPerson",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^person",
+      "multi_ops": [],
+      "target_var": "C^otherPerson",
+      "depend_on": [
+        "A^person",
+        "f^person"
+      ]
+    },
+    {
+      "vid": "otherPerson",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^otherPerson",
+      "multi_ops": [],
+      "target_var": "f^otherPerson",
+      "depend_on": [
+        "C^otherPerson",
+        "A^person",
+        "f^person"
+      ]
+    },
+    {
+      "vid": "otherPerson",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "b",
+        "d"
+      ],
+      "single_op": "f^otherPerson",
+      "multi_ops": [],
+      "target_var": "A^otherPerson",
+      "depend_on": [
+        "f^otherPerson",
+        "f^person",
+        "A^person",
+        "C^otherPerson"
+      ]
+    },
+    {
+      "vid": "forum",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^otherPerson",
+      "multi_ops": [],
+      "target_var": "C^forum",
+      "depend_on": [
+        "f^person",
+        "A^otherPerson",
+        "A^person",
+        "C^otherPerson",
+        "f^otherPerson"
+      ]
+    },
+    {
+      "vid": "forum",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^forum",
+      "multi_ops": [],
+      "target_var": "f^forum",
+      "depend_on": [
+        "f^otherPerson",
+        "f^person",
+        "C^forum",
+        "A^otherPerson",
+        "A^person",
+        "C^otherPerson"
+      ]
+    },
+    {
+      "vid": "forum",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "c"
+      ],
+      "single_op": "f^forum",
+      "multi_ops": [],
+      "target_var": "A^forum",
+      "depend_on": [
+        "A^otherPerson",
+        "f^person",
+        "C^forum",
+        "A^person",
+        "f^forum",
+        "C^otherPerson",
+        "f^otherPerson"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^forum",
+        "A^otherPerson"
+      ],
+      "target_var": "T^post",
+      "depend_on": [
+        "A^forum",
+        "f^otherPerson",
+        "A^person",
+        "A^otherPerson",
+        "C^otherPerson",
+        "f^forum",
+        "f^person",
+        "C^forum"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^post",
+      "multi_ops": [],
+      "target_var": "C^post",
+      "depend_on": [
+        "C^forum",
+        "C^otherPerson",
+        "A^person",
+        "f^otherPerson",
+        "f^forum",
+        "A^otherPerson",
+        "T^post",
+        "f^person",
+        "A^forum"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^post",
+      "multi_ops": [],
+      "target_var": "f^post",
+      "depend_on": [
+        "C^forum",
+        "f^otherPerson",
+        "T^post",
+        "C^post",
+        "C^otherPerson",
+        "f^person",
+        "A^person",
+        "A^forum",
+        "f^forum",
+        "A^otherPerson"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "get_adj",
+      "expand_eid_list": [],
+      "single_op": "f^post",
+      "multi_ops": [],
+      "target_var": "A^post",
+      "depend_on": [
+        "A^otherPerson",
+        "f^person",
+        "A^person",
+        "f^otherPerson",
+        "f^forum",
+        "f^post",
+        "C^post",
+        "C^forum",
+        "A^forum",
+        "C^otherPerson",
+        "T^post"
+      ]
+    },
+    {
+      "vid": "",
+      "type": "report",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "f^person",
+        "f^forum",
+        "f^post",
+        "f^otherPerson"
+      ],
+      "target_var": "f",
+      "depend_on": [
+        "A^otherPerson",
+        "f^person",
+        "C^otherPerson",
+        "A^forum",
+        "f^otherPerson",
+        "f^forum",
+        "f^post",
+        "T^post",
+        "A^person",
+        "C^post",
+        "C^forum"
+      ]
+    }
+  ]
+}

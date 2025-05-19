@@ -1,10 +1,5 @@
 {
-  "matching_order": [
-    "person2",
-    "company",
-    "person1",
-    "university"
-  ],
+  "matching_order": ["person2", "company", "person1", "university"],
   "vertices": {
     "university": {
       "vid": "university",
@@ -85,16 +80,11 @@
     {
       "vid": "person2",
       "type": "get_adj",
-      "expand_eid_list": [
-        "d",
-        "a"
-      ],
+      "expand_eid_list": ["d", "a"],
       "single_op": "f^person2",
       "multi_ops": [],
       "target_var": "A^person2",
-      "depend_on": [
-        "f^person2"
-      ]
+      "depend_on": ["f^person2"]
     },
     {
       "vid": "company",
@@ -108,32 +98,20 @@
     {
       "vid": "company",
       "type": "get_adj",
-      "expand_eid_list": [
-        "b"
-      ],
+      "expand_eid_list": ["b"],
       "single_op": "f^company",
       "multi_ops": [],
       "target_var": "A^company",
-      "depend_on": [
-        "f^company"
-      ]
+      "depend_on": ["f^company"]
     },
     {
       "vid": "person1",
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "A^person2",
-        "A^company"
-      ],
+      "multi_ops": ["A^person2", "A^company"],
       "target_var": "T^person1",
-      "depend_on": [
-        "f^company",
-        "A^person2",
-        "f^person2",
-        "A^company"
-      ]
+      "depend_on": ["f^company", "A^person2", "f^person2", "A^company"]
     },
     {
       "vid": "person1",
@@ -169,9 +147,7 @@
     {
       "vid": "person1",
       "type": "get_adj",
-      "expand_eid_list": [
-        "c"
-      ],
+      "expand_eid_list": ["c"],
       "single_op": "f^person1",
       "multi_ops": [],
       "target_var": "A^person1",
@@ -190,10 +166,7 @@
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "A^person2",
-        "A^person1"
-      ],
+      "multi_ops": ["A^person2", "A^person1"],
       "target_var": "T^university",
       "depend_on": [
         "f^company",
@@ -250,12 +223,7 @@
       "type": "report",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "f^person2",
-        "f^company",
-        "f^person1",
-        "f^university"
-      ],
+      "multi_ops": ["f^person2", "f^company", "f^person1", "f^university"],
       "target_var": "f",
       "depend_on": [
         "f^person1",

@@ -66,11 +66,31 @@ static QUERIES: LazyLock<PathBuf> = LazyLock::new(|| {
   res
 });
 
+#[cfg(not(feature = "no_optimizations"))]
 static PLANS: LazyLock<PathBuf> = LazyLock::new(|| {
   let res = project_root::get_project_root()
     .unwrap()
     .join("resources")
     .join("plan");
+
+  if !res.exists() {
+    std::fs::create_dir_all(&res).unwrap();
+    println!(
+      "⚠️  Directory '{}' does not exist, created it.",
+      res.to_str().unwrap().yellow()
+    );
+  }
+
+  res
+});
+
+#[cfg(feature = "no_optimizations")]
+static PLANS: LazyLock<PathBuf> = LazyLock::new(|| {
+  let res = project_root::get_project_root()
+    .unwrap()
+    .join("resources")
+    .join("plan")
+    .join("unoptimized");
 
   if !res.exists() {
     std::fs::create_dir_all(&res).unwrap();

@@ -61,14 +61,18 @@ impl PlanOptimizer {
       return;
     }
 
-    self.eliminate_cse();
-    self.flatten_multi_ops();
-    self.reorder();
+    #[cfg(not(feature = "no_optimizations"))]
+    {
+      self.eliminate_cse();
+      self.flatten_multi_ops();
+      self.reorder();
+    }
 
     // `compute dependencies` should be done after all optimizations
     compute_instr_dependencies(&mut self.exec_instructions);
   }
 
+  #[cfg(not(feature = "no_optimizations"))]
   fn reorder(&mut self) {
     let mut certain_set = HashSet::new();
     certain_set.insert(self.exec_instructions[0].target_var.clone());
@@ -110,6 +114,7 @@ impl PlanOptimizer {
   }
 
   /// Flatten multi-ops (at most 2 operands)
+  #[cfg(not(feature = "no_optimizations"))]
   fn flatten_multi_ops(&mut self) {
     let mut instr_idx = Vec::with_capacity(self.exec_instructions.len());
     let mut defined_vars = Vec::with_capacity(self.exec_instructions.len());
@@ -159,6 +164,7 @@ impl PlanOptimizer {
   }
 
   /// Eliminate common sub-expressions (CSE)
+  #[cfg(not(feature = "no_optimizations"))]
   fn eliminate_cse(&mut self) {
     loop {
       let mut data_list = vec![];

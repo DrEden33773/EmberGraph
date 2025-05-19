@@ -1,9 +1,5 @@
 {
-  "matching_order": [
-    "post",
-    "comment",
-    "person"
-  ],
+  "matching_order": ["post", "comment", "person"],
   "vertices": {
     "post": {
       "vid": "post",
@@ -60,15 +56,11 @@
     {
       "vid": "post",
       "type": "get_adj",
-      "expand_eid_list": [
-        "a"
-      ],
+      "expand_eid_list": ["a"],
       "single_op": "f^post",
       "multi_ops": [],
       "target_var": "A^post",
-      "depend_on": [
-        "f^post"
-      ]
+      "depend_on": ["f^post"]
     },
     {
       "vid": "comment",
@@ -77,10 +69,7 @@
       "single_op": "A^post",
       "multi_ops": [],
       "target_var": "C^comment",
-      "depend_on": [
-        "A^post",
-        "f^post"
-      ]
+      "depend_on": ["A^post", "f^post"]
     },
     {
       "vid": "comment",
@@ -89,27 +78,16 @@
       "single_op": "C^comment",
       "multi_ops": [],
       "target_var": "f^comment",
-      "depend_on": [
-        "f^post",
-        "C^comment",
-        "A^post"
-      ]
+      "depend_on": ["f^post", "C^comment", "A^post"]
     },
     {
       "vid": "comment",
       "type": "get_adj",
-      "expand_eid_list": [
-        "b"
-      ],
+      "expand_eid_list": ["b"],
       "single_op": "f^comment",
       "multi_ops": [],
       "target_var": "A^comment",
-      "depend_on": [
-        "f^comment",
-        "C^comment",
-        "f^post",
-        "A^post"
-      ]
+      "depend_on": ["f^comment", "C^comment", "f^post", "A^post"]
     },
     {
       "vid": "person",
@@ -118,13 +96,7 @@
       "single_op": "A^comment",
       "multi_ops": [],
       "target_var": "C^person",
-      "depend_on": [
-        "f^post",
-        "A^comment",
-        "A^post",
-        "C^comment",
-        "f^comment"
-      ]
+      "depend_on": ["f^post", "A^comment", "A^post", "C^comment", "f^comment"]
     },
     {
       "vid": "person",
@@ -147,11 +119,7 @@
       "type": "report",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "f^comment",
-        "f^person",
-        "f^post"
-      ],
+      "multi_ops": ["f^comment", "f^person", "f^post"],
       "target_var": "f",
       "depend_on": [
         "C^person",

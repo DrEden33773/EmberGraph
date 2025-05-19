@@ -1,10 +1,5 @@
 {
-  "matching_order": [
-    "tag",
-    "post",
-    "person2",
-    "person1"
-  ],
+  "matching_order": ["tag", "post", "person2", "person1"],
   "vertices": {
     "post": {
       "vid": "post",
@@ -73,15 +68,11 @@
     {
       "vid": "tag",
       "type": "get_adj",
-      "expand_eid_list": [
-        "b"
-      ],
+      "expand_eid_list": ["b"],
       "single_op": "f^tag",
       "multi_ops": [],
       "target_var": "A^tag",
-      "depend_on": [
-        "f^tag"
-      ]
+      "depend_on": ["f^tag"]
     },
     {
       "vid": "post",
@@ -90,10 +81,7 @@
       "single_op": "A^tag",
       "multi_ops": [],
       "target_var": "C^post",
-      "depend_on": [
-        "A^tag",
-        "f^tag"
-      ]
+      "depend_on": ["A^tag", "f^tag"]
     },
     {
       "vid": "post",
@@ -102,27 +90,16 @@
       "single_op": "C^post",
       "multi_ops": [],
       "target_var": "f^post",
-      "depend_on": [
-        "A^tag",
-        "f^tag",
-        "C^post"
-      ]
+      "depend_on": ["A^tag", "f^tag", "C^post"]
     },
     {
       "vid": "post",
       "type": "get_adj",
-      "expand_eid_list": [
-        "a"
-      ],
+      "expand_eid_list": ["a"],
       "single_op": "f^post",
       "multi_ops": [],
       "target_var": "A^post",
-      "depend_on": [
-        "A^tag",
-        "f^tag",
-        "f^post",
-        "C^post"
-      ]
+      "depend_on": ["A^tag", "f^tag", "f^post", "C^post"]
     },
     {
       "vid": "person2",
@@ -136,25 +113,18 @@
     {
       "vid": "person2",
       "type": "get_adj",
-      "expand_eid_list": [
-        "c"
-      ],
+      "expand_eid_list": ["c"],
       "single_op": "f^person2",
       "multi_ops": [],
       "target_var": "A^person2",
-      "depend_on": [
-        "f^person2"
-      ]
+      "depend_on": ["f^person2"]
     },
     {
       "vid": "person1",
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "A^person2",
-        "A^post"
-      ],
+      "multi_ops": ["A^person2", "A^post"],
       "target_var": "T^person1",
       "depend_on": [
         "A^tag",
@@ -208,12 +178,7 @@
       "type": "report",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "f^tag",
-        "f^person2",
-        "f^post",
-        "f^person1"
-      ],
+      "multi_ops": ["f^tag", "f^person2", "f^post", "f^person1"],
       "target_var": "f",
       "depend_on": [
         "f^person2",

@@ -99,15 +99,11 @@
     {
       "vid": "country1",
       "type": "get_adj",
-      "expand_eid_list": [
-        "d"
-      ],
+      "expand_eid_list": ["d"],
       "single_op": "f^country1",
       "multi_ops": [],
       "target_var": "A^country1",
-      "depend_on": [
-        "f^country1"
-      ]
+      "depend_on": ["f^country1"]
     },
     {
       "vid": "country2",
@@ -121,15 +117,11 @@
     {
       "vid": "country2",
       "type": "get_adj",
-      "expand_eid_list": [
-        "e"
-      ],
+      "expand_eid_list": ["e"],
       "single_op": "f^country2",
       "multi_ops": [],
       "target_var": "A^country2",
-      "depend_on": [
-        "f^country2"
-      ]
+      "depend_on": ["f^country2"]
     },
     {
       "vid": "person1",
@@ -143,16 +135,11 @@
     {
       "vid": "person1",
       "type": "get_adj",
-      "expand_eid_list": [
-        "c",
-        "a"
-      ],
+      "expand_eid_list": ["c", "a"],
       "single_op": "f^person1",
       "multi_ops": [],
       "target_var": "A^person1",
-      "depend_on": [
-        "f^person1"
-      ]
+      "depend_on": ["f^person1"]
     },
     {
       "vid": "person2",
@@ -161,10 +148,7 @@
       "single_op": "A^person1",
       "multi_ops": [],
       "target_var": "C^person2",
-      "depend_on": [
-        "A^person1",
-        "f^person1"
-      ]
+      "depend_on": ["A^person1", "f^person1"]
     },
     {
       "vid": "person2",
@@ -173,44 +157,25 @@
       "single_op": "C^person2",
       "multi_ops": [],
       "target_var": "f^person2",
-      "depend_on": [
-        "A^person1",
-        "C^person2",
-        "f^person1"
-      ]
+      "depend_on": ["A^person1", "C^person2", "f^person1"]
     },
     {
       "vid": "person2",
       "type": "get_adj",
-      "expand_eid_list": [
-        "b"
-      ],
+      "expand_eid_list": ["b"],
       "single_op": "f^person2",
       "multi_ops": [],
       "target_var": "A^person2",
-      "depend_on": [
-        "C^person2",
-        "f^person2",
-        "f^person1",
-        "A^person1"
-      ]
+      "depend_on": ["C^person2", "f^person2", "f^person1", "A^person1"]
     },
     {
       "vid": "city1",
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "A^country1",
-        "A^person1"
-      ],
+      "multi_ops": ["A^country1", "A^person1"],
       "target_var": "T^city1",
-      "depend_on": [
-        "A^person1",
-        "f^person1",
-        "A^country1",
-        "f^country1"
-      ]
+      "depend_on": ["A^person1", "f^person1", "A^country1", "f^country1"]
     },
     {
       "vid": "city1",
@@ -248,10 +213,7 @@
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "A^person2",
-        "A^country2"
-      ],
+      "multi_ops": ["A^person2", "A^country2"],
       "target_var": "T^city2",
       "depend_on": [
         "A^person1",

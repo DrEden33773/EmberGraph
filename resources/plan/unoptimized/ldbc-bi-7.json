@@ -1,0 +1,252 @@
+{
+  "matching_order": [
+    "tag",
+    "relatedTag",
+    "comment",
+    "post"
+  ],
+  "vertices": {
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "50_Cent",
+        "type": "string"
+      }
+    },
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
+    },
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
+      "attr": null
+    },
+    "relatedTag": {
+      "vid": "relatedTag",
+      "label": "Tag",
+      "attr": {
+        "attr": "name",
+        "op": "!=",
+        "value": "50_Cent",
+        "type": "string"
+      }
+    }
+  },
+  "edges": {
+    "b": {
+      "eid": "b",
+      "src_vid": "post",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "comment",
+      "dst_vid": "post",
+      "label": "replyOf",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "comment",
+      "dst_vid": "relatedTag",
+      "label": "hasTag",
+      "attr": null
+    }
+  },
+  "instructions": [
+    {
+      "vid": "tag",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^tag",
+      "depend_on": []
+    },
+    {
+      "vid": "tag",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "b"
+      ],
+      "single_op": "f^tag",
+      "multi_ops": [],
+      "target_var": "A^tag",
+      "depend_on": [
+        "f^tag"
+      ]
+    },
+    {
+      "vid": "relatedTag",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^relatedTag",
+      "depend_on": []
+    },
+    {
+      "vid": "relatedTag",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "c"
+      ],
+      "single_op": "f^relatedTag",
+      "multi_ops": [],
+      "target_var": "A^relatedTag",
+      "depend_on": [
+        "f^relatedTag"
+      ]
+    },
+    {
+      "vid": "comment",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^relatedTag",
+      "multi_ops": [],
+      "target_var": "C^comment",
+      "depend_on": [
+        "A^relatedTag",
+        "f^relatedTag"
+      ]
+    },
+    {
+      "vid": "comment",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^comment",
+      "multi_ops": [],
+      "target_var": "f^comment",
+      "depend_on": [
+        "f^relatedTag",
+        "C^comment",
+        "A^relatedTag"
+      ]
+    },
+    {
+      "vid": "comment",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "a"
+      ],
+      "single_op": "f^comment",
+      "multi_ops": [],
+      "target_var": "A^comment",
+      "depend_on": [
+        "f^comment",
+        "f^relatedTag",
+        "A^relatedTag",
+        "C^comment"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^comment",
+        "A^tag"
+      ],
+      "target_var": "T^post",
+      "depend_on": [
+        "f^tag",
+        "f^relatedTag",
+        "A^tag",
+        "A^comment",
+        "A^relatedTag",
+        "f^comment",
+        "C^comment"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^post",
+      "multi_ops": [],
+      "target_var": "C^post",
+      "depend_on": [
+        "f^relatedTag",
+        "f^tag",
+        "A^tag",
+        "A^comment",
+        "f^comment",
+        "C^comment",
+        "A^relatedTag",
+        "T^post"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^post",
+      "multi_ops": [],
+      "target_var": "f^post",
+      "depend_on": [
+        "f^comment",
+        "f^tag",
+        "T^post",
+        "A^comment",
+        "C^post",
+        "C^comment",
+        "f^relatedTag",
+        "A^relatedTag",
+        "A^tag"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "get_adj",
+      "expand_eid_list": [],
+      "single_op": "f^post",
+      "multi_ops": [],
+      "target_var": "A^post",
+      "depend_on": [
+        "A^relatedTag",
+        "f^tag",
+        "A^comment",
+        "A^tag",
+        "f^post",
+        "f^comment",
+        "C^comment",
+        "T^post",
+        "C^post",
+        "f^relatedTag"
+      ]
+    },
+    {
+      "vid": "",
+      "type": "report",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "f^post",
+        "f^comment",
+        "f^tag",
+        "f^relatedTag"
+      ],
+      "target_var": "f",
+      "depend_on": [
+        "C^comment",
+        "f^comment",
+        "A^relatedTag",
+        "f^relatedTag",
+        "T^post",
+        "A^comment",
+        "f^tag",
+        "f^post",
+        "C^post",
+        "A^tag"
+      ]
+    }
+  ]
+}

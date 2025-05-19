@@ -1,0 +1,56 @@
+{
+  "query_file": "/home/eden/GraduationProject/ember-sgm/resources/plan/unoptimized/neo4j_ordered/ldbc-bi-11.json",
+  "storage_type": "sqlite",
+  "cache_size": 512,
+  "num_runs": 10,
+  "num_warmup": 1,
+  "timing": {
+    "min_ms": 101.041547,
+    "max_ms": 112.867625,
+    "avg_ms": 106.481271,
+    "all_runs_ms": [
+      108.406201,
+      112.867625,
+      108.617531,
+      104.678934,
+      104.25040800000001,
+      99.245254,
+      104.395942,
+      101.041547,
+      107.59198,
+      114.885881
+    ]
+  },
+  "resource_usage": [
+    {
+      "timestamp_ms": 1747684409773,
+      "cpu_usage_percent": 17.9798,
+      "memory_bytes": 11910258688
+    },
+    {
+      "timestamp_ms": 1747684409985,
+      "cpu_usage_percent": 21.445782,
+      "memory_bytes": 11910258688
+    },
+    {
+      "timestamp_ms": 1747684410197,
+      "cpu_usage_percent": 21.728394,
+      "memory_bytes": 11910258688
+    },
+    {
+      "timestamp_ms": 1747684410409,
+      "cpu_usage_percent": 21.271393,
+      "memory_bytes": 11910258688
+    },
+    {
+      "timestamp_ms": 1747684410622,
+      "cpu_usage_percent": 21.73913,
+      "memory_bytes": 11910258688
+    },
+    {
+      "timestamp_ms": 1747684410833,
+      "cpu_usage_percent": 9.785203,
+      "memory_bytes": 11878862848
+    }
+  ]
+}

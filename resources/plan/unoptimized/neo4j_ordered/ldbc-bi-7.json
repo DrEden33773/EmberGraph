@@ -1,0 +1,240 @@
+{
+  "matching_order": [
+    "comment",
+    "post",
+    "tag",
+    "relatedTag"
+  ],
+  "vertices": {
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
+      "attr": null
+    },
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
+    },
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "50_Cent",
+        "type": "string"
+      }
+    },
+    "relatedTag": {
+      "vid": "relatedTag",
+      "label": "Tag",
+      "attr": {
+        "attr": "name",
+        "op": "!=",
+        "value": "50_Cent",
+        "type": "string"
+      }
+    }
+  },
+  "edges": {
+    "c": {
+      "eid": "c",
+      "src_vid": "comment",
+      "dst_vid": "relatedTag",
+      "label": "hasTag",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "comment",
+      "dst_vid": "post",
+      "label": "replyOf",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "post",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    }
+  },
+  "instructions": [
+    {
+      "vid": "comment",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^comment",
+      "depend_on": []
+    },
+    {
+      "vid": "comment",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "a",
+        "c"
+      ],
+      "single_op": "f^comment",
+      "multi_ops": [],
+      "target_var": "A^comment",
+      "depend_on": [
+        "f^comment"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^comment",
+      "multi_ops": [],
+      "target_var": "C^post",
+      "depend_on": [
+        "A^comment",
+        "f^comment"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^post",
+      "multi_ops": [],
+      "target_var": "f^post",
+      "depend_on": [
+        "C^post",
+        "A^comment",
+        "f^comment"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "b"
+      ],
+      "single_op": "f^post",
+      "multi_ops": [],
+      "target_var": "A^post",
+      "depend_on": [
+        "f^post",
+        "C^post",
+        "A^comment",
+        "f^comment"
+      ]
+    },
+    {
+      "vid": "tag",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^post",
+      "multi_ops": [],
+      "target_var": "C^tag",
+      "depend_on": [
+        "A^comment",
+        "f^comment",
+        "f^post",
+        "A^post",
+        "C^post"
+      ]
+    },
+    {
+      "vid": "tag",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^tag",
+      "multi_ops": [],
+      "target_var": "f^tag",
+      "depend_on": [
+        "f^post",
+        "C^tag",
+        "A^comment",
+        "f^comment",
+        "A^post",
+        "C^post"
+      ]
+    },
+    {
+      "vid": "tag",
+      "type": "get_adj",
+      "expand_eid_list": [],
+      "single_op": "f^tag",
+      "multi_ops": [],
+      "target_var": "A^tag",
+      "depend_on": [
+        "A^post",
+        "C^post",
+        "f^post",
+        "C^tag",
+        "f^tag",
+        "f^comment",
+        "A^comment"
+      ]
+    },
+    {
+      "vid": "relatedTag",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^comment",
+      "multi_ops": [],
+      "target_var": "C^relatedTag",
+      "depend_on": [
+        "A^comment",
+        "f^comment"
+      ]
+    },
+    {
+      "vid": "relatedTag",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^relatedTag",
+      "multi_ops": [],
+      "target_var": "f^relatedTag",
+      "depend_on": [
+        "f^comment",
+        "C^relatedTag",
+        "A^comment"
+      ]
+    },
+    {
+      "vid": "relatedTag",
+      "type": "get_adj",
+      "expand_eid_list": [],
+      "single_op": "f^relatedTag",
+      "multi_ops": [],
+      "target_var": "A^relatedTag",
+      "depend_on": [
+        "C^relatedTag",
+        "A^comment",
+        "f^relatedTag",
+        "f^comment"
+      ]
+    },
+    {
+      "vid": "",
+      "type": "report",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "f^comment",
+        "f^tag",
+        "f^post",
+        "f^relatedTag"
+      ],
+      "target_var": "f",
+      "depend_on": [
+        "f^relatedTag",
+        "f^post",
+        "C^tag",
+        "A^post",
+        "C^post",
+        "C^relatedTag",
+        "f^comment",
+        "f^tag",
+        "A^comment"
+      ]
+    }
+  ]
+}

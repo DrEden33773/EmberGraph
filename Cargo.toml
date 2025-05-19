@@ -55,13 +55,21 @@ mimalloc = "0.1.46"
 tikv-jemallocator = { version = "0.6.0", features = ["unprefixed_malloc_on_supported_platforms"] }
 
 [features]
-default = [
+hash_join_default = [
     "block_spawn_via_rayon",
     "cache_force_background_update",
     "simd_accelerated",
     # "refactored_incremental_load_new_edges",
     # "lazy_load_v",
     "use_tokio_mpsc_unbounded_channel",
+]
+default = [
+    "hash_join_default",
+    "use_sort_merge_join",
+]
+hash_join_bench = [
+    "hash_join_default",
+    "benchmark",
     "use_sort_merge_join",
 ]
 bench = [
@@ -70,11 +78,14 @@ bench = [
     "use_neo4j_ordered_plan",
 ]
 
-bench_via_sqlite_only_with_cache_eviction = ["bench", "benchmark_via_sqlite_only", "benchmark_with_cache_eviction"]
-bench_via_neo4j_only_with_cache_eviction  = ["bench", "benchmark_via_neo4j_only", "benchmark_with_cache_eviction"]
-bench_via_sqlite_only                     = ["bench", "benchmark_via_sqlite_only"]
-bench_via_neo4j_only                      = ["bench", "benchmark_via_neo4j_only"]
-bench_with_cache_eviction                 = ["bench", "benchmark_with_cache_eviction"]
+bench_via_sqlite_only_with_cache_eviction   = ["bench", "benchmark_via_sqlite_only", "benchmark_with_cache_eviction"]
+bench_via_neo4j_only_with_cache_eviction    = ["bench", "benchmark_via_neo4j_only", "benchmark_with_cache_eviction"]
+bench_via_sqlite_only                       = ["bench", "benchmark_via_sqlite_only"]
+bench_via_neo4j_only                        = ["bench", "benchmark_via_neo4j_only"]
+bench_via_sqlite_only_with_no_optimizations = ["bench", "benchmark_via_sqlite_only", "bench_with_no_optimizations"]
+bench_via_neo4j_only_with_no_optimizations  = ["bench", "benchmark_via_neo4j_only", "bench_with_no_optimizations"]
+bench_with_cache_eviction                   = ["bench", "benchmark_with_cache_eviction"]
+bench_with_no_optimizations                 = ["hash_join_bench", "no_optimizations", "benchmark_with_cache_eviction"]
 
 benchmark                     = []
 benchmark_with_cache_eviction = []
@@ -90,6 +101,7 @@ lazy_load_v                           = []
 use_tokio_mpsc_unbounded_channel      = []
 use_neo4j_ordered_plan                = []
 use_sort_merge_join                   = []
+no_optimizations                      = []
 
 trace_all     = ["trace_init", "trace_get_adj"]
 trace_init    = []

@@ -146,6 +146,7 @@ impl PlanGenerator {
   }
 }
 
+#[cfg(not(feature = "no_optimizations"))]
 fn remove_unused_dbq(instructions: Vec<Instruction>) -> Vec<Instruction> {
   let mut depend_set = HashSet::new();
   for instr in instructions.iter() {
@@ -164,4 +165,9 @@ fn remove_unused_dbq(instructions: Vec<Instruction>) -> Vec<Instruction> {
       instr.type_ != InstructionType::GetAdj || depend_set.contains(&instr.target_var)
     })
     .collect()
+}
+
+#[cfg(feature = "no_optimizations")]
+fn remove_unused_dbq(instructions: Vec<Instruction>) -> Vec<Instruction> {
+  instructions
 }

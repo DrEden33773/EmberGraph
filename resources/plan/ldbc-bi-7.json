@@ -1,10 +1,5 @@
 {
-  "matching_order": [
-    "tag",
-    "relatedTag",
-    "comment",
-    "post"
-  ],
+  "matching_order": ["tag", "relatedTag", "comment", "post"],
   "vertices": {
     "tag": {
       "vid": "tag",
@@ -73,15 +68,11 @@
     {
       "vid": "tag",
       "type": "get_adj",
-      "expand_eid_list": [
-        "b"
-      ],
+      "expand_eid_list": ["b"],
       "single_op": "f^tag",
       "multi_ops": [],
       "target_var": "A^tag",
-      "depend_on": [
-        "f^tag"
-      ]
+      "depend_on": ["f^tag"]
     },
     {
       "vid": "relatedTag",
@@ -95,15 +86,11 @@
     {
       "vid": "relatedTag",
       "type": "get_adj",
-      "expand_eid_list": [
-        "c"
-      ],
+      "expand_eid_list": ["c"],
       "single_op": "f^relatedTag",
       "multi_ops": [],
       "target_var": "A^relatedTag",
-      "depend_on": [
-        "f^relatedTag"
-      ]
+      "depend_on": ["f^relatedTag"]
     },
     {
       "vid": "comment",
@@ -112,10 +99,7 @@
       "single_op": "A^relatedTag",
       "multi_ops": [],
       "target_var": "C^comment",
-      "depend_on": [
-        "A^relatedTag",
-        "f^relatedTag"
-      ]
+      "depend_on": ["A^relatedTag", "f^relatedTag"]
     },
     {
       "vid": "comment",
@@ -124,37 +108,23 @@
       "single_op": "C^comment",
       "multi_ops": [],
       "target_var": "f^comment",
-      "depend_on": [
-        "A^relatedTag",
-        "C^comment",
-        "f^relatedTag"
-      ]
+      "depend_on": ["A^relatedTag", "C^comment", "f^relatedTag"]
     },
     {
       "vid": "comment",
       "type": "get_adj",
-      "expand_eid_list": [
-        "a"
-      ],
+      "expand_eid_list": ["a"],
       "single_op": "f^comment",
       "multi_ops": [],
       "target_var": "A^comment",
-      "depend_on": [
-        "A^relatedTag",
-        "f^relatedTag",
-        "C^comment",
-        "f^comment"
-      ]
+      "depend_on": ["A^relatedTag", "f^relatedTag", "C^comment", "f^comment"]
     },
     {
       "vid": "post",
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "A^comment",
-        "A^tag"
-      ],
+      "multi_ops": ["A^comment", "A^tag"],
       "target_var": "T^post",
       "depend_on": [
         "f^tag",
@@ -208,12 +178,7 @@
       "type": "report",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "f^relatedTag",
-        "f^comment",
-        "f^tag",
-        "f^post"
-      ],
+      "multi_ops": ["f^relatedTag", "f^comment", "f^tag", "f^post"],
       "target_var": "f",
       "depend_on": [
         "A^relatedTag",

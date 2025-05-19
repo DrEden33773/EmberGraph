@@ -1,0 +1,298 @@
+{
+  "matching_order": [
+    "person1",
+    "tag",
+    "person2",
+    "person"
+  ],
+  "vertices": {
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": null
+    },
+    "person1": {
+      "vid": "person1",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "=",
+        "value": 143,
+        "type": "int"
+      }
+    },
+    "person2": {
+      "vid": "person2",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "!=",
+        "value": 143,
+        "type": "int"
+      }
+    },
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "Elizabeth_I_of_England",
+        "type": "string"
+      }
+    }
+  },
+  "edges": {
+    "d": {
+      "eid": "d",
+      "src_vid": "person2",
+      "dst_vid": "tag",
+      "label": "hasInterest",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "person",
+      "dst_vid": "person1",
+      "label": "knows",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "person1",
+      "dst_vid": "tag",
+      "label": "hasInterest",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "person",
+      "dst_vid": "person2",
+      "label": "knows",
+      "attr": null
+    }
+  },
+  "instructions": [
+    {
+      "vid": "person1",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^person1",
+      "depend_on": []
+    },
+    {
+      "vid": "person1",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "a",
+        "c"
+      ],
+      "single_op": "f^person1",
+      "multi_ops": [],
+      "target_var": "A^person1",
+      "depend_on": [
+        "f^person1"
+      ]
+    },
+    {
+      "vid": "tag",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^person1",
+      "multi_ops": [],
+      "target_var": "C^tag",
+      "depend_on": [
+        "A^person1",
+        "f^person1"
+      ]
+    },
+    {
+      "vid": "tag",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^tag",
+      "multi_ops": [],
+      "target_var": "f^tag",
+      "depend_on": [
+        "f^person1",
+        "C^tag",
+        "A^person1"
+      ]
+    },
+    {
+      "vid": "tag",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "d"
+      ],
+      "single_op": "f^tag",
+      "multi_ops": [],
+      "target_var": "A^tag",
+      "depend_on": [
+        "f^person1",
+        "A^person1",
+        "f^tag",
+        "C^tag"
+      ]
+    },
+    {
+      "vid": "person2",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^tag",
+      "multi_ops": [],
+      "target_var": "C^person2",
+      "depend_on": [
+        "A^tag",
+        "f^person1",
+        "A^person1",
+        "f^tag",
+        "C^tag"
+      ]
+    },
+    {
+      "vid": "person2",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^person2",
+      "multi_ops": [],
+      "target_var": "f^person2",
+      "depend_on": [
+        "C^person2",
+        "A^person1",
+        "A^tag",
+        "f^person1",
+        "f^tag",
+        "C^tag"
+      ]
+    },
+    {
+      "vid": "person2",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "b"
+      ],
+      "single_op": "f^person2",
+      "multi_ops": [],
+      "target_var": "A^person2",
+      "depend_on": [
+        "A^tag",
+        "f^person2",
+        "f^tag",
+        "C^tag",
+        "f^person1",
+        "C^person2",
+        "A^person1"
+      ]
+    },
+    {
+      "vid": "person",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^person1",
+        "A^person2"
+      ],
+      "target_var": "T^person",
+      "depend_on": [
+        "f^person2",
+        "A^person1",
+        "f^person1",
+        "C^tag",
+        "f^tag",
+        "A^person2",
+        "C^person2",
+        "A^tag"
+      ]
+    },
+    {
+      "vid": "person",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^person",
+      "multi_ops": [],
+      "target_var": "C^person",
+      "depend_on": [
+        "T^person",
+        "C^tag",
+        "A^person2",
+        "f^person1",
+        "A^person1",
+        "A^tag",
+        "f^tag",
+        "C^person2",
+        "f^person2"
+      ]
+    },
+    {
+      "vid": "person",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^person",
+      "multi_ops": [],
+      "target_var": "f^person",
+      "depend_on": [
+        "f^person1",
+        "C^tag",
+        "T^person",
+        "C^person2",
+        "f^person2",
+        "A^person2",
+        "A^person1",
+        "C^person",
+        "A^tag",
+        "f^tag"
+      ]
+    },
+    {
+      "vid": "person",
+      "type": "get_adj",
+      "expand_eid_list": [],
+      "single_op": "f^person",
+      "multi_ops": [],
+      "target_var": "A^person",
+      "depend_on": [
+        "A^person2",
+        "A^person1",
+        "A^tag",
+        "C^person",
+        "f^person2",
+        "C^tag",
+        "C^person2",
+        "T^person",
+        "f^tag",
+        "f^person1",
+        "f^person"
+      ]
+    },
+    {
+      "vid": "",
+      "type": "report",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "f^person1",
+        "f^person",
+        "f^tag",
+        "f^person2"
+      ],
+      "target_var": "f",
+      "depend_on": [
+        "T^person",
+        "A^person2",
+        "A^person1",
+        "A^tag",
+        "C^person",
+        "f^person",
+        "f^person1",
+        "f^tag",
+        "f^person2",
+        "C^tag",
+        "C^person2"
+      ]
+    }
+  ]
+}

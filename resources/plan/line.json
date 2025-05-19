@@ -1,9 +1,5 @@
 {
-  "matching_order": [
-    "v3",
-    "v1",
-    "v2"
-  ],
+  "matching_order": ["v3", "v1", "v2"],
   "vertices": {
     "v3": {
       "vid": "v3",
@@ -50,15 +46,11 @@
     {
       "vid": "v3",
       "type": "get_adj",
-      "expand_eid_list": [
-        "b"
-      ],
+      "expand_eid_list": ["b"],
       "single_op": "f^v3",
       "multi_ops": [],
       "target_var": "A^v3",
-      "depend_on": [
-        "f^v3"
-      ]
+      "depend_on": ["f^v3"]
     },
     {
       "vid": "v1",
@@ -72,32 +64,20 @@
     {
       "vid": "v1",
       "type": "get_adj",
-      "expand_eid_list": [
-        "a"
-      ],
+      "expand_eid_list": ["a"],
       "single_op": "f^v1",
       "multi_ops": [],
       "target_var": "A^v1",
-      "depend_on": [
-        "f^v1"
-      ]
+      "depend_on": ["f^v1"]
     },
     {
       "vid": "v2",
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "A^v1",
-        "A^v3"
-      ],
+      "multi_ops": ["A^v1", "A^v3"],
       "target_var": "T^v2",
-      "depend_on": [
-        "A^v1",
-        "f^v3",
-        "A^v3",
-        "f^v1"
-      ]
+      "depend_on": ["A^v1", "f^v3", "A^v3", "f^v1"]
     },
     {
       "vid": "v2",
@@ -106,13 +86,7 @@
       "single_op": "T^v2",
       "multi_ops": [],
       "target_var": "C^v2",
-      "depend_on": [
-        "A^v1",
-        "f^v3",
-        "T^v2",
-        "A^v3",
-        "f^v1"
-      ]
+      "depend_on": ["A^v1", "f^v3", "T^v2", "A^v3", "f^v1"]
     },
     {
       "vid": "v2",
@@ -121,35 +95,16 @@
       "single_op": "C^v2",
       "multi_ops": [],
       "target_var": "f^v2",
-      "depend_on": [
-        "A^v3",
-        "f^v1",
-        "f^v3",
-        "A^v1",
-        "T^v2",
-        "C^v2"
-      ]
+      "depend_on": ["A^v3", "f^v1", "f^v3", "A^v1", "T^v2", "C^v2"]
     },
     {
       "vid": "",
       "type": "report",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "f^v1",
-        "f^v3",
-        "f^v2"
-      ],
+      "multi_ops": ["f^v1", "f^v3", "f^v2"],
       "target_var": "f",
-      "depend_on": [
-        "C^v2",
-        "f^v1",
-        "A^v3",
-        "A^v1",
-        "f^v3",
-        "f^v2",
-        "T^v2"
-      ]
+      "depend_on": ["C^v2", "f^v1", "A^v3", "A^v1", "f^v3", "f^v2", "T^v2"]
     }
   ]
 }

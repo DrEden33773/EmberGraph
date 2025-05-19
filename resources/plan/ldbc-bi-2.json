@@ -1,10 +1,5 @@
 {
-  "matching_order": [
-    "tag",
-    "tagClass",
-    "comment",
-    "post"
-  ],
+  "matching_order": ["tag", "tagClass", "comment", "post"],
   "vertices": {
     "tagClass": {
       "vid": "tagClass",
@@ -68,17 +63,11 @@
     {
       "vid": "tag",
       "type": "get_adj",
-      "expand_eid_list": [
-        "c",
-        "a",
-        "b"
-      ],
+      "expand_eid_list": ["c", "a", "b"],
       "single_op": "f^tag",
       "multi_ops": [],
       "target_var": "A^tag",
-      "depend_on": [
-        "f^tag"
-      ]
+      "depend_on": ["f^tag"]
     },
     {
       "vid": "tagClass",
@@ -87,10 +76,7 @@
       "single_op": "A^tag",
       "multi_ops": [],
       "target_var": "C^tagClass",
-      "depend_on": [
-        "f^tag",
-        "A^tag"
-      ]
+      "depend_on": ["f^tag", "A^tag"]
     },
     {
       "vid": "tagClass",
@@ -99,11 +85,7 @@
       "single_op": "C^tagClass",
       "multi_ops": [],
       "target_var": "f^tagClass",
-      "depend_on": [
-        "f^tag",
-        "A^tag",
-        "C^tagClass"
-      ]
+      "depend_on": ["f^tag", "A^tag", "C^tagClass"]
     },
     {
       "vid": "comment",
@@ -112,10 +94,7 @@
       "single_op": "A^tag",
       "multi_ops": [],
       "target_var": "C^comment",
-      "depend_on": [
-        "f^tag",
-        "A^tag"
-      ]
+      "depend_on": ["f^tag", "A^tag"]
     },
     {
       "vid": "comment",
@@ -124,11 +103,7 @@
       "single_op": "C^comment",
       "multi_ops": [],
       "target_var": "f^comment",
-      "depend_on": [
-        "A^tag",
-        "C^comment",
-        "f^tag"
-      ]
+      "depend_on": ["A^tag", "C^comment", "f^tag"]
     },
     {
       "vid": "post",
@@ -137,10 +112,7 @@
       "single_op": "A^tag",
       "multi_ops": [],
       "target_var": "C^post",
-      "depend_on": [
-        "A^tag",
-        "f^tag"
-      ]
+      "depend_on": ["A^tag", "f^tag"]
     },
     {
       "vid": "post",
@@ -149,23 +121,14 @@
       "single_op": "C^post",
       "multi_ops": [],
       "target_var": "f^post",
-      "depend_on": [
-        "f^tag",
-        "C^post",
-        "A^tag"
-      ]
+      "depend_on": ["f^tag", "C^post", "A^tag"]
     },
     {
       "vid": "",
       "type": "report",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "f^tag",
-        "f^comment",
-        "f^tagClass",
-        "f^post"
-      ],
+      "multi_ops": ["f^tag", "f^comment", "f^tagClass", "f^post"],
       "target_var": "f",
       "depend_on": [
         "C^comment",

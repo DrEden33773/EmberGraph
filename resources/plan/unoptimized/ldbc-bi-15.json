@@ -1,0 +1,452 @@
+{
+  "matching_order": [
+    "personA",
+    "personB",
+    "forum",
+    "c1",
+    "c2",
+    "post"
+  ],
+  "vertices": {
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
+    },
+    "c2": {
+      "vid": "c2",
+      "label": "Comment",
+      "attr": null
+    },
+    "personA": {
+      "vid": "personA",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "=",
+        "value": 4398046511220,
+        "type": "int"
+      }
+    },
+    "personB": {
+      "vid": "personB",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "=",
+        "value": 8796093022320,
+        "type": "int"
+      }
+    },
+    "forum": {
+      "vid": "forum",
+      "label": "Forum",
+      "attr": {
+        "attr": "creationDate",
+        "op": ">=",
+        "value": 1282431075745,
+        "type": "int"
+      }
+    },
+    "c1": {
+      "vid": "c1",
+      "label": "Comment",
+      "attr": null
+    }
+  },
+  "edges": {
+    "a": {
+      "eid": "a",
+      "src_vid": "personA",
+      "dst_vid": "personB",
+      "label": "knows",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "c2",
+      "dst_vid": "personB",
+      "label": "hasCreator",
+      "attr": null
+    },
+    "e": {
+      "eid": "e",
+      "src_vid": "c2",
+      "dst_vid": "post",
+      "label": "replyOf",
+      "attr": null
+    },
+    "f": {
+      "eid": "f",
+      "src_vid": "forum",
+      "dst_vid": "post",
+      "label": "containerOf",
+      "attr": null
+    },
+    "d": {
+      "eid": "d",
+      "src_vid": "c1",
+      "dst_vid": "c2",
+      "label": "replyOf",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "c1",
+      "dst_vid": "personA",
+      "label": "hasCreator",
+      "attr": null
+    }
+  },
+  "instructions": [
+    {
+      "vid": "personA",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^personA",
+      "depend_on": []
+    },
+    {
+      "vid": "personA",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "a",
+        "b"
+      ],
+      "single_op": "f^personA",
+      "multi_ops": [],
+      "target_var": "A^personA",
+      "depend_on": [
+        "f^personA"
+      ]
+    },
+    {
+      "vid": "personB",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^personA",
+      "multi_ops": [],
+      "target_var": "C^personB",
+      "depend_on": [
+        "A^personA",
+        "f^personA"
+      ]
+    },
+    {
+      "vid": "personB",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^personB",
+      "multi_ops": [],
+      "target_var": "f^personB",
+      "depend_on": [
+        "C^personB",
+        "A^personA",
+        "f^personA"
+      ]
+    },
+    {
+      "vid": "personB",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "c"
+      ],
+      "single_op": "f^personB",
+      "multi_ops": [],
+      "target_var": "A^personB",
+      "depend_on": [
+        "f^personA",
+        "f^personB",
+        "A^personA",
+        "C^personB"
+      ]
+    },
+    {
+      "vid": "forum",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^forum",
+      "depend_on": []
+    },
+    {
+      "vid": "forum",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "f"
+      ],
+      "single_op": "f^forum",
+      "multi_ops": [],
+      "target_var": "A^forum",
+      "depend_on": [
+        "f^forum"
+      ]
+    },
+    {
+      "vid": "c1",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^personA",
+      "multi_ops": [],
+      "target_var": "C^c1",
+      "depend_on": [
+        "A^personA",
+        "f^personA"
+      ]
+    },
+    {
+      "vid": "c1",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^c1",
+      "multi_ops": [],
+      "target_var": "f^c1",
+      "depend_on": [
+        "A^personA",
+        "f^personA",
+        "C^c1"
+      ]
+    },
+    {
+      "vid": "c1",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "d"
+      ],
+      "single_op": "f^c1",
+      "multi_ops": [],
+      "target_var": "A^c1",
+      "depend_on": [
+        "C^c1",
+        "f^personA",
+        "A^personA",
+        "f^c1"
+      ]
+    },
+    {
+      "vid": "c2",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^personB",
+        "A^c1"
+      ],
+      "target_var": "T^c2",
+      "depend_on": [
+        "A^c1",
+        "f^c1",
+        "C^personB",
+        "A^personB",
+        "A^personA",
+        "f^personB",
+        "f^personA",
+        "C^c1"
+      ]
+    },
+    {
+      "vid": "c2",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^c2",
+      "multi_ops": [],
+      "target_var": "C^c2",
+      "depend_on": [
+        "C^c1",
+        "A^c1",
+        "f^personB",
+        "A^personB",
+        "C^personB",
+        "f^personA",
+        "f^c1",
+        "T^c2",
+        "A^personA"
+      ]
+    },
+    {
+      "vid": "c2",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^c2",
+      "multi_ops": [],
+      "target_var": "f^c2",
+      "depend_on": [
+        "A^c1",
+        "f^c1",
+        "f^personA",
+        "T^c2",
+        "A^personB",
+        "C^c1",
+        "f^personB",
+        "C^c2",
+        "C^personB",
+        "A^personA"
+      ]
+    },
+    {
+      "vid": "c2",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "e"
+      ],
+      "single_op": "f^c2",
+      "multi_ops": [],
+      "target_var": "A^c2",
+      "depend_on": [
+        "f^c1",
+        "f^personB",
+        "C^c2",
+        "f^c2",
+        "A^c1",
+        "A^personB",
+        "T^c2",
+        "C^personB",
+        "f^personA",
+        "C^c1",
+        "A^personA"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^forum",
+        "A^c2"
+      ],
+      "target_var": "T^post",
+      "depend_on": [
+        "f^forum",
+        "f^personB",
+        "C^c2",
+        "f^c2",
+        "f^c1",
+        "A^c1",
+        "A^personB",
+        "C^personB",
+        "f^personA",
+        "C^c1",
+        "A^forum",
+        "T^c2",
+        "A^personA",
+        "A^c2"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^post",
+      "multi_ops": [],
+      "target_var": "C^post",
+      "depend_on": [
+        "f^c1",
+        "C^personB",
+        "f^personA",
+        "A^personA",
+        "C^c1",
+        "T^post",
+        "A^forum",
+        "A^c2",
+        "A^c1",
+        "C^c2",
+        "f^c2",
+        "A^personB",
+        "T^c2",
+        "f^personB",
+        "f^forum"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^post",
+      "multi_ops": [],
+      "target_var": "f^post",
+      "depend_on": [
+        "C^post",
+        "A^c1",
+        "f^personA",
+        "A^personB",
+        "A^personA",
+        "T^post",
+        "C^c1",
+        "A^forum",
+        "T^c2",
+        "A^c2",
+        "C^personB",
+        "C^c2",
+        "f^c1",
+        "f^c2",
+        "f^forum",
+        "f^personB"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "get_adj",
+      "expand_eid_list": [],
+      "single_op": "f^post",
+      "multi_ops": [],
+      "target_var": "A^post",
+      "depend_on": [
+        "A^c2",
+        "C^c1",
+        "C^c2",
+        "f^c2",
+        "f^forum",
+        "A^personA",
+        "A^c1",
+        "f^personB",
+        "A^personB",
+        "C^personB",
+        "f^post",
+        "T^post",
+        "A^forum",
+        "f^c1",
+        "C^post",
+        "f^personA",
+        "T^c2"
+      ]
+    },
+    {
+      "vid": "",
+      "type": "report",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "f^post",
+        "f^personB",
+        "f^forum",
+        "f^c2",
+        "f^personA",
+        "f^c1"
+      ],
+      "target_var": "f",
+      "depend_on": [
+        "A^personA",
+        "f^personB",
+        "f^forum",
+        "A^personB",
+        "C^personB",
+        "C^c1",
+        "f^c2",
+        "C^c2",
+        "A^forum",
+        "A^c2",
+        "f^personA",
+        "A^c1",
+        "f^post",
+        "C^post",
+        "T^c2",
+        "f^c1",
+        "T^post"
+      ]
+    }
+  ]
+}

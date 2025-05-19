@@ -1,0 +1,304 @@
+{
+  "matching_order": [
+    "person",
+    "tag",
+    "otherTag",
+    "otherPerson",
+    "post"
+  ],
+  "vertices": {
+    "otherTag": {
+      "vid": "otherTag",
+      "label": "Tag",
+      "attr": {
+        "attr": "name",
+        "op": "!=",
+        "value": "Joan_Crawford",
+        "type": "string"
+      }
+    },
+    "post": {
+      "vid": "post",
+      "label": "Post",
+      "attr": null
+    },
+    "otherPerson": {
+      "vid": "otherPerson",
+      "label": "Person",
+      "attr": null
+    },
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "Joan_Crawford",
+        "type": "string"
+      }
+    },
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "=",
+        "value": 153,
+        "type": "int"
+      }
+    }
+  },
+  "edges": {
+    "a": {
+      "eid": "a",
+      "src_vid": "person",
+      "dst_vid": "otherPerson",
+      "label": "knows",
+      "attr": null
+    },
+    "d": {
+      "eid": "d",
+      "src_vid": "post",
+      "dst_vid": "otherTag",
+      "label": "hasTag",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "post",
+      "dst_vid": "tag",
+      "label": "hasTag",
+      "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "post",
+      "dst_vid": "otherPerson",
+      "label": "hasCreator",
+      "attr": null
+    }
+  },
+  "instructions": [
+    {
+      "vid": "person",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^person",
+      "depend_on": []
+    },
+    {
+      "vid": "person",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "a"
+      ],
+      "single_op": "f^person",
+      "multi_ops": [],
+      "target_var": "A^person",
+      "depend_on": [
+        "f^person"
+      ]
+    },
+    {
+      "vid": "tag",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^tag",
+      "depend_on": []
+    },
+    {
+      "vid": "tag",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "c"
+      ],
+      "single_op": "f^tag",
+      "multi_ops": [],
+      "target_var": "A^tag",
+      "depend_on": [
+        "f^tag"
+      ]
+    },
+    {
+      "vid": "otherTag",
+      "type": "init",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [],
+      "target_var": "f^otherTag",
+      "depend_on": []
+    },
+    {
+      "vid": "otherTag",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "d"
+      ],
+      "single_op": "f^otherTag",
+      "multi_ops": [],
+      "target_var": "A^otherTag",
+      "depend_on": [
+        "f^otherTag"
+      ]
+    },
+    {
+      "vid": "otherPerson",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "A^person",
+      "multi_ops": [],
+      "target_var": "C^otherPerson",
+      "depend_on": [
+        "A^person",
+        "f^person"
+      ]
+    },
+    {
+      "vid": "otherPerson",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^otherPerson",
+      "multi_ops": [],
+      "target_var": "f^otherPerson",
+      "depend_on": [
+        "A^person",
+        "f^person",
+        "C^otherPerson"
+      ]
+    },
+    {
+      "vid": "otherPerson",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "b"
+      ],
+      "single_op": "f^otherPerson",
+      "multi_ops": [],
+      "target_var": "A^otherPerson",
+      "depend_on": [
+        "C^otherPerson",
+        "A^person",
+        "f^otherPerson",
+        "f^person"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^otherPerson",
+        "A^tag",
+        "A^otherTag"
+      ],
+      "target_var": "T^post",
+      "depend_on": [
+        "A^person",
+        "A^otherPerson",
+        "f^person",
+        "f^otherPerson",
+        "A^otherTag",
+        "f^otherTag",
+        "C^otherPerson",
+        "A^tag",
+        "f^tag"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^post",
+      "multi_ops": [],
+      "target_var": "C^post",
+      "depend_on": [
+        "T^post",
+        "f^otherTag",
+        "f^person",
+        "A^person",
+        "C^otherPerson",
+        "f^tag",
+        "A^tag",
+        "A^otherPerson",
+        "A^otherTag",
+        "f^otherPerson"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^post",
+      "multi_ops": [],
+      "target_var": "f^post",
+      "depend_on": [
+        "A^tag",
+        "A^otherPerson",
+        "T^post",
+        "C^post",
+        "f^otherTag",
+        "f^tag",
+        "f^otherPerson",
+        "f^person",
+        "C^otherPerson",
+        "A^otherTag",
+        "A^person"
+      ]
+    },
+    {
+      "vid": "post",
+      "type": "get_adj",
+      "expand_eid_list": [],
+      "single_op": "f^post",
+      "multi_ops": [],
+      "target_var": "A^post",
+      "depend_on": [
+        "f^otherPerson",
+        "f^person",
+        "f^post",
+        "f^otherTag",
+        "C^otherPerson",
+        "A^person",
+        "A^otherPerson",
+        "T^post",
+        "C^post",
+        "A^otherTag",
+        "f^tag",
+        "A^tag"
+      ]
+    },
+    {
+      "vid": "",
+      "type": "report",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "f^otherPerson",
+        "f^post",
+        "f^person",
+        "f^tag",
+        "f^otherTag"
+      ],
+      "target_var": "f",
+      "depend_on": [
+        "f^person",
+        "T^post",
+        "A^person",
+        "C^post",
+        "f^tag",
+        "f^otherTag",
+        "A^otherTag",
+        "f^otherPerson",
+        "f^post",
+        "C^otherPerson",
+        "A^otherPerson",
+        "A^tag"
+      ]
+    }
+  ]
+}

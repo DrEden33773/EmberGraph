@@ -1,11 +1,5 @@
 {
-  "matching_order": [
-    "country",
-    "likerPerson",
-    "zombie",
-    "post",
-    "city"
-  ],
+  "matching_order": ["country", "likerPerson", "zombie", "post", "city"],
   "vertices": {
     "post": {
       "vid": "post",
@@ -96,15 +90,11 @@
     {
       "vid": "country",
       "type": "get_adj",
-      "expand_eid_list": [
-        "c"
-      ],
+      "expand_eid_list": ["c"],
       "single_op": "f^country",
       "multi_ops": [],
       "target_var": "A^country",
-      "depend_on": [
-        "f^country"
-      ]
+      "depend_on": ["f^country"]
     },
     {
       "vid": "likerPerson",
@@ -118,15 +108,11 @@
     {
       "vid": "likerPerson",
       "type": "get_adj",
-      "expand_eid_list": [
-        "d"
-      ],
+      "expand_eid_list": ["d"],
       "single_op": "f^likerPerson",
       "multi_ops": [],
       "target_var": "A^likerPerson",
-      "depend_on": [
-        "f^likerPerson"
-      ]
+      "depend_on": ["f^likerPerson"]
     },
     {
       "vid": "zombie",
@@ -140,33 +126,20 @@
     {
       "vid": "zombie",
       "type": "get_adj",
-      "expand_eid_list": [
-        "a",
-        "b"
-      ],
+      "expand_eid_list": ["a", "b"],
       "single_op": "f^zombie",
       "multi_ops": [],
       "target_var": "A^zombie",
-      "depend_on": [
-        "f^zombie"
-      ]
+      "depend_on": ["f^zombie"]
     },
     {
       "vid": "post",
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "A^zombie",
-        "A^likerPerson"
-      ],
+      "multi_ops": ["A^zombie", "A^likerPerson"],
       "target_var": "T^post",
-      "depend_on": [
-        "f^zombie",
-        "A^zombie",
-        "A^likerPerson",
-        "f^likerPerson"
-      ]
+      "depend_on": ["f^zombie", "A^zombie", "A^likerPerson", "f^likerPerson"]
     },
     {
       "vid": "post",
@@ -204,17 +177,9 @@
       "type": "intersect",
       "expand_eid_list": [],
       "single_op": null,
-      "multi_ops": [
-        "A^zombie",
-        "A^country"
-      ],
+      "multi_ops": ["A^zombie", "A^country"],
       "target_var": "T^city",
-      "depend_on": [
-        "f^country",
-        "A^country",
-        "f^zombie",
-        "A^zombie"
-      ]
+      "depend_on": ["f^country", "A^country", "f^zombie", "A^zombie"]
     },
     {
       "vid": "city",
@@ -223,13 +188,7 @@
       "single_op": "T^city",
       "multi_ops": [],
       "target_var": "C^city",
-      "depend_on": [
-        "T^city",
-        "f^zombie",
-        "A^zombie",
-        "f^country",
-        "A^country"
-      ]
+      "depend_on": ["T^city", "f^zombie", "A^zombie", "f^country", "A^country"]
     },
     {
       "vid": "city",
