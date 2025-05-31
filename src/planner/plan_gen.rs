@@ -33,6 +33,7 @@ impl PlanGenerator {
 
     let mut instructions = vec![];
     let mut f_set = HashSet::new();
+    #[cfg(not(feature = "no_optimizations"))]
     let mut expanded_es = HashSet::new();
 
     // first vertex
@@ -54,6 +55,7 @@ impl PlanGenerator {
     );
     // update `f_set` and `expanded_es`
     f_set.insert(vid);
+    #[cfg(not(feature = "no_optimizations"))]
     expanded_es.extend(adj_eids);
 
     // other vertices
@@ -63,6 +65,7 @@ impl PlanGenerator {
 
       let mut adj_eids = self.pattern_graph.get_adj_eids(&vid);
       // only pick those edges that are not expanded
+      #[cfg(not(feature = "no_optimizations"))]
       adj_eids.retain(|eid| !expanded_es.contains(eid));
 
       // Init -> fx
@@ -127,6 +130,7 @@ impl PlanGenerator {
 
       // update `f_set` and `expanded_es`
       f_set.insert(vid);
+      #[cfg(not(feature = "no_optimizations"))]
       expanded_es.extend(adj_eids);
     }
 

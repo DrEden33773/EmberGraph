@@ -128,6 +128,31 @@ impl<S: StorageAdapter + 'static> IntersectOperator<S> {
       _ => panic!("❌  Invalid var_prefix: {lhs_pref}"),
     };
 
+    let t_bucket = if instr.multi_ops.len() > 2 {
+      // `T_prev` ∩ `A/T_curr` -> `T_next`
+      let mut t_bucket = t_bucket;
+      for idx in 2..instr.multi_ops.len() {
+        let (next_pref, _) = resolve_var(instr.multi_ops[idx].as_str());
+        let next_t_bucket = match next_pref {
+          DbQueryTarget => {
+            let next_a_group = self
+              .ctx
+              .pop_group_by_pat_from_a_block(instr.multi_ops[idx].as_str(), &instr.vid)?;
+            TBucket::build_from_t_a(t_bucket, next_a_group).await
+          }
+          IntersectTarget => {
+            let next_t_group = self.ctx.pop_from_t_block(instr.multi_ops[idx].as_str())?;
+            TBucket::build_from_t_t(t_bucket, next_t_group).await
+          }
+          _ => panic!("❌  Invalid var_prefix: {next_pref}"),
+        };
+        t_bucket = next_t_bucket;
+      }
+      t_bucket
+    } else {
+      t_bucket
+    };
+
     self.ctx.update_t_block(&instr.target_var, t_bucket);
 
     Some(())

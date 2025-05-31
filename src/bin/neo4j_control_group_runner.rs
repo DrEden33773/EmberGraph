@@ -281,7 +281,6 @@ async fn run_benchmark() -> io::Result<()> {
       }
     }
   } else {
-    // TODO
     // Execute single task
 
     let query_file = args.query_file.as_ref().unwrap();

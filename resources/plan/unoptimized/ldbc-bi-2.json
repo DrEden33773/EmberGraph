@@ -40,18 +40,18 @@
       "label": "hasTag",
       "attr": null
     },
-    "a": {
-      "eid": "a",
-      "src_vid": "post",
-      "dst_vid": "tag",
-      "label": "hasTag",
-      "attr": null
-    },
     "c": {
       "eid": "c",
       "src_vid": "tag",
       "dst_vid": "tagClass",
       "label": "hasType",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "post",
+      "dst_vid": "tag",
+      "label": "hasTag",
       "attr": null
     }
   },
@@ -70,8 +70,8 @@
       "type": "get_adj",
       "expand_eid_list": [
         "a",
-        "b",
-        "c"
+        "c",
+        "b"
       ],
       "single_op": "f^tag",
       "multi_ops": [],
@@ -100,21 +100,23 @@
       "multi_ops": [],
       "target_var": "f^tagClass",
       "depend_on": [
-        "A^tag",
         "f^tag",
-        "C^tagClass"
+        "C^tagClass",
+        "A^tag"
       ]
     },
     {
       "vid": "tagClass",
       "type": "get_adj",
-      "expand_eid_list": [],
+      "expand_eid_list": [
+        "c"
+      ],
       "single_op": "f^tagClass",
       "multi_ops": [],
       "target_var": "A^tagClass",
       "depend_on": [
-        "A^tag",
         "f^tagClass",
+        "A^tag",
         "C^tagClass",
         "f^tag"
       ]
@@ -127,8 +129,8 @@
       "multi_ops": [],
       "target_var": "C^comment",
       "depend_on": [
-        "A^tag",
-        "f^tag"
+        "f^tag",
+        "A^tag"
       ]
     },
     {
@@ -139,23 +141,25 @@
       "multi_ops": [],
       "target_var": "f^comment",
       "depend_on": [
-        "C^comment",
         "f^tag",
-        "A^tag"
+        "A^tag",
+        "C^comment"
       ]
     },
     {
       "vid": "comment",
       "type": "get_adj",
-      "expand_eid_list": [],
+      "expand_eid_list": [
+        "b"
+      ],
       "single_op": "f^comment",
       "multi_ops": [],
       "target_var": "A^comment",
       "depend_on": [
-        "f^tag",
         "A^tag",
-        "C^comment",
-        "f^comment"
+        "f^comment",
+        "f^tag",
+        "C^comment"
       ]
     },
     {
@@ -178,23 +182,25 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
-        "C^post",
+        "f^tag",
         "A^tag",
-        "f^tag"
+        "C^post"
       ]
     },
     {
       "vid": "post",
       "type": "get_adj",
-      "expand_eid_list": [],
+      "expand_eid_list": [
+        "a"
+      ],
       "single_op": "f^post",
       "multi_ops": [],
       "target_var": "A^post",
       "depend_on": [
+        "f^tag",
         "f^post",
         "A^tag",
-        "C^post",
-        "f^tag"
+        "C^post"
       ]
     },
     {
@@ -204,20 +210,20 @@
       "single_op": null,
       "multi_ops": [
         "f^tagClass",
-        "f^post",
+        "f^comment",
         "f^tag",
-        "f^comment"
+        "f^post"
       ],
       "target_var": "f",
       "depend_on": [
         "f^tagClass",
-        "C^post",
-        "f^tag",
-        "f^comment",
         "f^post",
+        "C^post",
         "C^comment",
         "C^tagClass",
-        "A^tag"
+        "A^tag",
+        "f^comment",
+        "f^tag"
       ]
     }
   ]

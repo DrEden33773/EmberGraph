@@ -5,14 +5,14 @@
     "v2"
   ],
   "vertices": {
-    "v3": {
-      "vid": "v3",
-      "label": "V3",
-      "attr": null
-    },
     "v2": {
       "vid": "v2",
       "label": "V2",
+      "attr": null
+    },
+    "v3": {
+      "vid": "v3",
+      "label": "V3",
       "attr": null
     },
     "v1": {
@@ -22,18 +22,18 @@
     }
   },
   "edges": {
-    "a": {
-      "eid": "a",
-      "src_vid": "v1",
-      "dst_vid": "v2",
-      "label": "A",
-      "attr": null
-    },
     "b": {
       "eid": "b",
       "src_vid": "v2",
       "dst_vid": "v3",
       "label": "B",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "v1",
+      "dst_vid": "v2",
+      "label": "A",
       "attr": null
     }
   },
@@ -107,11 +107,11 @@
       "multi_ops": [],
       "target_var": "C^v2",
       "depend_on": [
+        "f^v3",
         "A^v3",
         "A^v1",
         "T^v2",
-        "f^v1",
-        "f^v3"
+        "f^v1"
       ]
     },
     {
@@ -122,29 +122,32 @@
       "multi_ops": [],
       "target_var": "f^v2",
       "depend_on": [
-        "A^v1",
-        "A^v3",
-        "T^v2",
-        "C^v2",
         "f^v1",
-        "f^v3"
+        "A^v3",
+        "C^v2",
+        "f^v3",
+        "T^v2",
+        "A^v1"
       ]
     },
     {
       "vid": "v2",
       "type": "get_adj",
-      "expand_eid_list": [],
+      "expand_eid_list": [
+        "b",
+        "a"
+      ],
       "single_op": "f^v2",
       "multi_ops": [],
       "target_var": "A^v2",
       "depend_on": [
         "T^v2",
-        "f^v3",
+        "A^v1",
         "f^v2",
-        "C^v2",
-        "f^v1",
+        "f^v3",
         "A^v3",
-        "A^v1"
+        "f^v1",
+        "C^v2"
       ]
     },
     {
@@ -153,19 +156,19 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^v2",
         "f^v1",
+        "f^v2",
         "f^v3"
       ],
       "target_var": "f",
       "depend_on": [
-        "C^v2",
         "A^v3",
-        "A^v1",
-        "f^v3",
-        "f^v2",
+        "C^v2",
+        "T^v2",
         "f^v1",
-        "T^v2"
+        "A^v1",
+        "f^v2",
+        "f^v3"
       ]
     }
   ]

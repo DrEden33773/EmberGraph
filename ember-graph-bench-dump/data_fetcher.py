@@ -4,8 +4,8 @@ from typing import Any, Dict, List, Tuple
 
 from path_utils import (
     CONTROL_GROUP_BENCH_OUTPUT_DIR,
-    EXPERIMENT_GROUP_BENCH_OUTPUT_DIR,
-    UNOPTIMIZED_GROUP_BENCH_OUTPUT_DIR,
+    exp_group_bench_output_dir,
+    unoptimized_group_bench_output_dir,
 )
 from schema_def import BenchmarkOutput, ResourceUsage, TimingStats
 
@@ -40,13 +40,13 @@ def benchmark_output_from_dict(data: Dict[str, Any]) -> BenchmarkOutput:
     )
 
 
-def load_experiment_and_control_group_timing_data() -> Dict[
-    str, Tuple[TimingStats, TimingStats]
-]:
+def load_experiment_and_control_group_timing_data(
+    use_sqlite_backend: bool = True,
+) -> Dict[str, Tuple[TimingStats, TimingStats]]:
     sqlite_bench_data: dict[str, TimingStats] = {}
     control_group_data: dict[str, TimingStats] = {}
 
-    for file in Path(EXPERIMENT_GROUP_BENCH_OUTPUT_DIR).glob("*.json"):
+    for file in Path(exp_group_bench_output_dir(use_sqlite_backend)).glob("*.json"):
         filename = file.stem
         with open(file, "r") as f:
             json_string = f.read()
@@ -71,13 +71,13 @@ def load_experiment_and_control_group_timing_data() -> Dict[
     return result
 
 
-def load_experiment_and_unoptimized_group_timing_data() -> Dict[
-    str, Tuple[TimingStats, TimingStats]
-]:
+def load_experiment_and_unoptimized_group_timing_data(
+    use_sqlite_backend: bool = True,
+) -> Dict[str, Tuple[TimingStats, TimingStats]]:
     sqlite_bench_data: dict[str, TimingStats] = {}
     control_group_data: dict[str, TimingStats] = {}
 
-    for file in Path(EXPERIMENT_GROUP_BENCH_OUTPUT_DIR).glob("*.json"):
+    for file in Path(exp_group_bench_output_dir(use_sqlite_backend)).glob("*.json"):
         filename = file.stem
         with open(file, "r") as f:
             json_string = f.read()
@@ -86,7 +86,9 @@ def load_experiment_and_unoptimized_group_timing_data() -> Dict[
             timing_stats = benchmark_output.timing
             sqlite_bench_data[filename] = timing_stats
 
-    for file in Path(UNOPTIMIZED_GROUP_BENCH_OUTPUT_DIR).glob("*.json"):
+    for file in Path(unoptimized_group_bench_output_dir(use_sqlite_backend)).glob(
+        "*.json"
+    ):
         filename = file.stem
         with open(file, "r") as f:
             json_string = f.read()
@@ -102,11 +104,13 @@ def load_experiment_and_unoptimized_group_timing_data() -> Dict[
     return result
 
 
-def load_experiment_group_resource_usage_data() -> Dict[int, ResourceUsage]:
+def load_experiment_group_resource_usage_data(
+    use_sqlite_backend: bool = True,
+) -> Dict[int, ResourceUsage]:
     curr_ms = 0
     result: Dict[int, ResourceUsage] = {}
 
-    for file in Path(EXPERIMENT_GROUP_BENCH_OUTPUT_DIR).glob("*.json"):
+    for file in Path(exp_group_bench_output_dir(use_sqlite_backend)).glob("*.json"):
         with open(file, "r") as f:
             json_string = f.read()
             data_dict: Dict[str, Any] = json.loads(json_string)

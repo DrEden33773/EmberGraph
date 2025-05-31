@@ -80,15 +80,17 @@
     {
       "vid": "city",
       "type": "get_adj",
-      "expand_eid_list": [],
+      "expand_eid_list": [
+        "a"
+      ],
       "single_op": "f^city",
       "multi_ops": [],
       "target_var": "A^city",
       "depend_on": [
-        "C^city",
+        "A^person",
         "f^city",
         "f^person",
-        "A^person"
+        "C^city"
       ]
     },
     {
@@ -102,10 +104,10 @@
       ],
       "target_var": "f",
       "depend_on": [
-        "f^person",
-        "f^city",
         "C^city",
-        "A^person"
+        "A^person",
+        "f^city",
+        "f^person"
       ]
     }
   ]

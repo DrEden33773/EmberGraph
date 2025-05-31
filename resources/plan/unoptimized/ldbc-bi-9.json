@@ -5,11 +5,6 @@
     "person"
   ],
   "vertices": {
-    "person": {
-      "vid": "person",
-      "label": "Person",
-      "attr": null
-    },
     "comment": {
       "vid": "comment",
       "label": "Comment",
@@ -29,21 +24,26 @@
         "value": 1290661462488,
         "type": "int"
       }
+    },
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": null
     }
   },
   "edges": {
-    "a": {
-      "eid": "a",
-      "src_vid": "comment",
-      "dst_vid": "post",
-      "label": "replyOf",
-      "attr": null
-    },
     "b": {
       "eid": "b",
       "src_vid": "post",
       "dst_vid": "person",
       "label": "hasCreator",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "comment",
+      "dst_vid": "post",
+      "label": "replyOf",
       "attr": null
     }
   },
@@ -90,16 +90,17 @@
       "multi_ops": [],
       "target_var": "f^post",
       "depend_on": [
+        "A^comment",
         "C^post",
-        "f^comment",
-        "A^comment"
+        "f^comment"
       ]
     },
     {
       "vid": "post",
       "type": "get_adj",
       "expand_eid_list": [
-        "b"
+        "b",
+        "a"
       ],
       "single_op": "f^post",
       "multi_ops": [],
@@ -107,8 +108,8 @@
       "depend_on": [
         "f^post",
         "A^comment",
-        "C^post",
-        "f^comment"
+        "f^comment",
+        "C^post"
       ]
     },
     {
@@ -119,11 +120,11 @@
       "multi_ops": [],
       "target_var": "C^person",
       "depend_on": [
+        "f^post",
         "A^post",
         "A^comment",
-        "f^comment",
-        "f^post",
-        "C^post"
+        "C^post",
+        "f^comment"
       ]
     },
     {
@@ -134,18 +135,20 @@
       "multi_ops": [],
       "target_var": "f^person",
       "depend_on": [
-        "C^person",
-        "A^post",
-        "A^comment",
         "C^post",
         "f^comment",
-        "f^post"
+        "A^post",
+        "A^comment",
+        "f^post",
+        "C^person"
       ]
     },
     {
       "vid": "person",
       "type": "get_adj",
-      "expand_eid_list": [],
+      "expand_eid_list": [
+        "b"
+      ],
       "single_op": "f^person",
       "multi_ops": [],
       "target_var": "A^person",
@@ -153,10 +156,10 @@
         "C^person",
         "f^person",
         "f^comment",
-        "f^post",
-        "A^comment",
         "C^post",
-        "A^post"
+        "A^comment",
+        "A^post",
+        "f^post"
       ]
     },
     {
@@ -171,13 +174,13 @@
       ],
       "target_var": "f",
       "depend_on": [
-        "A^comment",
-        "C^person",
-        "A^post",
-        "f^post",
-        "f^comment",
         "f^person",
-        "C^post"
+        "f^comment",
+        "f^post",
+        "A^post",
+        "C^post",
+        "A^comment",
+        "C^person"
       ]
     }
   ]

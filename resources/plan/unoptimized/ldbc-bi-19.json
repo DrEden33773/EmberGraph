@@ -1,31 +1,16 @@
 {
   "matching_order": [
-    "city2",
     "city1",
-    "person2",
+    "city2",
     "person1",
+    "person2",
     "message",
     "comment"
   ],
   "vertices": {
-    "comment": {
-      "vid": "comment",
-      "label": "Comment",
-      "attr": null
-    },
     "person2": {
       "vid": "person2",
       "label": "Person",
-      "attr": null
-    },
-    "person1": {
-      "vid": "person1",
-      "label": "Person",
-      "attr": null
-    },
-    "message": {
-      "vid": "message",
-      "label": "Comment",
       "attr": null
     },
     "city2": {
@@ -38,6 +23,11 @@
         "type": "int"
       }
     },
+    "person1": {
+      "vid": "person1",
+      "label": "Person",
+      "attr": null
+    },
     "city1": {
       "vid": "city1",
       "label": "City",
@@ -47,6 +37,16 @@
         "value": 1342,
         "type": "int"
       }
+    },
+    "comment": {
+      "vid": "comment",
+      "label": "Comment",
+      "attr": null
+    },
+    "message": {
+      "vid": "message",
+      "label": "Comment",
+      "attr": null
     }
   },
   "edges": {
@@ -57,25 +57,11 @@
       "label": "hasCreator",
       "attr": null
     },
-    "b": {
-      "eid": "b",
-      "src_vid": "person1",
-      "dst_vid": "city1",
-      "label": "isLocatedIn",
-      "attr": null
-    },
     "c": {
       "eid": "c",
       "src_vid": "person2",
       "dst_vid": "city2",
       "label": "isLocatedIn",
-      "attr": null
-    },
-    "e": {
-      "eid": "e",
-      "src_vid": "message",
-      "dst_vid": "person2",
-      "label": "hasCreator",
       "attr": null
     },
     "f": {
@@ -91,31 +77,23 @@
       "dst_vid": "person2",
       "label": "knows",
       "attr": null
+    },
+    "b": {
+      "eid": "b",
+      "src_vid": "person1",
+      "dst_vid": "city1",
+      "label": "isLocatedIn",
+      "attr": null
+    },
+    "e": {
+      "eid": "e",
+      "src_vid": "message",
+      "dst_vid": "person2",
+      "label": "hasCreator",
+      "attr": null
     }
   },
   "instructions": [
-    {
-      "vid": "city2",
-      "type": "init",
-      "expand_eid_list": [],
-      "single_op": null,
-      "multi_ops": [],
-      "target_var": "f^city2",
-      "depend_on": []
-    },
-    {
-      "vid": "city2",
-      "type": "get_adj",
-      "expand_eid_list": [
-        "c"
-      ],
-      "single_op": "f^city2",
-      "multi_ops": [],
-      "target_var": "A^city2",
-      "depend_on": [
-        "f^city2"
-      ]
-    },
     {
       "vid": "city1",
       "type": "init",
@@ -139,44 +117,24 @@
       ]
     },
     {
-      "vid": "person2",
-      "type": "intersect",
+      "vid": "city2",
+      "type": "init",
       "expand_eid_list": [],
-      "single_op": "A^city2",
+      "single_op": null,
       "multi_ops": [],
-      "target_var": "C^person2",
-      "depend_on": [
-        "f^city2",
-        "A^city2"
-      ]
+      "target_var": "f^city2",
+      "depend_on": []
     },
     {
-      "vid": "person2",
-      "type": "foreach",
-      "expand_eid_list": [],
-      "single_op": "C^person2",
-      "multi_ops": [],
-      "target_var": "f^person2",
-      "depend_on": [
-        "C^person2",
-        "f^city2",
-        "A^city2"
-      ]
-    },
-    {
-      "vid": "person2",
+      "vid": "city2",
       "type": "get_adj",
       "expand_eid_list": [
-        "e",
-        "a"
+        "c"
       ],
-      "single_op": "f^person2",
+      "single_op": "f^city2",
       "multi_ops": [],
-      "target_var": "A^person2",
+      "target_var": "A^city2",
       "depend_on": [
-        "C^person2",
-        "A^city2",
-        "f^person2",
         "f^city2"
       ]
     },
@@ -184,38 +142,12 @@
       "vid": "person1",
       "type": "intersect",
       "expand_eid_list": [],
-      "single_op": null,
-      "multi_ops": [
-        "A^person2",
-        "A^city1"
-      ],
-      "target_var": "T^person1",
-      "depend_on": [
-        "C^person2",
-        "f^person2",
-        "A^city2",
-        "A^person2",
-        "f^city2",
-        "A^city1",
-        "f^city1"
-      ]
-    },
-    {
-      "vid": "person1",
-      "type": "intersect",
-      "expand_eid_list": [],
-      "single_op": "T^person1",
+      "single_op": "A^city1",
       "multi_ops": [],
       "target_var": "C^person1",
       "depend_on": [
-        "f^person2",
-        "A^person2",
-        "C^person2",
-        "T^person1",
-        "f^city2",
-        "A^city2",
-        "f^city1",
-        "A^city1"
+        "A^city1",
+        "f^city1"
       ]
     },
     {
@@ -226,37 +158,108 @@
       "multi_ops": [],
       "target_var": "f^person1",
       "depend_on": [
-        "A^city2",
-        "f^person2",
         "C^person1",
         "A^city1",
-        "C^person2",
-        "f^city1",
-        "f^city2",
-        "A^person2",
-        "T^person1"
+        "f^city1"
       ]
     },
     {
       "vid": "person1",
       "type": "get_adj",
       "expand_eid_list": [
-        "d"
+        "b",
+        "d",
+        "a"
       ],
       "single_op": "f^person1",
       "multi_ops": [],
       "target_var": "A^person1",
       "depend_on": [
-        "f^person2",
-        "f^city2",
+        "A^city1",
         "f^city1",
         "C^person1",
+        "f^person1"
+      ]
+    },
+    {
+      "vid": "person2",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": null,
+      "multi_ops": [
+        "A^city2",
+        "A^person1"
+      ],
+      "target_var": "T^person2",
+      "depend_on": [
+        "C^person1",
+        "f^person1",
+        "f^city1",
+        "A^person1",
+        "A^city2",
+        "f^city2",
+        "A^city1"
+      ]
+    },
+    {
+      "vid": "person2",
+      "type": "intersect",
+      "expand_eid_list": [],
+      "single_op": "T^person2",
+      "multi_ops": [],
+      "target_var": "C^person2",
+      "depend_on": [
+        "T^person2",
+        "C^person1",
+        "A^person1",
+        "f^city1",
+        "f^city2",
+        "A^city2",
+        "f^person1",
+        "A^city1"
+      ]
+    },
+    {
+      "vid": "person2",
+      "type": "foreach",
+      "expand_eid_list": [],
+      "single_op": "C^person2",
+      "multi_ops": [],
+      "target_var": "f^person2",
+      "depend_on": [
+        "f^city2",
+        "A^person1",
+        "C^person1",
+        "A^city2",
         "f^person1",
         "C^person2",
-        "A^person2",
-        "A^city2",
+        "f^city1",
         "A^city1",
-        "T^person1"
+        "T^person2"
+      ]
+    },
+    {
+      "vid": "person2",
+      "type": "get_adj",
+      "expand_eid_list": [
+        "a",
+        "c",
+        "e"
+      ],
+      "single_op": "f^person2",
+      "multi_ops": [],
+      "target_var": "A^person2",
+      "depend_on": [
+        "C^person1",
+        "A^person1",
+        "A^city2",
+        "C^person2",
+        "A^city1",
+        "f^city1",
+        "f^city2",
+        "f^person2",
+        "T^person2",
+        "f^person1"
       ]
     },
     {
@@ -267,11 +270,17 @@
       "multi_ops": [],
       "target_var": "C^message",
       "depend_on": [
-        "f^person2",
-        "A^city2",
+        "f^city1",
+        "C^person1",
+        "f^city2",
+        "f^person1",
+        "A^person1",
         "A^person2",
-        "C^person2",
-        "f^city2"
+        "A^city2",
+        "T^person2",
+        "f^person2",
+        "A^city1",
+        "C^person2"
       ]
     },
     {
@@ -282,30 +291,43 @@
       "multi_ops": [],
       "target_var": "f^message",
       "depend_on": [
-        "C^message",
-        "f^person2",
         "C^person2",
-        "f^city2",
+        "C^person1",
+        "A^person1",
         "A^person2",
-        "A^city2"
+        "f^city1",
+        "C^message",
+        "A^city2",
+        "f^person1",
+        "T^person2",
+        "f^person2",
+        "A^city1",
+        "f^city2"
       ]
     },
     {
       "vid": "message",
       "type": "get_adj",
       "expand_eid_list": [
-        "f"
+        "f",
+        "e"
       ],
       "single_op": "f^message",
       "multi_ops": [],
       "target_var": "A^message",
       "depend_on": [
-        "C^person2",
+        "A^city1",
         "f^city2",
         "A^person2",
-        "f^message",
-        "A^city2",
         "C^message",
+        "A^person1",
+        "f^city1",
+        "f^person1",
+        "C^person1",
+        "f^message",
+        "C^person2",
+        "A^city2",
+        "T^person2",
         "f^person2"
       ]
     },
@@ -315,25 +337,25 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^person1",
-        "A^message"
+        "A^message",
+        "A^person1"
       ],
       "target_var": "T^comment",
       "depend_on": [
-        "f^city1",
         "A^city2",
-        "f^message",
-        "A^person2",
         "A^message",
-        "f^person2",
-        "T^person1",
-        "f^person1",
+        "f^message",
+        "A^city1",
         "C^message",
+        "f^city1",
+        "f^city2",
         "C^person1",
         "C^person2",
-        "f^city2",
-        "A^city1",
-        "A^person1"
+        "T^person2",
+        "f^person1",
+        "A^person1",
+        "f^person2",
+        "A^person2"
       ]
     },
     {
@@ -344,21 +366,21 @@
       "multi_ops": [],
       "target_var": "C^comment",
       "depend_on": [
-        "f^person1",
-        "A^person2",
-        "A^city1",
+        "f^message",
+        "T^comment",
+        "f^city2",
         "C^person1",
+        "A^city2",
         "f^person2",
         "A^message",
-        "A^city2",
-        "T^person1",
+        "f^person1",
+        "f^city1",
         "C^person2",
         "C^message",
-        "f^city2",
+        "T^person2",
         "A^person1",
-        "f^message",
-        "f^city1",
-        "T^comment"
+        "A^person2",
+        "A^city1"
       ]
     },
     {
@@ -369,49 +391,52 @@
       "multi_ops": [],
       "target_var": "f^comment",
       "depend_on": [
-        "A^person1",
-        "T^comment",
-        "A^city1",
-        "C^message",
-        "C^person2",
+        "C^comment",
         "f^message",
-        "A^city2",
-        "T^person1",
-        "f^city2",
-        "C^person1",
-        "A^message",
-        "f^city1",
-        "A^person2",
-        "f^person2",
         "f^person1",
-        "C^comment"
+        "T^comment",
+        "A^person1",
+        "f^person2",
+        "C^person2",
+        "f^city1",
+        "C^message",
+        "A^city2",
+        "C^person1",
+        "f^city2",
+        "A^message",
+        "A^person2",
+        "T^person2",
+        "A^city1"
       ]
     },
     {
       "vid": "comment",
       "type": "get_adj",
-      "expand_eid_list": [],
+      "expand_eid_list": [
+        "d",
+        "f"
+      ],
       "single_op": "f^comment",
       "multi_ops": [],
       "target_var": "A^comment",
       "depend_on": [
-        "f^comment",
-        "A^city2",
-        "A^person2",
-        "C^message",
-        "f^city2",
-        "A^city1",
-        "f^city1",
-        "T^person1",
-        "A^message",
-        "T^comment",
         "C^person2",
-        "C^comment",
-        "f^person1",
-        "A^person1",
-        "f^person2",
+        "A^message",
+        "f^message",
+        "C^message",
         "C^person1",
-        "f^message"
+        "A^person2",
+        "f^person1",
+        "f^city2",
+        "f^city1",
+        "A^city1",
+        "T^person2",
+        "T^comment",
+        "C^comment",
+        "f^comment",
+        "f^person2",
+        "A^person1",
+        "A^city2"
       ]
     },
     {
@@ -420,32 +445,32 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^comment",
-        "f^person2",
-        "f^person1",
-        "f^city2",
         "f^message",
-        "f^city1"
+        "f^comment",
+        "f^city1",
+        "f^city2",
+        "f^person2",
+        "f^person1"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^person2",
-        "f^city1",
-        "A^message",
-        "A^person2",
-        "C^comment",
-        "C^person1",
-        "f^comment",
-        "A^city1",
-        "C^person2",
-        "f^message",
-        "T^comment",
-        "T^person1",
-        "A^person1",
-        "C^message",
-        "f^person1",
         "f^city2",
-        "A^city2"
+        "f^person1",
+        "A^city2",
+        "A^person2",
+        "f^message",
+        "T^person2",
+        "C^person1",
+        "C^person2",
+        "C^comment",
+        "A^person1",
+        "f^city1",
+        "C^message",
+        "f^person2",
+        "T^comment",
+        "A^message",
+        "f^comment",
+        "A^city1"
       ]
     }
   ]

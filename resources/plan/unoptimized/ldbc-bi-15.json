@@ -8,23 +8,13 @@
     "post"
   ],
   "vertices": {
-    "post": {
-      "vid": "post",
-      "label": "Post",
-      "attr": null
-    },
-    "c2": {
-      "vid": "c2",
-      "label": "Comment",
-      "attr": null
-    },
-    "personA": {
-      "vid": "personA",
-      "label": "Person",
+    "forum": {
+      "vid": "forum",
+      "label": "Forum",
       "attr": {
-        "attr": "id",
-        "op": "=",
-        "value": 4398046511220,
+        "attr": "creationDate",
+        "op": ">=",
+        "value": 1282431075745,
         "type": "int"
       }
     },
@@ -38,19 +28,29 @@
         "type": "int"
       }
     },
-    "forum": {
-      "vid": "forum",
-      "label": "Forum",
-      "attr": {
-        "attr": "creationDate",
-        "op": ">=",
-        "value": 1282431075745,
-        "type": "int"
-      }
-    },
     "c1": {
       "vid": "c1",
       "label": "Comment",
+      "attr": null
+    },
+    "personA": {
+      "vid": "personA",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "=",
+        "value": 4398046511220,
+        "type": "int"
+      }
+    },
+    "c2": {
+      "vid": "c2",
+      "label": "Comment",
+      "attr": null
+    },
+    "post": {
+      "vid": "post",
+      "label": "Post",
       "attr": null
     }
   },
@@ -62,17 +62,10 @@
       "label": "knows",
       "attr": null
     },
-    "c": {
-      "eid": "c",
-      "src_vid": "c2",
-      "dst_vid": "personB",
-      "label": "hasCreator",
-      "attr": null
-    },
-    "e": {
-      "eid": "e",
-      "src_vid": "c2",
-      "dst_vid": "post",
+    "d": {
+      "eid": "d",
+      "src_vid": "c1",
+      "dst_vid": "c2",
       "label": "replyOf",
       "attr": null
     },
@@ -83,17 +76,24 @@
       "label": "containerOf",
       "attr": null
     },
-    "d": {
-      "eid": "d",
-      "src_vid": "c1",
-      "dst_vid": "c2",
-      "label": "replyOf",
-      "attr": null
-    },
     "b": {
       "eid": "b",
       "src_vid": "c1",
       "dst_vid": "personA",
+      "label": "hasCreator",
+      "attr": null
+    },
+    "e": {
+      "eid": "e",
+      "src_vid": "c2",
+      "dst_vid": "post",
+      "label": "replyOf",
+      "attr": null
+    },
+    "c": {
+      "eid": "c",
+      "src_vid": "c2",
+      "dst_vid": "personB",
       "label": "hasCreator",
       "attr": null
     }
@@ -112,8 +112,8 @@
       "vid": "personA",
       "type": "get_adj",
       "expand_eid_list": [
-        "a",
-        "b"
+        "b",
+        "a"
       ],
       "single_op": "f^personA",
       "multi_ops": [],
@@ -130,8 +130,8 @@
       "multi_ops": [],
       "target_var": "C^personB",
       "depend_on": [
-        "A^personA",
-        "f^personA"
+        "f^personA",
+        "A^personA"
       ]
     },
     {
@@ -142,8 +142,8 @@
       "multi_ops": [],
       "target_var": "f^personB",
       "depend_on": [
-        "C^personB",
         "A^personA",
+        "C^personB",
         "f^personA"
       ]
     },
@@ -151,7 +151,8 @@
       "vid": "personB",
       "type": "get_adj",
       "expand_eid_list": [
-        "c"
+        "c",
+        "a"
       ],
       "single_op": "f^personB",
       "multi_ops": [],
@@ -159,8 +160,8 @@
       "depend_on": [
         "f^personA",
         "f^personB",
-        "A^personA",
-        "C^personB"
+        "C^personB",
+        "A^personA"
       ]
     },
     {
@@ -193,8 +194,8 @@
       "multi_ops": [],
       "target_var": "C^c1",
       "depend_on": [
-        "A^personA",
-        "f^personA"
+        "f^personA",
+        "A^personA"
       ]
     },
     {
@@ -205,25 +206,26 @@
       "multi_ops": [],
       "target_var": "f^c1",
       "depend_on": [
-        "A^personA",
         "f^personA",
-        "C^c1"
+        "C^c1",
+        "A^personA"
       ]
     },
     {
       "vid": "c1",
       "type": "get_adj",
       "expand_eid_list": [
-        "d"
+        "d",
+        "b"
       ],
       "single_op": "f^c1",
       "multi_ops": [],
       "target_var": "A^c1",
       "depend_on": [
-        "C^c1",
         "f^personA",
+        "f^c1",
         "A^personA",
-        "f^c1"
+        "C^c1"
       ]
     },
     {
@@ -232,19 +234,19 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "A^personB",
-        "A^c1"
+        "A^c1",
+        "A^personB"
       ],
       "target_var": "T^c2",
       "depend_on": [
-        "A^c1",
-        "f^c1",
-        "C^personB",
-        "A^personB",
-        "A^personA",
         "f^personB",
+        "C^personB",
+        "f^c1",
+        "A^personB",
+        "A^c1",
+        "C^c1",
         "f^personA",
-        "C^c1"
+        "A^personA"
       ]
     },
     {
@@ -255,15 +257,15 @@
       "multi_ops": [],
       "target_var": "C^c2",
       "depend_on": [
+        "T^c2",
+        "A^personA",
         "C^c1",
-        "A^c1",
         "f^personB",
+        "f^personA",
         "A^personB",
         "C^personB",
-        "f^personA",
-        "f^c1",
-        "T^c2",
-        "A^personA"
+        "A^c1",
+        "f^c1"
       ]
     },
     {
@@ -275,38 +277,40 @@
       "target_var": "f^c2",
       "depend_on": [
         "A^c1",
-        "f^c1",
-        "f^personA",
         "T^c2",
         "A^personB",
+        "f^c1",
         "C^c1",
+        "C^personB",
         "f^personB",
         "C^c2",
-        "C^personB",
-        "A^personA"
+        "A^personA",
+        "f^personA"
       ]
     },
     {
       "vid": "c2",
       "type": "get_adj",
       "expand_eid_list": [
-        "e"
+        "c",
+        "e",
+        "d"
       ],
       "single_op": "f^c2",
       "multi_ops": [],
       "target_var": "A^c2",
       "depend_on": [
-        "f^c1",
-        "f^personB",
-        "C^c2",
-        "f^c2",
-        "A^c1",
-        "A^personB",
-        "T^c2",
-        "C^personB",
         "f^personA",
+        "T^c2",
+        "f^personB",
+        "A^personA",
+        "A^personB",
         "C^c1",
-        "A^personA"
+        "A^c1",
+        "f^c2",
+        "C^personB",
+        "f^c1",
+        "C^c2"
       ]
     },
     {
@@ -320,20 +324,20 @@
       ],
       "target_var": "T^post",
       "depend_on": [
-        "f^forum",
-        "f^personB",
-        "C^c2",
-        "f^c2",
-        "f^c1",
-        "A^c1",
-        "A^personB",
-        "C^personB",
-        "f^personA",
-        "C^c1",
         "A^forum",
+        "f^personB",
+        "f^personA",
+        "f^c2",
+        "A^c2",
+        "A^personB",
+        "A^c1",
+        "C^c1",
+        "C^personB",
+        "f^c1",
+        "C^c2",
         "T^c2",
         "A^personA",
-        "A^c2"
+        "f^forum"
       ]
     },
     {
@@ -344,21 +348,21 @@
       "multi_ops": [],
       "target_var": "C^post",
       "depend_on": [
+        "f^c2",
         "f^c1",
-        "C^personB",
-        "f^personA",
+        "A^c1",
+        "T^c2",
         "A^personA",
         "C^c1",
+        "C^personB",
+        "f^forum",
+        "f^personB",
         "T^post",
+        "f^personA",
+        "C^c2",
         "A^forum",
         "A^c2",
-        "A^c1",
-        "C^c2",
-        "f^c2",
-        "A^personB",
-        "T^c2",
-        "f^personB",
-        "f^forum"
+        "A^personB"
       ]
     },
     {
@@ -370,48 +374,51 @@
       "target_var": "f^post",
       "depend_on": [
         "C^post",
-        "A^c1",
-        "f^personA",
-        "A^personB",
-        "A^personA",
-        "T^post",
-        "C^c1",
-        "A^forum",
-        "T^c2",
-        "A^c2",
         "C^personB",
-        "C^c2",
+        "C^c1",
         "f^c1",
-        "f^c2",
+        "C^c2",
+        "f^personB",
+        "A^c2",
+        "A^personA",
+        "A^personB",
+        "T^post",
+        "f^personA",
+        "A^forum",
+        "A^c1",
+        "T^c2",
         "f^forum",
-        "f^personB"
+        "f^c2"
       ]
     },
     {
       "vid": "post",
       "type": "get_adj",
-      "expand_eid_list": [],
+      "expand_eid_list": [
+        "f",
+        "e"
+      ],
       "single_op": "f^post",
       "multi_ops": [],
       "target_var": "A^post",
       "depend_on": [
+        "C^personB",
+        "f^forum",
         "A^c2",
-        "C^c1",
+        "A^personB",
+        "T^post",
+        "A^c1",
+        "T^c2",
+        "f^personB",
+        "C^post",
+        "f^c1",
+        "A^personA",
+        "f^post",
         "C^c2",
         "f^c2",
-        "f^forum",
-        "A^personA",
-        "A^c1",
-        "f^personB",
-        "A^personB",
-        "C^personB",
-        "f^post",
-        "T^post",
+        "C^c1",
         "A^forum",
-        "f^c1",
-        "C^post",
-        "f^personA",
-        "T^c2"
+        "f^personA"
       ]
     },
     {
@@ -420,31 +427,31 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^post",
-        "f^personB",
         "f^forum",
+        "f^c1",
         "f^c2",
+        "f^post",
         "f^personA",
-        "f^c1"
+        "f^personB"
       ],
       "target_var": "f",
       "depend_on": [
-        "A^personA",
-        "f^personB",
-        "f^forum",
-        "A^personB",
+        "f^personA",
+        "f^c1",
         "C^personB",
+        "A^forum",
+        "f^personB",
+        "A^personB",
+        "C^c2",
+        "f^forum",
+        "C^post",
         "C^c1",
         "f^c2",
-        "C^c2",
-        "A^forum",
-        "A^c2",
-        "f^personA",
-        "A^c1",
         "f^post",
-        "C^post",
+        "A^personA",
+        "A^c1",
         "T^c2",
-        "f^c1",
+        "A^c2",
         "T^post"
       ]
     }

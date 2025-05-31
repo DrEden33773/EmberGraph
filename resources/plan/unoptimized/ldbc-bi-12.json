@@ -15,6 +15,11 @@
         "type": "int"
       }
     },
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": null
+    },
     "post": {
       "vid": "post",
       "label": "Post",
@@ -24,11 +29,6 @@
         "value": "tk",
         "type": "string"
       }
-    },
-    "person": {
-      "vid": "person",
-      "label": "Person",
-      "attr": null
     }
   },
   "edges": {
@@ -91,24 +91,25 @@
       "target_var": "f^comment",
       "depend_on": [
         "C^comment",
-        "A^post",
-        "f^post"
+        "f^post",
+        "A^post"
       ]
     },
     {
       "vid": "comment",
       "type": "get_adj",
       "expand_eid_list": [
-        "b"
+        "b",
+        "a"
       ],
       "single_op": "f^comment",
       "multi_ops": [],
       "target_var": "A^comment",
       "depend_on": [
+        "C^comment",
         "f^comment",
         "f^post",
-        "A^post",
-        "C^comment"
+        "A^post"
       ]
     },
     {
@@ -119,10 +120,10 @@
       "multi_ops": [],
       "target_var": "C^person",
       "depend_on": [
-        "A^comment",
-        "f^post",
-        "A^post",
         "C^comment",
+        "A^comment",
+        "A^post",
+        "f^post",
         "f^comment"
       ]
     },
@@ -134,29 +135,31 @@
       "multi_ops": [],
       "target_var": "f^person",
       "depend_on": [
-        "A^post",
-        "A^comment",
-        "f^post",
-        "C^comment",
         "f^comment",
-        "C^person"
+        "C^person",
+        "C^comment",
+        "A^comment",
+        "A^post",
+        "f^post"
       ]
     },
     {
       "vid": "person",
       "type": "get_adj",
-      "expand_eid_list": [],
+      "expand_eid_list": [
+        "b"
+      ],
       "single_op": "f^person",
       "multi_ops": [],
       "target_var": "A^person",
       "depend_on": [
+        "A^comment",
         "C^person",
         "f^person",
+        "f^comment",
         "A^post",
-        "A^comment",
-        "f^post",
         "C^comment",
-        "f^comment"
+        "f^post"
       ]
     },
     {
@@ -165,19 +168,19 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^post",
         "f^comment",
+        "f^post",
         "f^person"
       ],
       "target_var": "f",
       "depend_on": [
-        "A^comment",
         "A^post",
         "f^person",
+        "f^comment",
         "C^person",
         "C^comment",
-        "f^post",
-        "f^comment"
+        "A^comment",
+        "f^post"
       ]
     }
   ]

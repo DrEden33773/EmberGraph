@@ -6,16 +6,6 @@
     "person"
   ],
   "vertices": {
-    "tag": {
-      "vid": "tag",
-      "label": "Tag",
-      "attr": {
-        "attr": "name",
-        "op": "=",
-        "value": "Theodore_Roosevelt",
-        "type": "string"
-      }
-    },
     "person": {
       "vid": "person",
       "label": "Person",
@@ -25,6 +15,16 @@
       "vid": "friend",
       "label": "Person",
       "attr": null
+    },
+    "tag": {
+      "vid": "tag",
+      "label": "Tag",
+      "attr": {
+        "attr": "name",
+        "op": "=",
+        "value": "Theodore_Roosevelt",
+        "type": "string"
+      }
     },
     "comment": {
       "vid": "comment",
@@ -52,18 +52,18 @@
       "label": "hasTag",
       "attr": null
     },
-    "d": {
-      "eid": "d",
-      "src_vid": "person",
-      "dst_vid": "friend",
-      "label": "knows",
-      "attr": null
-    },
     "c": {
       "eid": "c",
       "src_vid": "person",
       "dst_vid": "tag",
       "label": "hasInterest",
+      "attr": null
+    },
+    "d": {
+      "eid": "d",
+      "src_vid": "person",
+      "dst_vid": "friend",
+      "label": "knows",
       "attr": null
     }
   },
@@ -81,8 +81,8 @@
       "vid": "tag",
       "type": "get_adj",
       "expand_eid_list": [
-        "a",
-        "c"
+        "c",
+        "a"
       ],
       "single_op": "f^tag",
       "multi_ops": [],
@@ -111,8 +111,8 @@
       "multi_ops": [],
       "target_var": "f^comment",
       "depend_on": [
-        "C^comment",
         "f^tag",
+        "C^comment",
         "A^tag"
       ]
     },
@@ -120,16 +120,17 @@
       "vid": "comment",
       "type": "get_adj",
       "expand_eid_list": [
-        "b"
+        "b",
+        "a"
       ],
       "single_op": "f^comment",
       "multi_ops": [],
       "target_var": "A^comment",
       "depend_on": [
+        "C^comment",
         "A^tag",
         "f^tag",
-        "f^comment",
-        "C^comment"
+        "f^comment"
       ]
     },
     {
@@ -166,13 +167,13 @@
       ],
       "target_var": "T^person",
       "depend_on": [
-        "f^friend",
+        "A^friend",
         "f^tag",
-        "A^comment",
-        "A^tag",
-        "f^comment",
+        "f^friend",
         "C^comment",
-        "A^friend"
+        "A^tag",
+        "A^comment",
+        "f^comment"
       ]
     },
     {
@@ -183,14 +184,14 @@
       "multi_ops": [],
       "target_var": "C^person",
       "depend_on": [
-        "T^person",
+        "f^comment",
+        "f^tag",
+        "C^comment",
         "A^tag",
         "f^friend",
-        "C^comment",
-        "A^comment",
-        "f^tag",
-        "f^comment",
-        "A^friend"
+        "T^person",
+        "A^friend",
+        "A^comment"
       ]
     },
     {
@@ -201,35 +202,39 @@
       "multi_ops": [],
       "target_var": "f^person",
       "depend_on": [
-        "f^tag",
-        "f^friend",
-        "A^tag",
-        "C^person",
+        "A^friend",
         "T^person",
-        "f^comment",
         "C^comment",
+        "f^friend",
+        "f^tag",
+        "C^person",
+        "A^tag",
         "A^comment",
-        "A^friend"
+        "f^comment"
       ]
     },
     {
       "vid": "person",
       "type": "get_adj",
-      "expand_eid_list": [],
+      "expand_eid_list": [
+        "c",
+        "d",
+        "b"
+      ],
       "single_op": "f^person",
       "multi_ops": [],
       "target_var": "A^person",
       "depend_on": [
-        "f^tag",
-        "C^person",
-        "A^comment",
         "A^tag",
-        "T^person",
-        "A^friend",
-        "f^friend",
-        "C^comment",
         "f^comment",
-        "f^person"
+        "T^person",
+        "f^person",
+        "f^friend",
+        "A^comment",
+        "C^person",
+        "A^friend",
+        "C^comment",
+        "f^tag"
       ]
     },
     {
@@ -239,22 +244,22 @@
       "single_op": null,
       "multi_ops": [
         "f^tag",
-        "f^person",
         "f^friend",
-        "f^comment"
+        "f^comment",
+        "f^person"
       ],
       "target_var": "f",
       "depend_on": [
-        "f^comment",
-        "f^person",
+        "A^friend",
         "A^comment",
+        "C^person",
         "A^tag",
         "f^friend",
-        "C^comment",
-        "C^person",
-        "T^person",
+        "f^comment",
+        "f^person",
         "f^tag",
-        "A^friend"
+        "C^comment",
+        "T^person"
       ]
     }
   ]

@@ -70,7 +70,7 @@ default = [
 hash_join_bench = [
     "hash_join_default",
     "benchmark",
-    "use_sort_merge_join",
+    "use_neo4j_ordered_plan",
 ]
 bench = [
     "default",

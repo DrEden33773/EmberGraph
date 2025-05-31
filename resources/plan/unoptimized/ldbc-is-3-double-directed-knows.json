@@ -4,16 +4,6 @@
     "friend"
   ],
   "vertices": {
-    "person": {
-      "vid": "person",
-      "label": "Person",
-      "attr": {
-        "attr": "id",
-        "op": "=",
-        "value": 6597069766660,
-        "type": "int"
-      }
-    },
     "friend": {
       "vid": "friend",
       "label": "Person",
@@ -23,20 +13,30 @@
         "value": 6597069766660,
         "type": "int"
       }
+    },
+    "person": {
+      "vid": "person",
+      "label": "Person",
+      "attr": {
+        "attr": "id",
+        "op": "=",
+        "value": 6597069766660,
+        "type": "int"
+      }
     }
   },
   "edges": {
-    "a": {
-      "eid": "a",
-      "src_vid": "person",
-      "dst_vid": "friend",
-      "label": "knows",
-      "attr": null
-    },
     "b": {
       "eid": "b",
       "src_vid": "friend",
       "dst_vid": "person",
+      "label": "knows",
+      "attr": null
+    },
+    "a": {
+      "eid": "a",
+      "src_vid": "person",
+      "dst_vid": "friend",
       "label": "knows",
       "attr": null
     }
@@ -55,8 +55,8 @@
       "vid": "person",
       "type": "get_adj",
       "expand_eid_list": [
-        "b",
-        "a"
+        "a",
+        "b"
       ],
       "single_op": "f^person",
       "multi_ops": [],
@@ -73,8 +73,8 @@
       "multi_ops": [],
       "target_var": "C^friend",
       "depend_on": [
-        "A^person",
-        "f^person"
+        "f^person",
+        "A^person"
       ]
     },
     {
@@ -86,22 +86,25 @@
       "target_var": "f^friend",
       "depend_on": [
         "C^friend",
-        "A^person",
-        "f^person"
+        "f^person",
+        "A^person"
       ]
     },
     {
       "vid": "friend",
       "type": "get_adj",
-      "expand_eid_list": [],
+      "expand_eid_list": [
+        "a",
+        "b"
+      ],
       "single_op": "f^friend",
       "multi_ops": [],
       "target_var": "A^friend",
       "depend_on": [
-        "A^person",
-        "f^friend",
         "f^person",
-        "C^friend"
+        "f^friend",
+        "C^friend",
+        "A^person"
       ]
     },
     {
@@ -110,15 +113,15 @@
       "expand_eid_list": [],
       "single_op": null,
       "multi_ops": [
-        "f^person",
-        "f^friend"
+        "f^friend",
+        "f^person"
       ],
       "target_var": "f",
       "depend_on": [
         "C^friend",
-        "A^person",
         "f^friend",
-        "f^person"
+        "f^person",
+        "A^person"
       ]
     }
   ]

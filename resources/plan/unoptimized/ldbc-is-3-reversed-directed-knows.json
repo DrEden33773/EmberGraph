@@ -65,8 +65,8 @@
       "multi_ops": [],
       "target_var": "C^friend",
       "depend_on": [
-        "A^person",
-        "f^person"
+        "f^person",
+        "A^person"
       ]
     },
     {
@@ -77,23 +77,25 @@
       "multi_ops": [],
       "target_var": "f^friend",
       "depend_on": [
-        "A^person",
+        "f^person",
         "C^friend",
-        "f^person"
+        "A^person"
       ]
     },
     {
       "vid": "friend",
       "type": "get_adj",
-      "expand_eid_list": [],
+      "expand_eid_list": [
+        "a"
+      ],
       "single_op": "f^friend",
       "multi_ops": [],
       "target_var": "A^friend",
       "depend_on": [
         "f^friend",
-        "C^friend",
         "f^person",
-        "A^person"
+        "A^person",
+        "C^friend"
       ]
     },
     {
@@ -107,10 +109,10 @@
       ],
       "target_var": "f",
       "depend_on": [
+        "C^friend",
         "f^person",
-        "f^friend",
         "A^person",
-        "C^friend"
+        "f^friend"
       ]
     }
   ]
