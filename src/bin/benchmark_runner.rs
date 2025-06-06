@@ -372,7 +372,7 @@ async fn run_benchmark() -> io::Result<()> {
             task_usage_data.push(ResourceUsage {
               timestamp_ms,
               cpu_usage_percent: process.cpu_usage() / sys.cpus().len() as f32,
-              memory_bytes: process.virtual_memory(),
+              memory_bytes: process.memory(),
             });
           }
         }
@@ -467,7 +467,7 @@ async fn run_benchmark() -> io::Result<()> {
           task_usage_data.push(ResourceUsage {
             timestamp_ms,
             cpu_usage_percent: process.cpu_usage() / sys.cpus().len() as f32,
-            memory_bytes: process.virtual_memory(),
+            memory_bytes: process.memory(),
           });
         }
       }
@@ -509,17 +509,21 @@ async fn run_benchmark() -> io::Result<()> {
 
         let output_json = serde_json::to_string_pretty(&final_output).map_err(io::Error::other)?;
 
-        if let Some(output_path) = args.output {
-          fs::write(&output_path, output_json)?;
-          println!(
-            "{} Benchmark results saved to '{}'",
-            "INFO:".cyan(),
-            output_path.display()
-          );
-        } else {
-          println!("\n--- Benchmark Results ---");
-          println!("{}", output_json);
-        }
+        // Extract task number from filename
+        let task_num_str = query_file
+          .file_stem()
+          .and_then(|s| s.to_str())
+          .map(|s| s.trim_start_matches("ldbc-bi-"))
+          .unwrap_or(""); // Default to empty if parsing fails
+        let output_filename = format!("bi_{}.json", task_num_str);
+        let output_path = BENCHMARK_OUTPUT_DIR.join(output_filename);
+
+        fs::write(&output_path, output_json)?;
+        println!(
+          "{} Benchmark results saved to '{}'",
+          "INFO:".cyan(),
+          output_path.display()
+        );
       }
       Err(e) => {
         eprintln!(

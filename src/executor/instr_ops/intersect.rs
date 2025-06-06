@@ -77,10 +77,6 @@ impl<S: StorageAdapter + 'static> IntersectOperator<S> {
 
   /// `Ai / Ti` ∩ `Aj / Tj` -> `Tx`
   async fn with_multi_adj_set(&mut self, instr: &Instruction) -> Option<()> {
-    #[cfg(debug_assertions)]
-    // Assume that `flatten` has been applied
-    assert_eq!(instr.multi_ops.len(), 2);
-
     let (lhs_pref, _) = resolve_var(instr.multi_ops[0].as_str());
     let (rhs_pref, _) = resolve_var(instr.multi_ops[1].as_str());
 

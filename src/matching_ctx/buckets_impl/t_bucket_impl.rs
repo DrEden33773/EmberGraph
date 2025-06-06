@@ -62,9 +62,6 @@ impl TBucket {
 
     let expanding_graphs = Self::intersect_two_expanding_graphs(left_group, right_group).await;
 
-    #[cfg(debug_assertions)]
-    assert_eq!(t_bucket_1.target_pat_vid, t_bucket_2.target_pat_vid);
-
     Self {
       target_pat_vid: t_bucket_1.target_pat_vid,
       expanding_graphs,
