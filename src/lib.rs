@@ -157,10 +157,8 @@ pub async fn plan_gen_with_given_orders() -> io::Result<()> {
       );
       continue;
     }
-    if let Some(ext) = path.extension() {
-      if ext != "txt" {
-        continue;
-      }
+    if path.extension().unwrap_or_default() != "txt" {
+      continue;
     }
 
     let filename = path.file_stem().unwrap().to_str().unwrap().to_string();
@@ -174,13 +172,13 @@ pub async fn plan_gen_with_given_orders() -> io::Result<()> {
     println!(
       "🪄  Generating plan for query '{}' with given order {}",
       path.to_str().unwrap().green(),
-      format!("{:?}", given_order).yellow()
+      format!("{given_order:?}").yellow()
     );
 
     let handle = tokio::spawn(async move {
       let plan_data = generate_plan_with_given_order(&path, &given_order);
       let plan_json = serde_json::to_string_pretty(&plan_data).unwrap();
-      let filepath = plans.join(format!("{}.json", filename));
+      let filepath = plans.join(format!("{filename}.json"));
 
       tokio::fs::write(filepath.clone(), plan_json)
         .await
@@ -198,7 +196,7 @@ pub async fn plan_gen_with_given_orders() -> io::Result<()> {
   // wait for all tasks to complete
   for handle in handles {
     if let Err(e) = handle.await {
-      eprintln!("❌  Task failed: {}", e);
+      eprintln!("❌  Task failed: {e}");
     }
   }
 
@@ -225,10 +223,8 @@ pub async fn plan_gen() -> io::Result<()> {
       );
       continue;
     }
-    if let Some(ext) = path.extension() {
-      if ext != "txt" {
-        continue;
-      }
+    if path.extension().unwrap_or_default() != "txt" {
+      continue;
     }
 
     let filename = path.file_stem().unwrap().to_str().unwrap().to_string();
@@ -242,7 +238,7 @@ pub async fn plan_gen() -> io::Result<()> {
     let handle = tokio::spawn(async move {
       let plan_data = generate_optimal_plan(&path);
       let plan_json = serde_json::to_string_pretty(&plan_data).unwrap();
-      let filepath = plans.join(format!("{}.json", filename));
+      let filepath = plans.join(format!("{filename}.json"));
 
       tokio::fs::write(filepath.clone(), plan_json)
         .await
@@ -260,7 +256,7 @@ pub async fn plan_gen() -> io::Result<()> {
   // wait for all tasks to complete
   for handle in handles {
     if let Err(e) = handle.await {
-      eprintln!("❌  Task failed: {}", e);
+      eprintln!("❌  Task failed: {e}");
     }
   }
 
