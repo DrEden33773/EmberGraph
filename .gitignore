@@ -11,3 +11,5 @@
 
 /resources/output
 /resources/out
+
+/ember-graph-bench-dump

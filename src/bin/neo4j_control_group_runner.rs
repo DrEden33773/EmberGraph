@@ -43,6 +43,10 @@ struct Args {
   /// Output file path for results (JSON format). If not specified, prints to stdout.
   #[arg(short, long)]
   output: Option<PathBuf>,
+
+  /// Neo4j server pid
+  #[arg(long)]
+  neo4j_server_pid: usize,
 }
 
 #[derive(Serialize, Debug, Clone)]
@@ -217,10 +221,15 @@ async fn run_benchmark() -> io::Result<()> {
               .duration_since(SystemTime::UNIX_EPOCH)
               .unwrap_or_default()
               .as_millis();
+            let neo4j_server_cpu_usage = {
+              let neo4j_process = sys.process(args.neo4j_server_pid.into());
+              neo4j_process.map(|p| p.cpu_usage()).unwrap_or(0.0)
+            };
+            let cpu_usage = process.cpu_usage() + neo4j_server_cpu_usage;
             task_usage_data.push(ResourceUsage {
               timestamp_ms,
-              cpu_usage_percent: process.cpu_usage() / sys.cpus().len() as f32,
-              memory_bytes: process.virtual_memory(),
+              cpu_usage_percent: cpu_usage / sys.cpus().len() as f32,
+              memory_bytes: process.memory(),
             });
           }
         }
@@ -310,10 +319,15 @@ async fn run_benchmark() -> io::Result<()> {
             .duration_since(SystemTime::UNIX_EPOCH)
             .unwrap_or_default()
             .as_millis();
+          let neo4j_server_cpu_usage = {
+            let neo4j_process = sys.process(args.neo4j_server_pid.into());
+            neo4j_process.map(|p| p.cpu_usage()).unwrap_or(0.0)
+          };
+          let cpu_usage = process.cpu_usage() + neo4j_server_cpu_usage;
           task_usage_data.push(ResourceUsage {
             timestamp_ms,
-            cpu_usage_percent: process.cpu_usage() / sys.cpus().len() as f32,
-            memory_bytes: process.virtual_memory(),
+            cpu_usage_percent: cpu_usage / sys.cpus().len() as f32,
+            memory_bytes: process.memory(),
           });
         }
       }
@@ -440,8 +454,8 @@ async fn init_neo4j_db() -> Result<Graph, neo4rs::Error> {
     .user(username)
     .password(password)
     .db(db_name)
-    .fetch_size(4096)
-    .max_connections(num_cpus::get() * 4)
+    .fetch_size(1000)
+    .max_connections(num_cpus::get() * 2)
     .build()
     .unwrap();
 
