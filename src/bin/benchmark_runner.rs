@@ -57,6 +57,10 @@ struct Args {
   /// Cache size for the storage adapter.
   #[arg(long, default_value_t = 512)]
   cache_size: usize,
+
+  /// Neo4j server pid
+  #[arg(long)]
+  neo4j_server_pid: Option<usize>,
 }
 
 #[derive(Serialize, Debug, Clone)]
@@ -369,9 +373,17 @@ async fn run_benchmark() -> io::Result<()> {
               .duration_since(SystemTime::UNIX_EPOCH)
               .unwrap_or_default()
               .as_millis();
+            let neo4j_server_cpu_usage = args
+              .neo4j_server_pid
+              .map(|pid| {
+                let neo4j_process = sys.process(pid.into());
+                neo4j_process.map(|p| p.cpu_usage()).unwrap_or(0.0)
+              })
+              .unwrap_or(0.0);
+            let cpu_usage = process.cpu_usage() + neo4j_server_cpu_usage;
             task_usage_data.push(ResourceUsage {
               timestamp_ms,
-              cpu_usage_percent: process.cpu_usage() / sys.cpus().len() as f32,
+              cpu_usage_percent: cpu_usage / sys.cpus().len() as f32,
               memory_bytes: process.memory(),
             });
           }
@@ -464,9 +476,17 @@ async fn run_benchmark() -> io::Result<()> {
             .duration_since(SystemTime::UNIX_EPOCH)
             .unwrap_or_default()
             .as_millis();
+          let neo4j_server_cpu_usage = args
+            .neo4j_server_pid
+            .map(|pid| {
+              let neo4j_process = sys.process(pid.into());
+              neo4j_process.map(|p| p.cpu_usage()).unwrap_or(0.0)
+            })
+            .unwrap_or(0.0);
+          let cpu_usage = process.cpu_usage() + neo4j_server_cpu_usage;
           task_usage_data.push(ResourceUsage {
             timestamp_ms,
-            cpu_usage_percent: process.cpu_usage() / sys.cpus().len() as f32,
+            cpu_usage_percent: cpu_usage / sys.cpus().len() as f32,
             memory_bytes: process.memory(),
           });
         }
