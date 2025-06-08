@@ -23,7 +23,7 @@ impl PrettyDump for DataVertex {
 
     let mut attrs = "{".to_string();
     for (i, (key, value)) in sorted_kv_pairs.into_iter().enumerate() {
-      attrs.push_str(&format!("{}: ", key));
+      attrs.push_str(&format!("{key}: "));
       let value = if colored {
         match value {
           AttrValue::Int(v) => v.to_string().purple(),
@@ -47,9 +47,9 @@ impl PrettyDump for DataVertex {
     attrs.push('}');
 
     if attrs != "{}" {
-      format!("({} {})", label, attrs)
+      format!("({label} {attrs})")
     } else {
-      format!("({})", label)
+      format!("({label})")
     }
   }
 
@@ -65,7 +65,7 @@ impl PrettyDump for DataVertex {
       self.vid().to_string()
     };
 
-    format!("({} {})", label, vid)
+    format!("({label} {vid})")
   }
 }
 
@@ -83,7 +83,7 @@ impl PrettyDump for DataEdge {
 
     let mut attrs = "{".to_string();
     for (i, (key, value)) in sorted_kv_pairs.into_iter().enumerate() {
-      attrs.push_str(&format!("{}: ", key));
+      attrs.push_str(&format!("{key}: "));
       let value = if colored {
         match value {
           AttrValue::Int(v) => v.to_string().purple(),
@@ -107,9 +107,9 @@ impl PrettyDump for DataEdge {
     attrs.push('}');
 
     if attrs != "{}" {
-      format!("[{} {}]", label, attrs)
+      format!("[{label} {attrs}]")
     } else {
-      format!("[{}]", label)
+      format!("[{label}]")
     }
   }
 
@@ -120,7 +120,7 @@ impl PrettyDump for DataEdge {
       format!(":{}", self.label())
     };
 
-    format!("[{}]", label)
+    format!("[{label}]")
   }
 }
 

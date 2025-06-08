@@ -106,6 +106,6 @@ pub enum VarPrefix {
 
 impl VarPrefix {
   pub fn with(&self, other: impl Display) -> String {
-    format!("{}{STR_TUPLE_SPLITTER}{}", self, other)
+    format!("{self}{STR_TUPLE_SPLITTER}{other}")
   }
 }

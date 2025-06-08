@@ -72,9 +72,9 @@ impl From<&str> for AttrValue {
 impl Display for AttrValue {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match self {
-      Self::Int(v) => write!(f, "{}", v),
-      Self::Float(v) => write!(f, "{}", v),
-      Self::String(v) => write!(f, "{}", v),
+      Self::Int(v) => write!(f, "{v}"),
+      Self::Float(v) => write!(f, "{v}"),
+      Self::String(v) => write!(f, "{v}"),
     }
   }
 }

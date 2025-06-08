@@ -89,7 +89,7 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
     .unwrap();
 
     println!("🔍  Profile(Instructions)");
-    println!("{}\n", df);
+    println!("{df}\n");
   }
 
   pub async fn exec_without_final_merge(&mut self) -> Vec<Vec<DynGraph>> {
@@ -155,11 +155,11 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
                   };
 
                   for (v_pat, vids) in &shorter.pattern_2_vids {
-                    if let Some(longer_vids) = longer.pattern_2_vids.get(v_pat) {
-                      if vids != longer_vids || vids.len() > 1 {
-                        detected_one_pattern_2_multi_vs = true;
-                        break;
-                      }
+                    if let Some(longer_vids) = longer.pattern_2_vids.get(v_pat)
+                      && (vids != longer_vids || vids.len() > 1)
+                    {
+                      detected_one_pattern_2_multi_vs = true;
+                      break;
                     }
                   }
 
@@ -220,7 +220,7 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
           "🚀  Executing {}-{}: {}",
           "layer".yellow(),
           _layer_idx.to_string().yellow(),
-          format!("{:?}", layer).blue()
+          format!("{layer:?}").blue()
         );
       }
 
@@ -241,7 +241,7 @@ impl<S: AdvancedStorageAdapter + 'static> ExecEngine<S> {
 
       for handle in handles {
         if let Err(e) = handle.await {
-          eprintln!("❌  Error executing instruction: {}", e);
+          eprintln!("❌  Error executing instruction: {e}");
         }
       }
     }

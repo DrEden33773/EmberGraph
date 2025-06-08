@@ -277,20 +277,20 @@ async fn run_benchmark() -> io::Result<()> {
     for entry in fs::read_dir(&plan_dir).map_err(io::Error::other)? {
       let entry = entry.map_err(io::Error::other)?;
       let path = entry.path();
-      if path.is_file() {
-        if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
-          if !name.starts_with("ldbc-bi-") || !name.ends_with(".json") {
-            continue;
-          }
-          let task_num_str = name
-            .trim_start_matches("ldbc-bi-")
-            .trim_end_matches(".json");
-          if NEO4J_ORDERED_TASKS.contains(&task_num_str) {
-            let neo4j_path = neo4j_ordered_plan_dir.join(path.file_name().unwrap());
-            plan_paths.push(neo4j_path);
-          } else {
-            plan_paths.push(path);
-          }
+      if path.is_file()
+        && let Some(name) = path.file_name().and_then(|n| n.to_str())
+      {
+        if !name.starts_with("ldbc-bi-") || !name.ends_with(".json") {
+          continue;
+        }
+        let task_num_str = name
+          .trim_start_matches("ldbc-bi-")
+          .trim_end_matches(".json");
+        if NEO4J_ORDERED_TASKS.contains(&task_num_str) {
+          let neo4j_path = neo4j_ordered_plan_dir.join(path.file_name().unwrap());
+          plan_paths.push(neo4j_path);
+        } else {
+          plan_paths.push(path);
         }
       }
     }
@@ -415,7 +415,7 @@ async fn run_benchmark() -> io::Result<()> {
             resource_usage,
           };
 
-          let output_filename = format!("bi_{}.json", task_num_str);
+          let output_filename = format!("bi_{task_num_str}.json");
           let output_path = BENCHMARK_OUTPUT_DIR.join(output_filename);
           let output_json = serde_json::to_string_pretty(&output_data).map_err(io::Error::other)?;
 
@@ -515,7 +515,7 @@ async fn run_benchmark() -> io::Result<()> {
           .and_then(|s| s.to_str())
           .map(|s| s.trim_start_matches("ldbc-bi-"))
           .unwrap_or(""); // Default to empty if parsing fails
-        let output_filename = format!("bi_{}.json", task_num_str);
+        let output_filename = format!("bi_{task_num_str}.json");
         let output_path = BENCHMARK_OUTPUT_DIR.join(output_filename);
 
         fs::write(&output_path, output_json)?;
@@ -660,7 +660,7 @@ async fn execute_single_benchmark(
       // but we return an error just in case.
       return Err(io::Error::new(
         io::ErrorKind::InvalidInput,
-        format!("Invalid storage type encountered: {}", storage_type),
+        format!("Invalid storage type encountered: {storage_type}"),
       ));
     }
   };

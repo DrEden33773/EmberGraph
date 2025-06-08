@@ -211,7 +211,7 @@ impl ABucket {
                   .unwrap_or_else(|_| {
                     panic!(
                       "❌  Failed to send {} to channel",
-                      format!("({}, <expanding_graph>)", next_pat_vid).yellow()
+                      format!("({next_pat_vid}, <expanding_graph>)").yellow()
                     );
                   });
               }
@@ -245,7 +245,7 @@ impl ABucket {
     // wait for all tasks to complete
     for handle in matched_graph_handles {
       if let Err(e) = handle.await {
-        eprintln!("❌  Task failed: {}", e);
+        eprintln!("❌  Task failed: {e}");
       }
     }
 
@@ -396,7 +396,7 @@ impl ABucket {
                   .unwrap_or_else(|_| {
                     panic!(
                       "❌  Failed to send {} to channel",
-                      format!("({}, <expanding_graph>)", next_pat_vid).yellow()
+                      format!("({next_pat_vid}, <expanding_graph>)").yellow()
                     );
                   })
                   .await;
@@ -406,7 +406,7 @@ impl ABucket {
                   .unwrap_or_else(|_| {
                     panic!(
                       "❌  Failed to send {} to channel",
-                      format!("({}, <expanding_graph>)", next_pat_vid).yellow()
+                      format!("({next_pat_vid}, <expanding_graph>)").yellow()
                     );
                   })
               }
@@ -433,7 +433,7 @@ impl ABucket {
     // wait for all tasks to complete
     for handle in task_handles {
       if let Err(e) = handle.await {
-        eprintln!("❌  Task failed: {}", e);
+        eprintln!("❌  Task failed: {e}");
       }
     }
 

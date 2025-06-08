@@ -42,7 +42,7 @@ impl CBucket {
           .unwrap_or_else(|_| {
             panic!(
               "❌  Failed to send {} to channel",
-              format!("({}, <pattern_v>)", idx).yellow()
+              format!("({idx}, <pattern_v>)").yellow()
             );
           });
         #[cfg(not(feature = "use_tokio_mpsc_unbounded_channel"))]
@@ -50,7 +50,7 @@ impl CBucket {
           .unwrap_or_else(|_| {
             panic!(
               "❌  Failed to send {} to channel",
-              format!("({}, <pattern_v>)", idx).yellow()
+              format!("({idx}, <pattern_v>)").yellow()
             );
           })
           .await;
@@ -157,7 +157,7 @@ impl CBucket {
           .unwrap_or_else(|_| {
             panic!(
               "❌  Failed to send {} to channel",
-              format!("({}, <pattern_v>)", idx).yellow()
+              format!("({idx}, <pattern_v>)").yellow()
             );
           });
         #[cfg(not(feature = "use_tokio_mpsc_unbounded_channel"))]
@@ -165,7 +165,7 @@ impl CBucket {
           .unwrap_or_else(|_| {
             panic!(
               "❌  Failed to send {} to channel",
-              format!("({}, <pattern_v>)", idx).yellow()
+              format!("({idx}, <pattern_v>)").yellow()
             );
           })
           .await;

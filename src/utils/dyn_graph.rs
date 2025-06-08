@@ -172,17 +172,11 @@ impl<VType: VBase, EType: EBase> DynGraph<VType, EType> {
 
       self
     } else if self.has_vid(&src_vid) {
-      panic!(
-        "Detected `half-dangling edge`:\n\t(vid: {}) -[eid: {}]-> ?",
-        src_vid, eid
-      );
+      panic!("Detected `half-dangling edge`:\n\t(vid: {src_vid}) -[eid: {eid}]-> ?");
     } else if self.has_vid(&dst_vid) {
-      panic!(
-        "Detected `half-dangling edge`:\n\t? -[eid: {}]-> (vid: {})",
-        eid, dst_vid
-      );
+      panic!("Detected `half-dangling edge`:\n\t? -[eid: {eid}]-> (vid: {dst_vid})");
     } else {
-      panic!("Detected `dangling edge`:\n\t? -[eid: {}]-> ?", eid);
+      panic!("Detected `dangling edge`:\n\t? -[eid: {eid}]-> ?");
     }
   }
 

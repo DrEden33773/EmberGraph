@@ -116,7 +116,7 @@ impl ExpandGraph<DataVertex, DataEdge> {
           tx.send(pending_v).unwrap_or_else(|_| {
             panic!(
               "❌  Failed to send {} to channel",
-              format!("({}, <pattern_v>)", pending_vid).yellow()
+              format!("({pending_vid}, <pattern_v>)").yellow()
             );
           });
           #[cfg(not(feature = "use_tokio_mpsc_unbounded_channel"))]

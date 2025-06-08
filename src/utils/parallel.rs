@@ -22,7 +22,7 @@ pub fn config_before_run<F: Future>(to_run: F) -> F::Output {
   // rayon config
   rayon::ThreadPoolBuilder::new()
     .num_threads(num_cpus::get())
-    .thread_name(|i| format!("rayon-{}", i))
+    .thread_name(|i| format!("rayon-{i}"))
     .build_global()
     .unwrap();
 
@@ -34,7 +34,7 @@ pub fn config_before_run<F: Future>(to_run: F) -> F::Output {
       use std::sync::atomic::{AtomicUsize, Ordering};
       static ATOMIC_ID: AtomicUsize = AtomicUsize::new(0);
       let id = ATOMIC_ID.fetch_add(1, Ordering::SeqCst);
-      format!("tokio-{}", id)
+      format!("tokio-{id}")
     })
     .build()
     .unwrap()

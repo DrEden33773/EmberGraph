@@ -22,7 +22,7 @@ async fn exec(plan_filename: &str) -> io::Result<()> {
   let len = result.len();
 
   if let Some(df) = ResultDumper::new(result).to_simplified_df(false) {
-    println!("{}", df);
+    println!("{df}");
   }
 
   println!(

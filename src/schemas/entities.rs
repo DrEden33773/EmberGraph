@@ -52,10 +52,10 @@ impl AsRef<Self> for PatternVertex {
   }
 }
 impl VBase for PatternVertex {
-  fn vid(&self) -> VidRef {
+  fn vid(&self) -> VidRef<'_> {
     &self.vid
   }
-  fn label(&self) -> LabelRef {
+  fn label(&self) -> LabelRef<'_> {
     &self.label
   }
 }
@@ -76,10 +76,10 @@ impl AsRef<Self> for DataVertex {
   }
 }
 impl VBase for DataVertex {
-  fn vid(&self) -> VidRef {
+  fn vid(&self) -> VidRef<'_> {
     &self.vid
   }
-  fn label(&self) -> LabelRef {
+  fn label(&self) -> LabelRef<'_> {
     &self.label
   }
 }
@@ -95,16 +95,16 @@ impl AsRef<Self> for PatternEdge {
   }
 }
 impl EBase for PatternEdge {
-  fn eid(&self) -> VidRef {
+  fn eid(&self) -> VidRef<'_> {
     &self.eid
   }
-  fn src_vid(&self) -> VidRef {
+  fn src_vid(&self) -> VidRef<'_> {
     &self.src_vid
   }
-  fn dst_vid(&self) -> VidRef {
+  fn dst_vid(&self) -> VidRef<'_> {
     &self.dst_vid
   }
-  fn label(&self) -> LabelRef {
+  fn label(&self) -> LabelRef<'_> {
     &self.label
   }
 }
@@ -120,16 +120,16 @@ impl AsRef<Self> for DataEdge {
   }
 }
 impl EBase for DataEdge {
-  fn eid(&self) -> VidRef {
+  fn eid(&self) -> VidRef<'_> {
     &self.eid
   }
-  fn src_vid(&self) -> VidRef {
+  fn src_vid(&self) -> VidRef<'_> {
     &self.src_vid
   }
-  fn dst_vid(&self) -> VidRef {
+  fn dst_vid(&self) -> VidRef<'_> {
     &self.dst_vid
   }
-  fn label(&self) -> LabelRef {
+  fn label(&self) -> LabelRef<'_> {
     &self.label
   }
 }

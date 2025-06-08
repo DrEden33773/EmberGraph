@@ -196,7 +196,7 @@ impl SqliteStorageAdapter {
       let conn = match pool.get() {
         Ok(conn) => conn,
         Err(e) => {
-          eprintln!("❌  Error getting connection from pool: {}", e);
+          eprintln!("❌  Error getting connection from pool: {e}");
           return Vec::new();
         }
       };
@@ -218,7 +218,7 @@ impl SqliteStorageAdapter {
       let mut stmt = match conn.prepare_cached(&query_str) {
         Ok(stmt) => stmt,
         Err(e) => {
-          eprintln!("❌  Error preparing query: {}", e);
+          eprintln!("❌  Error preparing query: {e}");
           return Vec::new();
         }
       };
@@ -226,7 +226,7 @@ impl SqliteStorageAdapter {
       let rows = match stmt.query(params_from_iter(all_params.iter())) {
         Ok(rows) => rows,
         Err(e) => {
-          eprintln!("❌  Error executing query: {}", e);
+          eprintln!("❌  Error executing query: {e}");
           return Vec::new();
         }
       };
@@ -236,7 +236,7 @@ impl SqliteStorageAdapter {
     })
     .await
     .unwrap_or_else(|e| {
-      eprintln!("❌  Task failed: {}", e);
+      eprintln!("❌  Task failed: {e}");
       Vec::new()
     })
   }
@@ -254,7 +254,7 @@ impl SqliteStorageAdapter {
       let conn = match pool.get() {
         Ok(conn) => conn,
         Err(e) => {
-          eprintln!("❌  Error getting connection from pool: {}", e);
+          eprintln!("❌  Error getting connection from pool: {e}");
           return Vec::new();
         }
       };
@@ -276,7 +276,7 @@ impl SqliteStorageAdapter {
       let mut stmt = match conn.prepare_cached(&query_str) {
         Ok(stmt) => stmt,
         Err(e) => {
-          eprintln!("❌  Error preparing query: {}", e);
+          eprintln!("❌  Error preparing query: {e}");
           return Vec::new();
         }
       };
@@ -284,7 +284,7 @@ impl SqliteStorageAdapter {
       let rows = match stmt.query(params_from_iter(all_params.iter())) {
         Ok(rows) => rows,
         Err(e) => {
-          eprintln!("❌  Error executing query: {}", e);
+          eprintln!("❌  Error executing query: {e}");
           return Vec::new();
         }
       };
@@ -294,7 +294,7 @@ impl SqliteStorageAdapter {
     })
     .await
     .unwrap_or_else(|e| {
-      eprintln!("❌  Task failed: {}", e);
+      eprintln!("❌  Task failed: {e}");
       Vec::new()
     })
   }
@@ -435,7 +435,7 @@ impl StorageAdapter for SqliteStorageAdapter {
       let conn = match pool.get() {
         Ok(conn) => conn,
         Err(e) => {
-          eprintln!("Error getting connection from pool: {}", e);
+          eprintln!("Error getting connection from pool: {e}");
           return None;
         }
       };
@@ -450,7 +450,7 @@ impl StorageAdapter for SqliteStorageAdapter {
       let mut stmt = match conn.prepare_cached(query) {
         Ok(stmt) => stmt,
         Err(e) => {
-          eprintln!("❌  Error preparing statement: {}", e);
+          eprintln!("❌  Error preparing statement: {e}");
           return None;
         }
       };
@@ -469,7 +469,7 @@ impl StorageAdapter for SqliteStorageAdapter {
       {
         Ok(rows) => rows,
         Err(e) => {
-          eprintln!("❌  Error executing query: {}", e);
+          eprintln!("❌  Error executing query: {e}");
           return None;
         }
       };
@@ -499,7 +499,7 @@ impl StorageAdapter for SqliteStorageAdapter {
     })
     .await
     .unwrap_or_else(|e| {
-      eprintln!("❌  Task failed: {}", e);
+      eprintln!("❌  Task failed: {e}");
       None
     })
   }
@@ -591,7 +591,7 @@ impl SqliteStorageAdapter {
       let conn = match pool.get() {
         Ok(conn) => conn,
         Err(e) => {
-          eprintln!("❌  Error getting connection from pool: {}", e);
+          eprintln!("❌  Error getting connection from pool: {e}");
           return Vec::new();
         }
       };
@@ -626,7 +626,7 @@ impl SqliteStorageAdapter {
       let mut stmt = match conn.prepare_cached(&query_str) {
         Ok(stmt) => stmt,
         Err(e) => {
-          eprintln!("❌  Error preparing query: {}", e);
+          eprintln!("❌  Error preparing query: {e}");
           return Vec::new();
         }
       };
@@ -634,7 +634,7 @@ impl SqliteStorageAdapter {
       let rows = match stmt.query(params_from_iter(all_params.iter())) {
         Ok(rows) => rows,
         Err(e) => {
-          eprintln!("❌  Error executing query: {}", e);
+          eprintln!("❌  Error executing query: {e}");
           return Vec::new();
         }
       };
@@ -644,7 +644,7 @@ impl SqliteStorageAdapter {
     })
     .await
     .unwrap_or_else(|e| {
-      eprintln!("❌  Task failed: {}", e);
+      eprintln!("❌  Task failed: {e}");
       Vec::new()
     })
   }

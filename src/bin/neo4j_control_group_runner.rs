@@ -144,13 +144,13 @@ async fn run_benchmark() -> io::Result<()> {
     for entry in fs::read_dir(&query_dir).map_err(io::Error::other)? {
       let entry = entry.map_err(io::Error::other)?;
       let path = entry.path();
-      if path.is_file() {
-        if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
-          if !name.starts_with("bi-") || !name.ends_with("cypher") {
-            continue;
-          }
-          query_paths.push(path);
+      if path.is_file()
+        && let Some(name) = path.file_name().and_then(|n| n.to_str())
+      {
+        if !name.starts_with("bi-") || !name.ends_with("cypher") {
+          continue;
         }
+        query_paths.push(path);
       }
     }
 
@@ -261,7 +261,7 @@ async fn run_benchmark() -> io::Result<()> {
             resource_usage,
           };
 
-          let output_filename = format!("bi_{}.json", task_num_str);
+          let output_filename = format!("bi_{task_num_str}.json");
           let output_path = BENCHMARK_OUTPUT_DIR.join(output_filename);
           let output_json = serde_json::to_string_pretty(&output_data).map_err(io::Error::other)?;
 
@@ -362,7 +362,7 @@ async fn run_benchmark() -> io::Result<()> {
           );
         } else {
           println!("\n--- Benchmark Results ---");
-          println!("{}", output_json);
+          println!("{output_json}");
         }
       }
       Err(e) => {
