@@ -17,12 +17,5 @@ fn main() -> io::Result<()> {
 async fn to_run() -> io::Result<()> {
   dotenv().ok();
   println!("Querying 'BI-20' on 'SF0.1' ...\n");
-  #[cfg(unix)]
-  {
-    query::<Neo4jStorageAdapter>("ldbc-bi-20.json").await
-  }
-  #[cfg(windows)]
-  {
-    query::<SqliteStorageAdapter>("ldbc-bi-20.json").await
-  }
+  query::<SqliteStorageAdapter>("ldbc-bi-20.json").await
 }

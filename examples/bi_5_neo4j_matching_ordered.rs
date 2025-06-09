@@ -21,12 +21,5 @@ async fn to_run() -> io::Result<()> {
     "Querying 'BI-5' {} on 'SF0.1' ...\n",
     "with neo4j_matching_order".purple()
   );
-  #[cfg(unix)]
-  {
-    query::<Neo4jStorageAdapter>("ldbc-bi-5.json").await
-  }
-  #[cfg(windows)]
-  {
-    query::<SqliteStorageAdapter>("ldbc-bi-5.json").await
-  }
+  query::<SqliteStorageAdapter>("ldbc-bi-5.json").await
 }

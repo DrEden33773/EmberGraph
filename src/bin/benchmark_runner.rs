@@ -243,6 +243,7 @@ async fn run_benchmark() -> io::Result<()> {
 
   arg_validation(&args)?;
 
+  #[cfg(not(feature = "benchmark_with_cache_eviction"))]
   println!(
     "{} Running benchmark for {} with {} storage (cache size: {})",
     "INFO:".cyan(),
@@ -264,6 +265,28 @@ async fn run_benchmark() -> io::Result<()> {
     },
     args.cache_size.to_string().yellow()
   );
+  #[cfg(feature = "benchmark_with_cache_eviction")]
+  println!(
+    "{} Running benchmark for {} with {} storage",
+    "INFO:".cyan(),
+    if args.all_bi_tasks {
+      "all BI tasks".cyan()
+    } else {
+      args
+        .query_file
+        .as_ref()
+        .unwrap()
+        .display()
+        .to_string()
+        .cyan()
+    },
+    if args.all_bi_tasks {
+      "determined storage".cyan()
+    } else {
+      args.storage.as_ref().unwrap().cyan()
+    }
+  );
+
   println!(
     "{} Runs: {}, Warm-up: {}",
     "INFO:".cyan(),
@@ -373,6 +396,7 @@ async fn run_benchmark() -> io::Result<()> {
               .duration_since(SystemTime::UNIX_EPOCH)
               .unwrap_or_default()
               .as_millis();
+
             let neo4j_server_cpu_usage = args
               .neo4j_server_pid
               .map(|pid| {
@@ -381,10 +405,20 @@ async fn run_benchmark() -> io::Result<()> {
               })
               .unwrap_or(0.0);
             let cpu_usage = process.cpu_usage() + neo4j_server_cpu_usage;
+
+            let neo4j_server_memory_bytes = args
+              .neo4j_server_pid
+              .map(|pid| {
+                let neo4j_process = sys.process(pid.into());
+                neo4j_process.map(|p| p.memory()).unwrap_or(0)
+              })
+              .unwrap_or(0);
+            let memory_bytes = process.memory() + neo4j_server_memory_bytes;
+
             task_usage_data.push(ResourceUsage {
               timestamp_ms,
               cpu_usage_percent: cpu_usage / sys.cpus().len() as f32,
-              memory_bytes: process.memory(),
+              memory_bytes,
             });
           }
         }
@@ -476,6 +510,7 @@ async fn run_benchmark() -> io::Result<()> {
             .duration_since(SystemTime::UNIX_EPOCH)
             .unwrap_or_default()
             .as_millis();
+
           let neo4j_server_cpu_usage = args
             .neo4j_server_pid
             .map(|pid| {
@@ -484,10 +519,20 @@ async fn run_benchmark() -> io::Result<()> {
             })
             .unwrap_or(0.0);
           let cpu_usage = process.cpu_usage() + neo4j_server_cpu_usage;
+
+          let neo4j_server_memory_bytes = args
+            .neo4j_server_pid
+            .map(|pid| {
+              let neo4j_process = sys.process(pid.into());
+              neo4j_process.map(|p| p.memory()).unwrap_or(0)
+            })
+            .unwrap_or(0);
+          let memory_bytes = process.memory() + neo4j_server_memory_bytes;
+
           task_usage_data.push(ResourceUsage {
             timestamp_ms,
             cpu_usage_percent: cpu_usage / sys.cpus().len() as f32,
-            memory_bytes: process.memory(),
+            memory_bytes,
           });
         }
       }

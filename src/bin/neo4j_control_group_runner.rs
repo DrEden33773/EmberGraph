@@ -319,15 +319,23 @@ async fn run_benchmark() -> io::Result<()> {
             .duration_since(SystemTime::UNIX_EPOCH)
             .unwrap_or_default()
             .as_millis();
+
           let neo4j_server_cpu_usage = {
             let neo4j_process = sys.process(args.neo4j_server_pid.into());
             neo4j_process.map(|p| p.cpu_usage()).unwrap_or(0.0)
           };
           let cpu_usage = process.cpu_usage() + neo4j_server_cpu_usage;
+
+          let neo4j_server_memory_bytes = {
+            let neo4j_process = sys.process(args.neo4j_server_pid.into());
+            neo4j_process.map(|p| p.memory()).unwrap_or(0)
+          };
+          let memory_bytes = process.memory() + neo4j_server_memory_bytes;
+
           task_usage_data.push(ResourceUsage {
             timestamp_ms,
             cpu_usage_percent: cpu_usage / sys.cpus().len() as f32,
-            memory_bytes: process.memory(),
+            memory_bytes,
           });
         }
       }
