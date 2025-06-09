@@ -33,16 +33,9 @@ impl<S: AdvancedStorageAdapter + 'static> GetAdjOperator<S> {
       (pattern_vs, pattern_es)
     };
 
-    #[cfg(not(feature = "refactored_incremental_load_new_edges"))]
     // core logic: incremental load new edges
     a_bucket
-      .incremental_load_new_edges(pattern_es, pattern_vs, self.storage_adapter.clone())
-      .await;
-
-    #[cfg(feature = "refactored_incremental_load_new_edges")]
-    // core logic: incremental load new edges
-    a_bucket
-      .refactored_incremental_load_new_edges(pattern_es, pattern_vs, self.storage_adapter.clone())
+      .batched_incremental_load_new_edges(pattern_es, pattern_vs, self.storage_adapter.clone())
       .await;
 
     // update the `block` and `extended data vid set`

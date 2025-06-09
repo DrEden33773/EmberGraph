@@ -454,7 +454,7 @@ async fn init_neo4j_db() -> Result<Graph, neo4rs::Error> {
     .user(username)
     .password(password)
     .db(db_name)
-    .fetch_size(1000)
+    .fetch_size(2000)
     .max_connections(num_cpus::get() * 2)
     .build()
     .unwrap();

@@ -13,3 +13,4 @@
 /resources/out
 
 /ember-graph-bench-dump
+/bench-plotting
